@@ -1,0 +1,3 @@
+[submodule "extern/DREAM"]
+	path = extern/DREAM
+	url = https://github.com/chalmersplasmatheory/DREAM.git
