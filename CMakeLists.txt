@@ -23,7 +23,7 @@ set(DREAM_BUILD_TESTS OFF)
 set(DREAM_BUILD_PYFACE OFF)
 
 # Add CMake module path
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" "${PROJECT_SOURCE_DIR}/extern/DREAM/cmake" ${CMAKE_MODULE_PATH})
 
 # Get git commit hash
 include(GetGitRevisionDescription)
@@ -78,8 +78,7 @@ endif ()
 
 
 # Build libDREAM
-add_subdirectory(extern/DREAM/fvm)
-add_subdirectory(extern/DREAM/src)
+add_subdirectory(extern/DREAM)
 
 # Sub-directories
 add_subdirectory(src)

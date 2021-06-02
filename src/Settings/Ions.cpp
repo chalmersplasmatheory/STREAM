@@ -18,7 +18,7 @@ using namespace std;
  */
 void SimulationGenerator::ConstructEquation_Ions(
     DREAM::EquationSystem *eqsys, DREAM::Settings *s,
-    ADAS *adas, AMJUEL *amjuel
+    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel
 ) {
     const real_t t0 = 0;
     FVM::Grid *fluidGrid = eqsys->GetFluidGrid();

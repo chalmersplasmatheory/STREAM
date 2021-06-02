@@ -1,6 +1,7 @@
 
 #include "DREAM/EquationSystem.hpp"
 #include "DREAM/OtherQuantityHandler.hpp"
+#include "STREAM/Settings/SimulationGenerator.hpp"
 
 
 using namespace STREAM;
@@ -31,7 +32,7 @@ DREAM::EquationSystem *SimulationGenerator::ConstructEquationSystem(
     eqsys->SetTiming(s->GetBool("/output/timingstdout"), s->GetBool("/output/timingfile"));
 
     // Initialize from previous simulation output?
-    const real_t t0 = ConstructInitializer(eqsys, s);
+    const real_t t0 = DREAM::SimulationGenerator::ConstructInitializer(eqsys, s);
 
     // Construct unknowns
     ConstructUnknowns(
@@ -82,7 +83,7 @@ void SimulationGenerator::ConstructEquations(
     // TODO
     ConstructEquation_Ions(eqsys, s, adas, amjuel);
 
-    IonHandler *ionHandler = eqsys->GetIonHandler();
+    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
 
     // Construct collision quantity handlers
     if (hottailGrid != nullptr)
@@ -115,7 +116,7 @@ void SimulationGenerator::ConstructEquations(
         pMode = (DREAM::FVM::MomentQuantity::pThresholdMode)s->GetInteger("eqsys/f_hot/pThresholdMode");
     }
 
-    PostProcessor *postProcessor = new PostProcessor(
+    DREAM::PostProcessor *postProcessor = new DREAM::PostProcessor(
         fluidGrid, unknowns, pThreshold, pMode
     );
     eqsys->SetPostProcessor(postProcessor);

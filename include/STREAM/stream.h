@@ -1,0 +1,8 @@
+#ifndef _STREAM_CONFIG_H
+#define _STREAM_CONFIG_H
+
+#define DREAM_GIT_REFSPEC "refs/heads/main"
+#define DREAM_GIT_SHA1 "621e17356437a157d7487f350c62a955c80a955b"
+#define DREAM_GIT_TAG ""
+
+#endif/*_STREAM_CONFIG_H*/
