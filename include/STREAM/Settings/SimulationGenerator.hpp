@@ -15,8 +15,6 @@ namespace STREAM {
         // Equation system
         static DREAM::EquationSystem *ConstructEquationSystem(
             DREAM::Settings*, DREAM::FVM::Grid*, DREAM::FVM::Grid*,
-            enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*,
-            enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*,
             DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*
         );
         static void ConstructEquations(
@@ -25,9 +23,7 @@ namespace STREAM {
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
         static void ConstructUnknowns(
-            DREAM::EquationSystem*, DREAM::Settings*, DREAM::ADAS*,
-            DREAM::AMJUEL*, DREAM::NIST*,
-            struct DREAM::OtherQuantityHandler::eqn_terms*
+            DREAM::EquationSystem*, DREAM::Settings*
         );
 
         // Ion density equation
@@ -39,18 +35,18 @@ namespace STREAM {
         // Temperature equation
         static void ConstructEquation_T_cold(
             DREAM::EquationSystem*, DREAM::Settings*,
-            DREAM::ADAS*, DREAM::NIST*,
-            struct OtherQuantityHandler::eqn_terms*
+            DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
+            struct DREAM::OtherQuantityHandler::eqn_terms*
         );
         static void ConstructEquation_T_cold_selfconsistent(
             DREAM::EquationSystem*, DREAM::Settings*,
-            DREAM::ADAS*, DREAM::NIST*,
-            struct OtherQuantityHandler::eqn_terms*
+            DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
+            struct DREAM::OtherQuantityHandler::eqn_terms*
         );
 
         // STREAM main grid
-        static DREAM::FVM::Grid *ConstructRadialGrid();
-        static DREAM::FVM::RadialGrid *ConstructRadialGrid_Cylindrical(Settings*);
+        static DREAM::FVM::Grid *ConstructRadialGrid(DREAM::Settings*);
+        static DREAM::FVM::RadialGrid *ConstructRadialGrid_Cylindrical(DREAM::Settings*);
     };
 }
 

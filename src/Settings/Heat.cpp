@@ -2,35 +2,44 @@
  * Configuration of the heat dynamics in STREAM.
  */
 
-#include "STREAM/SimulationGenerator.hpp"
+#include <string>
+#include "DREAM/Equations/Fluid/MaxwellianCollisionalEnergyTransferTerm.hpp"
+#include "DREAM/Equations/Fluid/RadiatedPowerTerm.hpp"
+#include "DREAM/OtherQuantityHandler.hpp"
+#include "FVM/Equation/TransientTerm.hpp"
+#include "STREAM/Settings/SimulationGenerator.hpp"
 
+
+using namespace std;
+using namespace STREAM;
 
 #define MODULENAME "eqsys/T_cold"
+
 
 /**
  * Construct the equation for the temperature.
  */
 void SimulationGenerator::ConstructEquation_T_cold(
     DREAM::EquationSystem *eqsys, DREAM::Settings *s,
-    DREAM::ADAS *adas, DREAM::NIST *nist,
-    struct OtherQuantityHandler::eqn_terms *oqty_terms
+    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
+    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
-    enum OptionConstants::uqty_T_cold_eqn type =
-        (enum OptionConstants::uqty_T_cold_eqn)s->GetInteger(MODULENAME "/type");
+    enum DREAM::OptionConstants::uqty_T_cold_eqn type =
+        (enum DREAM::OptionConstants::uqty_T_cold_eqn)s->GetInteger(MODULENAME "/type");
 
     switch (type) {
-        case OptionConstants::UQTY_T_COLD_EQN_PRESCRIBED:
+        case DREAM::OptionConstants::UQTY_T_COLD_EQN_PRESCRIBED:
             DREAM::SimulationGenerator::ConstructEquation_T_cold_prescribed(eqsys, s);
             break;
 
-        case OptionConstants::UQTY_T_COLD_SELF_CONSISTENT:
-            ConstructEquation_T_cold_selfconsistent(eqsys, s, adas, nist, oqty_terms);
+        case DREAM::OptionConstants::UQTY_T_COLD_SELF_CONSISTENT:
+            ConstructEquation_T_cold_selfconsistent(eqsys, s, adas, amjuel, nist, oqty_terms);
             break;
 
         default:
             throw DREAM::SettingsException(
                 "Unrecognized equation type '%s': %d.",
-                OptionConstants::UQTY_T_COLD, type
+                DREAM::OptionConstants::UQTY_T_COLD, type
             );
     }
 }
@@ -40,8 +49,8 @@ void SimulationGenerator::ConstructEquation_T_cold(
  */
 void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     DREAM::EquationSystem *eqsys, DREAM::Settings *s,
-    DREAM::ADAS *adas, DREAM::NIST *nist,
-    struct OtherQuantityHandler::eqn_terms *oqty_terms
+    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
+    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
     DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
@@ -63,10 +72,19 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     oqty_terms->T_cold_ohmic = new DREAM::OhmicHeatingTerm(fluidGrid, unknowns);
     op_E_field->AddTerm(oqty_terms->T_cold_ohmic);
 
+    // Gather opacity settings
+    len_t ni_types;
+    const int_t *iopacity_modes = s->GetIntegerArray(MODULENAME "/opacity_modes", 1, &ni_types);
+    enum DREAM::OptionConstants::ion_opacity_mode *opacity_mode =
+        new enum DREAM::OptionConstants::ion_opacity_mode[ni_types];
+    for (len_t i = 0; i < ni_types; i++)
+        opacity_mode[i] = (enum DREAM::OptionConstants::ion_opacity_mode)iopacity_modes[i];
+
     // Add radiation loss term (TODO TODO TODO)
     bool withRecombinationRadiation = s->GetBool(MODULENAME "/recombination");
-    oqty_terms->T_cold_ohmic = new RadiatedPowerTerm(
-        fluidGrid, unknowns, ionHandler, adas, nist, withRecombinationRadiation
+    oqty_terms->T_cold_radiation = new DREAM::RadiatedPowerTerm(
+        fluidGrid, unknowns, ionHandler, adas, nist,
+        amjuel, opacity_mode, withRecombinationRadiation
     );
     op_n_cold->AddTerm(oqty_terms->T_cold_radiation);
 
@@ -89,8 +107,8 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     // electrons kinetically...
     enum DREAM::OptionConstants::collqty_collfreq_mode collfreq_mode =
         (enum DREAM::OptionConstants::collqty_collfreq_mode)s->GetInteger("collisions/collfreq_mode");
-    if (eqsys->HasRunawayGrid() && collfreq_mode != DREAM::OptionConstants::COLLFREQ_MODE_FULL) {
-        len_t id_f_re = unknowns->GetUnknownID(OptionConstants::UQTY_F_RE);
+    if (eqsys->HasRunawayGrid() && collfreq_mode != DREAM::OptionConstants::COLLQTY_COLLISION_FREQUENCY_MODE_FULL) {
+        len_t id_f_re = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_F_RE);
 
         oqty_terms->T_cold_fre_coll = new DREAM::CollisionalEnergyTransferKineticTerm(
             fluidGrid, eqsys->GetRunawayGrid(),
@@ -100,13 +118,13 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
 
         DREAM::FVM::Operator *op_f_re = new DREAM::FVM::Operator(fluidGrid);
         op_f_re->AddTerm(oqty_terms->T_cold_nre_coll);
-        eqsys->SetOperator(id_T_cold, id_n_re, op_f_re);
+        eqsys->SetOperator(id_T_cold, id_f_re, op_f_re);
 
         desc += " + int(W*nu_E*f_re)";
     // ...otherwise, add contribution from fluid runaways.
     } else {
         len_t id_n_re = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_RE);
-        oqty_terms->T_cold_nre_coll = new CollisionalEnergyTransferREFluidTerm(
+        oqty_terms->T_cold_nre_coll = new DREAM::CollisionalEnergyTransferREFluidTerm(
             fluidGrid, eqsys->GetUnknownHandler(), eqsys->GetREFluid()->GetLnLambda(), -1.0
         );
 
@@ -123,12 +141,12 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     if (Ti_type == DREAM::OptionConstants::UQTY_T_I_INCLUDE) {
         DREAM::CoulombLogarithm *lnLambda = eqsys->GetREFluid()->GetLnLambda();
         const len_t nZ = ionHandler->GetNZ();
-        const len_t id_Wi = eqsys->GetUnknownID(OptionConstants::UQTY_WI_ENER);
+        const len_t id_Wi = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
 
         oqty_terms->T_cold_ion_coll = new DREAM::FVM::Operator(fluidGrid);
         for (len_t iz = 0; iz < nZ; iz++) {
             oqty_terms->T_cold_ion_coll->AddTerm(
-                new MaxwellianCollisionalEnergyTransferTerm(
+                new DREAM::MaxwellianCollisionalEnergyTransferTerm(
                     fluidGrid,
                     0, false,
                     iz, true,

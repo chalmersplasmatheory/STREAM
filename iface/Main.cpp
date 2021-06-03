@@ -19,15 +19,15 @@
 
 #include <softlib/SOFTLibException.h>
 
-#include "STREAM/config.h"
+#include "STREAM/stream.h"
 //#include "DREAM/Init.h"
 #include "DREAM/IO.hpp"
 #include "DREAM/QuitException.hpp"
 #include "DREAM/Settings/Settings.hpp"
-//#include "DREAM/Settings/SFile.hpp"
-//#include "DREAM/Settings/SimulationGenerator.hpp"
-//#include "DREAM/Simulation.hpp"
+#include "DREAM/Settings/SFile.hpp"
+#include "DREAM/Simulation.hpp"
 #include "FVM/FVMException.hpp"
+#include "STREAM/Settings/SimulationGenerator.hpp"
 
 
 using namespace std;
@@ -115,7 +115,7 @@ struct cmd_args *parse_args(int argc, char *argv[]) {
 
 void splash() {
     cout << endl;
-    cout << R"TBA: Fancy STREAM splash screen" << endl;
+    cout << R"(TBA: Fancy STREAM splash screen)" << endl;
     /*cout << R"( It's time to...)" << endl;
     cout << endl;
     cout << R"( * * ________   _____  ______ ___* *  ___  ___       )" << endl;

@@ -3,10 +3,15 @@
  */
 
 #include <vector>
+#include "DREAM/Equations/Fluid/IonTransientTerm.hpp"
+#include "DREAM/Equations/Fluid/IonPrescribedParameter.hpp"
+#include "DREAM/Equations/Fluid/LyOpaqueDIonRateEquation.hpp"
 #include "DREAM/Settings/SimulationGenerator.hpp"
+#include "DREAM/Settings/Settings.hpp"
+#include "STREAM/Settings/SimulationGenerator.hpp"
 
 
-using namespace DREAM;
+using namespace STREAM;
 using namespace std;
 
 
@@ -21,7 +26,7 @@ void SimulationGenerator::ConstructEquation_Ions(
     DREAM::ADAS *adas, DREAM::AMJUEL *amjuel
 ) {
     const real_t t0 = 0;
-    FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
+    DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
 
     len_t nZ, ntypes;
     const int_t *_Z  = s->GetIntegerArray(MODULENAME "/Z", 1, &nZ);
@@ -37,7 +42,7 @@ void SimulationGenerator::ConstructEquation_Ions(
         for (len_t i = ionNames.size(); i < nZ; i++)
             ionNames.push_back("Ion " + to_string(i));
     } else if (ionNames.size() > nZ) {
-        throw SettingsException(
+        throw DREAM::SettingsException(
             "ions: Too many ion names given: %zu. Expected " LEN_T_PRINTF_FMT ".",
             ionNames.size(), nZ
         );
@@ -48,7 +53,7 @@ void SimulationGenerator::ConstructEquation_Ions(
 
     // Verify that exactly one type per ion species is given
     if (nZ != ntypes)
-        throw SettingsException(
+        throw DREAM::SettingsException(
             "ions: Expected the lengths of 'Z' and 'types' to match."
         );
 
@@ -57,27 +62,28 @@ void SimulationGenerator::ConstructEquation_Ions(
     for (len_t i = 0; i < nZ; i++)
         Z[i] = (len_t)_Z[i];
 
-    enum OptionConstants::ion_data_type *types = new enum OptionConstants::ion_data_type[ntypes];
+    enum DREAM::OptionConstants::ion_data_type *types =
+        new enum DREAM::OptionConstants::ion_data_type[ntypes];
     for (len_t i = 0; i < ntypes; i++)
-        types[i] = (enum OptionConstants::ion_data_type)itypes[i];
+        types[i] = (enum DREAM::OptionConstants::ion_data_type)itypes[i];
 
     // Verify that all non-prescribed elements are in ADAS
     for (len_t i = 0; i < nZ; i++) {
-        if (!adas->HasElement(Z[i]) && types[i] != OptionConstants::ION_DATA_PRESCRIBED)
-            throw SettingsException(
+        if (!adas->HasElement(Z[i]) && types[i] != DREAM::OptionConstants::ION_DATA_PRESCRIBED)
+            throw DREAM::SettingsException(
                 "ions: The DREAM ADAS database does not contain '%s' (Z = " LEN_T_PRINTF_FMT ")",
                 ionNames[i].c_str(), Z[i]
             );
     }
     
-    enum OptionConstants::ion_opacity_mode *opacity_mode = new enum OptionConstants::ion_opacity_mode[ntypes];
+    enum DREAM::OptionConstants::ion_opacity_mode *opacity_mode = new enum DREAM::OptionConstants::ion_opacity_mode[ntypes];
     for (len_t i = 0; i < ntypes; i++)
-        opacity_mode[i] = (enum OptionConstants::ion_opacity_mode)iopacity_modes[i];
+        opacity_mode[i] = (enum DREAM::OptionConstants::ion_opacity_mode)iopacity_modes[i];
         
     // Verify that all non-prescribed elements have ground state opaque coefficients available
     for (len_t i = 0; i < nZ; i++) {
-        if (Z[i]!=1 && opacity_mode[i]==OptionConstants::OPACITY_MODE_GROUND_STATE_OPAQUE){
-            throw SettingsException(
+        if (Z[i]!=1 && opacity_mode[i]==DREAM::OptionConstants::OPACITY_MODE_GROUND_STATE_OPAQUE){
+            throw DREAM::SettingsException(
             	"ions: There are no rate coefficients implemented for plasmas opaque to radiative transitions to the ground state for other species than hydrogen isotopes"
             );
         }
@@ -92,19 +98,19 @@ void SimulationGenerator::ConstructEquation_Ions(
     len_t *dynamic_indices = new len_t[nZ];
     for (len_t i = 0; i < nZ; i++) {
         switch (types[i]) {
-            case OptionConstants::ION_DATA_PRESCRIBED:
+            case DREAM::OptionConstants::ION_DATA_PRESCRIBED:
                 nZ0_prescribed += Z[i] + 1;
                 prescribed_indices[nZ_prescribed++] = i;
                 break;
 
-            case OptionConstants::ION_DATA_TYPE_DYNAMIC:
-            case OptionConstants::ION_DATA_EQUILIBRIUM:
+            case DREAM::OptionConstants::ION_DATA_TYPE_DYNAMIC:
+            case DREAM::OptionConstants::ION_DATA_EQUILIBRIUM:
                 nZ0_dynamic += Z[i] + 1;
                 dynamic_indices[nZ_dynamic++] = i;
                 break;
 
             default:
-                throw SettingsException(
+                throw DREAM::SettingsException(
                     "ions: Unrecognized ion model type specified: %d.",
                     types[i]
                 );
@@ -112,47 +118,49 @@ void SimulationGenerator::ConstructEquation_Ions(
     }
 
     // Load ion data
-    real_t *dynamic_densities = LoadDataIonR(
+    real_t *dynamic_densities = DREAM::SimulationGenerator::LoadDataIonR(
         MODULENAME, fluidGrid->GetRadialGrid(), s, nZ0_dynamic, "initial"
     );
-    MultiInterpolator1D *prescribed_densities = LoadDataIonRT(
-        MODULENAME, fluidGrid->GetRadialGrid(), s, nZ0_prescribed, "prescribed"
-    );
+    DREAM::MultiInterpolator1D *prescribed_densities =
+        DREAM::SimulationGenerator::LoadDataIonRT(
+            MODULENAME, fluidGrid->GetRadialGrid(), s, nZ0_prescribed, "prescribed"
+        );
 
-    IonHandler *ih = new IonHandler(fluidGrid->GetRadialGrid(), eqsys->GetUnknownHandler(), Z, nZ, ionNames, tritiumNames);
+    // Construct ion handler
+    DREAM::IonHandler *ih = new DREAM::IonHandler(fluidGrid->GetRadialGrid(), eqsys->GetUnknownHandler(), Z, nZ, ionNames, tritiumNames);
     eqsys->SetIonHandler(ih);
 
     // Initialize ion equations
-    FVM::Operator *eqn = new FVM::Operator(fluidGrid);
+    DREAM::FVM::Operator *eqn = new DREAM::FVM::Operator(fluidGrid);
 
-    IonPrescribedParameter *ipp = nullptr;
+    DREAM::IonPrescribedParameter *ipp = nullptr;
     if (nZ0_prescribed > 0)
-        ipp = new IonPrescribedParameter(fluidGrid, ih, nZ_prescribed, prescribed_indices, prescribed_densities);
+        ipp = new DREAM::IonPrescribedParameter(fluidGrid, ih, nZ_prescribed, prescribed_indices, prescribed_densities);
 
-    const len_t id_ni = eqsys->GetUnknownID(OptionConstants::UQTY_ION_SPECIES);
+    const len_t id_ni = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
     // Construct dynamic equations
     len_t nDynamic = 0, nEquil = 0;
     for (len_t iZ = 0; iZ < nZ; iZ++) {
         switch (types[iZ]) {
-            case OptionConstants::ION_DATA_PRESCRIBED: 
+            case DREAM::OptionConstants::ION_DATA_PRESCRIBED: 
                 break;
             // 'Dynamic' and 'Equilibrium' differ by a transient term
-            case OptionConstants::ION_DATA_TYPE_DYNAMIC:
+            case DREAM::OptionConstants::ION_DATA_TYPE_DYNAMIC:
                 nDynamic++;
                 eqn->AddTerm(
-                    new IonTransientTerm(fluidGrid, ih, iZ, id_ni)
+                    new DREAM::IonTransientTerm(fluidGrid, ih, iZ, id_ni)
                 );
                 [[fallthrough]];
-            case OptionConstants::ION_DATA_EQUILIBRIUM:
+            case DREAM::OptionConstants::ION_DATA_EQUILIBRIUM:
                 nEquil++;
                 // TODO Update these
-                if(ih->GetZ(iZ)==1 && opacity_mode[iZ]==OptionConstants::OPACITY_MODE_GROUND_STATE_OPAQUE){
-		            eqn->AddTerm(new LyOpaqueDIonRateEquation(
+                if(ih->GetZ(iZ)==1 && opacity_mode[iZ]==DREAM::OptionConstants::OPACITY_MODE_GROUND_STATE_OPAQUE){
+		            eqn->AddTerm(new DREAM::LyOpaqueDIonRateEquation(
 		                fluidGrid, ih, iZ, eqsys->GetUnknownHandler(),
 		                true, false, false, amjuel
 		            ));		            
                 }else{
-		            eqn->AddTerm(new IonRateEquation(
+		            eqn->AddTerm(new DREAM::IonRateEquation(
 		                fluidGrid, ih, iZ, adas, eqsys->GetUnknownHandler(),
 		                true, false, false
 		            ));
@@ -160,7 +168,7 @@ void SimulationGenerator::ConstructEquation_Ions(
                 break;
 
             default:
-                throw SettingsException(
+                throw DREAM::SettingsException(
                     "ions: Unrecognized ion model type specified: %d.",
                     types[iZ]
                 );
@@ -184,8 +192,6 @@ void SimulationGenerator::ConstructEquation_Ions(
         else
             desc = "Dynamic + equilibrium";
     }
-    if((nEquil>0) && includeKineticIonization)
-        desc += " (kinetic ionization)";
 
     if (ipp != nullptr)
         eqn->AddTerm(ipp);
