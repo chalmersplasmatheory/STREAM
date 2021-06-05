@@ -10,7 +10,14 @@
 namespace STREAM {
     class SimulationGenerator {
     public:
+        static DREAM::Settings *CreateSettings();
+        static void DefineOptions(DREAM::Settings*);
         static DREAM::Simulation *ProcessSettings(DREAM::Settings*);
+
+        // Define options
+        static void DefineOptions_Grid(DREAM::Settings*);
+        static void DefineOptions_T_cold(DREAM::Settings*);
+        static void DefineOptions_Ions(DREAM::Settings*);
 
         // Equation system
         static DREAM::EquationSystem *ConstructEquationSystem(

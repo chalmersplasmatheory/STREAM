@@ -10,6 +10,17 @@
 using namespace STREAM;
 
 /**
+ * Construct a new settings object with all available options
+ * defined.
+ */
+DREAM::Settings *SimulationGenerator::CreateSettings() {
+    DREAM::Settings *s = new DREAM::Settings();
+    DefineOptions(s);
+
+    return s;
+}
+
+/**
  * Process the given settings and construct a simulation object.
  *
  * s: Settings specifying how to construct the simulation.

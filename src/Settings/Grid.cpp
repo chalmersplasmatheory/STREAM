@@ -12,6 +12,19 @@
 
 using namespace STREAM;
 
+
+void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
+    s->DefineSetting(MODULENAME "/a",  "Tokamak minor radius", (real_t)0.5);
+    s->DefineSetting(MODULENAME "/B0", "Tokamak magnetic field strength on-axis", (real_t)1.0);
+    
+    DREAM::SimulationGenerator::DefineOptions_f_ripple(MODULENAME, s);
+}
+
+/**
+ * Main routine for creating a new main grid in STREAM.
+ *
+ * s: Settings object containing a specification of the grid.
+ */
 DREAM::FVM::Grid *SimulationGenerator::ConstructRadialGrid(DREAM::Settings *s) {
     // TODO add a radial grid with elongated flux surfaces and variable minor radius
     DREAM::FVM::RadialGrid *rg = ConstructRadialGrid_Cylindrical(s);

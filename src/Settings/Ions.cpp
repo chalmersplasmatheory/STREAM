@@ -17,6 +17,19 @@ using namespace std;
 
 #define MODULENAME "eqsys/n_i"
 
+
+/**
+ * Define options for the ion module.
+ *
+ * s: Settings object to define options in.
+ */
+void SimulationGenerator::DefineOptions_Ions(DREAM::Settings *s) {
+    // Include all settings from DREAM...
+    DREAM::SimulationGenerator::DefineOptions_Ions(s);
+
+    // TODO transport settings
+}
+
 /**
  * Construct the equation governing the evolution of the
  * ion densities for each charge state.

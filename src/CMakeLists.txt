@@ -1,5 +1,6 @@
 
 set(stream
+    "${PROJECT_SOURCE_DIR}/src/Settings/DefineOptions.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/EquationSystem.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/Grid.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/Heat.cpp"

@@ -20,7 +20,7 @@
 #include <softlib/SOFTLibException.h>
 
 #include "STREAM/stream.h"
-//#include "DREAM/Init.h"
+#include "DREAM/Init.h"
 #include "DREAM/IO.hpp"
 #include "DREAM/QuitException.hpp"
 #include "DREAM/Settings/Settings.hpp"
@@ -49,7 +49,7 @@ void display_settings(DREAM::Settings *s=nullptr) {
     s->DisplaySettings();
 }
 
-void display_adas(STREAM::Simulation *sim) {
+void display_adas(DREAM::Simulation *sim) {
     sim->GetADAS()->PrintElements();
     cout << endl;
 }

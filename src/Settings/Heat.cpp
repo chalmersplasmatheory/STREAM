@@ -17,6 +17,24 @@ using namespace STREAM;
 
 
 /**
+ * Define options for the electron temperature module.
+ */
+void SimulationGenerator::DefineOptions_T_cold(DREAM::Settings *s) {
+    s->DefineSetting(
+        MODULENAME "/type",
+        "Type of equation to use for determining the electron temperature evolution",
+        (int_t)DREAM::OptionConstants::UQTY_T_COLD_EQN_PRESCRIBED
+    );
+    
+    // Prescribed data
+    DREAM::SimulationGenerator::DefineDataRT(MODULENAME, s, "data");
+    // Prescribed initial profile (when evolving T_cold self-consistently)
+    DREAM::SimulationGenerator::DefineDataR(MODULENAME, s, "init");
+
+    // TODO transport settings
+}
+
+/**
  * Construct the equation for the temperature.
  */
 void SimulationGenerator::ConstructEquation_T_cold(
