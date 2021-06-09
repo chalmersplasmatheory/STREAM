@@ -18,6 +18,10 @@ namespace STREAM{
                         len_t id_Ip, id_Imk2, id_Tcold, id_Ti; 
 
                 public:
+                        real_t a, B, l_MK2;
+                        real_t I_ref = 100000;
+                        real_t B_v   = 1e-3; 
+                
                         ConefinementTime(FVM::UnknownQuantityHandler *u);
 
                         /* Är real_t rätt data-typ?  */
