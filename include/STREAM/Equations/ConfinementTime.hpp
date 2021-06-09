@@ -1,16 +1,18 @@
 #ifndef _STREAM_EQUATION_CONFINEMENT_TIME_HPP
 #define _STREAM_EQUATION_CONFINEMENT_TIME_HPP
 
-#include "FVM/Equation/EvaluableEquationTerm.hpp"
+/* #include "FVM/Equation/EvaluableEquationTerm.hpp" */
 #include "FVM/UnknownQuantityHandler.hpp"
-/* Behövs båda dessa? Är adresserna rätt?  */
+/* Behövs dessa? Är adresserna rätt?  */
+#include <gsl/gsl_math-h>
+/* Är detta rätt matte-bibliotek? */
 
 /** 
  * Implementation of the particle confinement time
  */
-
+/* Är det rätt namespace? */
 namespace STREAM{
-        class ConefinementTime /*: public FVM::EvaluableEquationTerm */{
+        class ConefinementTime /*: public FVM::EvaluableEquationTerm /* Ska denna vara med? */ */{
 
                 protected:
                         FVM::UnknownQuantityHandler *unknowns; /* Ska denna vara med? */
@@ -26,15 +28,15 @@ namespace STREAM{
                         ConefinementTime(FVM::UnknownQuantityHandler *u, real_t a, real_t B, real_t l_MK2);
 
                         /* Är real_t rätt data-typ?  */
-                        real_t EvaluateConfinementTime();
+                        real_t EvaluateConfinementTime(len_t ir);
 
-                        real_t EvaluateConfinementTime_dIp();
+                        real_t EvaluateConfinementTime_dIp(len_t ir);
 
-                        real_t EvaluateConfinementTime_dIMK2();
+                        real_t EvaluateConfinementTime_dIMK2(len_t ir);
 
-                        real_t EvaluateConfinementTime_dTe();
+                        real_t EvaluateConfinementTime_dTe(len_t ir);
 
-                        real_t EvaluateConfinementTime_dTi();
+                        real_t EvaluateConfinementTime_dTi(len_t ir);
 }
 
 #endif/*_STREAM_EQUATION_CONFINEMENT_TIME_HPP */
