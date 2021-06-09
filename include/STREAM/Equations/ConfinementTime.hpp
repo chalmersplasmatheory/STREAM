@@ -23,7 +23,7 @@ namespace STREAM{
                         real_t I_ref = 100000;
                         real_t B_v   = 1e-3;  
                 
-                        ConefinementTime(FVM::UnknownQuantityHandler *u);
+                        ConefinementTime(FVM::UnknownQuantityHandler *u, real_t a, real_t B, real_t l_MK2);
 
                         /* Är real_t rätt data-typ?  */
                         real_t EvaluateConfinementTime();
