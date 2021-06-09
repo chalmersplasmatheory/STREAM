@@ -10,7 +10,7 @@
  */
 
 namespace STREAM{
-        class ConefinementTime : public FVM::EvaluableEquationTerm {
+        class ConefinementTime /*: public FVM::EvaluableEquationTerm */{
 
                 protected:
                         FVM::UnknownQuantityHandler *unknowns; /* Ska denna vara med? */
