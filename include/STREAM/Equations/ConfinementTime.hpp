@@ -23,7 +23,9 @@ namespace STREAM{
                         /* Är detta korrekt eller ska det göras på något annat sät? */
                         real_t a, B, l_MK2;
                         real_t I_ref = 100000;
-                        real_t B_v   = 1e-3;  
+                        real_t B_v   = 1e-3;
+                        
+                        double k_B = 0.00008617342;
                 
                         ConefinementTime(FVM::UnknownQuantityHandler *u, real_t a, real_t B, real_t l_MK2);
 
