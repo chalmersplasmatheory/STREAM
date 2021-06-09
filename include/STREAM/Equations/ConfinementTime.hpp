@@ -18,9 +18,10 @@ namespace STREAM{
                         len_t id_Ip, id_Imk2, id_Tcold, id_Ti; 
 
                 public:
+                        /* Är detta korrekt eller ska det göras på något annat sät? */
                         real_t a, B, l_MK2;
                         real_t I_ref = 100000;
-                        real_t B_v   = 1e-3; 
+                        real_t B_v   = 1e-3;  
                 
                         ConefinementTime(FVM::UnknownQuantityHandler *u);
 
