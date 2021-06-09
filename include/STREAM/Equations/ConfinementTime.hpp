@@ -4,7 +4,7 @@
 /* #include "FVM/Equation/EvaluableEquationTerm.hpp" */
 #include "FVM/UnknownQuantityHandler.hpp"
 /* Behövs dessa? Är adresserna rätt?  */
-#include <gsl/gsl_math-h>
+#include <gsl/gsl_math.h>
 /* Är detta rätt matte-bibliotek? */
 #include "DREAM/Constants.hpp"
 /* Behövs denna? */
