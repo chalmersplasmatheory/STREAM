@@ -6,6 +6,9 @@
 /* Behövs dessa? Är adresserna rätt?  */
 #include <gsl/gsl_math-h>
 /* Är detta rätt matte-bibliotek? */
+#include "DREAM/Constants.hpp"
+/* Behövs denna? */
+
 
 /** 
  * Implementation of the particle confinement time
@@ -20,7 +23,7 @@ namespace STREAM{
                         len_t id_Ip, id_Imk2, id_Tcold, id_Ti; 
 
                 public:
-                        /* Är detta korrekt eller ska det göras på något annat sät? */
+                        /* Är detta korrekt eller ska det göras på något annat sätt? */
                         real_t a, B, l_MK2;
                         real_t I_ref = 100000;
                         real_t B_v   = 1e-3;
