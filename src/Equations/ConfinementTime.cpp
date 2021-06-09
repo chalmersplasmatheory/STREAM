@@ -13,7 +13,7 @@ ConfinementTime::ConfinementTime(FVM::UnknownQuantityHandler *u, real_t a, real_
     this->l_MK2=l_MK2;
 
     id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
-    id_Imk2    = unknowns->GetUnknownID(OptionConstants::UQTY_I_MK2);
+    id_Imk2    = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
     id_Ti = unknowns->GetUnknownID(OptionConstants::UQTY_T_I);
     /* Är dessa rätt? */
