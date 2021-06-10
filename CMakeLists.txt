@@ -32,7 +32,7 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 # Generate 'config.h'
 configure_file(
     "${PROJECT_SOURCE_DIR}/include/stream.h.in"
-    "${PROJECT_SOURCE_DIR}/include/STREAM/stream.h"
+    "${PROJECT_BINARY_DIR}/include/STREAM/stream.h"
 )
 
 # Require out-of-source builds
