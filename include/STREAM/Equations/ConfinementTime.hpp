@@ -21,19 +21,19 @@ namespace STREAM{
         class ConfinementTime /*: public FVM::EvaluableEquationTerm /* Ska denna vara med? */ */{
 
                 protected:
-                        FVM::UnknownQuantityHandler *unknowns; /* Ska denna vara med? */
+                        DREAM::FVM::UnknownQuantityHandler *unknowns; /* Ska denna vara med? */
                         
-                        len_t id_Ip, id_Imk2, id_Tcold, id_Ti; 
+                        EllipticalRadialGridGenerator *radials;
+                        
+                        len_t id_Ip, id_Imk2, id_Tcold, id_Wi, id_Ni; 
 
                 public:
                         /* Är detta korrekt eller ska det göras på något annat sätt? */
-                        real_t a, B, l_MK2;
+                        real_t l_MK2;
                         real_t I_ref = 100000;
                         real_t B_v   = 1e-3;
-                        
-                        double k_B = 0.00008617342; /* Ska denna vara double eller real_t? Eller går det att lägga till i Constantsfilen?" */
                 
-                        ConfinementTime(FVM::UnknownQuantityHandler *u, real_t a, real_t B, real_t l_MK2);
+                        ConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *aB, real_t l_MK2);
 
                         /* Är real_t rätt data-typ?  */
                         real_t EvaluateConfinementTime(len_t ir);
