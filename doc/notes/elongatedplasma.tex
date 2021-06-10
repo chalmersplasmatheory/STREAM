@@ -1,0 +1,115 @@
+\documentclass{notes}
+
+\title{Elongated plasma geometry for STREAM}
+\author{Mathias Hoppe}
+
+\newcommand{\Rm}{R_{\rm m}}
+\newcommand{\Rhat}{\hat{\bb{R}}}
+\newcommand{\Jac}{\mathcal{J}}
+
+\begin{document}
+    \maketitle
+
+    \noindent
+    The \DYON\ code uses an elongated flux plasma geometry, with a time evolving
+    plasma minor radius $a$ and elongation $\kappa$. In this document, we derive
+    expressions for the corresponding spatial Jacobian required by \STREAM. The
+    discussion is based on that of \texttt{doc/notes/theory.pdf} in the \DREAM\
+    repository.
+
+    \section{Definitions}
+    Similar to the analytical magnetic field of \DREAM, we parametrize flux
+    surfaces according to
+    \begin{equation}\label{eq:fsparam}
+        \begin{aligned}
+            \bb{x} &= R\Rhat + z\zhat,\\
+            %
+            R &= \Rm + r\cos\theta,\\
+            %
+            z &= r\kappa(r)\sin\theta,\\
+            %
+            \Rhat &= \cos\varphi\xhat + \sin\varphi\yhat,
+        \end{aligned}
+    \end{equation}
+    where $\bb{x}$ is the regular position vector, $R$ is the major radius
+    coordinate, $\Rm$ is the tokamak/plasma major radius, $z$ is the cartesian
+    vertical coordinate, $\varphi$ is the toroidal angle, $r$ is the minor
+    radius coordinate, $\theta$ is the poloidal angle, and $\kappa(r)$ is the
+    elongation.
+
+    Formally, quantities in \STREAM\ are flux-surface averaged, meaning that
+    they are integrated over the poloidal and toroidal angles. We denote a
+    flux-surface average using angle-bracket notation:
+    \begin{equation}
+        \begin{aligned}
+            \left\langle X \right\rangle &=
+                \frac{1}{V'}\int_0^{2\pi}\dd\theta\int_0^{2\pi}\dd\varphi\,\Jac\,X,\\
+            %
+            V' &= \frac{1}{V'}\int_0^{2\pi}\dd\theta\int_0^{2\pi}\dd\varphi\,\Jac.\\
+        \end{aligned}
+    \end{equation}
+    Here, $\Jac$ denotes the Jacobian for the toroidal coordinate system
+    $(r,\theta,\varphi)$.
+
+    \section{Geometrical quantities}
+    We will consider an elongated plasma with constant elongation
+    $\kappa(r)=\kappa_0$. In such a plasma, the Jacobian $\Jac$ becomes
+    \begin{equation}
+        \Jac = \kappa r R\left(
+            1 + \frac{r\kappa'}{\kappa}\sin^2\theta
+        \right) = \kappa rR,
+    \end{equation}
+    where $\kappa'(r) = \partial\kappa/\partial r = 0$. Aside from the Jacobian,
+    we also need to know 
+    \begin{equation}
+        \left|\nabla r\right|^2 = \frac{\kappa^2r^2R^2}{\Jac^2}\left[
+            \cos^2\theta + \frac{1}{\kappa^2}\sin^2\theta
+        \right] =
+        \cos^2\theta + \frac{1}{\kappa^2}\sin^2\theta.
+    \end{equation}
+    We note that the quantity $R/\Rm$, which is also needed by \STREAM,
+    evaluates to $R/\Rm=1$ in the large-aspect ratio limit ($a\ll\Rm$) which we
+    work in.
+
+    \section{SPI quantities}
+    For SPI support, we also need to convert between a cartesian and toroidal
+    basis for some quantities. The first conversion needed is simply the
+    inverse of equation~\eqref{eq:fsparam}, taking us from cartesian $(x,y,z)$
+    to toroidal coordinates $(r,\theta)$ (note that the SPI module substitutes
+    $z\to y$ and lets $z$ denote the toroidal direction). The relation between
+    $(r,\theta)$ and $(x,y)$ is
+    \begin{equation}
+        \begin{aligned}
+            r &= \sqrt{\frac{x^2+y^2}{\cos^2\theta+\kappa^2\sin^2\theta}},\\
+            \tan\theta &= \frac{y}{2\kappa x}.
+        \end{aligned}
+    \end{equation}
+    With
+    \begin{equation}
+        \sin\theta = \frac{y}{\sqrt{\kappa^2x^2 + y^2}},\quad
+        \cos\theta = \frac{\kappa x}{\sqrt{\kappa^2x^2 + y^2}},
+    \end{equation}
+    we can simplify $r$ to
+    \begin{equation}\label{eq:cartr}
+        r = \frac{\sqrt{\kappa^2x^2 + y^2}}{\kappa}.
+    \end{equation}
+    This in turn allows us to express the trigonometric functions in terms of
+    $r$ as
+    \begin{equation}
+        \sin\theta = \frac{x}{r},\quad \cos\theta = \frac{y}{\kappa r}.
+    \end{equation}
+
+    We will also need to express the gradient of $r$ in cartesian coordinates.
+    From equation~\eqref{eq:cartr} we find that the non-vanishing components of
+    $\nabla r$ become
+    \begin{equation}
+        \begin{aligned}
+            \frac{\partial r}{\partial x} &= \frac{\kappa x}{r} = \cos\theta,\\
+            %
+            \frac{\partial r}{\partial y} &= \frac{y}{\kappa r} = \kappa\sin\theta.
+        \end{aligned}
+    \end{equation}
+    Finally, \ldots
+
+\end{document}
+

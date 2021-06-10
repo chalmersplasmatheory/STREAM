@@ -54,6 +54,7 @@ namespace STREAM {
         // STREAM main grid
         static DREAM::FVM::Grid *ConstructRadialGrid(DREAM::Settings*);
         static DREAM::FVM::RadialGrid *ConstructRadialGrid_Cylindrical(DREAM::Settings*);
+        static DREAM::FVM::RadialGrid *ConstructRadialGrid_Elliptical(DREAM::Settings*);
     };
 }
 
