@@ -3,6 +3,8 @@
 
 /* #include "FVM/Equation/EvaluableEquationTerm.hpp" */
 #include "FVM/UnknownQuantityHandler.hpp"
+#include "FVM/Grid/Grid.hpp"
+#include "DREAM/Settings/OptionConstants.hpp"
 /* Behövs dessa? Är adresserna rätt?  */
 #include <gsl/gsl_math.h>
 /* Är detta rätt matte-bibliotek? */
@@ -13,9 +15,10 @@
 /** 
  * Implementation of the particle confinement time
  */
+ 
 /* Är det rätt namespace? */
 namespace STREAM{
-        class ConefinementTime /*: public FVM::EvaluableEquationTerm /* Ska denna vara med? */ */{
+        class ConfinementTime /*: public FVM::EvaluableEquationTerm /* Ska denna vara med? */ */{
 
                 protected:
                         FVM::UnknownQuantityHandler *unknowns; /* Ska denna vara med? */
@@ -28,9 +31,9 @@ namespace STREAM{
                         real_t I_ref = 100000;
                         real_t B_v   = 1e-3;
                         
-                        double k_B = 0.00008617342;
+                        double k_B = 0.00008617342; /* Ska denna vara double eller real_t? Eller går det att lägga till i Constantsfilen?" */
                 
-                        ConefinementTime(FVM::UnknownQuantityHandler *u, real_t a, real_t B, real_t l_MK2);
+                        ConfinementTime(FVM::UnknownQuantityHandler *u, real_t a, real_t B, real_t l_MK2);
 
                         /* Är real_t rätt data-typ?  */
                         real_t EvaluateConfinementTime(len_t ir);
