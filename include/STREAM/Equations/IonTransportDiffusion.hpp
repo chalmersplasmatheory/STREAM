@@ -7,12 +7,13 @@
 #include "FVM/Equation/DiffusionTerm.hpp"
 
 namespace STREAM {
-	class IonTransportDiffusion : public DREAM::IonEquationTerm<FVM::DiffusionTerm> {
+	class IonTransportDiffusion : public DREAM::IonEquationTerm</*DREAM:: /*?*/ */FVM::DiffusionTerm> {
 	private:
-		DREAM::FVM::Interpolator1D *tauinv; // Rätt implementation av 1/tau?
+		DREAM::FVM::Interpolator1D *coefftauinv; // Rätt implementation av 1/tau?
 		//FVM::Interpolator1D *dBOverB; // Behövs?
 		FVM::MultiInterpolator1D *DrrHat; // Behövs?
 		
+		// Behövs dessa?
 		real_t **dDrrdni;
 		real_t **dDrrdWi;
 		real_t **dDrrdNi;
@@ -25,8 +26,8 @@ namespace STREAM {
 
 	protected:
 		virtual void SetCoeffs(const len_t Z0) override; // Behövs?
-		//virtual void SetCoeffsAllCS(const real_t dt) override; // Behövs?
-		//virtual void SetDiffCoeffsAllCS(const real_t t) override; // Behövs?
+		virtual void SetCoeffsAllCS(const real_t dt) override; // Behövs?
+		virtual void SetDiffCoeffsAllCS(const real_t t) override; // Behövs?
 		virtual void SetPartialDiffusionTerm(len_t /*derivId*/, len_t /*nMultiples*/) override;
 		
 	public:

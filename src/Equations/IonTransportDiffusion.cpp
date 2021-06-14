@@ -8,9 +8,9 @@ using namespace DREAM;
 using namespace STREAM;
 
 IonTransportDiffusion::IonTransportDiffusion(FVM::Grid *g, IonHandler *ihdl,
-	const len_t iIon, FVM::Interpolator1D* tauinv, FVM::MultiInterpolator1D* DrrHat, FVM::UnknownQuantityHandler *u
+	const len_t iIon, FVM::Interpolator1D* coefftauinv, FVM::MultiInterpolator1D* DrrHat, FVM::UnknownQuantityHandler *u
 	) : IonEquationTerm<FVM::DiffusionTerm>(FVM::Grid *g, 
-	IonHandler *ihdl, const len_t iIon), tauinv(tauinv), DrrHat(DrrHat) {
+	IonHandler *ihdl, const len_t iIon), coefftauinv(coefftauinv), DrrHat(DrrHat) {
 	
     SetName("IonTransportsDiffusion");
 
@@ -78,10 +78,27 @@ void IonTransportDiffusion::SetDiffCoeffsAllCS(const real_t t){
 void IonTransportDiffusion::SetCoeffs(const len_t Z0){
 	if(Z0<1)
 		return;
-		
+	
+	real_t a = radials->GetMinorRadius()->Eval(t);
+    const real_t *tauinv = this->coefftauinv->Eval(t);
 	const len_t nr = this->g->GetNr();
+	const real_t *W_i = unknowns->GetUnknownData(this->id_Wi); // Hitta W_i, eller T_i och n_i för givet Z0??
+    const real_t *N
+    _i = unknowns->GetUnknownData(this->id_Ni);
+	const real_t *T_i = 2/3*W_i/N_i;
 	for(ir=0; ir<nr+1; ir++)
-		Drr(ir,0,0)=CoeffsAllCS[Z0-1][ir];
+        // Fel interpolation va?
+    	real_t T=0; 
+    	real_t n=0; 
+        if(ir<nr)
+            T += deltaRadialFlux[ir] * T_i[ir];
+            n += deltaRadialFlux[ir] * n_i[ir];
+            // W += deltaRadialFlux[ir] * W_i[ir];
+        if(ir>0)
+            T += (1-deltaRadialFlux[ir]) * T_i[ir-1];
+            n += (1-deltaRadialFlux[ir]) * n_i[ir-1];
+            W += (1-deltaRadialFlux[ir]) * W_i[ir-1];
+		Drr(ir,0,0)=3/2 * n * T /* * W */ * a * a * tauinv;
 }
 
 
