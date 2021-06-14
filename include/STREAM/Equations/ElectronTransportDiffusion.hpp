@@ -8,7 +8,7 @@
 #include "FVM/UnknownQuantityHandler.hpp"
 
 namespace STREAM {
-    class ElectronTransportDiffusion : public FVM::DiffusionTerm { //Ska vara subklass?
+    class ElectronTransportDiffusion : public DREAM::FVM::DiffusionTerm { //Ska vara subklass?
     private:
         enum DREAM::OptionConstants::momentumgrid_type mgtype;
         DREAM::FVM::Interpolator1D *coefftauinv; // Rätt implementation av 1/tau?
