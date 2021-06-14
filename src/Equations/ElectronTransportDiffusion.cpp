@@ -7,12 +7,13 @@
  */
 
 #include "DREAM/Constants.hpp"
-#include "DREAM/Equations/Fluid/HeatTransportDiffusion.hpp"
+#include "STREAM/Equations/ElectronTransportDiffusion.hpp"
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/Interpolator1D.hpp"
 
 
 using namespace DREAM;
+using namespace STREAM;
 
 
 /**
@@ -43,7 +44,7 @@ ElectronTransportDiffusion::ElectronTransportDiffusion(
 /**
  * Destructor.
  */
-HeatTransportDiffusion::~HeatTransportDiffusion() {
+ElectronTransportDiffusion::~ElectronTransportDiffusion() {
     delete this->coeffD;
     delete [] this->dD;
 }
@@ -52,7 +53,7 @@ HeatTransportDiffusion::~HeatTransportDiffusion() {
 /**
  * Allocate memory for the differentiation coefficient.
  */
-void HeatTransportDiffusion::AllocateDiffCoeff() {
+void ElectronTransportDiffusion::AllocateDiffCoeff() {
     const len_t nr = this->grid->GetNr();
     this->dD = new real_t[nr+1];
 }
@@ -60,7 +61,7 @@ void HeatTransportDiffusion::AllocateDiffCoeff() {
 /**
  * Called whenever the grid is rebuilt.
  */
-bool HeatTransportDiffusion::GridRebuilt() {
+bool ElectronTransportDiffusion::GridRebuilt() {
     this->FVM::DiffusionTerm::GridRebuilt();
 
     delete [] this->dD;
@@ -72,7 +73,7 @@ bool HeatTransportDiffusion::GridRebuilt() {
 /**
  * Rebuild the coefficients for this equation term.
  */
-void HeatTransportDiffusion::Rebuild(
+void ElectronTransportDiffusion::Rebuild(
     const real_t t, const real_t, FVM::UnknownQuantityHandler *unknowns
 ) {
     const real_t *D = this->coeffD->Eval(t);
@@ -102,7 +103,7 @@ void HeatTransportDiffusion::Rebuild(
  *             be differentiated.
  * nMultiples: (not used).
  */
-void HeatTransportDiffusion::SetPartialDiffusionTerm(
+void ElectronTransportDiffusion::SetPartialDiffusionTerm(
     len_t derivId, len_t
 ) {
     if (derivId != this->id_n_cold)

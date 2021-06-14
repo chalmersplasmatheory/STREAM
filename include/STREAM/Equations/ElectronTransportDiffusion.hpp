@@ -7,13 +7,13 @@
 #include "FVM/Interpolator1D.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
 
-namespace DREAM {
+namespace STREAM {
     class ElectronTransportDiffusion : public FVM::DiffusionTerm {
     private:
-        enum OptionConstants::momentumgrid_type mgtype;
-        FVM::Interpolator1D *coeffD;
+        enum DREAM::OptionConstants::momentumgrid_type mgtype;
+        DREAM::FVM::Interpolator1D *coeffD;
 
-        FVM::UnknownQuantityHandler *unknowns;
+        DREAM::FVM::UnknownQuantityHandler *unknowns;
         
         EllipticalRadialGridGenerator *radials;
 
@@ -31,7 +31,7 @@ namespace DREAM {
         virtual void SetPartialDiffusionTerm(len_t, len_t) override;
 
     public:
-        ElectronTransportDiffusion(FVM::Grid*, enum OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator *aB, ConfinementTime *tau, FVM::UnknownQuantityHandler*);
+        ElectronTransportDiffusion(DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator *aB, ConfinementTime *tau, DREAM::FVM::UnknownQuantityHandler*);
         ~ElectronTransportDiffusion();
 
         virtual bool GridRebuilt() override;
