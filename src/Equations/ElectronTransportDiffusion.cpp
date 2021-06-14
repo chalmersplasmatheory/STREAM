@@ -1,7 +1,7 @@
 /**
- * Implementation of a heat diffusion operator taking the form
+ * Implementation of a transport operator taking the form
  *
- *   d/dr ( V'*D*n_cold * d/dr (T_cold) )
+ *   
  *
  * This operator should be applied to 'T_cold'.
  */
@@ -22,21 +22,17 @@ using namespace STREAM;
 
 ElectronTransportDiffusion::ElectronTransportDiffusion(
     FVM::Grid *grid, enum OptionConstants::momentumgrid_type mgtype,
-    EllipticalRadialGridGenerator *radials, ConfinementTime *invtau, FVM::UnknownQuantityHandler *unknowns
-) : FVM::DiffusionTerm(grid), mgtype(mgtype) { //Rätt med confinementtime?
+    EllipticalRadialGridGenerator *radials, FVM::Interpolator1D *tauinv, FVM::UnknownQuantityHandler *unknowns
+) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) { //Rätt med interpolator?
 
     SetName("ElectronTransportDiffusion");
 
-    this->unknowns = unknowns;
+    this->unknowns  = unknowns;
     this->id_n_cold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
-    this->id_T_cold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
     
     this->radials = radials;
-    this->a       = radials->GetMinorRadius()->Eval(t);
-    this->coeffD  = a*a*invtau;
     
     AddUnknownForJacobian(unknowns, this->id_n_cold);
-    AddUnknownForJacobian(unknowns, this->id_T_cold);
 
     AllocateDiffCoeff();
 }
@@ -45,8 +41,8 @@ ElectronTransportDiffusion::ElectronTransportDiffusion(
  * Destructor.
  */
 ElectronTransportDiffusion::~ElectronTransportDiffusion() {
-    delete this->coeffD;
-    delete [] this->dD;
+    delete this->coefftauinv;
+    delete [] this->dtauinv;
 }
 
 
@@ -55,7 +51,7 @@ ElectronTransportDiffusion::~ElectronTransportDiffusion() {
  */
 void ElectronTransportDiffusion::AllocateDiffCoeff() {
     const len_t nr = this->grid->GetNr();
-    this->dD = new real_t[nr+1];
+    this->dtauinv = new real_t[nr+1];
 }
 
 /**
@@ -64,7 +60,7 @@ void ElectronTransportDiffusion::AllocateDiffCoeff() {
 bool ElectronTransportDiffusion::GridRebuilt() {
     this->FVM::DiffusionTerm::GridRebuilt();
 
-    delete [] this->dD;
+    delete [] this->dtauinv;
     AllocateDiffCoeff();
     
     return true;
@@ -76,11 +72,13 @@ bool ElectronTransportDiffusion::GridRebuilt() {
 void ElectronTransportDiffusion::Rebuild(
     const real_t t, const real_t, FVM::UnknownQuantityHandler *unknowns
 ) {
-    const real_t *D = this->coeffD->Eval(t);
+    real_t a = radials->GetMinorRadius()->Eval(t);
+    
+    const real_t *tauinv = this->coefftauinv->Eval(t);
     const len_t nr = this->grid->GetNr();
 
     const real_t *ncold = unknowns->GetUnknownData(this->id_n_cold);
-
+    
     for (len_t ir = 0; ir < nr+1; ir++) {
         real_t n=0;
         if(ir<nr)
@@ -90,9 +88,9 @@ void ElectronTransportDiffusion::Rebuild(
 
         // Factor ec (=elementary charge) to convert from
         // eV to joule
-        this->dD[ir] = 1.5 * Constants::ec * D[ir];
+        this->dtauinv[ir] = 1.5 * Constants::ec * a * a * tauinv[ir];
         
-        Drr(ir, 0, 0) += 1.5 * Constants::ec * D[ir] * n;
+        M(ir, 0, 0) += 1.5 * Constants::ec * a * a * tauinv[ir] * n; // Rätt?
     }
 }
 
@@ -113,6 +111,6 @@ void ElectronTransportDiffusion::SetPartialDiffusionTerm(
 
     const len_t nr = this->grid->GetNr();
     for (len_t ir = 0; ir < nr+1; ir++)
-        dDrr(ir, 0, 0) = this->dD[ir];
+        dM(ir, 0, 0) = this->dtauinv[ir];
 }
 
