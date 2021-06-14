@@ -89,9 +89,9 @@ void ElectronTransportDiffusion::Rebuild(
 
         // Factor ec (=elementary charge) to convert from
         // eV to joule
-        this->dtauinv[ir] = 1.5 * Constants::ec * a * a * tauinv[ir]; // Rätt?
+        this->dtauinv[ir] = 3/2 * Constants::ec * a * a * tauinv[ir]; // Rätt?
         
-        M(ir, 0, 0) += 1.5 * Constants::ec * a * a * tauinv[ir] * n; // Rätt? Ska det vara M och inte Drr?
+        M(ir, 0, 0) += 3/2 * Constants::ec * a * a * tauinv[ir] * n; // Rätt? Ska det vara M och inte Drr?
     }
 }
 
