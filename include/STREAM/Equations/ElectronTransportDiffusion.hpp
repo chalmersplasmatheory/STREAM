@@ -1,5 +1,5 @@
-#ifndef _STREAM_EQUATIONS_ION_TRANSPORT_DIFFUSION_HPP
-#define _STREAM_EQUATIONS_ION_TRANSPORT_DIFFUSION_HPP
+#ifndef _STREAM_EQUATIONS_ELECTRON_TRANSPORT_DIFFUSION_HPP
+#define _STREAM_EQUATIONS_ELECTRON_TRANSPORT_DIFFUSION_HPP
 
 #include "DREAM/Settings/OptionConstants.hpp"
 #include "FVM/Equation/DiffusionTerm.hpp"
@@ -8,7 +8,7 @@
 #include "FVM/UnknownQuantityHandler.hpp"
 
 namespace DREAM {
-    class IonTransportDiffusion : public FVM::DiffusionTerm {
+    class ElectronTransportDiffusion : public FVM::DiffusionTerm {
     private:
         enum OptionConstants::momentumgrid_type mgtype;
         FVM::Interpolator1D *coeffD;
@@ -27,8 +27,8 @@ namespace DREAM {
         virtual void SetPartialDiffusionTerm(len_t, len_t) override;
 
     public:
-        HeatTransportDiffusion(FVM::Grid*, enum OptionConstants::momentumgrid_type, FVM::Interpolator1D*, FVM::UnknownQuantityHandler*);
-        ~HeatTransportDiffusion();
+        ElectronTransportDiffusion(FVM::Grid*, enum OptionConstants::momentumgrid_type, FVM::Interpolator1D*, FVM::UnknownQuantityHandler*);
+        ~ElectronTransportDiffusion();
 
         virtual bool GridRebuilt() override;
         virtual void Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*) override;
