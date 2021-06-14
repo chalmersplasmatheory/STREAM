@@ -23,18 +23,18 @@ using namespace STREAM;
 ElectronTransportDiffusion::ElectronTransportDiffusion(
     FVM::Grid *grid, enum OptionConstants::momentumgrid_type mgtype,
     EllipticalRadialGridGenerator *radials, FVM::Interpolator1D *tauinv, FVM::UnknownQuantityHandler *unknowns
-) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) { //Rätt med interpolator?
+) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) { //Rätt datatyper?
 
-    SetName("ElectronTransportDiffusion");
+    SetName("ElectronTransportDiffusion"); // Behövs?
 
     this->unknowns  = unknowns;
     this->id_n_cold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
     
     this->radials = radials;
     
-    AddUnknownForJacobian(unknowns, this->id_n_cold);
+    AddUnknownForJacobian(unknowns, this->id_n_cold); // Behövs?
 
-    AllocateDiffCoeff();
+    AllocateDiffCoeff(); // Behövs?
 }
 
 /**
@@ -69,8 +69,9 @@ bool ElectronTransportDiffusion::GridRebuilt() {
 /**
  * Rebuild the coefficients for this equation term.
  */
+  // Korrekt?
 void ElectronTransportDiffusion::Rebuild(
-    const real_t t, const real_t, FVM::UnknownQuantityHandler *unknowns
+    const real_t t, const real_t, FVM::UnknownQuantityHandler *unknowns //, EllipticalRadialGridGenerator *radials Behövs denna
 ) {
     real_t a = radials->GetMinorRadius()->Eval(t);
     
@@ -101,6 +102,7 @@ void ElectronTransportDiffusion::Rebuild(
  *             be differentiated.
  * nMultiples: (not used).
  */
+ // Korrekt?
 void ElectronTransportDiffusion::SetPartialDiffusionTerm(
     len_t derivId, len_t
 ) {

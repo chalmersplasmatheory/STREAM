@@ -8,10 +8,10 @@
 #include "FVM/UnknownQuantityHandler.hpp"
 
 namespace STREAM {
-    class ElectronTransportDiffusion : public FVM::DiffusionTerm {
+    class ElectronTransportDiffusion : public FVM::DiffusionTerm { //Ska vara subklass?
     private:
         enum DREAM::OptionConstants::momentumgrid_type mgtype;
-        DREAM::FVM::Interpolator1D *coefftauinv;
+        DREAM::FVM::Interpolator1D *coefftauinv; // Rätt implementation av 1/tau?
 
         DREAM::FVM::UnknownQuantityHandler *unknowns;
         
@@ -24,16 +24,18 @@ namespace STREAM {
         // IDs of unknown quantities used by the operator...
         len_t id_n_cold;
 
-        void AllocateDiffCoeff();
+        /* Dessa behövs va? */
+        void AllocateDiffCoeff(); 
         virtual void SetPartialDiffusionTerm(len_t, len_t) override;
 
     public:
         ElectronTransportDiffusion(DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator*, DREAM::FVM::Interpolator1D*, DREAM::FVM::UnknownQuantityHandler*);
         ~ElectronTransportDiffusion();
 
+        /* Dessa behövs va? */
         virtual bool GridRebuilt() override;
         virtual void Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*) override;
     };
 }
 
-#endif/*_DREAM_EQUATIONS_FLUID_HEAT_TRANSPORT_DIFFUSION_HPP*/
+#endif/*_STREAM_EQUATIONS_ELECTRON_TRANSPORT_DIFFUSION_HPP*/
