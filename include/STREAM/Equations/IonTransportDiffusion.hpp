@@ -9,7 +9,9 @@
 namespace STREAM {
 	class IonTransportDiffusion : public DREAM::IonEquationTerm<FVM::DiffusionTerm> {
 	private:
-		DREAM::FVM::Interpolator1D *coefftauinv; // Rätt implementation av 1/tau?
+		DREAM::FVM::Interpolator1D *tauinv; // Rätt implementation av 1/tau?
+		//FVM::Interpolator1D *dBOverB; // Behövs?
+		FVM::MultiInterpolator1D *DrrHat; // Behövs?
 		
 		real_t **dDrrdni;
 		real_t **dDrrdWi;
@@ -29,7 +31,7 @@ namespace STREAM {
 		
 	public:
 		IonTransportDiffusion(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon, 
-			DREAM::FVM::Interpolator1D*,DREAM::FVM::MultiInterpolator1D*);
+			DREAM::FVM::Interpolator1D*,DREAM::FVM::MultiInterpolator1D* /* Behövs?*/);
 		~IonTransportDiffusion();
 	}
 }
