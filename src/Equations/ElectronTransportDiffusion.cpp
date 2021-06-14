@@ -18,17 +18,24 @@ using namespace DREAM;
 /**
  * Constructor.
  */
-HeatTransportDiffusion::HeatTransportDiffusion(
-    FVM::Grid *grid, enum OptionConstants::momentumgrid_type mgtype,
-    FVM::Interpolator1D *D, FVM::UnknownQuantityHandler *unknowns
-) : FVM::DiffusionTerm(grid), mgtype(mgtype), coeffD(D) {
 
-    SetName("HeatTransportDiffusion");
+ElectronTransportDiffusion::ElectronTransportDiffusion(
+    FVM::Grid *grid, enum OptionConstants::momentumgrid_type mgtype,
+    EllipticalRadialGridGenerator *radials, ConfinementTime *invtau, FVM::UnknownQuantityHandler *unknowns
+) : FVM::DiffusionTerm(grid), mgtype(mgtype) { //Rätt med confinementtime?
+
+    SetName("ElectronTransportDiffusion");
 
     this->unknowns = unknowns;
     this->id_n_cold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
+    this->id_T_cold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
+    
+    this->radials = radials;
+    this->a       = radials->GetMinorRadius()->Eval(t);
+    this->coeffD  = a*a*invtau;
     
     AddUnknownForJacobian(unknowns, this->id_n_cold);
+    AddUnknownForJacobian(unknowns, this->id_T_cold);
 
     AllocateDiffCoeff();
 }

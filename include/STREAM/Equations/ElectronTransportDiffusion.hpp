@@ -14,6 +14,8 @@ namespace DREAM {
         FVM::Interpolator1D *coeffD;
 
         FVM::UnknownQuantityHandler *unknowns;
+        
+        EllipticalRadialGridGenerator *radials;
 
         // Precomputed coefficient used for calculating
         // derivatives of the diffusion coefficient Drr...
@@ -22,12 +24,14 @@ namespace DREAM {
         // IDs of unknown quantities used by the operator...
         len_t id_n_cold;
         len_t id_T_cold;
+        
+        real_t a;
 
         void AllocateDiffCoeff();
         virtual void SetPartialDiffusionTerm(len_t, len_t) override;
 
     public:
-        ElectronTransportDiffusion(FVM::Grid*, enum OptionConstants::momentumgrid_type, FVM::Interpolator1D*, FVM::UnknownQuantityHandler*);
+        ElectronTransportDiffusion(FVM::Grid*, enum OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator *aB, ConfinementTime *tau, FVM::UnknownQuantityHandler*);
         ~ElectronTransportDiffusion();
 
         virtual bool GridRebuilt() override;
