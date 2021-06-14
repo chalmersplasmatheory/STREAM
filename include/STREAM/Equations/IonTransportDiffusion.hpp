@@ -28,8 +28,8 @@ namespace STREAM {
 		virtual void SetPartialDiffusionTerm(len_t /*derivId*/, len_t /*nMultiples*/) override;
 		
 	public:
-		IonChargedDiffusionStochasticBTerm(FVM::Grid *g, IonHandler *ihdl, const len_t iIon, 
-			FVM::Interpolator1D*,FVM::MultiInterpolator1D*);
+		IonChargedDiffusionStochasticBTerm(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon, 
+			DREAM::FVM::Interpolator1D*,DREAM::FVM::MultiInterpolator1D*);
 		~IonChargedDiffusionStochasticBTerm();
 	}
 }
