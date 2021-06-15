@@ -7,7 +7,7 @@
  */
 
 #include "DREAM/Constants.hpp"
-#include "STREAM/Equations/ElectronHeatTransportDiffusion.hpp"
+#include "STREAM/Equations/ElectronTransportDiffusion.hpp"
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/Interpolator1D.hpp"
 
@@ -19,12 +19,12 @@ using namespace STREAM;
  * Constructor.
  */
 
-ElectronHeatTransportDiffusion::ElectronHeatTransportDiffusion(
+ElectronTransportDiffusion::ElectronTransportDiffusion(
     FVM::Grid *grid, enum OptionConstants::momentumgrid_type mgtype,
     EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *unknowns
 ) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) {
 
-    SetName("ElectronHeatTransportDiffusion"); 
+    SetName("ElectronTransportDiffusion"); 
 
     this->unknowns = unknowns;
     this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
@@ -49,7 +49,7 @@ ElectronHeatTransportDiffusion::ElectronHeatTransportDiffusion(
 /**
  * Destructor.
  */
-ElectronHeatTransportDiffusion::~ElectronHeatTransportDiffusion() {
+ElectronTransportDiffusion::~ElectronTransportDiffusion() {
     delete this->coefftauinv;
     delete [] this->dtauinv;
 }
@@ -58,7 +58,7 @@ ElectronHeatTransportDiffusion::~ElectronHeatTransportDiffusion() {
 /**
  * Allocate memory for the differentiation coefficient.
  */
-void ElectronHeatTransportDiffusion::AllocateDiffCoeff() {
+void ElectronTransportDiffusion::AllocateDiffCoeff() {
     const len_t nr = this->grid->GetNr();
     this->dtauinv = new real_t[nr+1];
 }
@@ -66,7 +66,7 @@ void ElectronHeatTransportDiffusion::AllocateDiffCoeff() {
 /**
  * Called whenever the grid is rebuilt.
  */
-bool ElectronHeatTransportDiffusion::GridRebuilt() {
+bool ElectronTransportDiffusion::GridRebuilt() {
     this->FVM::DiffusionTerm::GridRebuilt();
 
     delete [] this->dtauinv;
@@ -79,7 +79,7 @@ bool ElectronHeatTransportDiffusion::GridRebuilt() {
  * Rebuild the coefficients for this equation term.
  */
  
-void ElectronHeatTransportDiffusion::Rebuild(
+void ElectronTransportDiffusion::Rebuild(
     const real_t t, const real_t, FVM::UnknownQuantityHandler *unknowns 
 ) {
     real_t a = radials->GetMinorRadius();
@@ -120,7 +120,7 @@ void ElectronHeatTransportDiffusion::Rebuild(
  *             be differentiated.
  * nMultiples: (not used).
  */
-void ElectronHeatTransportDiffusion::SetPartialDiffusionTerm(
+void ElectronTransportDiffusion::SetPartialDiffusionTerm(
     len_t derivId, len_t
 ) {
     if (derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_ni)

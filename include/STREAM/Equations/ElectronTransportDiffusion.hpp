@@ -8,7 +8,7 @@
 #include "FVM/UnknownQuantityHandler.hpp"
 
 namespace STREAM {
-    class ElectronHeatTransportDiffusion : public DREAM::FVM::DiffusionTerm {
+    class ElectronTransportDiffusion : public DREAM::FVM::DiffusionTerm {
     private:
         enum DREAM::OptionConstants::momentumgrid_type mgtype;
         ConfinementTime *coefftauinv; 
@@ -31,8 +31,8 @@ namespace STREAM {
         virtual void SetPartialDiffusionTerm(len_t, len_t) override;
 
     public:
-        ElectronHeatTransportDiffusion(DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator*, ConfinementTime, DREAM::FVM::UnknownQuantityHandler*);
-        ~ElectronHeatTransportDiffusion();
+        ElectronTransportDiffusion(DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator*, ConfinementTime, DREAM::FVM::UnknownQuantityHandler*);
+        ~ElectronTransportDiffusion();
 
         virtual bool GridRebuilt() override;
         virtual void Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*) override;
