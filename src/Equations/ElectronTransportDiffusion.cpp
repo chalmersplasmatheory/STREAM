@@ -9,7 +9,6 @@ using namespace STREAM;
 /**
  * Constructor.
  */
-
 ElectronTransportDiffusion::ElectronTransportDiffusion(
     FVM::Grid *grid, enum OptionConstants::momentumgrid_type mgtype,
     EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *unknowns
