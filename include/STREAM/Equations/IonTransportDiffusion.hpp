@@ -1,13 +1,16 @@
 #ifndef _STREAM_EQUATIONs_ION_TRANSPORT_DIFFUSION_HPP
 #define _STREAM_EQUATIONs_ION_TRANSPORT_DIFFUSION_HPP
 
+#include "DREAM/Equations/Fluid/IonChargedAdvectionDiffusionTerm.hpp"
 #include "DREAM/Equations/Fluid/IonEquation.hpp"
 #include "DREAM/IonHandler.hpp"
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/Equation/DiffusionTerm.hpp"
+#include "FVM/Interpolator1D.hpp"
+#include "DREAM/MultiInterpolator1D.hpp"
 
 namespace STREAM {
-	class IonTransportDiffusion : public DREAM::IonEquationTerm</*DREAM:: /*?*/ */FVM::DiffusionTerm> {
+	class IonTransportDiffusion : public DREAM::IonChargedAdvectionDiffusionTerm</*DREAM:: /*?*/ */FVM::DiffusionTerm> {
 	private:
 		DREAM::FVM::Interpolator1D *coefftauinv; // Rätt implementation av 1/tau?
 		//FVM::Interpolator1D *dBOverB; // Behövs?
@@ -31,8 +34,8 @@ namespace STREAM {
 		virtual void SetPartialDiffusionTerm(len_t /*derivId*/, len_t /*nMultiples*/) override;
 		
 	public:
-		IonTransportDiffusion(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon, 
-			DREAM::FVM::Interpolator1D*,DREAM::FVM::MultiInterpolator1D* /* Behövs?*/);
+		IonTransportDiffusion(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, bool allocCoefficients, const len_t iIon, 
+			DREAM::FVM::Interpolator1D*,DREAM::FVM::MultiInterpolator1D* /* Behövs?*/,  FVM::UnknownQuantityHandler *u);
 		~IonTransportDiffusion();
 	}
 }
