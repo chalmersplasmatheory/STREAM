@@ -7,7 +7,7 @@
  */
 
 #include "DREAM/Constants.hpp"
-#include "STREAM/Equations/ElectronTransportDiffusion.hpp"
+#include "STREAM/Equations/ElectronHeatTransportDiffusion.hpp"
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/Interpolator1D.hpp"
 
@@ -15,32 +15,41 @@
 using namespace DREAM;
 using namespace STREAM;
 
-
 /**
  * Constructor.
  */
 
-ElectronTransportDiffusion::ElectronTransportDiffusion(
+ElectronHeatTransportDiffusion::ElectronHeatTransportDiffusion(
     FVM::Grid *grid, enum OptionConstants::momentumgrid_type mgtype,
-    EllipticalRadialGridGenerator *radials, FVM::Interpolator1D *tauinv, FVM::UnknownQuantityHandler *unknowns
-) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) { //Rätt datatyper?
+    EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *unknowns
+) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) {
 
-    SetName("ElectronTransportDiffusion"); // Behövs?
+    SetName("ElectronHeatTransportDiffusion"); 
 
-    this->unknowns  = unknowns;
-    this->id_n_cold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
+    this->unknowns = unknowns;
+    this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
+    this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
+    this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
+    this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
+    this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
+    this->id_ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
     
     this->radials = radials;
     
-    AddUnknownForJacobian(unknowns, this->id_n_cold); // Behövs?
+    AddUnknownForJacobian(unknowns, this->id_ncold); 
+    AddUnknownForJacobian(unknowns, this->id_Ip);
+    AddUnknownForJacobian(unknowns, this->id_Iwall);
+    AddUnknownForJacobian(unknowns, this->id_Tcold);
+    AddUnknownForJacobian(unknowns, this->id_Wi); 
+    AddUnknownForJacobian(unknowns, this->id_ni);
 
-    AllocateDiffCoeff(); // Behövs?
+    AllocateDiffCoeff(); 
 }
 
 /**
  * Destructor.
  */
-ElectronTransportDiffusion::~ElectronTransportDiffusion() {
+ElectronHeatTransportDiffusion::~ElectronHeatTransportDiffusion() {
     delete this->coefftauinv;
     delete [] this->dtauinv;
 }
@@ -49,7 +58,7 @@ ElectronTransportDiffusion::~ElectronTransportDiffusion() {
 /**
  * Allocate memory for the differentiation coefficient.
  */
-void ElectronTransportDiffusion::AllocateDiffCoeff() {
+void ElectronHeatTransportDiffusion::AllocateDiffCoeff() {
     const len_t nr = this->grid->GetNr();
     this->dtauinv = new real_t[nr+1];
 }
@@ -57,7 +66,7 @@ void ElectronTransportDiffusion::AllocateDiffCoeff() {
 /**
  * Called whenever the grid is rebuilt.
  */
-bool ElectronTransportDiffusion::GridRebuilt() {
+bool ElectronHeatTransportDiffusion::GridRebuilt() {
     this->FVM::DiffusionTerm::GridRebuilt();
 
     delete [] this->dtauinv;
@@ -69,29 +78,38 @@ bool ElectronTransportDiffusion::GridRebuilt() {
 /**
  * Rebuild the coefficients for this equation term.
  */
-  // Korrekt?
-void ElectronTransportDiffusion::Rebuild(
-    const real_t t, const real_t, FVM::UnknownQuantityHandler *unknowns //, EllipticalRadialGridGenerator *radials Behövs denna
+ 
+void ElectronHeatTransportDiffusion::Rebuild(
+    const real_t t, const real_t, FVM::UnknownQuantityHandler *unknowns 
 ) {
-    real_t a = radials->GetMinorRadius()->Eval(t);
+    real_t a = radials->GetMinorRadius();
     
-    const real_t *tauinv = this->coefftauinv->Eval(t);
     const len_t nr = this->grid->GetNr();
 
-    const real_t *ncold = unknowns->GetUnknownData(this->id_n_cold);
+    const real_t *ncold = unknowns->GetUnknownData(this->id_ncold);
     
     for (len_t ir = 0; ir < nr+1; ir++) {
+        real_t *tauinv        = this->coefftauinv->EvaluateConfinementTime(ir, t); 
+        real_t *dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir, t); 
+        real_t *dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir, t); 
+        real_t *dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir, t); 
+        real_t *dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir, t); 
+        real_t *dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir, t);
+         
         real_t n=0;
         if(ir<nr)
             n += deltaRadialFlux[ir] * ncold[ir];
         if(ir>0)
             n += (1-deltaRadialFlux[ir]) * ncold[ir-1];
 
-        // Factor ec (=elementary charge) to convert from
-        // eV to joule
-        this->dtauinv[ir] = 3/2 * Constants::ec * a * a * tauinv[ir]; // Rätt?
+
+        this->dI_p[ir]    = a * a * dtauinvdIp[ir];
+        this->dI_wall[ir] = a * a * dtauinvdIwall[ir];
+        this->dT_cold[ir] = a * a * dtauinvdTcold[ir];
+        this->dW_i[ir]    = a * a * dtauinvdWi[ir];
+        this->dn_i[ir]    = a * a * dtauinvdni[ir];
         
-        M(ir, 0, 0) += 3/2 * Constants::ec * a * a * tauinv[ir] * n; // Rätt? Ska det vara M och inte Drr?
+        Drr(ir, 0, 0) += a * a * tauinv[ir];
     }
 }
 
@@ -102,17 +120,35 @@ void ElectronTransportDiffusion::Rebuild(
  *             be differentiated.
  * nMultiples: (not used).
  */
- // Korrekt?
-void ElectronTransportDiffusion::SetPartialDiffusionTerm(
+void ElectronHeatTransportDiffusion::SetPartialDiffusionTerm(
     len_t derivId, len_t
 ) {
-    if (derivId != this->id_n_cold)
+    if (derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_ni)
         return;
 
     ResetDifferentiationCoefficients();
-
+    
     const len_t nr = this->grid->GetNr();
-    for (len_t ir = 0; ir < nr+1; ir++)
-        dM(ir, 0, 0) = this->dtauinv[ir];
+    
+    if (derivId == id_Ip) {
+        for (len_t ir = 0; ir < nr+1; ir++)
+            dDrr(ir, 0, 0) = this->dI_p[ir];
+    }
+    else if (derivId == id_Iwall) {
+        for (len_t ir = 0; ir < nr+1; ir++)
+            dDrr(ir, 0, 0) = this->dI_wall[ir];
+    }
+    else if (derivId == id_Tcold) {
+        for (len_t ir = 0; ir < nr+1; ir++)
+            dDrr(ir, 0, 0) = this->dT_cold[ir];
+    }
+    else if (derivId == id_Wi) {
+        for (len_t ir = 0; ir < nr+1; ir++)
+            dDrr(ir, 0, 0) = this->dW_i[ir];
+    }
+    else if (derivId == id_ni) {
+        for (len_t ir = 0; ir < nr+1; ir++)
+            dDrr(ir, 0, 0) = this->dn_i[ir];
+    }
 }
 

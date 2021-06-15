@@ -8,31 +8,32 @@
 #include "FVM/UnknownQuantityHandler.hpp"
 
 namespace STREAM {
-    class ElectronTransportDiffusion : public DREAM::FVM::DiffusionTerm { //Ska vara subklass?
+    class ElectronHeatTransportDiffusion : public DREAM::FVM::DiffusionTerm {
     private:
         enum DREAM::OptionConstants::momentumgrid_type mgtype;
-        DREAM::FVM::Interpolator1D *coefftauinv; // Rätt implementation av 1/tau?
-
+        ConfinementTime *coefftauinv; 
         DREAM::FVM::UnknownQuantityHandler *unknowns;
         
         EllipticalRadialGridGenerator *radials;
 
         // Precomputed coefficient used for calculating
         // derivatives of the diffusion coefficient Drr...
-        real_t *dtauinv=nullptr;
+        real_t *dI_p=nullptr;
+        real_t *dI_wall=nullptr;
+        real_t *dT_cold=nullptr;
+        real_t *dW_i=nullptr;
+        real_t *dn_i=nullptr;
 
         // IDs of unknown quantities used by the operator...
-        len_t id_n_cold;
+        len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_ni;
 
-        /* Dessa behövs va? */
         void AllocateDiffCoeff(); 
         virtual void SetPartialDiffusionTerm(len_t, len_t) override;
 
     public:
-        ElectronTransportDiffusion(DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator*, DREAM::FVM::Interpolator1D*, DREAM::FVM::UnknownQuantityHandler*);
-        ~ElectronTransportDiffusion();
+        ElectronHeatTransportDiffusion(DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator*, ConfinementTime, DREAM::FVM::UnknownQuantityHandler*);
+        ~ElectronHeatTransportDiffusion();
 
-        /* Dessa behövs va? */
         virtual bool GridRebuilt() override;
         virtual void Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*) override;
     };
