@@ -8,35 +8,37 @@
 #include "FVM/Equation/DiffusionTerm.hpp"
 #include "FVM/Interpolator1D.hpp"
 #include "DREAM/MultiInterpolator1D.hpp"
+#include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
+#include "STREAM/Equations/ConfinementTime.hpp"
 
 namespace STREAM {
 	class IonTransportDiffusion : public DREAM::IonChargedAdvectionDiffusionTerm</*DREAM:: /*?*/ */FVM::DiffusionTerm> {
 	private:
-		DREAM::FVM::Interpolator1D *coefftauinv; // Rätt implementation av 1/tau?
-		//FVM::Interpolator1D *dBOverB; // Behövs?
-		FVM::MultiInterpolator1D *DrrHat; // Behövs?
+        ConfinementTime *coefftauinv; 
+		DREAM::IonHandler *ions;
+		DREAM::FVM::UnknownQuantityHandler *unknowns;
+        EllipticalRadialGridGenerator *radials;
 		
 		// Behövs dessa?
-		real_t **dDrrdni;
-		real_t **dDrrdWi;
-		real_t **dDrrdNi;
-		//real_t **dDrrdTcold; // Behövs?
+        real_t *dI_p=nullptr;
+        real_t *dI_wall=nullptr;
+        real_t *dT_cold=nullptr;
+        real_t *dW_i=nullptr;
+        real_t *dn_i=nullptr; // All ions
 		
-		len_t id_ni, id_Wi, id_Ni;
+		len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_ni;
 		
 		void Allocate();
 		void Deallocate();
 
 	protected:
-		virtual void SetCoeffs(const len_t Z0) override; // Behövs?
-		virtual void SetCoeffsAllCS(const real_t dt) override; // Behövs?
-		virtual void SetDiffCoeffsAllCS(const real_t t) override; // Behövs?
+		virtual void SetCoeffs(const len_t Z0) override; 
 		virtual void SetPartialDiffusionTerm(len_t /*derivId*/, len_t /*nMultiples*/) override;
 		
 	public:
 		IonTransportDiffusion(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, bool allocCoefficients, const len_t iIon, 
-			DREAM::FVM::Interpolator1D*,DREAM::FVM::MultiInterpolator1D* /* Behövs?*/,  FVM::UnknownQuantityHandler *u);
+			ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *u);
 		~IonTransportDiffusion();
 	}
 }
-#endif/*_STREAM_EQUATIONs_ION_TRANSPORT_DIFFUSION_HPP*/
+#endif/*_STREAM_EQUATIONS_ION_TRANSPORT_DIFFUSION_HPP*/

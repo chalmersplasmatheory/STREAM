@@ -8,120 +8,158 @@
 using namespace DREAM;
 using namespace STREAM;
 
+/**
+ * Constructor.
+ */
 IonTransportDiffusion::IonTransportDiffusion(FVM::Grid *g, IonHandler *ihdl, bool allocCoefficients,
-	const len_t iIon, FVM::Interpolator1D* coefftauinv, FVM::MultiInterpolator1D* DrrHat, FVM::UnknownQuantityHandler *u
-	) : IonChargedAdvectionDiffusionTerm<FVM::DiffusionTerm>(g, ihdl, iIon, allocCoefficients), coefftauinv(coefftauinv), DrrHat(DrrHat) {
+	const len_t *iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u
+	) : IonChargedAdvectionDiffusionTerm<FVM::DiffusionTerm>(g, ihdl, iIon, allocCoefficients), coefftauinv(tauinv), ions(ihdl) {
 	
-    SetName("IonTransportsDiffusion");
+    SetName("IonTransportDiffusion");
 
-    this->id_ni = u->GetUnknownID(OptionConstants::UQTY_ION_SPECIES);
-    AddUnknownForJacobian(u, id_ni);
+    this->unknowns = unknowns;
+    this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
+    this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
+    this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
+    this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
+    this->id_ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
     
-    this->id_Wi = u->GetUnknownID(OptionConstants::UQTY_WI_ENER);
-    AddUnknownForJacobian(u, id_Wi);
+    this->radials = radials;
     
-    this->id_Ni = u->GetUnknownID(OptionConstants::UQTY_NI_DENS);
-    AddUnknownForJacobian(u, id_Ni);
+    AddUnknownForJacobian(unknowns, this->id_Ip);
+    AddUnknownForJacobian(unknowns, this->id_Iwall);
+    AddUnknownForJacobian(unknowns, this->id_Tcold);
+    AddUnknownForJacobian(unknowns, this->id_Wi); 
+    AddUnknownForJacobian(unknowns, this->id_ni);
 	
 	Allocate();
 }
 
+/**
+ * Destructor.
+ */
 IonTransportDiffusion::~IonTransportDiffusion(){
 	Deallocate();
 }
 
-void IonChargedDiffusionStochasticBTerm::Allocate(){
+/**
+ * Allocate memory for the differentiation coefficient.
+ */
+void IonTransportDiffusion::Allocate(){
     Deallocate();
     
     len_t nzs=ions->GetNzs();
 
     const len_t nr = this->grid->GetNr();
 
-	// Derivatives wrt ion (charge state) densities
-    this->dDrrdni = new real_t*[Zion];
+    this->dI_p = new real_t[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        this->dDrrdni[Z0-1] = new real_t[(nr+1)*nzs];
-        
-    // Derivatives wrt ion thermal energy (of this species only)
-    this->dDrrdWi = new real_t*[Zion];
+        this->dI_p[Z0-1] = new real_t[(nr+1)];
+    
+    this->dI_wall = new real_t[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        this->dDrrdWi[Z0-1] = new real_t[(nr+1)];
-        
-    // Derivatives wrt the total ion density (of this species only)
-    this->dDrrdNi = new real_t*[Zion];
+        this->dI_wall[Z0-1] = new real_t[(nr+1)];
+    
+    this->dT_cold = new real_t[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        this->dDrrdNi[Z0-1] = new real_t[(nr+1)];
+        this->dT_cold[Z0-1] = new real_t[(nr+1)];
+    
+    this->dW_i = new real_t[Zion];
+    for(len_t Z0=1; Z0<=Zion; Z0++)
+        this->dW_i[Z0-1] = new real_t[(nr+1)];
+    
+    this->dn_i = new real_t[Zion];
+    for(len_t Z0=1; Z0<=Zion; Z0++)
+        this->dn_i[Z0-1] = new real_t[(nr+1)];
 }
 
-void IonChargedDiffusionStochasticBTerm::Deallocate(){
+void IonTransportDiffusion::Deallocate(){
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        delete [] this->dDrrdni[Z0-1];
-    delete [] this->dDrrdni;
+        delete [] this->dI_p[Z0-1];
+    delete [] this->dI_p;
     
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        delete [] this->dDrrdWi[Z0-1];
-    delete [] this->dDrrdWi;
+        delete [] this->dI_wall;
+    delete [] this->dI_wall;
     
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        delete [] this->dDrrdNi[Z0-1];
-    delete [] this->dDrrdNi;
-}
+        delete [] this->dT_cold;
+    delete [] this->dT_cold;
+    
+    for(len_t Z0=1; Z0<=Zion; Z0++)
+        delete [] this->dW_i;
+    delete [] this->dW_i;
+    
+    for(len_t Z0=1; Z0<=Zion; Z0++)
+        delete [] this->dn_i;
+    delete [] this->dn_i;
 
-/*
-void IonTransportDiffusion::SetCoeffsAllCS(const real_t t){
 }
-
-void IonTransportDiffusion::SetDiffCoeffsAllCS(const real_t t){
-}
-*/
 
 void IonTransportDiffusion::SetCoeffs(const len_t Z0){
 	if(Z0<1)
 		return;
 	
-	real_t a = radials->GetMinorRadius()->Eval(t);
-    const real_t *tauinv = this->coefftauinv->Eval(t);
-	const len_t nr = this->g->GetNr();
-	const real_t *W_i = unknowns->GetUnknownData(this->id_Wi); // Hitta W_i, eller T_i och n_i för givet Z0??
-    const real_t *N_i = unknowns->GetUnknownData(this->id_Ni);
-	//const real_t *T_i = 2/3*W_i/N_i;
-	for(ir=0; ir<nr+1; ir++)
-        // Fel interpolation va?
-    	real_t T=0; 
-    	real_t n=0; 
-        if(ir<nr)
-            //T += deltaRadialFlux[ir] * T_i[ir];
-            //n= += deltaRadialFlux[ir] * n_i[Z0,ir];
-            n += deltaRadialFlux[ir] * n_i[ir];
-            W += deltaRadialFlux[ir] * W_i[ir];
-        if(ir>0)
-            //T += (1-deltaRadialFlux[ir]) * T_i[ir-1];
-            //n += (1-deltaRadialFlux[ir]) * n_i[Z0,ir-1];
-            n += (1-deltaRadialFlux[ir]) * n_i[ir-1];
-            W += (1-deltaRadialFlux[ir]) * W_i[ir-1];
-		Drr(ir,0,0)+=3/2 * W / n * a * a * tauinv; // Ska den vara en operator på T_i eller n_i eller något annat?
+	real_t a = radials->GetMinorRadius();
+	
+	const len_t nr = this->grid->GetNr();
+	
+    for(ir=0; ir<nr+1; ir++){
+	    real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir, t); 
+        real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir, t); 
+        real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir, t); 
+        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir, t); 
+        real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir, t); 
+        real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir, t);
+        
+        // Ska det vara d...[Z0-1][ir] eller bara d...[ir]?
+        this->dI_p[Z0-1][ir]    = a * a * dtauinvdIp;
+        this->dI_wall[Z0-1][ir] = a * a * dtauinvdIwall;
+        this->dT_cold[Z0-1][ir] = a * a * dtauinvdTcold;
+        this->dW_i[Z0-1][ir]    = a * a * dtauinvdWi;
+        this->dn_i[Z0-1][ir]    = a * a * dtauinvdni;
 		
-		dDrrdni[Z0]+=-3/2 * W / (n * n) * a * a * tauinv;
-		
-		dDrrdWi[Z0]=+=3/2 * 1 / n * a * a * tauinv;
+		Drr(ir,0,0) += a * a * tauinv * n_i; 
+	}
+
 }
 
 
 void IonTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMultiples){
-	if(derivId==id_ni)
-		for(n=0; n<nMultiples; n++)
-			for(ir=0; ir<nr+1; ir++)
-				dDrr(ir,0,0,n)=dDrrdni[Z0ForPartials-1][ir+nr*n]
-				
-	if(derivId==id_Wi)
+	if (derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_ni)
+        return;
+    
+    // ResetDifferentiationCoefficients(); //Ska vara med?
+    
+    const len_t nr = this->grid->GetNr();
+	
+	if(derivId==id_Ip)
 		for(n=0; n<nMultiples; n++)
 			if(n==iIon)
 				for(ir=0; ir<nr+1; ir++)
-					dDrr(ir,0,0,n)=dDrrdWi[Z0ForPartials-1][ir]	
+					dDrr(ir,0,0,n)=dI_p[Z0ForPartials-1][ir]	
 					
-	if(derivId==id_Ni)
+	else if(derivId==id_Iwall)
 		for(n=0; n<nMultiples; n++)
 			if(n==iIon)
 				for(ir=0; ir<nr+1; ir++)
-					dDrr(ir,0,0,n)=dDrrdNi[Z0ForPartials-1][ir]			
+					dDrr(ir,0,0,n)=dI_wall[Z0ForPartials-1][ir]	
+	
+	else if(derivId==id_Tcold)
+		for(n=0; n<nMultiples; n++)
+			if(n==iIon)
+				for(ir=0; ir<nr+1; ir++)
+					dDrr(ir,0,0,n)=dTcold[Z0ForPartials-1][ir]	
+				
+	else if(derivId==id_Wi)
+		for(n=0; n<nMultiples; n++)
+			if(n==iIon)
+				for(ir=0; ir<nr+1; ir++)
+					dDrr(ir,0,0,n)=dW_i[Z0ForPartials-1][ir]	
+					
+	else if(derivId==id_ni)
+		for(n=0; n<nMultiples; n++)
+			if(n==iIon)
+				for(ir=0; ir<nr+1; ir++)
+					dDrr(ir,0,0,n)=dn_i[Z0ForPartials-1][ir]		
 }
