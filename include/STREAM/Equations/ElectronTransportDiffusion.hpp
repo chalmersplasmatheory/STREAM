@@ -6,6 +6,8 @@
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/Interpolator1D.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
+#include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
+#include "STREAM/Equations/ConfinementTime.hpp"
 
 namespace STREAM {
     class ElectronTransportDiffusion : public DREAM::FVM::DiffusionTerm {
@@ -31,11 +33,15 @@ namespace STREAM {
         virtual void SetPartialDiffusionTerm(len_t, len_t) override;
 
     public:
-        ElectronTransportDiffusion(DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator*, ConfinementTime, DREAM::FVM::UnknownQuantityHandler*);
+        ElectronTransportDiffusion(
+    DREAM::FVM::Grid *grid, enum DREAM::OptionConstants::momentumgrid_type mgtype,
+    EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *unknowns
+);
+        //(DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, EllipticalRadialGridGenerator*, ConfinementTime, DREAM::FVM::UnknownQuantityHandler*);
         ~ElectronTransportDiffusion();
 
         virtual bool GridRebuilt() override;
-        virtual void Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*) override;
+        virtual void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*) override;
     };
 }
 

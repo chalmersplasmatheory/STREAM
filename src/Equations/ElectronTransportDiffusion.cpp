@@ -27,7 +27,6 @@ ElectronTransportDiffusion::ElectronTransportDiffusion(
     SetName("ElectronTransportDiffusion"); 
 
     this->unknowns = unknowns;
-    this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
     this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
     this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
@@ -36,7 +35,6 @@ ElectronTransportDiffusion::ElectronTransportDiffusion(
     
     this->radials = radials;
     
-    AddUnknownForJacobian(unknowns, this->id_ncold); 
     AddUnknownForJacobian(unknowns, this->id_Ip);
     AddUnknownForJacobian(unknowns, this->id_Iwall);
     AddUnknownForJacobian(unknowns, this->id_Tcold);
@@ -51,7 +49,11 @@ ElectronTransportDiffusion::ElectronTransportDiffusion(
  */
 ElectronTransportDiffusion::~ElectronTransportDiffusion() {
     delete this->coefftauinv;
-    delete [] this->dtauinv;
+    delete [] this->dI_p;
+    delete [] this->dI_wall;
+    delete [] this->dT_cold;
+    delete [] this->dW_i;
+    delete [] this->dn_i;
 }
 
 
@@ -60,7 +62,11 @@ ElectronTransportDiffusion::~ElectronTransportDiffusion() {
  */
 void ElectronTransportDiffusion::AllocateDiffCoeff() {
     const len_t nr = this->grid->GetNr();
-    this->dtauinv = new real_t[nr+1];
+    this->dI_p = new real_t[nr+1];
+    this->dI_wall = new real_t[nr+1];
+    this->dT_cold = new real_t[nr+1];
+    this->dW_i = new real_t[nr+1];
+    this->dn_i = new real_t[nr+1];
 }
 
 /**
@@ -69,7 +75,11 @@ void ElectronTransportDiffusion::AllocateDiffCoeff() {
 bool ElectronTransportDiffusion::GridRebuilt() {
     this->FVM::DiffusionTerm::GridRebuilt();
 
-    delete [] this->dtauinv;
+    delete [] this->dI_p;
+    delete [] this->dI_wall;
+    delete [] this->dT_cold;
+    delete [] this->dW_i;
+    delete [] this->dn_i;
     AllocateDiffCoeff();
     
     return true;
@@ -85,31 +95,24 @@ void ElectronTransportDiffusion::Rebuild(
     real_t a = radials->GetMinorRadius();
     
     const len_t nr = this->grid->GetNr();
-
-    const real_t *ncold = unknowns->GetUnknownData(this->id_ncold);
     
     for (len_t ir = 0; ir < nr+1; ir++) {
-        real_t *tauinv        = this->coefftauinv->EvaluateConfinementTime(ir, t); 
-        real_t *dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir, t); 
-        real_t *dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir, t); 
-        real_t *dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir, t); 
-        real_t *dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir, t); 
-        real_t *dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir, t);
+        real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir, t); 
+        real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir, t); 
+        real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir, t); 
+        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir, t); 
+        real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir, t); 
+        real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir, t);
          
-        real_t n=0;
-        if(ir<nr)
-            n += deltaRadialFlux[ir] * ncold[ir];
-        if(ir>0)
-            n += (1-deltaRadialFlux[ir]) * ncold[ir-1];
 
 
-        this->dI_p[ir]    = a * a * dtauinvdIp[ir];
-        this->dI_wall[ir] = a * a * dtauinvdIwall[ir];
-        this->dT_cold[ir] = a * a * dtauinvdTcold[ir];
-        this->dW_i[ir]    = a * a * dtauinvdWi[ir];
-        this->dn_i[ir]    = a * a * dtauinvdni[ir];
+        this->dI_p[ir]    = a * a * dtauinvdIp;
+        this->dI_wall[ir] = a * a * dtauinvdIwall;
+        this->dT_cold[ir] = a * a * dtauinvdTcold;
+        this->dW_i[ir]    = a * a * dtauinvdWi;
+        this->dn_i[ir]    = a * a * dtauinvdni;
         
-        Drr(ir, 0, 0) += a * a * tauinv[ir];
+        Drr(ir, 0, 0) += a * a * tauinv;
     }
 }
 
