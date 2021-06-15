@@ -114,7 +114,7 @@ void ElectronHeatTransportDiffusion::Rebuild(
         this->dW_i[ir]    = 3/2 * Constants::ec * a * a * dtauinvdWi * n;
         this->dn_i[ir]    = 3/2 * Constants::ec * a * a * dtauinvdni * n;
         
-        Drr(ir, 0, 0) += 3/2 * Constants::ec * a * a * tauinv[ir] * n; 
+        Drr(ir, 0, 0) += 3/2 * Constants::ec * a * a * tauinv * n; 
     }
 }
 

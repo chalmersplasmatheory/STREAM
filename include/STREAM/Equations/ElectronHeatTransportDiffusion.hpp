@@ -38,7 +38,7 @@ namespace STREAM {
         ~ElectronHeatTransportDiffusion();
 
         virtual bool GridRebuilt() override;
-        virtual void Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*) override;
+        virtual void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*) override;
     };
 }
 
