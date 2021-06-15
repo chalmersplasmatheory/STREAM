@@ -12,7 +12,6 @@ using namespace std;
 /**
  * Constructor
  */
- /* ta in speciellt radial grid? Ta object av typen EllipticalRadialGridGenerator Interpolator1D eval(t) */
 ConfinementTime::ConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2) {
     unknowns = u;
     radials  = r;
@@ -29,7 +28,6 @@ ConfinementTime::ConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadia
 /**
  * Evaluates the inverted confinement time
  */
-
 real_t ConfinementTime::EvaluateConfinementTime(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -46,7 +44,6 @@ real_t ConfinementTime::EvaluateConfinementTime(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the plasma current
  */
-
 real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -63,7 +60,6 @@ real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the wall current
  */
-
 real_t ConfinementTime::EvaluateConfinementTime_dIwall(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -81,7 +77,6 @@ real_t ConfinementTime::EvaluateConfinementTime_dIwall(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the electron temperature
  */
-
 real_t ConfinementTime::EvaluateConfinementTime_dTe(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -98,7 +93,6 @@ real_t ConfinementTime::EvaluateConfinementTime_dTe(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the ion energy
  */
-
 real_t ConfinementTime::EvaluateConfinementTime_dWi(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -115,7 +109,6 @@ real_t ConfinementTime::EvaluateConfinementTime_dWi(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the ion density
  */
-
 real_t ConfinementTime::EvaluateConfinementTime_dni(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -134,7 +127,6 @@ real_t ConfinementTime::EvaluateConfinementTime_dni(len_t ir, real_t t){
 /**
  * Evaluates the confinement time
  * /
-
 real_t ConfinementTime::EvaluateConfinementTime(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -151,7 +143,6 @@ real_t ConfinementTime::EvaluateConfinementTime(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the confinement time with respect to the plasma current
  * /
-
 real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -168,7 +159,6 @@ real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the confinement time with respect to the wall current
  * /
-
 real_t ConfinementTime::EvaluateConfinementTime_dIwall(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -186,7 +176,6 @@ real_t ConfinementTime::EvaluateConfinementTime_dIwall(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the confinement time with respect to the electron temperature
  * /
-
 real_t ConfinementTime::EvaluateConfinementTime_dTe(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -203,7 +192,6 @@ real_t ConfinementTime::EvaluateConfinementTime_dTe(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the confinement time with respect to the ion energy
  * /
-
 real_t ConfinementTime::EvaluateConfinementTime_dWi(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
@@ -220,7 +208,6 @@ real_t ConfinementTime::EvaluateConfinementTime_dWi(len_t ir, real_t t){
 /**
  * Evaluates the derivative of the confinement time with respect to the ion density
  * /
-
 real_t ConfinementTime::EvaluateConfinementTime_dni(len_t ir, real_t t){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
