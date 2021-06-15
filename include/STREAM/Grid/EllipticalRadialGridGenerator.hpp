@@ -52,6 +52,10 @@ namespace STREAM {
         real_t FindClosestApproach(
             real_t, real_t, real_t, real_t, real_t, real_t
         );
+        
+        real_t GetMinorRadius(){ return currA; }
+        
+        real_t GetMagneticField(){ return currB0; }
     };
 }
 
