@@ -1,15 +1,6 @@
-/**
- * Implementation of a transport operator taking the form
- *
- *   
- *
- * This operator should be applied to 'T_cold'.
- */
-
 #include "DREAM/Constants.hpp"
 #include "STREAM/Equations/ElectronTransportDiffusion.hpp"
 #include "FVM/Grid/Grid.hpp"
-#include "FVM/Interpolator1D.hpp"
 
 
 using namespace DREAM;
@@ -88,7 +79,6 @@ bool ElectronTransportDiffusion::GridRebuilt() {
 /**
  * Rebuild the coefficients for this equation term.
  */
- 
 void ElectronTransportDiffusion::Rebuild(
     const real_t t, const real_t, FVM::UnknownQuantityHandler *unknowns 
 ) {
