@@ -1,10 +1,9 @@
-#ifndef _STREAM_EQUATIONS_ELECTRON_TRANSPORT_DIFFUSION_HPP
-#define _STREAM_EQUATIONS_ELECTRON_TRANSPORT_DIFFUSION_HPP
+#ifndef _STREAM_EQUATIONS_ELECTRON_HEAT_TRANSPORT_DIFFUSION_HPP
+#define _STREAM_EQUATIONS_ELECTRON_HEAT_TRANSPORT_DIFFUSION_HPP
 
 #include "DREAM/Settings/OptionConstants.hpp"
 #include "FVM/Equation/DiffusionTerm.hpp"
 #include "FVM/Grid/Grid.hpp"
-#include "FVM/Interpolator1D.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
