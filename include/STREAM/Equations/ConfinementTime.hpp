@@ -6,6 +6,7 @@
 #include "DREAM/Settings/OptionConstants.hpp"
 #include <gsl/gsl_math.h>
 #include "DREAM/Constants.hpp"
+#include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 
 
 
@@ -41,6 +42,7 @@ namespace STREAM{
                         real_t EvaluateConfinementTime_dWi(len_t ir, real_t t);
                         
                         real_t EvaluateConfinementTime_dni(len_t ir, real_t t);
+    };
 }
 
 #endif/*_STREAM_EQUATION_CONFINEMENT_TIME_HPP */
