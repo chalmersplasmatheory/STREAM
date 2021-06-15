@@ -13,7 +13,7 @@ using namespace STREAM;
 ElectronHeatTransportDiffusion::ElectronHeatTransportDiffusion(
     FVM::Grid *grid, enum OptionConstants::momentumgrid_type mgtype,
     EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *unknowns
-) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) { //Rätt datatyper?
+) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) { 
 
     SetName("ElectronHeatTransportDiffusion"); // Behövs?
 

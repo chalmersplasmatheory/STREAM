@@ -12,14 +12,13 @@
 #include "STREAM/Equations/ConfinementTime.hpp"
 
 namespace STREAM {
-	class IonTransportDiffusion : public DREAM::IonChargedAdvectionDiffusionTerm</*DREAM:: /*?*/ */FVM::DiffusionTerm> {
+	class IonTransportDiffusion : public DREAM::IonChargedAdvectionDiffusionTerm<DREAM::FVM::DiffusionTerm> {
 	private:
         ConfinementTime *coefftauinv; 
 		DREAM::IonHandler *ions;
 		DREAM::FVM::UnknownQuantityHandler *unknowns;
         EllipticalRadialGridGenerator *radials;
 		
-		// Behövs dessa?
         real_t *dI_p=nullptr;
         real_t *dI_wall=nullptr;
         real_t *dT_cold=nullptr;
