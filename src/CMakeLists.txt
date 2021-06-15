@@ -8,6 +8,7 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Settings/Ions.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/Process.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ConfinementTime.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/ElectronTransportDiffusion.cpp"
 )
 
 add_library(stream STATIC ${stream})
