@@ -15,7 +15,6 @@ namespace STREAM {
         enum DREAM::OptionConstants::momentumgrid_type mgtype;
         ConfinementTime *coefftauinv; 
         DREAM::FVM::UnknownQuantityHandler *unknowns;
-        
         EllipticalRadialGridGenerator *radials;
 
         // Precomputed coefficient used for calculating
