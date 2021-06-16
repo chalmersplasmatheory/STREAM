@@ -28,11 +28,13 @@ namespace STREAM {
 		real_t tauinv;//, n_i; // Bra?
 		
 	public:
-		IonTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl,/* bool allocCoefficients,*/ const len_t iIon, 
+		IonTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl,/* bool allocCoefficients,*/ const len_t iIon, len_t iz,
 			ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *u);
 		~IonTransport();
+		
+        void IonTransport::Allocate();
         
-        void ElectronHeatTransportDiffusion::Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*)
+        void IonTransport::Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*)
 
 		virtual bool SetCSJacobianBlock(
             const len_t, const len_t, FVM::Matrix*, const real_t*,
