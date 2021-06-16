@@ -1,6 +1,6 @@
 #include "DREAM/Constants.hpp"
 #include "DREAM/Equations/Fluid/IonChargedAdvectionDiffusionTerm.hpp"
-#include "DREAM/Equations/Fluid/IonTransportDiffusion.hpp"
+#include "STREAM/Equations/IonTransportDiffusion.hpp"
 #include "DREAM/IonHandler.hpp"
 #include "DREAM/NotImplementedException.hpp"
 #include "FVM/Grid/Grid.hpp"
@@ -12,12 +12,12 @@ using namespace STREAM;
  * Constructor.
  */
 IonTransportDiffusion::IonTransportDiffusion(FVM::Grid *g, IonHandler *ihdl, bool allocCoefficients,
-	const len_t *iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u
+	const len_t iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u
 	) : IonChargedAdvectionDiffusionTerm<FVM::DiffusionTerm>(g, ihdl, iIon, allocCoefficients), coefftauinv(tauinv), ions(ihdl) {
 	
     SetName("IonTransportDiffusion");
 
-    this->unknowns = unknowns;
+    this->unknowns = u;
     this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
     this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
@@ -48,27 +48,27 @@ IonTransportDiffusion::~IonTransportDiffusion(){
 void IonTransportDiffusion::Allocate(){
     Deallocate();
     
-    len_t nzs=ions->GetNzs();
+    //len_t nzs=ions->GetNzs();
 
     const len_t nr = this->grid->GetNr();
 
-    this->dI_p = new real_t[Zion];
+    this->dI_p = new real_t*[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
         this->dI_p[Z0-1] = new real_t[(nr+1)];
     
-    this->dI_wall = new real_t[Zion];
+    this->dI_wall = new real_t*[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
         this->dI_wall[Z0-1] = new real_t[(nr+1)];
     
-    this->dT_cold = new real_t[Zion];
+    this->dT_cold = new real_t*[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
         this->dT_cold[Z0-1] = new real_t[(nr+1)];
     
-    this->dW_i = new real_t[Zion];
+    this->dW_i = new real_t*[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
         this->dW_i[Z0-1] = new real_t[(nr+1)];
     
-    this->dn_i = new real_t[Zion];
+    this->dn_i = new real_t*[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
         this->dn_i[Z0-1] = new real_t[(nr+1)];
 }
@@ -96,7 +96,7 @@ void IonTransportDiffusion::Deallocate(){
 
 }
 
-void IonTransportDiffusion::SetCoeffs(const len_t Z0){
+void IonTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t t){ // Måste ha en t här
 	if(Z0<1)
 		return;
 	
@@ -104,7 +104,7 @@ void IonTransportDiffusion::SetCoeffs(const len_t Z0){
 	
 	const len_t nr = this->grid->GetNr();
 	
-    for(ir=0; ir<nr+1; ir++){
+    for(len_t ir=0; ir<nr+1; ir++){
 	    real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir, t); 
         real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir, t); 
         real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir, t); 
@@ -119,7 +119,7 @@ void IonTransportDiffusion::SetCoeffs(const len_t Z0){
         this->dW_i[Z0-1][ir]    = a * a * dtauinvdWi;
         this->dn_i[Z0-1][ir]    = a * a * dtauinvdni;
 		
-		Drr(ir,0,0) += a * a * tauinv * n_i; 
+		Drr(ir,0,0) += a * a * tauinv; 
 	}
 
 }
@@ -133,33 +133,53 @@ void IonTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMultip
     
     const len_t nr = this->grid->GetNr();
 	
-	if(derivId==id_Ip)
-		for(n=0; n<nMultiples; n++)
-			if(n==iIon)
-				for(ir=0; ir<nr+1; ir++)
-					dDrr(ir,0,0,n)=dI_p[Z0ForPartials-1][ir]	
+	if(derivId==id_Ip){
+		for(len_t  n=0; n<nMultiples; n++){
+			if(n==iIon){
+				for(len_t ir=0; ir<nr+1; ir++){
+					dDrr(ir,0,0,n)=dI_p[Z0ForPartials-1][ir];
+	            }
+	        }
+	    }
+	}	
 					
-	else if(derivId==id_Iwall)
-		for(n=0; n<nMultiples; n++)
-			if(n==iIon)
-				for(ir=0; ir<nr+1; ir++)
-					dDrr(ir,0,0,n)=dI_wall[Z0ForPartials-1][ir]	
+	else if(derivId==id_Iwall){
+		for(len_t  n=0; n<nMultiples; n++){
+			if(n==iIon){
+				for(len_t ir=0; ir<nr+1; ir++){
+					dDrr(ir,0,0,n)=dI_wall[Z0ForPartials-1][ir];
+	            }
+	        }
+	    }
+	}
 	
-	else if(derivId==id_Tcold)
-		for(n=0; n<nMultiples; n++)
-			if(n==iIon)
-				for(ir=0; ir<nr+1; ir++)
-					dDrr(ir,0,0,n)=dTcold[Z0ForPartials-1][ir]	
+	else if(derivId==id_Tcold){
+		for(len_t  n=0; n<nMultiples; n++){
+			if(n==iIon){
+				for(len_t ir=0; ir<nr+1; ir++){
+					dDrr(ir,0,0,n)=dT_cold[Z0ForPartials-1][ir];
+	            }
+	        }
+	    }
+	}
 				
-	else if(derivId==id_Wi)
-		for(n=0; n<nMultiples; n++)
-			if(n==iIon)
-				for(ir=0; ir<nr+1; ir++)
-					dDrr(ir,0,0,n)=dW_i[Z0ForPartials-1][ir]	
+	else if(derivId==id_Wi){
+		for(len_t n=0; n<nMultiples; n++){
+			if(n==iIon){
+				for(len_t ir=0; ir<nr+1; ir++){
+					dDrr(ir,0,0,n)=dW_i[Z0ForPartials-1][ir];	
+	            }
+	        }
+	    }
+	}
 					
-	else if(derivId==id_ni)
-		for(n=0; n<nMultiples; n++)
-			if(n==iIon)
-				for(ir=0; ir<nr+1; ir++)
-					dDrr(ir,0,0,n)=dn_i[Z0ForPartials-1][ir]		
+	else if(derivId==id_ni){
+		for(len_t  n=0; n<nMultiples; n++){
+			if(n==iIon){
+				for(len_t ir=0; ir<nr+1; ir++){
+					dDrr(ir,0,0,n)=dn_i[Z0ForPartials-1][ir];		
+	            }
+	        }
+	    }
+	}
 }
