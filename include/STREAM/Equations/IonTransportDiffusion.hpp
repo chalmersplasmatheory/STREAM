@@ -6,8 +6,7 @@
 #include "DREAM/IonHandler.hpp"
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/Equation/DiffusionTerm.hpp"
-#include "FVM/Interpolator1D.hpp"
-#include "DREAM/MultiInterpolator1D.hpp"
+#include "FVM/UnknownQuantityHandler.hpp"
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
 
@@ -19,19 +18,19 @@ namespace STREAM {
 		    DREAM::FVM::UnknownQuantityHandler *unknowns;
             EllipticalRadialGridGenerator *radials;
 		    
-            real_t **dI_p;//=nullptr;
-            real_t **dI_wall;//=nullptr;
-            real_t **dT_cold;//=nullptr;
-            real_t **dW_i;//=nullptr;
-            real_t **dn_i;//=nullptr; // All ions
-		    
+            real_t **dI_p;
+            real_t **dI_wall;
+            real_t **dT_cold;
+            real_t **dW_i;
+            real_t **dn_i;
+            
 		    len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_ni;
 		    
 		    void Allocate();
 		    void Deallocate();
 
 	    protected:
-		    virtual void SetDiffusionTerm(const len_t Z0, real_t t);// override; 
+		    virtual void SetDiffusionTerm(const len_t Z0, real_t t);
 		    virtual void SetPartialDiffusionTerm(len_t /*derivId*/, len_t /*nMultiples*/) override;
 		    
 	    public:
