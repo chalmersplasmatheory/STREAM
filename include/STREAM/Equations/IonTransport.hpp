@@ -1,13 +1,10 @@
 #ifndef _STREAM_EQUATIONS_ION_TRANSPORT_HPP
 #define _STREAM_EQUATIONS_ION_TRANSPORT_HPP
 
-#include "DREAM/Equations/Fluid/IonChargedAdvectionDiffusionTerm.hpp"
 #include "DREAM/Equations/Fluid/IonEquationTerm.hpp"
 #include "DREAM/IonHandler.hpp"
 #include "FVM/Grid/Grid.hpp"
-#include "FVM/Equation/DiffusionTerm.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
-#include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
 
 namespace STREAM {
@@ -16,7 +13,6 @@ namespace STREAM {
 	    ConfinementTime *coefftauinv; 
 		DREAM::IonHandler *ions;
 		DREAM::FVM::UnknownQuantityHandler *unknowns;
-        //EllipticalRadialGridGenerator *radials;
 		
 		/* Behövs inte va?
 		real_t *dIS;//=nullptr; // Ion species
