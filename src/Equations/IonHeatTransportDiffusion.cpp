@@ -157,7 +157,7 @@ void IonHeatTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMu
 	else if(derivId==id_Ip){
 		for(len_t  n=0; n<nMultiples; n++){
 			if(n==iIon){
-				for(len_t  ir=0; ir<nr+1; ir++)[
+				for(len_t  ir=0; ir<nr+1; ir++){
 					dDrr(ir,0,0,n)=dI_p[Z0ForPartials-1][ir];
 	            }
 	        }
@@ -178,7 +178,7 @@ void IonHeatTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMu
 		for(len_t  n=0; n<nMultiples; n++){
 			if(n==iIon){
 				for(len_t  ir=0; ir<nr+1; ir++){
-					dDrr(ir,0,0,n)=dTcold[Z0ForPartials-1][ir];
+					dDrr(ir,0,0,n)=dT_cold[Z0ForPartials-1][ir];
 	            }
 	        }
 	    }
