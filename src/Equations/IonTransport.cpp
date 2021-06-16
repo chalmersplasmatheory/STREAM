@@ -10,9 +10,9 @@ using namespace STREAM;
 /**
  * Constructor.
  */
-IonTransport::IonTransport(FVM::Grid *g, IonHandler *ihdl, bool allocCoefficients,
+IonTransport::IonTransport(FVM::Grid *g, IonHandler *ihdl/*, bool allocCoefficients*/, len_t iz,
 	const len_t iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u
-	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon, allocCoefficients), coefftauinv(tauinv), ions(ihdl) {
+	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon, allocCoefficients), coefftauinv(tauinv), ions(ihdl), iz(iz) {
 	
     SetName("IonTransport");
 
@@ -23,50 +23,77 @@ IonTransport::IonTransport(FVM::Grid *g, IonHandler *ihdl, bool allocCoefficient
     this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
     this->id_ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
     
-    tauinv = coefftauinv->EvaluateConfinementTime(0, t); 
-    n_i    = ions->GetIonDensity(ir, iIon, Z0);
-
-    
-	//Allocate();
+	Allocate();
 }
 
 /**
  * Destructor.
  */
-IonTransport::~IonTransport(){}
+IonTransport::~IonTransport() {
+    delete this->tauinv;
+    delete this->dI_p;
+    delete this->dI_wall;
+    delete this->dT_cold;
+    delete this->dW_i;
+    delete this->dn_i;
+    delete this->dIS;
+}
+
+
+/**
+ * Allocate memory for the differentiation coefficient.
+ */
+void IonTransport::Allocate() {
+    this->tauinv = new real_t*;
+    this->dI_p = new real_t*;
+    this->dI_wall = new real_t*;
+    this->dT_cold = new real_t*;
+    this->dW_i = new real_t*;
+    this->dn_i = new real_t*;
+}
+
+void IonTransport::Rebuild(
+    const real_t t, const real_t, FVM::UnknownQuantityHandler* 
+) {
+    
+    real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0, t); 
+    real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0, t); 
+    real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(0, t); 
+    real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0, t); 
+    real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(0, t);
+    
+    this->tauinv  = coefftauinv->EvaluateConfinementTime(0, t);
+    this->dIS    = - tauinv; 
+    this->dI_p    = - dtauinvdIp * n_i;
+    this->dI_wall = - dtauinvdIwall * n_i;
+    this->dT_cold = - dtauinvdTcold * n_i;
+    this->dW_i    = - dtauinvdWi * n_i;
+    this->dn_i    = - dtauinvdni * n_i;
+    
+    }
+}
 
 bool IonTransport::SetCSJacobianBlock(
-    const len_t, const len_t derivId, FVM::Matrix *jac, const real_t *t/* ska det vara t här?*/,
+    const len_t, const len_t derivId, FVM::Matrix *jac, const real_t*,
     const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
     if (derivId != this->id_IS && derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_ni)
         return false;
     
-    real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0, t); // ska vara (0,t) va, för ir=0 för 0d?
-    real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0, t); 
-    real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(0, t); 
-    real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0, t); 
-    real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(0, t);
-        
-    real_t dn_i    = - tauinv; 
-    real_t dI_p    = - dtauinvdIp * n_i;
-    real_t dI_wall = - dtauinvdIwall * n_i;
-    real_t dT_cold = - dtauinvdTcold * n_i;
-    real_t dW_i    = - dtauinvdWi * n_i;
-    real_t dn_i    = - dtauinvdni * n_i;
+    real_t n_i = ions->GetIonDensity(0, iIon, Z0);
     
     if(derivId==id_IS){ // Detta känns fel, ska det vara id_IS för n_i? // ska index vara Z0,Z0 och Z0,0?
-		jac->SetElement(Z0,Z0,this->dn_i); 
+		jac->SetElement(rOffset+Z0, rOffset+Z0,this->dIS); 
     } else if(derivId==id_Ip){
-		jac->SetElement(Z0,0,this->dI_p)
+		jac->SetElement(rOffset+Z0, 0,this->dI_p*n_i)
 	} else if(derivId==id_Iwall){
-		jac->SetElement(Z0,0,this->dI_wall)
+		jac->SetElement(rOffset+Z0, 0,this->dI_wall*n_i)
 	} else if(derivId==id_Tcold){
-		jac->SetElement(Z0,0,this->dT_cold)
+		jac->SetElement(rOffset+Z0, 0,this->dT_cold*n_i)
 	} else if(derivId==id_Wi){
-		jac->SetElement(Z0,Z0,this->dW_i)
+		jac->SetElement(rOffset+Z0, iz,this->dW_i*n_i)
 	} else if(derivId==id_ni){
-		jac->SetElement(Z0,Z0,this->dn_i)
+		jac->SetElement(rOffset+Z0, iz,this->dn_i*n_i)
 	}
 	
 	return true;
@@ -74,13 +101,14 @@ bool IonTransport::SetCSJacobianBlock(
 void IonTransport::SetCSMatrixElements(
     FVM::Matrix *mat, real_t* /* rhs */, const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
-    mat[Z0]=-n_i*tauinv; // Är detta rätt? Eller ska man använda rhs istället för mat? Ska de andra variablerna användas?
+    mat[rOffset+Z0, rOffset+Z0]=-tauinv; // Är detta rätt? 
 } 
 
 
 void IonTransport::SetCSVectorElements(
     real_t* vec, const real_t* /* x */, const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
-    vec[Z0]=-tauinv; // Är detta rätt? Eller ska man använda x istället för mat? Ska de andra variablerna användas?
+    real_t n_i     = ions->GetIonDensity(0, iIon, Z0);
+    vec[rOffset+Z0]=-n_i*tauinv; // Är detta rätt?
 }
 
