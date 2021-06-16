@@ -10,6 +10,8 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Equations/ConfinementTime.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronTransportDiffusion.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronHeatTransportDiffusion.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/IonTransportDiffusion.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/IonHeatTransportDiffusion.cpp"
 )
 
 add_library(stream STATIC ${stream})
