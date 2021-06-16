@@ -51,11 +51,11 @@ void IonTransport::Rebuild(
     
     this->tauinv  = coefftauinv->EvaluateConfinementTime(0, t);
     this->dn_i     = - tauinv; 
-    this->dI_p    = - dtauinvdIp * n_i;
-    this->dI_wall = - dtauinvdIwall * n_i;
-    this->dT_cold = - dtauinvdTcold * n_i;
-    this->dW_i    = - dtauinvdWi * n_i;
-    this->dN_i    = - dtauinvdNi * n_i;
+    this->dI_p    = - dtauinvdIp;
+    this->dI_wall = - dtauinvdIwall;
+    this->dT_cold = - dtauinvdTcold;
+    this->dW_i    = - dtauinvdWi;
+    this->dN_i    = - dtauinvdNi;
     
     }
 }

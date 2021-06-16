@@ -14,17 +14,17 @@ namespace STREAM {
 		DREAM::IonHandler *ions;
 		DREAM::FVM::UnknownQuantityHandler *unknowns;
 		
-		real_t *dn_i;//=nullptr; // Ion species
-        real_t *dI_p;//=nullptr;
-        real_t *dI_wall;//=nullptr;
-        real_t *dT_cold;//=nullptr;
-        real_t *dW_i;//=nullptr;
-        real_t *dN_i;//=nullptr; // All ions
+		real_t *dn_i;
+        real_t *dI_p;
+        real_t *dI_wall;
+        real_t *dT_cold;
+        real_t *dW_i;
+        real_t *dN_i;
 		
 		
 		len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni;
 		
-		real_t tauinv;//, n_i; // Bra?
+		real_t tauinv;
 		
 	public:
 		IonTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon,
