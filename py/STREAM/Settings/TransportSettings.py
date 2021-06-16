@@ -22,11 +22,14 @@ BC_F_0 = DREAMTransport.BC_F_0                       # Assume f=0 outside the pl
 BC_DF_CONST = DREAMTransport.BC_DF_CONST             # Assume that df/dr is constant on the plasma boundary
 
 class TransportSettings(DREAMTransport.TransportSettings):
+    def __init__(self, kinetic=False):
+        super().__init__(kinetic=kinetic)
+        
     def setDYON(self, t=None):
         self.type = TRANSPORT_DYON
         
     def verifySettings(self):
-        if self.type == TRANSPORT_DYON
-            
+        if self.type == TRANSPORT_DYON:
+            pass
         else:
             super().verifySettings()
