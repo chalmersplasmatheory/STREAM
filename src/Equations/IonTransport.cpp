@@ -42,7 +42,7 @@ bool IonTransport::SetCSJacobianBlock(
     if (derivId != this->id_IS && derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_ni)
         return false;
     
-    real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0, t); 
+    real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0, t); // ska vara (0,t) va, för ir=0 för 0d?
     real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0, t); 
     real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(0, t); 
     real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0, t); 
