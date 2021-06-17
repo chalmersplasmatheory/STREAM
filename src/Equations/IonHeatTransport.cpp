@@ -60,7 +60,7 @@ void IonHeatTransport::Rebuild(
 }
 
 bool IonHeatTransport::SetCSJacobianBlock(
-    const len_t uqtyId, const len_t derivId, FVM::Matrix *jac, const real_t*,
+    const len_t, const len_t derivId, FVM::Matrix *jac, const real_t*,
     const len_t iIon, const len_t Z0, const len_t rOffset
 ) { 
     if(derivId==id_Ip){
@@ -91,7 +91,7 @@ void IonHeatTransport::SetCSMatrixElements(
 
 
 void IonHeatTransport::SetCSVectorElements(
-    real_t* vec, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
+    real_t* vec, const real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
     vec[rOffset+Z0]=-3/2 * Constants::ec*N_i*tauinv; 
 }

@@ -68,9 +68,9 @@ void IonTransportDiffusion::Allocate(){
     for(len_t Z0=1; Z0<=Zion; Z0++)
         this->dW_i[Z0-1] = new real_t[(nr+1)];
     
-    this->dn_i = new real_t*[Zion];
+    this->dN_i = new real_t*[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        this->dn_i[Z0-1] = new real_t[(nr+1)];
+        this->dN_i[Z0-1] = new real_t[(nr+1)];
 }
 
 void IonTransportDiffusion::Deallocate(){
@@ -91,8 +91,8 @@ void IonTransportDiffusion::Deallocate(){
     delete [] this->dW_i;
     
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        delete [] this->dn_i;
-    delete [] this->dn_i;
+        delete [] this->dN_i;
+    delete [] this->dN_i;
 
 }
 
@@ -117,7 +117,7 @@ void IonTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
         this->dI_wall[Z0-1][ir] = a * a * dtauinvdIwall;
         this->dT_cold[Z0-1][ir] = a * a * dtauinvdTcold;
         this->dW_i[Z0-1][ir]    = a * a * dtauinvdWi;
-        this->dn_i[Z0-1][ir]    = a * a * dtauinvdNi;
+        this->dN_i[Z0-1][ir]    = a * a * dtauinvdNi;
 		
 		Drr(ir,0,0) += a * a * tauinv; 
 	}
@@ -177,7 +177,7 @@ void IonTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMultip
 		for(len_t  n=0; n<nMultiples; n++){
 			if(n==iIon){
 				for(len_t ir=0; ir<nr+1; ir++){
-					dDrr(ir,0,0,n)=dn_i[Z0ForPartials-1][ir];		
+					dDrr(ir,0,0,n)=dN_i[Z0ForPartials-1][ir];		
 	            }
 	        }
 	    }

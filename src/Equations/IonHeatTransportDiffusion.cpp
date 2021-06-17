@@ -57,7 +57,7 @@ void IonHeatTransportDiffusion::Allocate(){
     this->dn_i = new real_t*[Zion];
     this->dn_i[0]= new real_t[Zion*(nr+1)*nzs];
     for (len_t Z0=1; Z0<Zion; Z0++)
-        this->dn_i[Z0]=this->dIS[Z0-1]+(nr+1)*nzs;
+        this->dn_i[Z0]=this->dn_i[Z0-1]+(nr+1)*nzs;
     
     this->dI_p = new real_t*[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
