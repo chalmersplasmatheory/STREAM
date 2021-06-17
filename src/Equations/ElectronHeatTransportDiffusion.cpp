@@ -82,7 +82,7 @@ bool ElectronHeatTransportDiffusion::GridRebuilt() {
  * Rebuild the coefficients for this equation term.
  */
 void ElectronHeatTransportDiffusion::Rebuild(
-    const real_t t, const real_t, FVM::UnknownQuantityHandler *unknowns 
+    const real_t, const real_t, FVM::UnknownQuantityHandler *unknowns 
 ) {
     real_t a = radials->GetMinorRadius();
     
@@ -91,12 +91,12 @@ void ElectronHeatTransportDiffusion::Rebuild(
     const real_t *ncold = unknowns->GetUnknownData(this->id_ncold);
     
     for (len_t ir = 0; ir < nr+1; ir++) {
-        real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir, t); 
-        real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir, t); 
-        real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir, t); 
-        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir, t); 
-        real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir, t); 
-        real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir, t);
+        real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir); 
+        real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir); 
+        real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir); 
+        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir); 
+        real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
+        real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir);
          
         real_t n=0;
         if(ir<nr)

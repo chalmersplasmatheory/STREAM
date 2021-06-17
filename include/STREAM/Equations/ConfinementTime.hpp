@@ -31,7 +31,7 @@ namespace STREAM{
                 
                         ConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2);
                         
-                        real_t EvaluateConfinementTime(len_t ir, real_t t);
+                        real_t EvaluateConfinementTime(len_t ir);
 
                         real_t EvaluateConfinementTime_dIp(len_t ir, real_t t);
 

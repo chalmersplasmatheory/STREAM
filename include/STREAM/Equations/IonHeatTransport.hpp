@@ -21,7 +21,6 @@ namespace STREAM {
         real_t *dW_i;
         real_t *dN_i;
 		
-		
 		len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni;
 		
 		real_t tauinv;//, n_i; // Bra?

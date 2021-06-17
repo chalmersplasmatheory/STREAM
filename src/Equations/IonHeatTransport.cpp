@@ -40,16 +40,16 @@ IonHeatTransport::~IonHeatTransport() {
 }
 
 void IonHeatTransport::Rebuild(
-    const real_t t, const real_t, FVM::UnknownQuantityHandler* 
+    const real_t, const real_t, FVM::UnknownQuantityHandler* 
 ) {
     
-    real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0, t); 
-    real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0, t); 
-    real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(0, t); 
-    real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0, t); 
-    real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dni(0, t);
+    real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0); 
+    real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0); 
+    real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(0); 
+    real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
+    real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dni(0);
     
-    this->tauinv  = coefftauinv->EvaluateConfinementTime(0, t);
+    this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
     this->dn_i    = - 3/2 * Constants::ec * tauinv; 
     this->dI_p    = - 3/2 * Constants::ec * dtauinvdIp;
     this->dI_wall = - 3/2 * Constants::ec * dtauinvdIwall;
@@ -92,7 +92,7 @@ bool IonHeatTransport::SetCSJacobianBlock(
 void IonHeatTransport::SetCSMatrixElements(
     FVM::Matrix *mat, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
-    mat->SetElement(rOffset+Z0, rOffset+Z0, -tauinv);
+    mat->SetElement(rOffset+Z0, rOffset+Z0, -3/2 * Constants::ec*tauinv);
 } 
 
 
@@ -100,6 +100,6 @@ void IonHeatTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
     real_t n_i     = ions->GetIonDensity(0, iIon, Z0);
-    vec[rOffset+Z0]=-n_i*tauinv; 
+    vec[rOffset+Z0]=-3/2 * Constants::ec*n_i*tauinv; 
 }
 

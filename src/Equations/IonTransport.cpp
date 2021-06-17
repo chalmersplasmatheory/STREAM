@@ -40,16 +40,16 @@ IonTransport::~IonTransport() {
 }
 
 void IonTransport::Rebuild(
-    const real_t t, const real_t, FVM::UnknownQuantityHandler* 
+    const real_t, const real_t, FVM::UnknownQuantityHandler* 
 ) {
     
-    real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0, t); 
-    real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0, t); 
-    real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(0, t); 
-    real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0, t); 
-    real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dni(0, t);
+    real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0); 
+    real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0); 
+    real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(0); 
+    real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
+    real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dni(0);
     
-    this->tauinv  = coefftauinv->EvaluateConfinementTime(0, t);
+    this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
     this->dn_i     = - tauinv; 
     this->dI_p    = - dtauinvdIp;
     this->dI_wall = - dtauinvdIwall;

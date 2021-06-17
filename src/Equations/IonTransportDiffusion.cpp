@@ -96,7 +96,7 @@ void IonTransportDiffusion::Deallocate(){
 
 }
 
-void IonTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t t){ // Måste ha en t här
+void IonTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){ 
 	if(Z0<1)
 		return;
 	
@@ -105,12 +105,12 @@ void IonTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t t){ // Måst
 	const len_t nr = this->grid->GetNr();
 	
     for(len_t ir=0; ir<nr+1; ir++){
-	    real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir, t); 
-        real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir, t); 
-        real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir, t); 
-        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir, t); 
-        real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir, t); 
-        real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir, t);
+	    real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir); 
+        real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir); 
+        real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir); 
+        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir); 
+        real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
+        real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir);
         
         // Ska det vara d...[Z0-1][ir] eller bara d...[ir]?
         this->dI_p[Z0-1][ir]    = a * a * dtauinvdIp;
