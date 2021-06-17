@@ -13,7 +13,7 @@ using namespace DREAM;
     }
     
     real_t PlasmaVolume::GetPlasmaVolume() const{
-        return grid->GetVpVol(0) * grid->GetRadialGrid()->GetDr(0); //ok? Or multiply with R0?
+        return grid->GetVpVol(0) * grid->GetRadialGrid()->GetDr(0) * grid->GetRadialGrid()->GetR0(); //Multiplied with R0, ok?
     }
     
     real_t PlasmaVolume::GetNeutralVolume(const len_t iz){ 
@@ -21,7 +21,7 @@ using namespace DREAM;
         real_t R0 = grid->GetRadialGrid()->GetR0();
         real_t kappa = radials->GetElongation(); 
         real_t delta = radials->GetTriangularity(); 
-        real_t lambda_i = unknowns->GetUnknownData(id_lambda_i)[0]; //How do we get lambda with correct index iz? Don't we need to use input argument iz somehow?
+        real_t lambda_i = unknowns->GetUnknownData(id_lambda_i)[iz]; //Is this the correct way to have iz?
          
         //Eq. 13 in startup-appendix + added triangularity 
         if (lambda_i <= a){
