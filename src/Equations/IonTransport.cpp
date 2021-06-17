@@ -27,7 +27,7 @@ IonTransport::IonTransport(FVM::Grid *g, IonHandler *ihdl,
 
 /**
  * Destructor.
- */
+
 IonTransport::~IonTransport() {
     delete this->tauinv;
     delete this->dI_p;
@@ -37,6 +37,7 @@ IonTransport::~IonTransport() {
     delete this->dN_i;
     delete this->dn_i;
 }
+ */
 
 void IonTransport::Rebuild(
     const real_t, const real_t, FVM::UnknownQuantityHandler* 
@@ -56,7 +57,6 @@ void IonTransport::Rebuild(
     this->dW_i    = - dtauinvdWi;
     this->dN_i    = - dtauinvdNi;
     
-    }
 }
 
 bool IonTransport::SetCSJacobianBlock(

@@ -14,12 +14,12 @@ namespace STREAM {
 		DREAM::IonHandler *ions;
 		DREAM::FVM::UnknownQuantityHandler *unknowns;
 		
-		real_t *dn_i;
-        real_t *dI_p;
-        real_t *dI_wall;
-        real_t *dT_cold;
-        real_t *dW_i;
-        real_t *dN_i;
+		real_t dn_i;
+        real_t dI_p;
+        real_t dI_wall;
+        real_t dT_cold;
+        real_t dW_i;
+        real_t dN_i;
 		
 		len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni;
 		
@@ -30,7 +30,7 @@ namespace STREAM {
 			ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *u);
 		~IonHeatTransport();
         
-        void IonHeatTransport::Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*);
+        void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*);
 
 		virtual bool SetCSJacobianBlock(
             const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*,

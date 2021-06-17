@@ -27,7 +27,7 @@ IonHeatTransport::IonHeatTransport(FVM::Grid *g, IonHandler *ihdl,
 
 /**
  * Destructor.
- */
+
 IonHeatTransport::~IonHeatTransport() {
     delete this->tauinv;
     delete this->dI_p;
@@ -37,6 +37,7 @@ IonHeatTransport::~IonHeatTransport() {
     delete this->dN_i;
     delete this->dn_i;
 }
+ */
 
 void IonHeatTransport::Rebuild(
     const real_t, const real_t, FVM::UnknownQuantityHandler* 
@@ -56,7 +57,6 @@ void IonHeatTransport::Rebuild(
     this->dW_i    = - 3/2 * Constants::ec * dtauinvdWi;
     this->dN_i    = - 3/2 * Constants::ec * dtauinvdNi;
     
-    }
 }
 
 bool IonHeatTransport::SetCSJacobianBlock(
@@ -69,7 +69,6 @@ bool IonHeatTransport::SetCSJacobianBlock(
 		jac->SetElement(rOffset+Z0, rOffset+Z0,this->dn_i); 
 		return true;
     } else if(derivId==id_Ip){
-        real_t d=
 		jac->SetElement(rOffset+Z0, 0,this->dI_p*n_i);
 		return true;
 	} else if(derivId==id_Iwall){
