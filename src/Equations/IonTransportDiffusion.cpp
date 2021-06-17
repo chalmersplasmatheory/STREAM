@@ -22,7 +22,7 @@ IonTransportDiffusion::IonTransportDiffusion(FVM::Grid *g, IonHandler *ihdl, boo
     this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
     this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
-    this->id_ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
+    this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
     
     this->radials = radials;
     
@@ -30,7 +30,7 @@ IonTransportDiffusion::IonTransportDiffusion(FVM::Grid *g, IonHandler *ihdl, boo
     AddUnknownForJacobian(unknowns, this->id_Iwall);
     AddUnknownForJacobian(unknowns, this->id_Tcold);
     AddUnknownForJacobian(unknowns, this->id_Wi); 
-    AddUnknownForJacobian(unknowns, this->id_ni);
+    AddUnknownForJacobian(unknowns, this->id_Ni);
 	
 	Allocate();
 }
@@ -110,14 +110,14 @@ void IonTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
         real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir); 
         real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir); 
         real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
-        real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir);
+        real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(ir);
         
         // Ska det vara d...[Z0-1][ir] eller bara d...[ir]?
         this->dI_p[Z0-1][ir]    = a * a * dtauinvdIp;
         this->dI_wall[Z0-1][ir] = a * a * dtauinvdIwall;
         this->dT_cold[Z0-1][ir] = a * a * dtauinvdTcold;
         this->dW_i[Z0-1][ir]    = a * a * dtauinvdWi;
-        this->dn_i[Z0-1][ir]    = a * a * dtauinvdni;
+        this->dn_i[Z0-1][ir]    = a * a * dtauinvdNi;
 		
 		Drr(ir,0,0) += a * a * tauinv; 
 	}
@@ -126,7 +126,7 @@ void IonTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
 
 
 void IonTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMultiples){
-	if (derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_ni)
+	if (derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_Ni)
         return;
     
     // ResetDifferentiationCoefficients(); //Ska vara med?
@@ -173,7 +173,7 @@ void IonTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMultip
 	    }
 	}
 					
-	else if(derivId==id_ni){
+	else if(derivId==id_Ni){
 		for(len_t  n=0; n<nMultiples; n++){
 			if(n==iIon){
 				for(len_t ir=0; ir<nr+1; ir++){

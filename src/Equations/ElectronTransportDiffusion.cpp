@@ -21,7 +21,7 @@ ElectronTransportDiffusion::ElectronTransportDiffusion(
     this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
     this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
-    this->id_ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
+    this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
     
     this->radials = radials;
     
@@ -29,7 +29,7 @@ ElectronTransportDiffusion::ElectronTransportDiffusion(
     AddUnknownForJacobian(unknowns, this->id_Iwall);
     AddUnknownForJacobian(unknowns, this->id_Tcold);
     AddUnknownForJacobian(unknowns, this->id_Wi); 
-    AddUnknownForJacobian(unknowns, this->id_ni);
+    AddUnknownForJacobian(unknowns, this->id_Ni);
 
     AllocateDiffCoeff(); 
 }
@@ -43,7 +43,7 @@ ElectronTransportDiffusion::~ElectronTransportDiffusion() {
     delete [] this->dI_wall;
     delete [] this->dT_cold;
     delete [] this->dW_i;
-    delete [] this->dn_i;
+    delete [] this->dN_i;
 }
 
 
@@ -56,7 +56,7 @@ void ElectronTransportDiffusion::AllocateDiffCoeff() {
     this->dI_wall = new real_t[nr+1];
     this->dT_cold = new real_t[nr+1];
     this->dW_i = new real_t[nr+1];
-    this->dn_i = new real_t[nr+1];
+    this->dN_i = new real_t[nr+1];
 }
 
 /**
@@ -69,7 +69,7 @@ bool ElectronTransportDiffusion::GridRebuilt() {
     delete [] this->dI_wall;
     delete [] this->dT_cold;
     delete [] this->dW_i;
-    delete [] this->dn_i;
+    delete [] this->dN_i;
     AllocateDiffCoeff();
     
     return true;
@@ -91,7 +91,7 @@ void ElectronTransportDiffusion::Rebuild(
         real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir); 
         real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir); 
         real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
-        real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir);
+        real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(ir);
          
 
 
@@ -99,7 +99,7 @@ void ElectronTransportDiffusion::Rebuild(
         this->dI_wall[ir] = a * a * dtauinvdIwall;
         this->dT_cold[ir] = a * a * dtauinvdTcold;
         this->dW_i[ir]    = a * a * dtauinvdWi;
-        this->dn_i[ir]    = a * a * dtauinvdni;
+        this->dN_i[ir]    = a * a * dtauinvdNi;
         
         Drr(ir, 0, 0) += a * a * tauinv;
     }
@@ -115,7 +115,7 @@ void ElectronTransportDiffusion::Rebuild(
 void ElectronTransportDiffusion::SetPartialDiffusionTerm(
     len_t derivId, len_t
 ) {
-    if (derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_ni)
+    if (derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_Ni)
         return;
 
     ResetDifferentiationCoefficients();
@@ -138,9 +138,9 @@ void ElectronTransportDiffusion::SetPartialDiffusionTerm(
         for (len_t ir = 0; ir < nr+1; ir++)
             dDrr(ir, 0, 0) = this->dW_i[ir];
     }
-    else if (derivId == id_ni) {
+    else if (derivId == id_Ni) {
         for (len_t ir = 0; ir < nr+1; ir++)
-            dDrr(ir, 0, 0) = this->dn_i[ir];
+            dDrr(ir, 0, 0) = this->dN_i[ir];
     }
 }
 

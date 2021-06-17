@@ -47,7 +47,7 @@ void IonHeatTransport::Rebuild(
     real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0); 
     real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(0); 
     real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
-    real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dni(0);
+    real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(0);
     
     this->N_i    = unknowns->GetUnknownData(id_Ni)[0];
     this->tauinv  = coefftauinv->EvaluateConfinementTime(0);

@@ -18,14 +18,14 @@ namespace STREAM {
 		DREAM::FVM::UnknownQuantityHandler *unknowns;
         EllipticalRadialGridGenerator *radials;
 		
-		real_t **dIS;
+		real_t **dn_i;
         real_t **dI_p;
         real_t **dI_wall;
         real_t **dT_cold;
         real_t **dW_i;
-        real_t **dn_i;
+        real_t **dN_i;
 		
-		len_t id_IS, id_Ip, id_Iwall, id_Tcold, id_Wi, id_ni;
+		len_t id_ni, id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni;
 		
 		void Allocate();
 		void Deallocate();

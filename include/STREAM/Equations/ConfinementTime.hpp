@@ -22,7 +22,7 @@ namespace STREAM{
                         
                         EllipticalRadialGridGenerator *radials;
                         
-                        len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_ni; 
+                        len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni; 
 
                 public:
                         real_t l_MK2;
@@ -41,7 +41,7 @@ namespace STREAM{
 
                         real_t EvaluateConfinementTime_dWi(len_t ir);
                         
-                        real_t EvaluateConfinementTime_dni(len_t ir);
+                        real_t EvaluateConfinementTime_dNi(len_t ir);
     };
 }
 

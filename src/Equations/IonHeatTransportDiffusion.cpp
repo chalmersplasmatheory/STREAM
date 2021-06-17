@@ -18,21 +18,21 @@ IonHeatTransportDiffusion::IonHeatTransportDiffusion(FVM::Grid *g, IonHandler *i
     SetName("IonHeatTransportDiffusion");
     
     this->unknowns = u;
-    this->id_IS    = unknowns->GetUnknownID(OptionConstants::UQTY_ION_SPECIES);
+    this->id_ni    = unknowns->GetUnknownID(OptionConstants::UQTY_ION_SPECIES);
     this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
     this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
     this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
-    this->id_ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
+    this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
     
     this->radials = radials;
     
-    AddUnknownForJacobian(unknowns, this->id_IS);
+    AddUnknownForJacobian(unknowns, this->id_ni);
     AddUnknownForJacobian(unknowns, this->id_Ip);
     AddUnknownForJacobian(unknowns, this->id_Iwall);
     AddUnknownForJacobian(unknowns, this->id_Tcold);
     AddUnknownForJacobian(unknowns, this->id_Wi); 
-    AddUnknownForJacobian(unknowns, this->id_ni);
+    AddUnknownForJacobian(unknowns, this->id_Ni);
     
 	Allocate();
 }
@@ -54,10 +54,10 @@ void IonHeatTransportDiffusion::Allocate(){
 
     const len_t nr = this->grid->GetNr();
 
-    this->dIS = new real_t*[Zion];
-    this->dIS[0]= new real_t[Zion*(nr+1)*nzs];
+    this->dn_i = new real_t*[Zion];
+    this->dn_i[0]= new real_t[Zion*(nr+1)*nzs];
     for (len_t Z0=1; Z0<Zion; Z0++)
-        this->dIS[Z0]=this->dIS[Z0-1]+(nr+1)*nzs;
+        this->dn_i[Z0]=this->dIS[Z0-1]+(nr+1)*nzs;
     
     this->dI_p = new real_t*[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
@@ -75,17 +75,17 @@ void IonHeatTransportDiffusion::Allocate(){
     for(len_t Z0=1; Z0<=Zion; Z0++)
         this->dW_i[Z0-1] = new real_t[(nr+1)];
     
-    this->dn_i = new real_t*[Zion];
+    this->dN_i = new real_t*[Zion];
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        this->dn_i[Z0-1] = new real_t[(nr+1)];
+        this->dN_i[Z0-1] = new real_t[(nr+1)];
 }
 
 /**
  * Deallocate memory for the differentiation coefficient.
  */
 void IonHeatTransportDiffusion::Deallocate(){
-    delete [] this->dIS[0];
-    delete [] this->dIS;
+    delete [] this->dn_i[0];
+    delete [] this->dn_i;
     
     for(len_t Z0=1; Z0<=Zion; Z0++)
         delete [] this->dI_p[Z0-1];
@@ -104,8 +104,8 @@ void IonHeatTransportDiffusion::Deallocate(){
     delete [] this->dW_i;
     
     for(len_t Z0=1; Z0<=Zion; Z0++)
-        delete [] this->dn_i;
-    delete [] this->dn_i;
+        delete [] this->dN_i;
+    delete [] this->dN_i;
 }
 
 void IonHeatTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){ 
@@ -123,7 +123,7 @@ void IonHeatTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
         real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir); 
         real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir); 
         real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
-        real_t dtauinvdni    = this->coefftauinv->EvaluateConfinementTime_dni(ir);
+        real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(ir);
         
         // Ska det vara d...[Z0-1][ir] eller bara d...[ir]?
         this->dn_i[Z0-1][ir]    = 3/2 * Constants::ec * a * a * tauinv; 
@@ -131,7 +131,7 @@ void IonHeatTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
         this->dI_wall[Z0-1][ir] = 3/2 * Constants::ec * a * a * dtauinvdIwall * n_i;
         this->dT_cold[Z0-1][ir] = 3/2 * Constants::ec * a * a * dtauinvdTcold * n_i;
         this->dW_i[Z0-1][ir]    = 3/2 * Constants::ec * a * a * dtauinvdWi * n_i;
-        this->dn_i[Z0-1][ir]    = 3/2 * Constants::ec * a * a * dtauinvdni * n_i;
+        this->dN_i[Z0-1][ir]    = 3/2 * Constants::ec * a * a * dtauinvdNi * n_i;
 		
 		Drr(ir,0,0) += 3/2 * Constants::ec * a * a * tauinv * n_i; 
 	}
@@ -139,14 +139,14 @@ void IonHeatTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
 
 
 void IonHeatTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMultiples){
-	if (derivId != this->id_IS && derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_ni)
+	if (derivId != this->id_ni && derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_Ni)
         return;
     
     // ResetDifferentiationCoefficients(); //Ska vara med?
     
     const len_t nr = this->grid->GetNr();
 	
-	if(derivId==id_IS){ // Detta känns fel, ska det vara id_IS för n_i?
+	if(derivId==id_ni){ 
 		for(len_t  n=0; n<nMultiples; n++){
 			for(len_t  ir=0; ir<nr+1; ir++){
 				dDrr(ir,0,0,n)=dn_i[Z0ForPartials-1][ir+nr*n];
@@ -194,11 +194,11 @@ void IonHeatTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMu
 	    }
 	}
 					
-	else if(derivId==id_ni){
+	else if(derivId==id_Ni){
 		for(len_t  n=0; n<nMultiples; n++){
 			if(n==iIon){
 				for(len_t  ir=0; ir<nr+1; ir++){
-					dDrr(ir,0,0,n)=dn_i[Z0ForPartials-1][ir];
+					dDrr(ir,0,0,n)=dN_i[Z0ForPartials-1][ir];
 	            }
 	        }
 	    }
