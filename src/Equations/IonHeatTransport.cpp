@@ -49,39 +49,34 @@ void IonHeatTransport::Rebuild(
     real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
     real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dni(0);
     
+    this->N_i    = unknowns->GetUnknownData(id_Ni)[0];
     this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
-    this->dn_i    = - 3/2 * Constants::ec * tauinv; 
-    this->dI_p    = - 3/2 * Constants::ec * dtauinvdIp;
-    this->dI_wall = - 3/2 * Constants::ec * dtauinvdIwall;
-    this->dT_cold = - 3/2 * Constants::ec * dtauinvdTcold;
-    this->dW_i    = - 3/2 * Constants::ec * dtauinvdWi;
-    this->dN_i    = - 3/2 * Constants::ec * dtauinvdNi;
+    this->dI_p    = - 3/2 * Constants::ec * dtauinvdIp * N_i;
+    this->dI_wall = - 3/2 * Constants::ec * dtauinvdIwall * N_i;
+    this->dT_cold = - 3/2 * Constants::ec * dtauinvdTcold * N_i;
+    this->dW_i    = - 3/2 * Constants::ec * dtauinvdWi * N_i;
+    this->dN_i    = - 3/2 * Constants::ec * (dtauinvdNi * N_i + tauinv);
     
 }
 
 bool IonHeatTransport::SetCSJacobianBlock(
     const len_t uqtyId, const len_t derivId, FVM::Matrix *jac, const real_t*,
     const len_t iIon, const len_t Z0, const len_t rOffset
-) {
-    real_t n_i = ions->GetIonDensity(0, iIon, Z0);
-    
-    if(derivId==uqtyId){
-		jac->SetElement(rOffset+Z0, rOffset+Z0,this->dn_i); 
-		return true;
-    } else if(derivId==id_Ip){
-		jac->SetElement(rOffset+Z0, 0,this->dI_p*n_i);
+) { 
+    if(derivId==id_Ip){
+		jac->SetElement(rOffset+Z0, 0,this->dI_p);
 		return true;
 	} else if(derivId==id_Iwall){
-		jac->SetElement(rOffset+Z0, 0,this->dI_wall*n_i);
+		jac->SetElement(rOffset+Z0, 0,this->dI_wall);
 		return true;
 	} else if(derivId==id_Tcold){
-		jac->SetElement(rOffset+Z0, 0,this->dT_cold*n_i);
+		jac->SetElement(rOffset+Z0, 0,this->dT_cold);
 		return true;
 	} else if(derivId==id_Wi){
-		jac->SetElement(rOffset+Z0, iIon,this->dW_i*n_i);
+		jac->SetElement(rOffset+Z0, iIon,this->dW_i);
 		return true;
 	} else if(derivId==id_Ni){
-		jac->SetElement(rOffset+Z0, iIon,this->dN_i*n_i);
+		jac->SetElement(rOffset+Z0, iIon,this->dN_i);
 		return true;
 	}
 	else {
@@ -98,7 +93,6 @@ void IonHeatTransport::SetCSMatrixElements(
 void IonHeatTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
-    real_t n_i     = ions->GetIonDensity(0, iIon, Z0);
-    vec[rOffset+Z0]=-3/2 * Constants::ec*n_i*tauinv; 
+    vec[rOffset+Z0]=-3/2 * Constants::ec*N_i*tauinv; 
 }
 

@@ -23,7 +23,7 @@ namespace STREAM {
 		
 		len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni;
 		
-		real_t tauinv;//, n_i; // Bra?
+		real_t tauinv, N_i;
 		
 	public:
 		IonHeatTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon,
