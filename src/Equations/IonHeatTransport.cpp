@@ -12,7 +12,7 @@ using namespace STREAM;
  */
 IonHeatTransport::IonHeatTransport(FVM::Grid *g, IonHandler *ihdl,
 	const len_t iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u
-	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon, allocCoefficients), coefftauinv(tauinv), ions(ihdl) {
+	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon), coefftauinv(tauinv), ions(ihdl) {
 	
     SetName("IonHeatTransport");
 
@@ -23,7 +23,6 @@ IonHeatTransport::IonHeatTransport(FVM::Grid *g, IonHandler *ihdl,
     this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
     this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
     
-	Allocate();
 }
 
 /**
@@ -70,6 +69,7 @@ bool IonHeatTransport::SetCSJacobianBlock(
 		jac->SetElement(rOffset+Z0, rOffset+Z0,this->dn_i); 
 		return true;
     } else if(derivId==id_Ip){
+        real_t d=
 		jac->SetElement(rOffset+Z0, 0,this->dI_p*n_i);
 		return true;
 	} else if(derivId==id_Iwall){
@@ -90,7 +90,7 @@ bool IonHeatTransport::SetCSJacobianBlock(
     }
 }
 void IonHeatTransport::SetCSMatrixElements(
-    FVM::Matrix *mat, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
+    FVM::Matrix *mat, real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
     mat->SetElement(rOffset+Z0, rOffset+Z0, -3/2 * Constants::ec*tauinv);
 } 

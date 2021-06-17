@@ -31,14 +31,14 @@ namespace STREAM {
 			ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *u);
 		~IonTransport();
         
-        void IonTransport::Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*);
+        void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*);
 
 		virtual bool SetCSJacobianBlock(
-            const len_t, const len_t, FVM::Matrix*, const real_t*,
+            const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*,
             const len_t iIon, const len_t Z0, const len_t rOffset
         ) override;
         virtual void SetCSMatrixElements(
-            FVM::Matrix*, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
+            DREAM::FVM::Matrix*, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
         ) override;
         virtual void SetCSVectorElements(
             real_t*, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset

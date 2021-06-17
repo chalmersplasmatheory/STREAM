@@ -12,7 +12,7 @@ using namespace STREAM;
  */
 IonTransport::IonTransport(FVM::Grid *g, IonHandler *ihdl,
 	const len_t iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u
-	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon, allocCoefficients), coefftauinv(tauinv), ions(ihdl) {
+	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon), coefftauinv(tauinv), ions(ihdl) {
 	
     SetName("IonTransport");
 
@@ -23,7 +23,6 @@ IonTransport::IonTransport(FVM::Grid *g, IonHandler *ihdl,
     this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
     this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
     
-	Allocate();
 }
 
 /**
@@ -90,7 +89,7 @@ bool IonTransport::SetCSJacobianBlock(
     }
 }
 void IonTransport::SetCSMatrixElements(
-    FVM::Matrix *mat, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
+    FVM::Matrix *mat, real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
     mat->SetElement(rOffset+Z0, rOffset+Z0, -tauinv);
 } 
