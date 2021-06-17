@@ -33,15 +33,15 @@ namespace STREAM{
                         
                         real_t EvaluateConfinementTime(len_t ir);
 
-                        real_t EvaluateConfinementTime_dIp(len_t ir, real_t t);
+                        real_t EvaluateConfinementTime_dIp(len_t ir);
 
-                        real_t EvaluateConfinementTime_dIwall(len_t ir, real_t t);
+                        real_t EvaluateConfinementTime_dIwall(len_t ir);
 
-                        real_t EvaluateConfinementTime_dTe(len_t ir, real_t t);
+                        real_t EvaluateConfinementTime_dTe(len_t ir);
 
-                        real_t EvaluateConfinementTime_dWi(len_t ir, real_t t);
+                        real_t EvaluateConfinementTime_dWi(len_t ir);
                         
-                        real_t EvaluateConfinementTime_dni(len_t ir, real_t t);
+                        real_t EvaluateConfinementTime_dni(len_t ir);
     };
 }
 
