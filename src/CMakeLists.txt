@@ -12,6 +12,7 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronHeatTransportDiffusion.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/IonTransportDiffusion.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/IonHeatTransportDiffusion.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Settings/Transport.cpp"
 )
 
 add_library(stream STATIC ${stream})

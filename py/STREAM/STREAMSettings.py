@@ -28,6 +28,10 @@ class STREAMSettings(DREAMSettings):
 
         # TODO replace 'EquationSystem'
         self.addSetting('radialgrid', RadialGrid())
+        
+        # Should be defined last as it may need access to the
+        # obejcts created above...
+        self.addSetting('eqsys', EquationSystem(settings=self))
 
         if filename is not None:
             if type(filename) == str:
