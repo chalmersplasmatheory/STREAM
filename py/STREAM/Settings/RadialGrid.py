@@ -1,0 +1,96 @@
+
+
+from DREAM.Settings.PrescribedParameter import PrescribedParameter
+
+class RadialGrid(PrescribedParameter):
+    
+
+    def __init__(self):
+        """
+        Constructor.
+        """
+        # Only here for compatibility with DREAM parts of
+        # the settings interface
+        self.nr = 1
+
+        self.a, self.ta = None, None
+        self.B0, self.tB0 = None, None
+        self.kappa, self.tkappa = None, None
+
+
+    def setB0(self, B0, t=0):
+        """
+        Prescribe the (time evolution of the) magnetic field strength
+        on the magnetic axis.
+
+        :param B0: Magnetic field strength on the magnetic axis.
+        :param t:  Time vector (if ``B0`` varies with time).
+        """
+        self.B0, _, self.tB0 = self._setPrescribedData(data=B0, times=t)
+
+
+    def setMinorRadius(self, a, t=0):
+        """
+        Prescribe the (time evolution of the) plasma minor radius.
+
+        :param a: Plasma minor radius.
+        :param t: Time vector (if ``a`` varies with time).
+        """
+        self.a, _, self.ta = self._setPrescribedData(data=a, times=t)
+
+
+    def setElongation(self, kappa, t=0):
+        """
+        Prescribe the (time evolution of the) plasma elongation parameter.
+
+        :param kappa: Plasma elongation.
+        :param t:     Time vector (if ``kappa`` varies with time).
+        """
+        self.kappa, _, self.tkappa = self._setPrescribedData(data=kappa, times=t)
+
+
+    def fromdict(self, data):
+        """
+        Load settings from the given dictionary.
+        """
+        self.a, self.ta = data['a']['x'], data['a']['t']
+        self.B0, self.tB0 = data['B0']['x'], data['B0']['t']
+        self.kappa, self.tkappa = data['kappa']['x'], data['kappa']['t']
+
+
+    def todict(self, verify=True):
+        """
+        Returns the settings in this object as a Python dictionary.
+        """
+        if verify:
+            self.verifySettings()
+
+        data = {
+            'a': {
+                't': self.ta,
+                'x': self.a
+            },
+            'B0': {
+                't': self.tB0,
+                'x': self.B0
+            },
+            'kappa': {
+                't': self.tkappa,
+                'x': self.kappa
+            }
+        }
+
+        return data
+
+
+    def verifySettings(self):
+        """
+        Verify that the RadialGrid settings are consistent.
+        """
+        r0 = np.asarray([0])
+
+        self._verifySettingsPrescribedData('a', self.a, r0, self.ta)
+        self._verifySettingsPrescribedData('B0', self.B0, r0, self.tB0)
+        self._verifySettingsPrescribedData('kappa', self.kappa, r0, self.tkappa)
+
+

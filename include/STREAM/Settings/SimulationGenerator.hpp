@@ -18,6 +18,7 @@ namespace STREAM {
         static void DefineOptions_Grid(DREAM::Settings*);
         static void DefineOptions_T_cold(DREAM::Settings*);
         static void DefineOptions_Ions(DREAM::Settings*);
+        static void DefineOptions_Transport(const std::string&, DREAM::Settings*, bool, const std::string& subname="transport");
 
         // Equation system
         static DREAM::EquationSystem *ConstructEquationSystem(
@@ -51,6 +52,15 @@ namespace STREAM {
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
 
+        // General transport interface
+        static bool ConstructTransportTerm(
+            DREAM::FVM::Operator*, const std::string&, DREAM::FVM::Grid*,
+            enum DREAM::OptionConstants::momentumgrid_type, DREAM::EquationSystem*,
+            DREAM::Settings*, bool, bool, DREAM::TransportAdvectiveBC** abc=nullptr,
+            DREAM::TransportDiffusiveBC** dbc=nullptr,
+            struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms=nullptr,
+            const std::string& subname="transport"
+        );
         // STREAM main grid
         static DREAM::FVM::Grid *ConstructRadialGrid(DREAM::Settings*);
         static DREAM::FVM::RadialGrid *ConstructRadialGrid_Cylindrical(DREAM::Settings*);
