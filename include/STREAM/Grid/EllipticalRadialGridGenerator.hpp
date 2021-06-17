@@ -14,7 +14,7 @@ namespace STREAM {
         real_t r, r_f[2], dr, dr_f=0;
 
         // Most recently evaluated minor radius, magnetic field and elongation...
-        real_t currA=0, currB0=0, currKappa=0;
+        real_t currA=0, currB0=0, currKappa=0, currTriang=0;
 
     public:
         EllipticalRadialGridGenerator(
@@ -52,6 +52,10 @@ namespace STREAM {
         real_t FindClosestApproach(
             real_t, real_t, real_t, real_t, real_t, real_t
         );
+        real_t GetElongation(){ return currKappa; }
+        real_t GetMinorRadius(){ return currA; }
+        real_t GetTriangularity(){return currTriang; }
+        real_t GetMagneticField(){ return currB0; }
     };
 }
 
