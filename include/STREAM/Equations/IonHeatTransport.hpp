@@ -14,7 +14,6 @@ namespace STREAM {
 		DREAM::IonHandler *ions;
 		DREAM::FVM::UnknownQuantityHandler *unknowns;
 		
-		real_t dn_i;
         real_t dI_p;
         real_t dI_wall;
         real_t dT_cold;
@@ -23,7 +22,7 @@ namespace STREAM {
 		
 		len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni;
 		
-		real_t tauinv, N_i;
+		real_t tauinv, W_i;
 		
 	public:
 		IonHeatTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon,

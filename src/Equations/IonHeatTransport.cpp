@@ -49,13 +49,13 @@ void IonHeatTransport::Rebuild(
     real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
     real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(0);
     
-    this->N_i    = unknowns->GetUnknownData(id_Ni)[0];
+    this->W_i     = unknowns->GetUnknownData(id_Wi)[0];
     this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
-    this->dI_p    = - 3/2 * Constants::ec * dtauinvdIp * N_i;
-    this->dI_wall = - 3/2 * Constants::ec * dtauinvdIwall * N_i;
-    this->dT_cold = - 3/2 * Constants::ec * dtauinvdTcold * N_i;
-    this->dW_i    = - 3/2 * Constants::ec * dtauinvdWi * N_i;
-    this->dN_i    = - 3/2 * Constants::ec * (dtauinvdNi * N_i + tauinv);
+    this->dI_p    = - 2/3 * dtauinvdIp * W_i;
+    this->dI_wall = - 2/3 * dtauinvdIwall * W_i;
+    this->dT_cold = - 2/3 * dtauinvdTcold * W_i;
+    this->dW_i    = - 2/3 * ( dtauinvdWi * W_i + tauinv);
+    this->dN_i    = - 2/3 * dtauinvdNi * W_i;
     
 }
 
@@ -86,13 +86,13 @@ bool IonHeatTransport::SetCSJacobianBlock(
 void IonHeatTransport::SetCSMatrixElements(
     FVM::Matrix *mat, real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
-    mat->SetElement(rOffset+Z0, rOffset+Z0, -3/2 * Constants::ec*tauinv);
+    mat->SetElement(rOffset+Z0, rOffset+Z0, -2/3 * tauinv);
 } 
 
 
 void IonHeatTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
-    vec[rOffset+Z0]=-3/2 * Constants::ec*N_i*tauinv; 
+    vec[rOffset+Z0]=-2/3 * W_i * tauinv; 
 }
 
