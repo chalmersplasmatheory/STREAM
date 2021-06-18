@@ -1,7 +1,10 @@
 #ifndef _STREAM_EQUATIONS_NEUTRAL_INFLUX_HPP
 #define _STREAM_EQUATIONS_NEUTRAL_INFLUX_HPP
 
+#include "DREAM/IonHandler.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
+#include "STREAM/Equations/SputteredRecycledCoefficient"
+/*#include "STREAM/Equations/PlasmaVolume.hpp" ***Add when have PlasmaVolume class */
 #include <gsl/gsl_math.h>
 
 namespace STREAM{
