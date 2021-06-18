@@ -63,6 +63,8 @@ bool IonTransport::SetCSJacobianBlock(
     const len_t uqtyId, const len_t derivId, FVM::Matrix *jac, const real_t*,
     const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
+	//if(Z0<1)
+	//	return false;
     real_t n_i = ions->GetIonDensity(0, iIon, Z0);
     
     if(derivId==uqtyId){
