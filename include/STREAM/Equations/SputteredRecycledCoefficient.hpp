@@ -5,8 +5,8 @@ namespace STREAM{
     class SputteredRecycledCoefficient {
         private: 
             std::unordered_map< len_t /*iIon1*/, std::unordered_map<len_t /*iIon2*/, real_t /*Y*/> > 
-                coefficientTable = {
-                    {/* D */ 1, {
+                coefficientTable = { //Är detta korekt syntax för unordered_map?
+                    {/* D */ 1, { //Är detta ett rimligt sätt att göra unordered_map på? Dvs kalla D, C, O för 1, 6, 8? 
                                 {/* C */ 6, 0},
                                 {/* O */ 8, 0}
                                }
@@ -38,9 +38,9 @@ namespace STREAM{
                 coefficient_D_row[ O ] = 1;
         */
         public:
-            SputteredRecycledCoefficient();
-            void add(len_t upper, len_t lower, real_t coefficient);
-            real_t get(len_t upper, len_t lower);
+            SputteredRecycledCoefficient(); // Denna ska vara tom va? Det enda vi vill ha är tabellen
+            void AddSRCoefficient(len_t upper, len_t lower, real_t coefficient);
+            real_t GetSRCoefficient(len_t upper, len_t lower);
     };
 }
 #endif/*_STREAM_EQUATIONS_SPUTTERED_RECYCLED_COEFFICIENT_HPP*/
