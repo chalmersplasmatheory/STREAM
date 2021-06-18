@@ -8,7 +8,7 @@
 namespace STREAM {
     class EllipticalRadialGridGenerator : public DREAM::FVM::RadialGridGenerator {
     protected:
-        DREAM::FVM::Interpolator1D *a, *B0, *kappa;
+        DREAM::FVM::Interpolator1D *a, *B0, *kappa, *delta;
 
         // Radial grid points considered
         real_t r, r_f[2], dr, dr_f=0;

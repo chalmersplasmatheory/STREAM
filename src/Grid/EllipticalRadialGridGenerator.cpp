@@ -14,14 +14,15 @@ using namespace STREAM;
  */
 EllipticalRadialGridGenerator::EllipticalRadialGridGenerator(
     DREAM::FVM::Interpolator1D *a, DREAM::FVM::Interpolator1D *B0,
-    DREAM::FVM::Interpolator1D *kappa
-) : RadialGridGenerator(1), a(a), B0(B0), kappa(kappa) {
+    DREAM::FVM::Interpolator1D *kappa, DREAM::FVM::Interpolator1D *delta
+) : RadialGridGenerator(1), a(a), B0(B0), kappa(kappa), delta(delta) {
 }
 
 /**
  * Destructor.
  */
 EllipticalRadialGridGenerator::~EllipticalRadialGridGenerator() {
+    delete this->delta;
     delete this->kappa;
     delete this->B0;
     delete this->a;
@@ -38,10 +39,14 @@ bool EllipticalRadialGridGenerator::NeedsRebuild(const real_t t) const {
     real_t
         na     = *this->a->Eval(t),
         nB0    = *this->B0->Eval(t),
-        nkappa = *this->kappa->Eval(t);
+        nkappa = *this->kappa->Eval(t),
+        ndelta = *this->delta->Eval(t);
 
     // Only rebuild if values have changed...
-    return (na != currA || nB0 != currB0 || nkappa != currKappa);
+    return (
+        na != currA || nB0 != currB0 ||
+        nkappa != currKappa || ndelta != currTriang
+    );
 }
 
 /**
@@ -50,9 +55,10 @@ bool EllipticalRadialGridGenerator::NeedsRebuild(const real_t t) const {
 bool EllipticalRadialGridGenerator::Rebuild(
     const real_t t, DREAM::FVM::RadialGrid *rg
 ) {
-    this->currA     = *this->a->Eval(t);
-    this->currB0    = *this->B0->Eval(t);
-    this->currKappa = *this->kappa->Eval(t);
+    this->currA      = *this->a->Eval(t);
+    this->currB0     = *this->B0->Eval(t);
+    this->currKappa  = *this->kappa->Eval(t);
+    this->currTriang = *this->delta->Eval(t);
 
     // We always consider the point in between r=0 and r=a
     // in STREAM simulations.

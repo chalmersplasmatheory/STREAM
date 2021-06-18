@@ -21,6 +21,7 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "a");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "B0");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "kappa");
+    DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "delta");
     
     DREAM::SimulationGenerator::DefineOptions_f_ripple(MODULENAME, s);
 }
@@ -71,10 +72,13 @@ DREAM::FVM::RadialGrid *SimulationGenerator::ConstructRadialGrid_Elliptical(
     // Plasma elongation
     DREAM::FVM::Interpolator1D *kappa
         = DREAM::SimulationGenerator::LoadDataT(MODULENAME, s, "kappa");
+    // Plasma triangularity
+    DREAM::FVM::Interpolator1D *delta
+        = DREAM::SimulationGenerator::LoadDataT(MODULENAME, s, "delta");
 
     return new DREAM::FVM::RadialGrid(
         new EllipticalRadialGridGenerator(
-            a, B0, kappa
+            a, B0, kappa, delta
         )
     );
 }
