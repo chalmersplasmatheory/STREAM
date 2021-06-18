@@ -17,6 +17,7 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Settings/Transport.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/SputteredRecycledCoefficient.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/NeutralInflux.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/RunawayElectronConfinementTime.cpp"
 )
 
 add_library(stream STATIC ${stream})

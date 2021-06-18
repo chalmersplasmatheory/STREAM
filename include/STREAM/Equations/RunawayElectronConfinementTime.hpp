@@ -29,13 +29,13 @@ namespace STREAM{
                         real_t I_ref = 100000;
                         real_t B_v   = 1e-3;
                 
-                        ConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2);
+                        RunawayElectronConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2);
                         
-                        real_t EvaluateConfinementTime(len_t ir);
+                        real_t EvaluateRunawayElectronConfinementTime(len_t ir);
 
-                        real_t EvaluateConfinementTime_dIp(len_t ir);
+                        real_t EvaluateRunawayElectronConfinementTime_dIp(len_t ir);
 
-                        real_t EvaluateConfinementTime_dIwall(len_t ir);
+                        real_t EvaluateRunawayElectronConfinementTime_dIwall(len_t ir);
     };
 }
 

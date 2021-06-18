@@ -12,7 +12,7 @@ using namespace std;
 /**
  * Constructor
  */
-ConfinementTime::ConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2) {
+RunawayElectronConfinementTime::RunawayElectronConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2) {
     unknowns = u;
     radials  = r;
     this->l_MK2=l_MK2;
@@ -24,7 +24,7 @@ ConfinementTime::ConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadia
 /**
  * Evaluates the inverted confinement time
  */
-real_t ConfinementTime::EvaluateConfinementTime(len_t ir){
+real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
 
@@ -37,7 +37,7 @@ real_t ConfinementTime::EvaluateConfinementTime(len_t ir){
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the plasma current
  */
-real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir){
+real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dIp(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
 
@@ -50,7 +50,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir){
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the wall current
  */
-real_t ConfinementTime::EvaluateConfinementTime_dIwall(len_t ir){
+real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dIwall(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
 
