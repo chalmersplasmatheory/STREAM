@@ -12,11 +12,14 @@ NeutralInflux::NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficie
     /*this->V_p    = PV->GetPlasmaVolume(); ***Add when have PlasmaVolume class */
 } // Korrekt sätt att hantera constructor?
 
-real_t DeuteriumRecyclingCoefficient(real_t t){
+real_t NeutralInflux::DeuteriumRecyclingCoefficient(real_t t){
     return c1-c2*(1-exp(-t/c3));
 }
 
-real_t EvaluateNeutralInflux(real_t t, const len_t iIon){
+/**
+ * Evaluates the neutral influx
+ */
+real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
     len_t Z   = ions->GetZ(const len_t iIon); // Bör denna vara en variabel i funktionen eller klassen?
     len_t *Zs = ions->GetZs(); // Är detta en array med alla aktiva ämnens Z? 
     real_t Gamma0=0; // Är detta rätt sätt att börja en summa?
@@ -40,7 +43,10 @@ real_t EvaluateNeutralInflux(real_t t, const len_t iIon){
     return Gamma0;
 }
 
-real_t EvaluateNeutralInflux_dni(real_t t, const len_t iIon){
+/**
+ * Evaluates the derivative of the neutral influx with respect to the ion species density
+ */
+real_t NeutralInflux::EvaluateNeutralInflux_dni(real_t t, const len_t iIon){
     len_t Z   = ions->GetZ(const len_t iIon); // Bör denna vara en variabel i funktionen eller klassen?
     len_t *Zs = ions->GetZs(); // Är detta en array med alla aktiva ämnens Z? 
     real_t Gamma0=0; // Är detta rätt sätt att börja en summa?
@@ -64,7 +70,10 @@ real_t EvaluateNeutralInflux_dni(real_t t, const len_t iIon){
     return Gamma0;
 }
 
-real_t EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
+/**
+ * Evaluates the derivative of the neutral influx with respect to the plasma current
+ */
+real_t NeutralInflux::EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
     real_t dtauinvdIp = this->coefftauinv->EvaluateConfinementTime_dIp(0); 
     
     len_t Z   = ions->GetZ(const len_t iIon); // Bör denna vara en variabel i funktionen eller klassen?
@@ -90,7 +99,10 @@ real_t EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
     return Gamma0;
 }
 
-real_t EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
+/**
+ * Evaluates the derivative of the neutral influx with respect to the wall current
+ */
+real_t NeutralInflux::EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
     real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0); 
     
     len_t Z   = ions->GetZ(const len_t iIon); // Bör denna vara en variabel i funktionen eller klassen?
@@ -116,7 +128,10 @@ real_t EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
     return Gamma0;
 }
 
-real_t EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
+/**
+ * Evaluates the derivative of the neutral influx with respect to the electron temperature
+ */
+real_t NeutralInflux::EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
     real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(0); 
     
     len_t Z   = ions->GetZ(const len_t iIon); // Bör denna vara en variabel i funktionen eller klassen?
@@ -142,7 +157,10 @@ real_t EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
     return Gamma0;
 }
 
-real_t EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
+/**
+ * Evaluates the derivative of the neutral influx with respect to the ion energy
+ */
+real_t NeutralInflux::EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
     real_t dtauinvdWi = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
     
     len_t Z   = ions->GetZ(const len_t iIon); // Bör denna vara en variabel i funktionen eller klassen?
@@ -168,7 +186,10 @@ real_t EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
     return Gamma0;
 }
 
-real_t EvaluateNeutralInflux_dNi(real_t t, const len_t iIon){
+/**
+ * Evaluates the derivative of the neutral influx with respect to the total ion density
+ */
+real_t NeutralInflux::EvaluateNeutralInflux_dNi(real_t t, const len_t iIon){
     real_t dtauinvdNi = this->coefftauinv->EvaluateConfinementTime_dNi(0); 
     
     len_t Z   = ions->GetZ(const len_t iIon); // Bör denna vara en variabel i funktionen eller klassen?

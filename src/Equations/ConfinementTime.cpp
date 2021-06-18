@@ -107,7 +107,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dWi(len_t ir){
 }
 
 /**
- * Evaluates the derivative of the inverted confinement time with respect to the ion density
+ * Evaluates the derivative of the inverted confinement time with respect to the total ion density
  */
 real_t ConfinementTime::EvaluateConfinementTime_dNi(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
