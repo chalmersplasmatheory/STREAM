@@ -1,6 +1,6 @@
 #include "DREAM/Constants.hpp"
 #include "DREAM/Equations/Fluid/IonChargedAdvectionDiffusionTerm.hpp"
-#include "STREAM/Equations/IonHeatTransportDiffusion.hpp"
+#include "STREAM/Equations/IonHeatTransportDiffusion3D.hpp"
 #include "DREAM/IonHandler.hpp"
 #include "DREAM/NotImplementedException.hpp"
 #include "FVM/Grid/Grid.hpp"
@@ -121,7 +121,7 @@ void IonHeatTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
         real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir); 
         real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir); 
         real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir); 
-        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(ir); 
+        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(ir); 
         real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
         real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(ir);
         

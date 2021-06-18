@@ -37,7 +37,7 @@ namespace STREAM{
 
                         real_t EvaluateConfinementTime_dIwall(len_t ir);
 
-                        real_t EvaluateConfinementTime_dTe(len_t ir);
+                        real_t EvaluateConfinementTime_dTcold(len_t ir);
 
                         real_t EvaluateConfinementTime_dWi(len_t ir);
                         

@@ -32,7 +32,7 @@ namespace STREAM{
 
             real_t EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon);
 
-            real_t EvaluateNeutralInflux_dTe(real_t t, const len_t iIon);
+            real_t EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon);
 
             real_t EvaluateNeutralInflux_dWi(real_t t, const len_t iIon);
             

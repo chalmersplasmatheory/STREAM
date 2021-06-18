@@ -137,8 +137,8 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
 /**
  * Evaluates the derivative of the neutral influx with respect to the electron temperature
  */
-real_t NeutralInflux::EvaluateNeutralInflux_dTe(real_t t, const len_t iIon){
-    real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTe(0); 
+real_t NeutralInflux::EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
+    real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(0); 
     
     len_t Z   = ions->GetZ(iIon); 
     const len_t *Zs = ions->GetZs(); 
