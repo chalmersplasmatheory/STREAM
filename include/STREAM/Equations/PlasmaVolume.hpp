@@ -8,9 +8,9 @@
 
 
 namespace STREAM{
-    class PlasmaVolume{ //: public { should it be a subclass?
+    class PlasmaVolume{ 
     private:
-        DREAM::FVM::Grid *grid; //Is this correct when it is not a subclass?
+        DREAM::FVM::Grid *grid; 
         len_t iz;
         real_t vessel_vol;
         DREAM::FVM::UnknownQuantityHandler *unknowns;

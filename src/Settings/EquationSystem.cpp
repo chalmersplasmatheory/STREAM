@@ -2,6 +2,7 @@
 #include "DREAM/EquationSystem.hpp"
 #include "DREAM/OtherQuantityHandler.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
+#include "STREAM/Settings/OptionConstants.hpp"
 
 
 using namespace STREAM;
@@ -137,6 +138,7 @@ void SimulationGenerator::ConstructEquations(
     DREAM::SimulationGenerator::ConstructEquation_n_cold(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_n_hot(eqsys, s);
     ConstructEquation_T_cold(eqsys, s, adas, amjuel, nist, oqty_terms);   // TODO
+    ConstructEquation_lambda_i(eqsys, s, adas);
 
     enum DREAM::OptionConstants::uqty_T_i_eqn typeTi =
         (DREAM::OptionConstants::uqty_T_i_eqn)s->GetInteger("eqsys/n_i/typeTi");
@@ -178,5 +180,6 @@ void SimulationGenerator::ConstructUnknowns(
         eqsys->GetScalarGrid(), eqsys->GetFluidGrid(),
         eqsys->GetHotTailGrid(), eqsys->GetRunawayGrid()
     );
+    eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid());
 }
 

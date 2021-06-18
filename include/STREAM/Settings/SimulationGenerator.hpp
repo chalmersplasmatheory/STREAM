@@ -51,7 +51,12 @@ namespace STREAM {
             DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
-
+        
+        //Mean free path equation
+        static void ConstructEquation_lambda_i(
+            DREAM::EquationSystem*, DREAM::Settings*, DREAM::ADAS*
+        );
+        
         // General transport interface
         static bool ConstructTransportTerm(
             DREAM::FVM::Operator*, const std::string&, DREAM::FVM::Grid*,
