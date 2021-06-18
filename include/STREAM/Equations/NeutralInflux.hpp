@@ -3,7 +3,7 @@
 
 #include "DREAM/IonHandler.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
-#include "STREAM/Equations/SputteredRecycledCoefficient"
+#include "STREAM/Equations/SputteredRecycledCoefficient.hpp"
 /*#include "STREAM/Equations/PlasmaVolume.hpp" ***Add when have PlasmaVolume class */
 #include <gsl/gsl_math.h>
 

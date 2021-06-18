@@ -10,11 +10,13 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Equations/ConfinementTime.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronTransportDiffusion.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronHeatTransportDiffusion.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Equations/IonTransportDiffusion.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Equations/IonHeatTransportDiffusion.cpp"
+#    "${PROJECT_SOURCE_DIR}/src/Equations/IonTransportDiffusion3D.cpp"
+#    "${PROJECT_SOURCE_DIR}/src/Equations/IonHeatTransportDiffusion3D.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/IonTransport.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/IonHeatTransport.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/Transport.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/SputteredRecycledCoefficient.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/NeutralInflux.cpp"
 )
 
 add_library(stream STATIC ${stream})
