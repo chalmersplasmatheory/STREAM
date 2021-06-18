@@ -138,7 +138,7 @@ void SimulationGenerator::ConstructEquations(
     DREAM::SimulationGenerator::ConstructEquation_n_cold(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_n_hot(eqsys, s);
     ConstructEquation_T_cold(eqsys, s, adas, amjuel, nist, oqty_terms);   // TODO
-    ConstructEquation_lambda_i(eqsys, s, adas);
+    //ConstructEquation_lambda_i(eqsys, s, adas); TODO: Uncomment once MeanFreePath.cpp is added to CMakeLists.txt
 
     enum DREAM::OptionConstants::uqty_T_i_eqn typeTi =
         (DREAM::OptionConstants::uqty_T_i_eqn)s->GetInteger("eqsys/n_i/typeTi");

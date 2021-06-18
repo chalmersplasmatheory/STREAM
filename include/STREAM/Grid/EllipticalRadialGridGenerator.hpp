@@ -19,7 +19,7 @@ namespace STREAM {
     public:
         EllipticalRadialGridGenerator(
             DREAM::FVM::Interpolator1D*, DREAM::FVM::Interpolator1D*,
-            DREAM::FVM::Interpolator1D*
+            DREAM::FVM::Interpolator1D*, DREAM::FVM::Interpolator1D*
         );
         ~EllipticalRadialGridGenerator();
 
