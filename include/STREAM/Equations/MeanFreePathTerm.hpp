@@ -20,6 +20,8 @@ namespace STREAM{
 	public:
 	    //Constructor
 		MeanFreePathTerm(DREAM::FVM::Grid *g, len_t iz, DREAM::FVM::UnknownQuantityHandler *u, DREAM::ADAS *adas, DREAM::IonHandler *ions);
+
+        virtual void EvaluableTransform(real_t*) override;
 		
 		//Methods implemented here
 		virtual len_t GetNumberOfNonZerosPerRow() const override { return 1; }

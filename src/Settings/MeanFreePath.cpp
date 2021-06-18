@@ -1,3 +1,5 @@
+
+#include "DREAM/Equations/Fluid/IonSpeciesIdentityTerm.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
 #include "STREAM/Equations/MeanFreePathTerm.hpp"
 #include "STREAM/Settings/OptionConstants.hpp"
@@ -5,14 +7,15 @@
 using namespace STREAM;
 
     void SimulationGenerator::ConstructEquation_lambda_i(
-        DREAM::EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas){
+        DREAM::EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas
+    ){
         DREAM::FVM::Operator *op_lambda_i = new DREAM::FVM::Operator(eqsys->GetFluidGrid());
         DREAM::FVM::Operator *op_W_i = new DREAM::FVM::Operator(eqsys->GetFluidGrid());
         
         DREAM::IonHandler *ions = eqsys->GetIonHandler();
         
         for (len_t iz = 0; iz<ions->GetNZ(); iz++){
-            op_lambda_i->AddTerm(new IonIdentityTerm(eqsys->GetFluidGrid(), iz));
+            op_lambda_i->AddTerm(new DREAM::IonSpeciesIdentityTerm(eqsys->GetFluidGrid(), iz, -1.0));
             op_W_i->AddTerm(new MeanFreePathTerm(eqsys->GetFluidGrid(), iz, eqsys->GetUnknownHandler(), adas, ions));
         }
         

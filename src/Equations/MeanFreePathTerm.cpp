@@ -17,11 +17,22 @@ using namespace std; //Standard functions
         id_T_cold = u->GetUnknownID(OptionConstants::UQTY_T_COLD); 
         id_n_cold = u->GetUnknownID(OptionConstants::UQTY_N_COLD);
     }
+
+    /**
+     * Evaluate this mean-free path term, i.e. calculate
+     *
+     *   lambda_i = v_i / (n_i*I_i)
+     * 
+     * vec: Vector containing 'lambda_i' on return.
+     */
+    void MeanFreePathTerm::EvaluableTransform(real_t *vec) {
+        this->SetVectorElements(vec, nullptr);
+    }
     
     //Rebuild the equation term 
     void MeanFreePathTerm::Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*){
-        real_t W_i = unknowns->GetUnknownData(id_W_i)[0];
-        real_t n_i = unknowns->GetUnknownData(id_n_i)[0];
+        real_t W_i = unknowns->GetUnknownData(id_W_i)[this->iz];
+        real_t n_i = unknowns->GetUnknownData(id_n_i)[this->iz];
         real_t T_cold = unknowns->GetUnknownData(id_T_cold)[0];
         real_t n_cold = unknowns->GetUnknownData(id_n_cold)[0]; 
                 
@@ -37,8 +48,8 @@ using namespace std; //Standard functions
         if (derivId != id_W_i && derivId != id_n_i && derivId != id_T_cold && derivId != id_n_cold)             
             return false;
     
-        real_t W_i = unknowns->GetUnknownData(id_W_i)[0];
-        real_t n_i = unknowns->GetUnknownData(id_n_i)[0];
+        real_t W_i = unknowns->GetUnknownData(id_W_i)[this->iz];
+        real_t n_i = unknowns->GetUnknownData(id_n_i)[this->iz];
         real_t T_cold = unknowns->GetUnknownData(id_T_cold)[0];
         real_t n_cold = unknowns->GetUnknownData(id_n_cold)[0];
         
