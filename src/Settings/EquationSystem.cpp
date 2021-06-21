@@ -69,12 +69,11 @@ void SimulationGenerator::ConstructEquations(
     EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas,
     DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms,
-    EllipticalRadialGridGenerator *r, DREAM::IonHandler *ihdl,  // Rätt?
 ) {
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
     DREAM::FVM::Grid *hottailGrid = eqsys->GetHotTailGrid();
     DREAM::FVM::Grid *runawayGrid = eqsys->GetRunawayGrid();
-    DREAM::FVM::UnknownQuantityHandler *unknowns = eqsys->GetUnknownHandler();
+    DREAM::FVM::UnknownQuantityHandler *unknowns = eqsys->GetUnknownHandler();    
 
     enum DREAM::OptionConstants::momentumgrid_type ht_type = eqsys->GetHotTailGridType();
     enum DREAM::OptionConstants::momentumgrid_type re_type = eqsys->GetRunawayGridType();
@@ -118,9 +117,11 @@ void SimulationGenerator::ConstructEquations(
     DREAM::PostProcessor *postProcessor = new DREAM::PostProcessor(
         fluidGrid, unknowns, pThreshold, pMode
     );
-    eqsys->SetPostProcessor(postProcessor);
+    eqsys->SetPostProcessor(postProcessor); 
     
     // Confinement time 
+    EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); //Korrekt?
+    
     real_t l_MK2 = 1; // Ska denna sättas här?
     ConfinementTime *confinementTime = new ConfinementTime(
         unknowns, r, l_MK2
@@ -128,13 +129,17 @@ void SimulationGenerator::ConstructEquations(
     eqsys->SetConfinementTime(confinementTime); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
     
     // Neutral influx 
+    SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
+    PlasmaVolume *PV = eqsys->getPlasmaVolume(); //Korrekt?
+    ConfinementTime *coefftauinv = eqsys->GetConfinementTime();//Korrekt? 
+
     real_t c1 = 1.1; // Ska dessa sättas här?
     real_t c2 = 0.09;
     real_t c3 = 0.1;
     Neautral Influx *neutralInflux = new NeutralInflux(
-        ihdl, SRC, coefftauinv, PV, c1, c2, c3 // Hur göra med SRC och coefftauinv?
+        ionHandler, SRC, coefftauinv, PV, c1, c2, c3 // Hur göra med SRC och coefftauinv?
     );
-    eqsys->SetConfinementTime(confinementTime); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
+    eqsys->SetNeutralInflux(neutralInflux); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
 
     // Hot electron quantities
     if (eqsys->HasHotTailGrid()) {
