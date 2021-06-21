@@ -256,6 +256,4 @@ void SimulationGenerator::ConstructEquation_ion_transport(EquationSystem*, DREAM
     
     eqsys->SetOperator(OptionConstants::UQTY_ION_TRANSPORT, OptionConstants::UQTY_ION_TRANSPORT, op_ion_transport, "-n_i^(j)/tau_D");
     eqsys->SetOperator(OptionConstants::UQTY_ION_TRANSPORT, DREAM::OptionConstants::UQTY_ION_SPECIES, op_n_i);
-    
-    // Vilket initialvärde?
 }

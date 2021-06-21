@@ -202,6 +202,4 @@ void SimulationGenerator::ConstructEquation_ion_heat_transport(EquationSystem*, 
     
     eqsys->SetOperator(OptionConstants::UQTY_ION_HEAT_TRANSPORT, OptionConstants::UQTY_ION_HEAT_TRANSPORT, op_ion_transport, "- sum_i sum_(j>1) 3/2*n_i^(j)*T_i/tau_D");
     eqsys->SetOperator(OptionConstants::UQTY_ION_HEAT_TRANSPORT, DREAM::OptionConstants::UQTY_WI_ENER, op_n_i);
-    
-    // Vilket initialvärde?
 }
