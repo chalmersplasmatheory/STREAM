@@ -189,3 +189,19 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     DREAM::SimulationGenerator::ConstructEquation_W_cold(eqsys, s);
 }
 
+void SimulationGenerator::ConstructEquation_ion_heat_transport(EquationSystem*, DREAM::Settings*) {
+    DREAM::FVM::Operator *op_ion_heat_transport = new DREAM::FVM::Operator(eqsys->GetFluidGrid());
+    DREAM::FVM::Operator *op_W_i =  new DREAM::FVM::Operator(eqsys->GetFluidGrid());
+    
+    DREAM::IonHandler *ions = eqsys->GetIonHandler();
+    
+    for (len-t iz=1; iz<ions->GetNZ(); iz++) {// Ska vara iz=1 och inte 0?
+        op_ion_heat_transport->AddTerm(new DREAM::IonSpeciesIdentityTerm(eqsys->GetFluidGrid(), iz, -1.0));
+        op_W_i->AddTerm(new IonHeatTransport(eqsys->GetFluidGrid(), ions, iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
+    }
+    
+    eqsys->SetOperator(OptionConstants::UQTY_ION_HEAT_TRANSPORT, OptionConstants::UQTY_ION_HEAT_TRANSPORT, op_ion_transport, "- sum_i sum_(j>1) 3/2*n_i^(j)*T_i/tau_D");
+    eqsys->SetOperator(OptionConstants::UQTY_ION_HEAT_TRANSPORT, DREAM::OptionConstants::UQTY_WI_ENER, op_n_i);
+    
+    // Vilket initialvärde?
+}

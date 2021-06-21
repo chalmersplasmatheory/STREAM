@@ -3,6 +3,8 @@
 #include "DREAM/OtherQuantityHandler.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
 #include "STREAM/Settings/OptionConstants.hpp"
+#include "STREAM/Equations/ConfinementTime.hpp"
+#include "STREAM/Equations/NeutralInflux.hpp"
 
 
 using namespace STREAM;
@@ -203,5 +205,7 @@ void SimulationGenerator::ConstructUnknowns(
         eqsys->GetHotTailGrid(), eqsys->GetRunawayGrid()
     );
     eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid());
+    eqsys->SetUnknown(OptionConstants::UQTY_ION_HEAT_TRANSPORT, OptionConstants::UQTY_ION_HEAT_TRANSPORT_DESC, eqsys->GetFluidGrid());
+    eqsys->SetUnknown(OptionConstants::UQTY_ION_TRANSPORT, OptionConstants::UQTY_ION_TRANSPORT_DESC, eqsys->GetFluidGrid());
 }
 

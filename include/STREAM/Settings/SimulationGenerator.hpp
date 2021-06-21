@@ -57,6 +57,16 @@ namespace STREAM {
             EquationSystem*, DREAM::Settings*, DREAM::ADAS*
         );
         
+        //Ion heat transport
+        static void ConstructEquation_ion_heat_transport(
+            EquationSystem*, DREAM::Settings*
+        );
+        
+        //Ion heat transport
+        static void ConstructEquation_ion_transport(
+            EquationSystem*, DREAM::Settings*
+        );
+        
         // General transport interface
         static bool ConstructTransportTerm(
             DREAM::FVM::Operator*, const std::string&, DREAM::FVM::Grid*,
