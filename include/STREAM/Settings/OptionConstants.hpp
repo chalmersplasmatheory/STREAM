@@ -12,10 +12,14 @@ namespace STREAM {
         // Please, also maintain alphabetical order.
         static const char
             *UQTY_LAMBDA_I;
+            *UQTY_ION_HEAT_TRANSPORT;
+            *UQTY_ION_TRANSPORT;
             
         // Descriptions of unknown quantities
         static const char
-            *UQTY_LAMBDA_I_DESC;            
+            *UQTY_LAMBDA_I_DESC; 
+            *UQTY_ION_HEAT_TRANSPORT_DESC;
+            *UQTY_ION_TRANSPORT_DESC;
     };
 }
 #endif/*_STREAM_OPTION_CONSTANTS_HPP*/
