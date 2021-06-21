@@ -20,6 +20,7 @@ namespace STREAM{
         PlasmaVolume(DREAM::FVM::Grid *g, len_t iz, real_t vessel_vol, DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r); 
         real_t GetPlasmaVolume() const; 
         real_t GetNeutralVolume(const len_t iz);
+        real_t GetTotalNeutralVolume(const len_t iz);
     };
 }
 

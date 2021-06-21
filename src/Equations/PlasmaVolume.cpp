@@ -29,7 +29,6 @@ using namespace DREAM;
         } else {
             return GetPlasmaVolume();
         }
-        
         /**
         //Eq. 13 in startup-appendix
         if (lambda_i <= a){
@@ -38,4 +37,9 @@ using namespace DREAM;
             return GetPlasmaVolume();
         }
         */ 
+    }
+    
+    //gamma_n,i * vessel volume V, with gamma_n,i from eq. 12 in startup-appendix
+    real_t PlasmaVolume::GetTotalNeutralVolume(const len_t iz){
+        return vessel_vol - GetPlasmaVolume() + GetNeutralVolume(iz);
     }
