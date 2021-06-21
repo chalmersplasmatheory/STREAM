@@ -55,7 +55,6 @@ namespace STREAM {
         
         real_t GetMinorRadius(){ return currA; }
         real_t GetElongation(){ return currKappa; }
-        real_t GetMinorRadius(){ return currA; }
         real_t GetTriangularity(){return currTriang; }
         real_t GetMagneticField(){ return currB0; }
     };

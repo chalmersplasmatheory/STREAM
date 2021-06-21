@@ -4,7 +4,7 @@
 #include "DREAM/IonHandler.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
 #include "STREAM/Equations/SputteredRecycledCoefficient.hpp"
-/*#include "STREAM/Equations/PlasmaVolume.hpp" ***Add when have PlasmaVolume class */
+#include "STREAM/Equations/PlasmaVolume.hpp" 
 #include <gsl/gsl_math.h>
 
 namespace STREAM{
@@ -13,16 +13,16 @@ namespace STREAM{
             DREAM::IonHandler *ions;
             SputteredRecycledCoefficient *SRC;
             ConfinementTime *coefftauinv; 
-            /*PlasmaVolume *PV; ***Add when have PlasmaVolume class */
+            PlasmaVolume *PV; 
 
             real_t c1, c2, c3;
             
-            real_t tauinv/*, V_p ***Add when have PlasmaVolume class */;
+            real_t tauinv, V_p;
 
             real_t DeuteriumRecyclingCoefficient(real_t t);
         
         public:
-            NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, /*PlasmaVolume *PV, ***Add when have PlasmaVolume class */ real_t c1, real_t c2, real_t c3);
+            NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, PlasmaVolume *PV,  real_t c1, real_t c2, real_t c3);
             
             real_t EvaluateNeutralInflux_dni(real_t t, const len_t iIon);
                         

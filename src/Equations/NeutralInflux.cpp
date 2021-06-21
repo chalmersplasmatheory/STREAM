@@ -7,9 +7,9 @@ using namespace std;
 /**
  * Constructor
  */
-NeutralInflux::NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, /*PlasmaVolume *PV, ***Add when have PlasmaVolume class */ real_t c1, real_t c2, real_t c3) : ions(ihdl), SRC(SRC), coefftauinv(coefftauinv), /*PV(PV), ***Add when have PlasmaVolume class */ c1(c1), c2(c2), c3(c3) {
+NeutralInflux::NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, PlasmaVolume *PV, real_t c1, real_t c2, real_t c3) : ions(ihdl), SRC(SRC), coefftauinv(coefftauinv), PV(PV), c1(c1), c2(c2), c3(c3) {
     this->tauinv = coefftauinv->EvaluateConfinementTime(0);
-    /*this->V_p    = PV->GetPlasmaVolume(); ***Add when have PlasmaVolume class */
+    this->V_p    = PV->GetPlasmaVolume(); 
 } // Korrekt sätt att hantera constructor?
 
 real_t NeutralInflux::DeuteriumRecyclingCoefficient(real_t t){
@@ -39,7 +39,7 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += /* V_p *  ***Add when have PlasmaVolume class */Y * n_ij * tauinv;
+            Gamma0 += V_p * Y * n_ij * tauinv;
         }
     }
     return Gamma0;
@@ -66,7 +66,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dni(real_t t, const len_t iIon){
             Y=this->SRC->GetSRCoefficient(Z,Zs[i]);
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
-            Gamma0 += /* V_p *  ***Add when have PlasmaVolume class */Y * tauinv;
+            Gamma0 += V_p * Y * tauinv;
         }
     }
     return Gamma0;
@@ -97,7 +97,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += /* V_p *  ***Add when have PlasmaVolume class */Y * n_ij * dtauinvdIp;
+            Gamma0 += V_p * Y * n_ij * dtauinvdIp;
         }
     }
     return Gamma0;
@@ -128,7 +128,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += /* V_p *  ***Add when have PlasmaVolume class */Y * n_ij * dtauinvdIwall;
+            Gamma0 += V_p * Y * n_ij * dtauinvdIwall;
         }
     }
     return Gamma0;
@@ -159,7 +159,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += /* V_p *  ***Add when have PlasmaVolume class */Y * n_ij * dtauinvdTcold;
+            Gamma0 += V_p * Y * n_ij * dtauinvdTcold;
         }
     }
     return Gamma0;
@@ -190,7 +190,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += /* V_p *  ***Add when have PlasmaVolume class */Y * n_ij * dtauinvdWi;
+            Gamma0 += V_p * Y * n_ij * dtauinvdWi;
         }
     }
     return Gamma0;
@@ -221,7 +221,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dNi(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += /* V_p *  ***Add when have PlasmaVolume class */Y * n_ij * dtauinvdNi;
+            Gamma0 += V_p * Y * n_ij * dtauinvdNi;
         }
     }
     return Gamma0;
