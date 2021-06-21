@@ -9,5 +9,6 @@ namespace STREAM {
             
             EquationSystem(DREAM::FVM::Grid*, DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*, 
             ConfinementTime*, NeutralInflux*);
-    }
+    };
 }
+#endif /*_STREAM_EQUATION_SYSTEM_HPP*/
