@@ -21,46 +21,46 @@ namespace STREAM {
         static void DefineOptions_Transport(const std::string&, DREAM::Settings*, bool, const std::string& subname="transport");
 
         // Equation system
-        static DREAM::EquationSystem *ConstructEquationSystem(
+        static EquationSystem *ConstructEquationSystem(
             DREAM::Settings*, DREAM::FVM::Grid*, DREAM::FVM::Grid*,
             DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*
         );
         static void ConstructEquations(
-            DREAM::EquationSystem*, DREAM::Settings*, DREAM::ADAS*,
+            EquationSystem*, DREAM::Settings*, DREAM::ADAS*,
             DREAM::AMJUEL*, DREAM::NIST*,
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
         static void ConstructUnknowns(
-            DREAM::EquationSystem*, DREAM::Settings*
+            EquationSystem*, DREAM::Settings*
         );
 
         // Ion density equation
         static void ConstructEquation_Ions(
-            DREAM::EquationSystem*, DREAM::Settings*,
+            EquationSystem*, DREAM::Settings*,
             DREAM::ADAS*, DREAM::AMJUEL*
         );
 
         // Temperature equation
         static void ConstructEquation_T_cold(
-            DREAM::EquationSystem*, DREAM::Settings*,
+            EquationSystem*, DREAM::Settings*,
             DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
         static void ConstructEquation_T_cold_selfconsistent(
-            DREAM::EquationSystem*, DREAM::Settings*,
+            EquationSystem*, DREAM::Settings*,
             DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
         
         //Mean free path equation
         static void ConstructEquation_lambda_i(
-            DREAM::EquationSystem*, DREAM::Settings*, DREAM::ADAS*
+            EquationSystem*, DREAM::Settings*, DREAM::ADAS*
         );
         
         // General transport interface
         static bool ConstructTransportTerm(
             DREAM::FVM::Operator*, const std::string&, DREAM::FVM::Grid*,
-            enum DREAM::OptionConstants::momentumgrid_type, DREAM::EquationSystem*,
+            enum DREAM::OptionConstants::momentumgrid_type, EquationSystem*,
             DREAM::Settings*, bool, bool, DREAM::TransportAdvectiveBC** abc=nullptr,
             DREAM::TransportDiffusiveBC** dbc=nullptr,
             struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms=nullptr,

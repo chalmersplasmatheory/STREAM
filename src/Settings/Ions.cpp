@@ -35,7 +35,7 @@ void SimulationGenerator::DefineOptions_Ions(DREAM::Settings *s) {
  * ion densities for each charge state.
  */
 void SimulationGenerator::ConstructEquation_Ions(
-    DREAM::EquationSystem *eqsys, DREAM::Settings *s,
+    EquationSystem *eqsys, DREAM::Settings *s,
     DREAM::ADAS *adas, DREAM::AMJUEL *amjuel
 ) {
     const real_t t0 = 0;

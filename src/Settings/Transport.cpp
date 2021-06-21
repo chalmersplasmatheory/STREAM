@@ -54,7 +54,7 @@ void SimulationGenerator::DefineOptions_Transport(
 bool SimulationGenerator::ConstructTransportTerm(
     DREAM::FVM::Operator *oprtr, const string& mod, DREAM::FVM::Grid *grid,
     enum DREAM::OptionConstants::momentumgrid_type momtype,
-    DREAM::EquationSystem *eqsys,
+    EquationSystem *eqsys,
     DREAM::Settings *s, bool kinetic, bool heat,
     DREAM::TransportAdvectiveBC **advective_bc,
     DREAM::TransportDiffusiveBC **diffusive_bc,

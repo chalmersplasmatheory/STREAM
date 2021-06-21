@@ -38,7 +38,7 @@ void SimulationGenerator::DefineOptions_T_cold(DREAM::Settings *s) {
  * Construct the equation for the temperature.
  */
 void SimulationGenerator::ConstructEquation_T_cold(
-    DREAM::EquationSystem *eqsys, DREAM::Settings *s,
+    EquationSystem *eqsys, DREAM::Settings *s,
     DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
@@ -66,7 +66,7 @@ void SimulationGenerator::ConstructEquation_T_cold(
  * Construct the equation for a self-consistent temperature evolution.
  */
 void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
-    DREAM::EquationSystem *eqsys, DREAM::Settings *s,
+    EquationSystem *eqsys, DREAM::Settings *s,
     DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {

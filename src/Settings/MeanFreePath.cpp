@@ -7,7 +7,7 @@
 using namespace STREAM;
 
     void SimulationGenerator::ConstructEquation_lambda_i(
-        DREAM::EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas
+        EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas
     ){
         DREAM::FVM::Operator *op_lambda_i = new DREAM::FVM::Operator(eqsys->GetFluidGrid());
         DREAM::FVM::Operator *op_W_i = new DREAM::FVM::Operator(eqsys->GetFluidGrid());

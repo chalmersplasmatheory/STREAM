@@ -14,11 +14,11 @@ using namespace STREAM;
 /**
  * Construct an EquationSystem object.
  */
-DREAM::EquationSystem *SimulationGenerator::ConstructEquationSystem(
+EquationSystem *SimulationGenerator::ConstructEquationSystem(
     DREAM::Settings *s, DREAM::FVM::Grid *scalarGrid, DREAM::FVM::Grid *fluidGrid,
     DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist
 ) {
-    DREAM::EquationSystem *eqsys = new DREAM::EquationSystem(
+    EquationSystem *eqsys = new EquationSystem(
         scalarGrid, fluidGrid,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr
@@ -66,9 +66,10 @@ DREAM::EquationSystem *SimulationGenerator::ConstructEquationSystem(
  * Construct equations to solve.
  */
 void SimulationGenerator::ConstructEquations(
-    DREAM::EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas,
+    EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas,
     DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
-    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
+    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms,
+    EllipticalRadialGridGenerator *r, DREAM::IonHandler *ihdl,  // Rätt?
 ) {
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
     DREAM::FVM::Grid *hottailGrid = eqsys->GetHotTailGrid();
@@ -118,6 +119,22 @@ void SimulationGenerator::ConstructEquations(
         fluidGrid, unknowns, pThreshold, pMode
     );
     eqsys->SetPostProcessor(postProcessor);
+    
+    // Confinement time 
+    real_t l_MK2 = 1; // Ska denna sättas här?
+    ConfinementTime *confinementTime = new ConfinementTime(
+        unknowns, r, l_MK2
+    );
+    eqsys->SetConfinementTime(confinementTime); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
+    
+    // Neutral influx 
+    real_t c1 = 1.1; // Ska dessa sättas här?
+    real_t c2 = 0.09;
+    real_t c3 = 0.1;
+    Neautral Influx *neutralInflux = new NeutralInflux(
+        ihdl, SRC, coefftauinv, PV, c1, c2, c3 // Hur göra med SRC och coefftauinv?
+    );
+    eqsys->SetConfinementTime(confinementTime); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
 
     // Hot electron quantities
     if (eqsys->HasHotTailGrid()) {
@@ -173,7 +190,7 @@ void SimulationGenerator::ConstructEquations(
  * Construct the unknowns of the STREAM equation system.
  */
 void SimulationGenerator::ConstructUnknowns(
-    DREAM::EquationSystem *eqsys, DREAM::Settings *s
+    EquationSystem *eqsys, DREAM::Settings *s
 ) {
     DREAM::SimulationGenerator::ConstructUnknowns(
         eqsys, s,
