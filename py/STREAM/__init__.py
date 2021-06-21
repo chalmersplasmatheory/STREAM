@@ -5,7 +5,7 @@ except ModuleNotFoundError:
     # Add DREAM from 
     import sys
     import pathlib
-    cwd = pathlib.Path('.').resolve()
+    cwd = pathlib.Path(__file__).resolve()
     p = (cwd.parent / 'extern' / 'DREAM' / 'py').resolve()
     sys.path.append(p)
 
