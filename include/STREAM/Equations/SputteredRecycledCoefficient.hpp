@@ -7,10 +7,10 @@
 namespace STREAM{
     class SputteredRecycledCoefficient {
         private: 
-            const real_t **coefficient;
+            real_t **coefficientTable;
       
         public:
-            SputteredRecycledCoefficient(const real_t**);
+            SputteredRecycledCoefficient(real_t**);
             ~SputteredRecycledCoefficient();
 
             real_t GetSRCoefficient(len_t upper, len_t lower);

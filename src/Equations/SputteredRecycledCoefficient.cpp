@@ -8,7 +8,7 @@ using namespace std;
  * Constructor
  */
 SputteredRecycledCoefficient::SputteredRecycledCoefficient(
-    const real_t **coefficientTable
+    real_t **coefficientTable
 ) : coefficientTable(coefficientTable) {}
 
 /**

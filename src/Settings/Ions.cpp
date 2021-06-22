@@ -12,6 +12,7 @@
 #include "STREAM/Settings/SimulationGenerator.hpp"
 #include "DREAM/Equations/Fluid/IonSpeciesIdentityTerm.hpp"
 #include "STREAM/Equations/IonTransport.hpp"
+#include "STREAM/Equations/SputteredRecycledCoefficient.hpp"
 
 
 using namespace STREAM;
@@ -128,7 +129,7 @@ void SimulationGenerator::ConstructEquation_Ions(
                 rectab[i][j] = recycling[i*nZ + j];
         }
 
-        src = new SputterRecycledCoefficient(rectab);
+        src = new SputteredRecycledCoefficient(rectab);
     }
 
     /////////////////////
