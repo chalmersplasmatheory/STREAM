@@ -26,6 +26,7 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Equations/IonRateEquation.cpp"
     "${PROJECT_SOURCE_DIR}/src/EquationSystem.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/NeutralInflux.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/Equations/NeutralTransport.cpp" 
 )
 
 add_library(stream STATIC ${stream})

@@ -24,7 +24,7 @@ namespace STREAM{
         public:
             NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, PlasmaVolume *PV,  real_t c1, real_t c2, real_t c3);
             
-            real_t EvaluateNeutralInflux_dni(real_t t, const len_t iIon);
+            real_t EvaluateNeutralInflux_dnij(real_t t, const len_t iIon);
                         
             real_t EvaluateNeutralInflux(real_t t, const len_t iIon);
 

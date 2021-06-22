@@ -2,6 +2,8 @@
 #define _STREAM_EQUATIONS_NEUTRAL_TRANSPORT_HPP
 
 #include "FVM/Grid/Grid.hpp"
+#include "DREAM/IonHandler.hpp"
+#include "FVM/Grid/Grid.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
 #include "STREAM/Equations/NeutralInflux.hpp"
 #include "DREAM/Equations/Fluid/IonEquationTerm.hpp"
@@ -13,8 +15,7 @@ namespace STREAM {
 	private:
 		NeutralInflux *NI;
 		PlasmaVolume *PV;
-		
-		real_t vessel_vol;
+		DREAM::FVM::UnknownQuantityHandler *unknowns;
 		
 		real_t wall_term;
 		
@@ -24,13 +25,15 @@ namespace STREAM {
         real_t dT_cold;
         real_t dW_i;
         real_t dN_i;
+        real_t dn_cold;
         
+        len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni, id_ncold;
 		
 	public:
-		NeutralTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon, NeutralInflux*, PlasmaVolume*, real_t);
+		NeutralTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon, DREAM::FVM::UnknownQuantityHandler*, NeutralInflux*, PlasmaVolume*);
 		~NeutralTransport();
         
-        void Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*);
+        void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*);
         
 		virtual bool SetCSJacobianBlock(
             const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*,
