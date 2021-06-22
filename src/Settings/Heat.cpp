@@ -11,7 +11,7 @@
 #include "DREAM/Equations/Fluid/IonSpeciesIdentityTerm.hpp"
 #include "STREAM/Equations/IonHeatTransport.hpp"
 #include "STREAM/Settings/OptionConstants.hpp"
-
+#include "DREAM/Equations/Fluid/IonSpeciesTransientTerm.hpp"
 
 using namespace std;
 using namespace STREAM;
@@ -192,29 +192,29 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     DREAM::SimulationGenerator::ConstructEquation_W_cold(eqsys, s);
 }
 
-void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *eqsys, Settings* /*s*/){
-    const len_t id_Wi = eqsys->GetUnknownID(OptionConstants::UQTY_WI_ENER); 
-    const len_t id_Wcold = eqsys->GetUnknownID(OptionConstants::UQTY_W_COLD);
+void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *eqsys, DREAM::Settings* /*s*/){
+    const len_t id_Wi = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER); 
+    const len_t id_Wcold = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_W_COLD);
 
-    FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
-    IonHandler *ionHandler = eqsys->GetIonHandler();
-    FVM::UnknownQuantityHandler *unknowns = eqsys->GetUnknownHandler();    
+    DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
+    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
+    DREAM::FVM::UnknownQuantityHandler *unknowns = eqsys->GetUnknownHandler();    
     const len_t nZ = ionHandler->GetNZ();
 
 
-    FVM::Operator *Op_Wij = new FVM::Operator(fluidGrid);
-    FVM::Operator *Op_Wie = new FVM::Operator(fluidGrid);
+    DREAM::FVM::Operator *Op_Wij = new DREAM::FVM::Operator(fluidGrid);
+    DREAM::FVM::Operator *Op_Wie = new DREAM::FVM::Operator(fluidGrid);
 
-    CoulombLogarithm *lnLambda = eqsys->GetREFluid()->GetLnLambda();
+    DREAM::CoulombLogarithm *lnLambda = eqsys->GetREFluid()->GetLnLambda();
     for(len_t iz=0; iz<nZ; iz++){
         Op_Wij->AddTerm( 
-            new IonSpeciesTransientTerm(fluidGrid, iz, id_Wi, -1.0)
+            new DREAM::IonSpeciesTransientTerm(fluidGrid, iz, id_Wi, -1.0)
         );
         for(len_t jz=0; jz<nZ; jz++){
             if(jz==iz) // the term is trivial =0 for self collisions and can be skipped
                 continue;
             Op_Wij->AddTerm(
-                new MaxwellianCollisionalEnergyTransferTerm(
+                new DREAM::MaxwellianCollisionalEnergyTransferTerm(
                     fluidGrid,
                     iz, true,
                     jz, true,
@@ -222,13 +222,13 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *e
             );
         }
         Op_Wie->AddTerm(
-            new MaxwellianCollisionalEnergyTransferTerm(
+            new DREAM::MaxwellianCollisionalEnergyTransferTerm(
                     fluidGrid,
                     iz, true,
                     0, false,
                     unknowns, lnLambda, ionHandler)
         );
-        Op_Wij->AddTerm(new IonHeatTransport(eqsys->GetFluidGrid(), ions, iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
+        Op_Wij->AddTerm(new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
     }
     eqsys->SetOperator(id_Wi, id_Wi, Op_Wij, "dW_i/dt = sum_j Q_ij + Q_ie");
     eqsys->SetOperator(id_Wi, id_Wcold, Op_Wie);

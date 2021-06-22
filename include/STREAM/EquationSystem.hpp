@@ -5,12 +5,14 @@
 #include "STREAM/Equations/ConfinementTime.hpp"
 #include "STREAM/Equations/NeutralInflux.hpp"
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
-
+#include "STREAM/Equations/PlasmaVolume.hpp" 
+#include "STREAM/Equations/NeutralInflux.hpp"
+#include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 
 namespace STREAM {
     class EquationSystem : public DREAM::EquationSystem {
         private: 
-            EllipticalRadialGridGenerator* r=nullptr;
+            EllipticalRadialGridGenerator *r=nullptr;
             SputteredRecycledCoefficient *SRC=nullptr;
             PlasmaVolume *PV=nullptr;
 
@@ -29,7 +31,7 @@ namespace STREAM {
             PlasmaVolume *GetPlasmaVolume();
             ConfinementTime *GetConfinementTime();
             
-            void SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator* r);
+            void SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator *r);
             void SetSputteredRecycledCoefficient(SputteredRecycledCoefficient *SRC);
             void SetPlasmaVolume(PlasmaVolume *PV);
     };

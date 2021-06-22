@@ -180,7 +180,7 @@ void SimulationGenerator::ConstructEquation_Ions(
 		                true, false, false
 		            ));
                 }
-                eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), ions, iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
+                eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
                 break;
 
             default:

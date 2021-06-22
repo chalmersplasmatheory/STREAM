@@ -98,6 +98,8 @@ void SimulationGenerator::ConstructEquations(
     enum DREAM::OptionConstants::momentumgrid_type ht_type = eqsys->GetHotTailGridType();
     enum DREAM::OptionConstants::momentumgrid_type re_type = eqsys->GetRunawayGridType();
     
+    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
+    
     // Confinement time 
     EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); //Korrekt?
     
@@ -122,8 +124,6 @@ void SimulationGenerator::ConstructEquations(
 
     // TODO
     ConstructEquation_Ions(eqsys, s, adas, amjuel);
-
-    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
 
     // Construct collision quantity handlers
     if (hottailGrid != nullptr)

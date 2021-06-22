@@ -10,7 +10,7 @@ using namespace std;
 NeutralInflux::NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, PlasmaVolume *PV, real_t c1, real_t c2, real_t c3) : ions(ihdl), SRC(SRC), coefftauinv(coefftauinv), PV(PV), c1(c1), c2(c2), c3(c3) {
     this->tauinv = coefftauinv->EvaluateConfinementTime(0);
     this->V_p    = PV->GetPlasmaVolume(); 
-} // Korrekt sätt att hantera constructor?
+} 
 
 real_t NeutralInflux::DeuteriumRecyclingCoefficient(real_t t){
     return c1-c2*(1-exp(-t/c3));
@@ -20,7 +20,7 @@ real_t NeutralInflux::DeuteriumRecyclingCoefficient(real_t t){
  * Evaluates the neutral influx
  */
 real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
-    len_t Z   = ions->GetZ(iIon); 
+    len_t Z   = ions->GetZ(iIon);  // Inte kolla på Z utan kolla på jonindex i loop
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
@@ -28,14 +28,10 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
     real_t n_ij = 0;
     real_t Y = 0;
     for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
-        if (Z==1 && Zs[i]==1) {
-            if (ions->IsTritium(iIon)) {
-                Y=0; // Ska Y=0 vid Tritium?
-            } else {
-                Y=DeuteriumRecyclingCoefficient(t);
-            }
+        if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
+            Y=DeuteriumRecyclingCoefficient(t);
         } else {
-            Y=this->SRC->GetSRCoefficient(Z,Zs[i]);
+            Y=this->SRC->GetSRCoefficient(iIon,i);
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);

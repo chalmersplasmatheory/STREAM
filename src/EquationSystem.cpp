@@ -1,18 +1,17 @@
 #include "STREAM/EquationSystem.hpp"
 
 using namespace STREAM;
-using namespace DREAM;
 using namespace std;
 
 /**
  * Constructor.
  */
- EquationSystem::EquationSystem(
-    FVM::Grid *emptygrid, FVM::Grid *rgrid,
-    enum OptionConstants::momentumgrid_type ht_type, FVM::Grid *hottailGrid,
-    enum OptionConstants::momentumgrid_type re_type, FVM::Grid *runawayGrid,
+EquationSystem::EquationSystem(
+    DREAM::FVM::Grid *emptygrid, DREAM::FVM::Grid *rgrid,
+    enum DREAM::OptionConstants::momentumgrid_type ht_type, DREAM::FVM::Grid *hottailGrid,
+    enum DREAM::OptionConstants::momentumgrid_type re_type, DREAM::FVM::Grid *runawayGrid,
     ConfinementTime *CT, NeutralInflux *NI
-) : EquationSystem(emptygrid, rgrid, hottailGrid, runawayGrid, ht_type, re_type),
+) : DREAM::EquationSystem(emptygrid, rgrid, ht_type, hottailGrid, re_type, runawayGrid),
     CT(CT), NI(NI) {}
     
 void EquationSystem::SetConfinementTime(ConfinementTime *CT)
@@ -21,22 +20,22 @@ void EquationSystem::SetConfinementTime(ConfinementTime *CT)
 void EquationSystem::SetNeutralInflux(NeutralInflux *NI)
     { this->NI = NI; }
     
-EllipticalRadialGridGenerator *GetEllipticalRadialGridGenerator()
-    {return this->r}
-SputteredRecycledCoefficient *GetSputteredRecycledCoefficient()
-    {return this->SRC}
-PlasmaVolume *GetPlasmaVolume()
-    {return this->PV}
-ConfinementTime *GetConfinementTime()
-    {return this->CT}
+EllipticalRadialGridGenerator* EquationSystem::GetEllipticalRadialGridGenerator()
+    {return this->r;}
+SputteredRecycledCoefficient* EquationSystem::GetSputteredRecycledCoefficient()
+    {return this->SRC;}
+PlasmaVolume* EquationSystem::GetPlasmaVolume()
+    {return this->PV;}
+ConfinementTime* EquationSystem::GetConfinementTime()
+    {return this->CT;}
 
-void SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator* r){
+void EquationSystem::SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator *r){
     this->r=r;
 }
-void SetSputteredRecycledCoefficient(SputteredRecycledCoefficient *SRC){
+void EquationSystem::SetSputteredRecycledCoefficient(SputteredRecycledCoefficient *SRC){
     this->SRC=SRC;
 }
-void SetPlasmaVolume(PlasmaVolume *PV){
+void EquationSystem::SetPlasmaVolume(PlasmaVolume *PV){
     this->PV=PV;
 }
     
