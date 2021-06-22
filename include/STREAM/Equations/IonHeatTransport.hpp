@@ -27,7 +27,7 @@ namespace STREAM {
 	public:
 		IonHeatTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon,
 			ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *u);
-		~IonHeatTransport();
+		/*~IonHeatTransport();*/
         
         void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*);
 
@@ -41,6 +41,10 @@ namespace STREAM {
         virtual void SetCSVectorElements(
             real_t*, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
         ) override;
+        
+        virtual len_t GetNumberOfNonZerosPerRow() const override { return 1; } 
+
+        virtual len_t GetNumberOfNonZerosPerRow_jac() const override { return 5; }
 	};
 }
 #endif/*_STREAM_EQUATIONS_ION_HEAT_TRANSPORT_HPP*/

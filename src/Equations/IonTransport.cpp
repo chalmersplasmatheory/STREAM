@@ -63,8 +63,8 @@ bool IonTransport::SetCSJacobianBlock(
     const len_t uqtyId, const len_t derivId, FVM::Matrix *jac, const real_t*,
     const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
-	//if(Z0<1)
-	//	return false;
+	if(Z0==0)
+		return false;
     real_t n_i = ions->GetIonDensity(0, iIon, Z0);
     
     if(derivId==uqtyId){
@@ -93,6 +93,8 @@ bool IonTransport::SetCSJacobianBlock(
 void IonTransport::SetCSMatrixElements(
     FVM::Matrix *mat, real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
+	if(Z0==0)
+		return;
     mat->SetElement(rOffset+Z0, rOffset+Z0, -tauinv);
 } 
 
@@ -100,6 +102,8 @@ void IonTransport::SetCSMatrixElements(
 void IonTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
+	if(Z0==0)
+		return;
     real_t n_i     = ions->GetIonDensity(0, iIon, Z0);
     vec[rOffset+Z0]=-n_i*tauinv; 
 }
