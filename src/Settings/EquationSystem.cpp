@@ -1,11 +1,10 @@
-
+#include "STREAM/EquationSystem.hpp"
 #include "DREAM/EquationSystem.hpp"
 #include "DREAM/OtherQuantityHandler.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
 #include "STREAM/Settings/OptionConstants.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
 #include "STREAM/Equations/NeutralInflux.hpp"
-
 
 using namespace STREAM;
 
@@ -23,7 +22,8 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
     EquationSystem *eqsys = new EquationSystem(
         scalarGrid, fluidGrid,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr,
-        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr
+        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr, 
+        nullptr, nullptr
     );
 
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms =
@@ -70,7 +70,7 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
 void SimulationGenerator::ConstructEquations(
     EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas,
     DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
-    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms,
+    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
     DREAM::FVM::Grid *hottailGrid = eqsys->GetHotTailGrid();
@@ -132,13 +132,13 @@ void SimulationGenerator::ConstructEquations(
     
     // Neutral influx 
     SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
-    PlasmaVolume *PV = eqsys->getPlasmaVolume(); //Korrekt?
+    PlasmaVolume *PV = eqsys->GetPlasmaVolume(); //Korrekt?
     ConfinementTime *coefftauinv = eqsys->GetConfinementTime();//Korrekt? 
 
     real_t c1 = 1.1; // Ska dessa sättas här?
     real_t c2 = 0.09;
     real_t c3 = 0.1;
-    Neautral Influx *neutralInflux = new NeutralInflux(
+    NeutralInflux *neutralInflux = new NeutralInflux(
         ionHandler, SRC, coefftauinv, PV, c1, c2, c3 // Hur göra med SRC och coefftauinv?
     );
     eqsys->SetNeutralInflux(neutralInflux); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor

@@ -9,6 +9,8 @@
 #include "DREAM/Settings/SimulationGenerator.hpp"
 #include "DREAM/Settings/Settings.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
+#include "DREAM/Equations/Fluid/IonSpeciesIdentityTerm.hpp"
+#include "STREAM/Equations/IonTransport.hpp"
 
 
 using namespace STREAM;
@@ -243,7 +245,7 @@ void SimulationGenerator::ConstructEquation_Ions(
     delete [] types;
 }
 
-void SimulationGenerator::ConstructEquation_ion_transport(EquationSystem*, DREAM::Settings*) {
+void SimulationGenerator::ConstructEquation_ion_transport(EquationSystem *eqsys, DREAM::Settings *s) {
     DREAM::FVM::Operator *op_ion_transport = new DREAM::FVM::Operator(eqsys->GetFluidGrid());
     DREAM::FVM::Operator *op_n_i =  new DREAM::FVM::Operator(eqsys->GetFluidGrid());
     

@@ -6,6 +6,7 @@
 #include "DREAM/NIST.hpp"
 #include "DREAM/Settings/Settings.hpp"
 #include "DREAM/Settings/SimulationGenerator.hpp"
+#include "STREAM/EquationSystem.hpp"
 
 namespace STREAM {
     class SimulationGenerator {

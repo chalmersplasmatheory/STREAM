@@ -14,3 +14,32 @@ using namespace std;
     ConfinementTime *CT, NeutralInflux *NI
 ) : EquationSystem(emptygrid, rgrid, hottailGrid, runawayGrid, ht_type, re_type),
     CT(CT), NI(NI) {}
+    
+void EquationSystem::SetConfinementTime(ConfinementTime *CT)
+    { this->CT = CT; }
+    
+void EquationSystem::SetNeutralInflux(NeutralInflux *NI)
+    { this->NI = NI; }
+    
+EllipticalRadialGridGenerator *GetEllipticalRadialGridGenerator()
+    {return this->r}
+SputteredRecycledCoefficient *GetSputteredRecycledCoefficient()
+    {return this->SRC}
+PlasmaVolume *GetPlasmaVolume()
+    {return this->PV}
+ConfinementTime *GetConfinementTime()
+    {return this->CT}
+
+void *SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator* r){
+    this->r=r;
+}
+void *SetSputteredRecycledCoefficient(SputteredRecycledCoefficient *SRC){
+    this->SRC=SRC;
+}
+void *SetPlasmaVolume(PlasmaVolume *PV){
+    this->PV=PV;
+}
+    
+    
+    
+
