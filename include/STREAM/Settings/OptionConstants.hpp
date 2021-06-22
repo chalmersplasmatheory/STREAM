@@ -11,15 +11,11 @@ namespace STREAM {
         // to also define it in 'src/Settings/Constants.cpp'.
         // Please, also maintain alphabetical order.
         static const char
-            *UQTY_LAMBDA_I,
-            *UQTY_ION_HEAT_TRANSPORT,
-            *UQTY_ION_TRANSPORT;
+            *UQTY_LAMBDA_I;
             
         // Descriptions of unknown quantities
         static const char
-            *UQTY_LAMBDA_I_DESC, 
-            *UQTY_ION_HEAT_TRANSPORT_DESC,
-            *UQTY_ION_TRANSPORT_DESC;
+            *UQTY_LAMBDA_I_DESC;
     };
 }
 #endif/*_STREAM_OPTION_CONSTANTS_HPP*/
