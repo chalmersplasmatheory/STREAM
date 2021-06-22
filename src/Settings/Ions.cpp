@@ -180,6 +180,7 @@ void SimulationGenerator::ConstructEquation_Ions(
 		                true, false, false
 		            ));
                 }
+                eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), ions, iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
                 break;
 
             default:
@@ -243,19 +244,4 @@ void SimulationGenerator::ConstructEquation_Ions(
     ih->Rebuild();
 
     delete [] types;
-}
-
-void SimulationGenerator::ConstructEquation_ion_transport(EquationSystem *eqsys, DREAM::Settings *s) {
-    DREAM::FVM::Operator *op_ion_transport = new DREAM::FVM::Operator(eqsys->GetFluidGrid());
-    DREAM::FVM::Operator *op_n_i =  new DREAM::FVM::Operator(eqsys->GetFluidGrid());
-    
-    DREAM::IonHandler *ions = eqsys->GetIonHandler();
-    
-    for (len-t iz=1; iz<ions->GetNZ(); iz++) {// Ska vara iz=1 och inte 0?
-        op_ion_transport->AddTerm(new DREAM::IonSpeciesIdentityTerm(eqsys->GetFluidGrid(), iz, -1.0));
-        op_n_i->AddTerm(new IonTransport(eqsys->GetFluidGrid(), ions, iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
-    }
-    
-    eqsys->SetOperator(OptionConstants::UQTY_ION_TRANSPORT, OptionConstants::UQTY_ION_TRANSPORT, op_ion_transport, "-n_i^(j)/tau_D");
-    eqsys->SetOperator(OptionConstants::UQTY_ION_TRANSPORT, DREAM::OptionConstants::UQTY_ION_SPECIES, op_n_i);
 }
