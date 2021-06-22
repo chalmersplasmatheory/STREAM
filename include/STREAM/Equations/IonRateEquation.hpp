@@ -6,13 +6,15 @@
 #include "DREAM/IonHandler.hpp"
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
+#include "STREAM/Equations/PlasmaVolume.hpp"
 
-namespace DREAM {
-    class IonRateEquation : public IonEquationTerm<FVM::EquationTerm> {
+namespace STREAM {
+    class IonRateEquation : public DREAM::IonEquationTerm<DREAM::FVM::EquationTerm> {
     protected:
         enum SetMode {MATRIX, JACOBIAN};
-        ADAS *adas;
-        FVM::UnknownQuantityHandler *unknowns;
+        DREAM::ADAS *adas;
+        DREAM::FVM::UnknownQuantityHandler *unknowns;
+        PlasmaVolume *volumes;
         len_t id_ions, id_n_cold, id_n_tot, id_T_cold;
         bool addFluidIonization; // the full ADAS ionization rate is added in this equation term
         bool addFluidJacobian;   // only the jacobian of the ionization is set with this term
@@ -25,8 +27,8 @@ namespace DREAM {
             **PartialTIon; // d/dT_cold of ionization rate coefficients (nZs x nr)
     public:
         IonRateEquation(
-            FVM::Grid*, IonHandler*, const len_t, ADAS*, 
-            FVM::UnknownQuantityHandler*,bool,bool,bool
+            DREAM::FVM::Grid*, DREAM::IonHandler*, const len_t, DREAM::ADAS*, 
+            DREAM::FVM::UnknownQuantityHandler*, PlasmaVolume*, bool,bool,bool
         );
         virtual ~IonRateEquation();
 
@@ -42,21 +44,21 @@ namespace DREAM {
             }
 
         virtual bool GridRebuilt() override;
-        virtual void Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*) override;
+        virtual void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*) override;
 
         virtual bool SetCSJacobianBlock(
-            const len_t, const len_t, FVM::Matrix*, const real_t*,
+            const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*,
             const len_t iIon, const len_t Z0, const len_t rOffset
         ) override;
 
         virtual void SetCSMatrixElements(
-            FVM::Matrix *mat, real_t *rhs, const len_t iIon, const len_t Z0, const len_t rOffset
+            DREAM::FVM::Matrix *mat, real_t *rhs, const len_t iIon, const len_t Z0, const len_t rOffset
         ) override {
             SetCSMatrixElements(mat, rhs, iIon, Z0, rOffset, MATRIX);
         }
 
         virtual void SetCSMatrixElements(
-            FVM::Matrix*, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset, SetMode
+            DREAM::FVM::Matrix*, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset, SetMode
         );
 
         virtual void SetCSVectorElements(
