@@ -20,6 +20,7 @@ namespace STREAM {
         static void DefineOptions_T_cold(DREAM::Settings*);
         static void DefineOptions_Ions(DREAM::Settings*);
         static void DefineOptions_Transport(const std::string&, DREAM::Settings*, bool, const std::string& subname="transport");
+        static void DefineOptions_wall(DREAM::Settings *s);
 
         // Equation system
         static EquationSystem *ConstructEquationSystem(

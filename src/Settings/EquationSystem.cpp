@@ -11,6 +11,24 @@ using namespace STREAM;
 
 #define EQUATIONSYSTEM "eqsys"
 
+void SimulationGenerator::DefineOptions_wall(DREAM::Settings *s) {
+    s->DefineSetting(
+        "radialgrid/wall/c1",
+        "Coefficients for deuterium recycling",
+        (real_t)1.1
+    );
+    s->DefineSetting(
+        "radialgrid/wall/c2",
+        "Coefficients for deuterium recycling",
+        (real_t)0.09
+    );
+    s->DefineSetting(
+        "radialgrid/wall/c3",
+        "Coefficients for deuterium recycling",
+        (real_t)0.1
+    );
+}
+
 
 /**
  * Construct an EquationSystem object.
@@ -79,6 +97,28 @@ void SimulationGenerator::ConstructEquations(
 
     enum DREAM::OptionConstants::momentumgrid_type ht_type = eqsys->GetHotTailGridType();
     enum DREAM::OptionConstants::momentumgrid_type re_type = eqsys->GetRunawayGridType();
+    
+    // Confinement time 
+    EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); //Korrekt?
+    
+    real_t l_MK2 = s->GetReal("radialgrid/wall_radius"); // Ska denna sättas här?
+    ConfinementTime *confinementTime = new ConfinementTime(
+        unknowns, r, l_MK2
+    );
+    eqsys->SetConfinementTime(confinementTime); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
+    
+    // Neutral influx 
+    SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
+    PlasmaVolume *PV = eqsys->GetPlasmaVolume(); //Korrekt?
+    ConfinementTime *coefftauinv = eqsys->GetConfinementTime();//Korrekt? 
+
+    real_t c1 = s->GetReal("radialgrid/wall/c1"); 
+    real_t c2 = s->GetReal("radialgrid/wall/c2"); 
+    real_t c3 = s->GetReal("radialgrid/wall/c3"); 
+    NeutralInflux *neutralInflux = new NeutralInflux(
+        ionHandler, SRC, coefftauinv, PV, c1, c2, c3 // Hur göra med SRC och coefftauinv?
+    );
+    eqsys->SetNeutralInflux(neutralInflux); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
 
     // TODO
     ConstructEquation_Ions(eqsys, s, adas, amjuel);
@@ -120,28 +160,6 @@ void SimulationGenerator::ConstructEquations(
         fluidGrid, unknowns, pThreshold, pMode
     );
     eqsys->SetPostProcessor(postProcessor); 
-    
-    // Confinement time 
-    EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); //Korrekt?
-    
-    real_t l_MK2 = 1; // Ska denna sättas här?
-    ConfinementTime *confinementTime = new ConfinementTime(
-        unknowns, r, l_MK2
-    );
-    eqsys->SetConfinementTime(confinementTime); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
-    
-    // Neutral influx 
-    SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
-    PlasmaVolume *PV = eqsys->GetPlasmaVolume(); //Korrekt?
-    ConfinementTime *coefftauinv = eqsys->GetConfinementTime();//Korrekt? 
-
-    real_t c1 = 1.1; // Ska dessa sättas här?
-    real_t c2 = 0.09;
-    real_t c3 = 0.1;
-    NeutralInflux *neutralInflux = new NeutralInflux(
-        ionHandler, SRC, coefftauinv, PV, c1, c2, c3 // Hur göra med SRC och coefftauinv?
-    );
-    eqsys->SetNeutralInflux(neutralInflux); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
 
     // Hot electron quantities
     if (eqsys->HasHotTailGrid()) {
@@ -205,7 +223,5 @@ void SimulationGenerator::ConstructUnknowns(
         eqsys->GetHotTailGrid(), eqsys->GetRunawayGrid()
     );
     eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid());
-    eqsys->SetUnknown(OptionConstants::UQTY_ION_HEAT_TRANSPORT, OptionConstants::UQTY_ION_HEAT_TRANSPORT_DESC, eqsys->GetFluidGrid());
-    eqsys->SetUnknown(OptionConstants::UQTY_ION_TRANSPORT, OptionConstants::UQTY_ION_TRANSPORT_DESC, eqsys->GetFluidGrid());
 }
 
