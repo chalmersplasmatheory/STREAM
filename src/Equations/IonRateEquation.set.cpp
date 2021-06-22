@@ -8,10 +8,8 @@
     const len_t Z  = this->ions->GetZ(iIon);
     const real_t *n_cold = this->unknowns->GetUnknownData(id_n_cold);
     const real_t V_p = this->volumes->GetPlasmaVolume();
-    const real_t V_n = this->volumes->GetNeutralVolume(iIon); //Is the argument iIon the right one here?
+    const real_t V_n = this->volumes->GetNeutralVolume(iIon); 
     const real_t V_n_tot = this->volumes->GetTotalNeutralVolume(iIon);
-    
-    //const len_t ionidx = this->ions->GetIndex(iIon, Z0);
 
     for (len_t ir = 0; ir < Nr; ir++) {
         if(setIonization){
