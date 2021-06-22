@@ -13,16 +13,14 @@ namespace STREAM{
     class PlasmaVolume{ 
     private:
         DREAM::FVM::Grid *grid; 
-        len_t iz;
         real_t vessel_vol;
         DREAM::FVM::UnknownQuantityHandler *unknowns;
         EllipticalRadialGridGenerator *radials;
         DREAM::ADAS *adas;
-		DREAM::ADASRateInterpolator *interp;
 		DREAM::IonHandler *ions;
         len_t id_lambda_i, id_W_i, id_n_i, id_T_cold, id_n_cold;
     public:
-        PlasmaVolume(DREAM::FVM::Grid *g, len_t iz, real_t vessel_vol, DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, DREAM::ADAS *adas, DREAM::IonHandler *ions); 
+        PlasmaVolume(DREAM::FVM::Grid *g, real_t vessel_vol, DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, DREAM::ADAS *adas, DREAM::IonHandler *ions); 
         real_t GetPlasmaVolume() const; 
         real_t GetNeutralVolume(const len_t iz);
         real_t GetTotalNeutralVolume(const len_t iz);

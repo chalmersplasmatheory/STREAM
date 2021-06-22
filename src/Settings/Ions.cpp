@@ -6,13 +6,13 @@
 #include <vector>
 #include "DREAM/Equations/Fluid/IonTransientTerm.hpp"
 #include "DREAM/Equations/Fluid/IonPrescribedParameter.hpp"
-#include "DREAM/Equations/Fluid/LyOpaqueDIonRateEquation.hpp"
 #include "DREAM/Settings/SimulationGenerator.hpp"
 #include "DREAM/Settings/Settings.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
 #include "DREAM/Equations/Fluid/IonSpeciesIdentityTerm.hpp"
 #include "STREAM/Equations/IonTransport.hpp"
 #include "STREAM/Equations/SputteredRecycledCoefficient.hpp"
+#include "STREAM/Equations/IonRateEquation.hpp"
 
 
 using namespace STREAM;
@@ -55,7 +55,7 @@ void SimulationGenerator::ConstructEquation_Ions(
     len_t nZ, ntypes;
     const int_t *_Z  = s->GetIntegerArray(MODULENAME "/Z", 1, &nZ);
     const int_t *itypes = s->GetIntegerArray(MODULENAME "/types", 1, &ntypes);
-    const int_t *iopacity_modes = s->GetIntegerArray(MODULENAME "/opacity_modes", 1, &ntypes);
+    //const int_t *iopacity_modes = s->GetIntegerArray(MODULENAME "/opacity_modes", 1, &ntypes); // TODO: Remove since we do not use opacity?
 
     // Parse list of ion names (stored as one contiguous string,
     // each substring separated by ';')
@@ -99,7 +99,7 @@ void SimulationGenerator::ConstructEquation_Ions(
                 ionNames[i].c_str(), Z[i]
             );
     }
-    
+    /* TODO: Remove since we do not use opacity?
     enum DREAM::OptionConstants::ion_opacity_mode *opacity_mode = new enum DREAM::OptionConstants::ion_opacity_mode[ntypes];
     for (len_t i = 0; i < ntypes; i++)
         opacity_mode[i] = (enum DREAM::OptionConstants::ion_opacity_mode)iopacity_modes[i];
@@ -112,7 +112,8 @@ void SimulationGenerator::ConstructEquation_Ions(
             );
         }
     }
-
+    */
+    
     // Sputtering-recycling coefficient table
     SputteredRecycledCoefficient *src = nullptr;
     len_t rec_dims[2];
@@ -195,19 +196,11 @@ void SimulationGenerator::ConstructEquation_Ions(
                 );
                 [[fallthrough]];
             case DREAM::OptionConstants::ION_DATA_EQUILIBRIUM:
-                nEquil++;
-                // TODO Update these
-                if(ih->GetZ(iZ)==1 && opacity_mode[iZ]==DREAM::OptionConstants::OPACITY_MODE_GROUND_STATE_OPAQUE){
-		            eqn->AddTerm(new DREAM::LyOpaqueDIonRateEquation(
-		                fluidGrid, ih, iZ, eqsys->GetUnknownHandler(),
-		                true, false, false, amjuel
-		            ));		            
-                }else{
-		            eqn->AddTerm(new DREAM::IonRateEquation(
-		                fluidGrid, ih, iZ, adas, eqsys->GetUnknownHandler(),
-		                true, false, false
-		            ));
-                }
+                nEquil++;              
+	            eqn->AddTerm(new IonRateEquation(
+	                fluidGrid, ih, iZ, adas, eqsys->GetUnknownHandler(), 
+	                eqsys->GetPlasmaVolume(), true, false, false
+	            ));
                 eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
                 break;
 

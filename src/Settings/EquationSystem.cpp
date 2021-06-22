@@ -27,6 +27,12 @@ void SimulationGenerator::DefineOptions_wall(DREAM::Settings *s) {
         "Coefficients for deuterium recycling",
         (real_t)0.1
     );
+    
+    s->DefineSetting(
+        "radialgrid/wall/vessel_volume", 
+        "The vacuum vessel volume",
+        (real_t)0
+    );
 }
 
 
@@ -109,9 +115,21 @@ void SimulationGenerator::ConstructEquations(
     );
     eqsys->SetConfinementTime(confinementTime); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
     
+    //Plasma Volume
+    real_t vessel_volume = s->GetReal("radialgrid/wall/vessel_volume");
+    if (vessel_volume == 0){
+        throw DREAM::SettingsException(
+            "Vessel volume is unspecified" //Is this an ok exception? 
+        );
+    }
+    PlasmaVolume *volumes = new PlasmaVolume(
+        fluidGrid, vessel_volume, unknowns, r, adas, ionHandler
+    );
+    eqsys->SetPlasmaVolume(volumes);
+    
     // Neutral influx 
     SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
-    PlasmaVolume *PV = eqsys->GetPlasmaVolume(); //Korrekt?
+    PlasmaVolume *PV = eqsys->GetPlasmaVolume(); //Korrekt? Skulle inte volumes som skapas på rad 120 kunna användas direkt?
     ConfinementTime *coefftauinv = eqsys->GetConfinementTime();//Korrekt? 
 
     real_t c1 = s->GetReal("radialgrid/wall/c1"); 

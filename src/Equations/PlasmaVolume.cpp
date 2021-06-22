@@ -8,7 +8,7 @@
 using namespace STREAM;
 using namespace DREAM;
 
-    PlasmaVolume::PlasmaVolume(FVM::Grid *g, len_t iz, real_t vessel_vol, FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, ADAS *adas, IonHandler *ions): grid(g), iz(iz), vessel_vol(vessel_vol), unknowns(u), radials(r), adas(adas), interp(adas->GetSCD(iz)), ions(ions){
+    PlasmaVolume::PlasmaVolume(FVM::Grid *g, real_t vessel_vol, FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, ADAS *adas, IonHandler *ions): grid(g), vessel_vol(vessel_vol), unknowns(u), radials(r), adas(adas), ions(ions){
         id_lambda_i = u->GetUnknownID(OptionConstants::UQTY_LAMBDA_I);
         id_W_i = u->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
         id_n_i = u->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS);
@@ -62,8 +62,8 @@ using namespace DREAM;
             real_t T_cold = unknowns->GetUnknownData(id_T_cold)[0];
             real_t n_cold = unknowns->GetUnknownData(id_n_cold)[0];
         
-            real_t I_i = interp->Eval(0, n_cold, T_cold); //Evaluate I_i^(0)
-            real_t dIdT = interp->Eval_deriv_T(0, n_cold, T_cold); // Derivative w.r.t. T_cold
+            real_t I_i = adas->GetSCD(iz)->Eval(0, n_cold, T_cold); //Evaluate I_i^(0)
+            real_t dIdT = adas->GetSCD(iz)->Eval_deriv_T(0, n_cold, T_cold); // Derivative w.r.t. T_cold
 
             real_t v_i = sqrt(4 * W_i/(3 * n_i * ions->GetIonSpeciesMass(iz)));
             
@@ -86,8 +86,8 @@ using namespace DREAM;
             real_t T_cold = unknowns->GetUnknownData(id_T_cold)[0];
             real_t n_cold = unknowns->GetUnknownData(id_n_cold)[0];
             
-            real_t I_i = interp->Eval(0, n_cold, T_cold); //Evaluate I_i^(0)
-            real_t dIdn = interp->Eval_deriv_n(0, n_cold, T_cold); // Derivative w.r.t. n_cold
+            real_t I_i = adas->GetSCD(iz)->Eval(0, n_cold, T_cold); //Evaluate I_i^(0)
+            real_t dIdn = adas->GetSCD(iz)->Eval_deriv_n(0, n_cold, T_cold); // Derivative w.r.t. n_cold
             
             real_t v_i = sqrt(4 * W_i/(3 * n_i * ions->GetIonSpeciesMass(iz)));
         
