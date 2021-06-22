@@ -7,9 +7,9 @@ using namespace STREAM;
  * Constructor.
  */
 NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
-	const len_t iIon, NeutralInflux *NI, PlasmaVolume *PV, ConfinementTime *CT, 
+	const len_t iIon, NeutralInflux *NI, PlasmaVolume *PV, 
 	real_t vessel_vol) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon), 
-	NI(NI), PV(PV), CT(CT), vessel_vol(vessel_vol) {
+	NI(NI), PV(PV), vessel_vol(vessel_vol) {
     SetName("NeutralTransport");
 }
 
@@ -17,25 +17,36 @@ void NeutralTransport::Rebuild(const real_t t, const real_t, FVM::UnknownQuantit
     real_t Gamma0 = this->NI->EvaluateNeutralInflux(t, iIon);
     real_t V_p = PV->GetPlasmaVolume();
     real_t V_ni= PV->GetNeutralVolume(iIon);
-    real_t tauinv = coefftauinv->CT(0);
-    real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0); 
-    real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0); 
-    real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(0); 
-    real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
-    real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(0);
+    real_t dGamma0dnij   = this->NI->EvaluateNeutralInflux_dnij(t, iIon);
+    real_t dGamma0dIp    = this->NI->EvaluateNeutralInflux_dIp(t, iIon); 
+    real_t dGamma0dIwall = this->NI->EvaluateNeutralInflux_dIwall(t, iIon); 
+    real_t dGamma0dTcold = this->NI->EvaluateNeutralInflux_dTcold(t, iIon); 
+    real_t dGamma0dWi    = this->NI->EvaluateNeutralInflux_dWi(t, iIon); 
+    real_t dGamma0dNi    = this->NI->EvaluateNeutralInflux_dNi(t, iIon);
         
     this->wall_term = Gamma0/(vessel_vol-V_p+V_ni);
-    this->dI_p      = - wall_term/tauinv * dtauinvdIp;
-    this->dI_wall   = - wall_term/tauinv * dtauinvdIwall;
-    this->dT_cold   = - wall_term/tauinv * dtauinvdTcold;
-    this->dW_i      = - wall_term/tauinv * dtauinvdWi;
-    this->dN_i      = - wall_term/tauinv * dtauinvdNi;
+    this->dn_ij     = dGamma0dni/(vessel_vol-V_p+V_nij);
+    this->dI_p      = dGamma0dIp/(vessel_vol-V_p+V_ni);
+    this->dI_wall   = dGamma0dIwall/(vessel_vol-V_p+V_ni);
+    this->dT_cold   = dGamma0dTcold/(vessel_vol-V_p+V_ni);
+    this->dW_i      = dGamma0dWi/(vessel_vol-V_p+V_ni);
+    this->dN_i      = dGamma0dNi/(vessel_vol-V_p+V_ni);
 }
 
 bool IonTransport::SetCSJacobianBlock(
     const len_t uqtyId, const len_t derivId, FVM::Matrix *jac, const real_t*,
     const len_t iIon, const len_t, const len_t rOffset
 ) {    
+    if(derivId==uqtyId){
+        nZ = ions->GetNZ();
+        for (len_t k = 0, idx = 0; k < nZ; k++) {
+            len_t Z0 = ions->GetZ0(k);
+            for (len_t l = 0; l <= Z0; l++, idx++) {
+                jac->SetElement(rOffset+idx, rOffset+idx,this->dn_ij);
+            }
+        }  
+		return true;
+    } else 
     if(derivId==id_Ip){
 		jac->SetElement(rOffset, 0,this->dI_p);
 		return true;

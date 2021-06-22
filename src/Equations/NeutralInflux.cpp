@@ -44,12 +44,12 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
 /**
  * Evaluates the derivative of the neutral influx with respect to the ion species density
  */
-real_t NeutralInflux::EvaluateNeutralInflux_dni(real_t t, const len_t iIon){
+real_t NeutralInflux::EvaluateNeutralInflux_dnij(real_t t, const len_t iIon){
     len_t Z   = ions->GetZ(iIon); 
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t Gamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
     real_t Y = 0;
     for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
         if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
@@ -57,11 +57,9 @@ real_t NeutralInflux::EvaluateNeutralInflux_dni(real_t t, const len_t iIon){
         } else {
             Y=this->SRC->GetSRCoefficient(iIon,i);
         }
-        for (len_t Z0=1; Z0<=Z; Z0++) {
-            Gamma0 += V_p * Y * tauinv;
-        }
+        dGamma0 += V_p * Y * tauinv;
     }
-    return Gamma0;
+    return dGamma0;
 }
 
 /**
@@ -74,7 +72,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t Gamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
     real_t n_ij = 0;
     real_t Y = 0;
     for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
@@ -85,10 +83,10 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += V_p * Y * n_ij * dtauinvdIp;
+            dGamma0 += V_p * Y * n_ij * dtauinvdIp;
         }
     }
-    return Gamma0;
+    return dGamma0;
 }
 
 /**
@@ -101,7 +99,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t Gamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
     real_t n_ij = 0;
     real_t Y = 0;
     for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
@@ -112,10 +110,10 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += V_p * Y * n_ij * dtauinvdIwall;
+            dGamma0 += V_p * Y * n_ij * dtauinvdIwall;
         }
     }
-    return Gamma0;
+    return dGamma0;
 }
 
 /**
@@ -128,7 +126,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t Gamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
     real_t n_ij = 0;
     real_t Y = 0;
     for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
@@ -139,10 +137,10 @@ real_t NeutralInflux::EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += V_p * Y * n_ij * dtauinvdTcold;
+            dGamma0 += V_p * Y * n_ij * dtauinvdTcold;
         }
     }
-    return Gamma0;
+    return dGamma0;
 }
 
 /**
@@ -155,7 +153,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t Gamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
     real_t n_ij = 0;
     real_t Y = 0;
     for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
@@ -166,10 +164,10 @@ real_t NeutralInflux::EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += V_p * Y * n_ij * dtauinvdWi;
+            dGamma0 += V_p * Y * n_ij * dtauinvdWi;
         }
     }
-    return Gamma0;
+    return dGamma0;
 }
 
 /**
@@ -182,7 +180,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dNi(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t Gamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
     real_t n_ij = 0;
     real_t Y = 0;
     for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
@@ -193,8 +191,8 @@ real_t NeutralInflux::EvaluateNeutralInflux_dNi(real_t t, const len_t iIon){
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
-            Gamma0 += V_p * Y * n_ij * dtauinvdNi;
+            dGamma0 += V_p * Y * n_ij * dtauinvdNi;
         }
     }
-    return Gamma0;
+    return dGamma0;
 }

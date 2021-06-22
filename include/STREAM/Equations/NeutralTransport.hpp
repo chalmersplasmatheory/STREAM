@@ -4,6 +4,7 @@
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
 #include "STREAM/Equations/NeutralInflux.hpp"
+#include "DREAM/Equations/Fluid/IonEquationTerm.hpp"
 
 //TODO Använda Esmées redan existerande kod för gamma_{n,i}
 
@@ -12,13 +13,12 @@ namespace STREAM {
 	private:
 		NeutralInflux *NI;
 		PlasmaVolume *PV;
-	    ConfinementTime *CT; 
 		
 		real_t vessel_vol;
 		
 		real_t wall_term;
-		real_t tauinv;
 		
+        real_t dn_ij;
         real_t dI_p;
         real_t dI_wall;
         real_t dT_cold;
@@ -27,7 +27,7 @@ namespace STREAM {
         
 		
 	public:
-		NeutralTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon, NeutralInflux*, PlasmaVolume*, ConfinementTime*, real_t);
+		NeutralTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon, NeutralInflux*, PlasmaVolume*, real_t);
 		~NeutralTransport();
         
         void Rebuild(const real_t, const real_t, FVM::UnknownQuantityHandler*);
