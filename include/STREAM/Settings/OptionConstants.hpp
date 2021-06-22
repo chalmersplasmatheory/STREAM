@@ -15,7 +15,7 @@ namespace STREAM {
             
         // Descriptions of unknown quantities
         static const char
-            *UQTY_LAMBDA_I_DESC;            
+            *UQTY_LAMBDA_I_DESC;
     };
 }
 #endif/*_STREAM_OPTION_CONSTANTS_HPP*/

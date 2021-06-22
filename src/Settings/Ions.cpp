@@ -9,6 +9,8 @@
 #include "DREAM/Settings/SimulationGenerator.hpp"
 #include "DREAM/Settings/Settings.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
+#include "DREAM/Equations/Fluid/IonSpeciesIdentityTerm.hpp"
+#include "STREAM/Equations/IonTransport.hpp"
 
 
 using namespace STREAM;
@@ -35,7 +37,7 @@ void SimulationGenerator::DefineOptions_Ions(DREAM::Settings *s) {
  * ion densities for each charge state.
  */
 void SimulationGenerator::ConstructEquation_Ions(
-    DREAM::EquationSystem *eqsys, DREAM::Settings *s,
+    EquationSystem *eqsys, DREAM::Settings *s,
     DREAM::ADAS *adas, DREAM::AMJUEL *amjuel
 ) {
     const real_t t0 = 0;
@@ -178,6 +180,7 @@ void SimulationGenerator::ConstructEquation_Ions(
 		                true, false, false
 		            ));
                 }
+                eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
                 break;
 
             default:
@@ -242,4 +245,3 @@ void SimulationGenerator::ConstructEquation_Ions(
 
     delete [] types;
 }
-

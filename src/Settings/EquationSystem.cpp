@@ -1,27 +1,47 @@
-
+#include "STREAM/EquationSystem.hpp"
 #include "DREAM/EquationSystem.hpp"
 #include "DREAM/OtherQuantityHandler.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
 #include "STREAM/Settings/OptionConstants.hpp"
-
+#include "STREAM/Equations/ConfinementTime.hpp"
+#include "STREAM/Equations/NeutralInflux.hpp"
 
 using namespace STREAM;
 
 
 #define EQUATIONSYSTEM "eqsys"
 
+void SimulationGenerator::DefineOptions_wall(DREAM::Settings *s) {
+    s->DefineSetting(
+        "radialgrid/wall/c1",
+        "Coefficients for deuterium recycling",
+        (real_t)1.1
+    );
+    s->DefineSetting(
+        "radialgrid/wall/c2",
+        "Coefficients for deuterium recycling",
+        (real_t)0.09
+    );
+    s->DefineSetting(
+        "radialgrid/wall/c3",
+        "Coefficients for deuterium recycling",
+        (real_t)0.1
+    );
+}
+
 
 /**
  * Construct an EquationSystem object.
  */
-DREAM::EquationSystem *SimulationGenerator::ConstructEquationSystem(
+EquationSystem *SimulationGenerator::ConstructEquationSystem(
     DREAM::Settings *s, DREAM::FVM::Grid *scalarGrid, DREAM::FVM::Grid *fluidGrid,
     DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist
 ) {
-    DREAM::EquationSystem *eqsys = new DREAM::EquationSystem(
+    EquationSystem *eqsys = new EquationSystem(
         scalarGrid, fluidGrid,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr,
-        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr
+        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr, 
+        nullptr, nullptr
     );
 
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms =
@@ -66,22 +86,44 @@ DREAM::EquationSystem *SimulationGenerator::ConstructEquationSystem(
  * Construct equations to solve.
  */
 void SimulationGenerator::ConstructEquations(
-    DREAM::EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas,
+    EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas,
     DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
     DREAM::FVM::Grid *hottailGrid = eqsys->GetHotTailGrid();
     DREAM::FVM::Grid *runawayGrid = eqsys->GetRunawayGrid();
-    DREAM::FVM::UnknownQuantityHandler *unknowns = eqsys->GetUnknownHandler();
+    DREAM::FVM::UnknownQuantityHandler *unknowns = eqsys->GetUnknownHandler();    
 
     enum DREAM::OptionConstants::momentumgrid_type ht_type = eqsys->GetHotTailGridType();
     enum DREAM::OptionConstants::momentumgrid_type re_type = eqsys->GetRunawayGridType();
+    
+    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
+    
+    // Confinement time 
+    EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); //Korrekt?
+    
+    real_t l_MK2 = s->GetReal("radialgrid/wall_radius"); // Ska denna sättas här?
+    ConfinementTime *confinementTime = new ConfinementTime(
+        unknowns, r, l_MK2
+    );
+    eqsys->SetConfinementTime(confinementTime); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
+    
+    // Neutral influx 
+    SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
+    PlasmaVolume *PV = eqsys->GetPlasmaVolume(); //Korrekt?
+    ConfinementTime *coefftauinv = eqsys->GetConfinementTime();//Korrekt? 
+
+    real_t c1 = s->GetReal("radialgrid/wall/c1"); 
+    real_t c2 = s->GetReal("radialgrid/wall/c2"); 
+    real_t c3 = s->GetReal("radialgrid/wall/c3"); 
+    NeutralInflux *neutralInflux = new NeutralInflux(
+        ionHandler, SRC, coefftauinv, PV, c1, c2, c3 // Hur göra med SRC och coefftauinv?
+    );
+    eqsys->SetNeutralInflux(neutralInflux); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
 
     // TODO
     ConstructEquation_Ions(eqsys, s, adas, amjuel);
-
-    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
 
     // Construct collision quantity handlers
     if (hottailGrid != nullptr)
@@ -117,7 +159,7 @@ void SimulationGenerator::ConstructEquations(
     DREAM::PostProcessor *postProcessor = new DREAM::PostProcessor(
         fluidGrid, unknowns, pThreshold, pMode
     );
-    eqsys->SetPostProcessor(postProcessor);
+    eqsys->SetPostProcessor(postProcessor); 
 
     // Hot electron quantities
     if (eqsys->HasHotTailGrid()) {
@@ -173,7 +215,7 @@ void SimulationGenerator::ConstructEquations(
  * Construct the unknowns of the STREAM equation system.
  */
 void SimulationGenerator::ConstructUnknowns(
-    DREAM::EquationSystem *eqsys, DREAM::Settings *s
+    EquationSystem *eqsys, DREAM::Settings *s
 ) {
     DREAM::SimulationGenerator::ConstructUnknowns(
         eqsys, s,

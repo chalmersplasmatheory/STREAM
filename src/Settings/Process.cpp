@@ -50,7 +50,7 @@ DREAM::Simulation *SimulationGenerator::ProcessSettings(DREAM::Settings *s) {
     DREAM::NIST *nist     = DREAM::SimulationGenerator::LoadNIST(s);
 
     // Construct equation system
-    DREAM::EquationSystem *eqsys = ConstructEquationSystem(
+    EquationSystem *eqsys = ConstructEquationSystem(
         s, scalarGrid, fluidGrid, adas, amjuel, nist
     );
 
