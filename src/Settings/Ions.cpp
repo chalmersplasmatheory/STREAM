@@ -2,6 +2,7 @@
  * Construct equation for the ion densities.
  */
 
+#include <unordered_map>
 #include <vector>
 #include "DREAM/Equations/Fluid/IonTransientTerm.hpp"
 #include "DREAM/Equations/Fluid/IonPrescribedParameter.hpp"
@@ -26,8 +27,15 @@ using namespace std;
  * s: Settings object to define options in.
  */
 void SimulationGenerator::DefineOptions_Ions(DREAM::Settings *s) {
+    const len_t ndim[2] = {0};
+
     // Include all settings from DREAM...
     DREAM::SimulationGenerator::DefineOptions_Ions(s);
+
+    s->DefineSetting(
+        MODULENAME "/recycling", "Table of sputtering-recycling coefficients",
+        2, ndim, (real_t*)nullptr
+    );
 
     // TODO transport settings
 }
@@ -102,6 +110,25 @@ void SimulationGenerator::ConstructEquation_Ions(
             	"ions: There are no rate coefficients implemented for plasmas opaque to radiative transitions to the ground state for other species than hydrogen isotopes"
             );
         }
+    }
+
+    // Sputtering-recycling coefficient table
+    SputteredRecycledCoefficient *src = nullptr;
+    len_t rec_dims[2];
+    const real_t *recycling = s->GetRealArray(MODULENAME "/recycling", 2, rec_dims);
+    if (recycling != nullptr) {
+        real_t **rectab = new real_t*[nZ];
+        rectab[0] = new real_t[nZ*nZ];
+
+        for (len_t i = 0; i < nZ; i++) {
+            if (i > 0)
+                rectab[i] = rectab[i-1] + nZ;
+
+            for (len_t j = 0; j < nZ; j++)
+                rectab[i][j] = recycling[i*nZ + j];
+        }
+
+        src = new SputterRecycledCoefficient(rectab);
     }
 
     /////////////////////

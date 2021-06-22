@@ -3,16 +3,16 @@
 
 #include "STREAM/stream.h"
 #include "DREAM/config.h"
-#include <unordered_map>
 
 namespace STREAM{
     class SputteredRecycledCoefficient {
         private: 
-            std::unordered_map<len_t /*iIon1*/, std::unordered_map<len_t /*iIon2*/, real_t /*Y*/> > *coefficientTable;
+            const real_t **coefficient;
       
         public:
-            SputteredRecycledCoefficient(std::unordered_map<len_t /*iIon1*/, std::unordered_map<len_t /*iIon2*/, real_t /*Y*/> > *coefficientTable);
-            void AddSRCoefficient(len_t upper, len_t lower, real_t coefficient);
+            SputteredRecycledCoefficient(const real_t**);
+            ~SputteredRecycledCoefficient();
+
             real_t GetSRCoefficient(len_t upper, len_t lower);
     };
 }
