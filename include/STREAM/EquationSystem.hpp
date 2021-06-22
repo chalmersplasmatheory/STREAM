@@ -29,9 +29,9 @@ namespace STREAM {
             PlasmaVolume *GetPlasmaVolume();
             ConfinementTime *GetConfinementTime();
             
-            void *SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator* r);
-            void *SetSputteredRecycledCoefficient(SputteredRecycledCoefficient *SRC);
-            void *SetPlasmaVolume(PlasmaVolume *PV);
+            void SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator* r);
+            void SetSputteredRecycledCoefficient(SputteredRecycledCoefficient *SRC);
+            void SetPlasmaVolume(PlasmaVolume *PV);
     };
 }
 #endif /*_STREAM_EQUATION_SYSTEM_HPP*/

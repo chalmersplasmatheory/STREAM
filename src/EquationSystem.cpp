@@ -30,13 +30,13 @@ PlasmaVolume *GetPlasmaVolume()
 ConfinementTime *GetConfinementTime()
     {return this->CT}
 
-void *SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator* r){
+void SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator* r){
     this->r=r;
 }
-void *SetSputteredRecycledCoefficient(SputteredRecycledCoefficient *SRC){
+void SetSputteredRecycledCoefficient(SputteredRecycledCoefficient *SRC){
     this->SRC=SRC;
 }
-void *SetPlasmaVolume(PlasmaVolume *PV){
+void SetPlasmaVolume(PlasmaVolume *PV){
     this->PV=PV;
 }
     
