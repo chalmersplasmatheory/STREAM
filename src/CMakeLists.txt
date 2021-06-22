@@ -24,6 +24,7 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Equations/PlasmaVolume.cpp" 
     "${PROJECT_SOURCE_DIR}/src/Settings/MeanFreePath.cpp"
     "${PROJECT_SOURCE_DIR}/src/EquationSystem.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/NeutralInflux.cpp" 
 )
 
 add_library(stream STATIC ${stream})
