@@ -16,6 +16,7 @@ class RadialGrid(PrescribedParameter):
         self.a, self.ta = None, None
         self.B0, self.tB0 = None, None
         self.kappa, self.tkappa = None, None
+        self.vessel_volume = None 
 
 
     def setB0(self, B0, t=0):
@@ -47,8 +48,15 @@ class RadialGrid(PrescribedParameter):
         :param t:     Time vector (if ``kappa`` varies with time).
         """
         self.kappa, _, self.tkappa = self._setPrescribedData(data=kappa, times=t)
-
-
+        
+    def setVesselVolume(self, v):
+    	"""
+    	Prescribe the vacuum vessel volume.
+    	
+    	:param v: Vacuum vessel volume.
+		"""
+		self.vessel_volume = v
+	
     def fromdict(self, data):
         """
         Load settings from the given dictionary.
@@ -56,6 +64,7 @@ class RadialGrid(PrescribedParameter):
         self.a, self.ta = data['a']['x'], data['a']['t']
         self.B0, self.tB0 = data['B0']['x'], data['B0']['t']
         self.kappa, self.tkappa = data['kappa']['x'], data['kappa']['t']
+        self.vessel_volume = data['vessel_volume']['x']
 
 
     def todict(self, verify=True):
@@ -77,6 +86,9 @@ class RadialGrid(PrescribedParameter):
             'kappa': {
                 't': self.tkappa,
                 'x': self.kappa
+            },
+            'vessel_volume': {
+            	'x': self.vessel_volume
             }
         }
 
@@ -92,5 +104,7 @@ class RadialGrid(PrescribedParameter):
         self._verifySettingsPrescribedData('a', self.a, r0, self.ta)
         self._verifySettingsPrescribedData('B0', self.B0, r0, self.tB0)
         self._verifySettingsPrescribedData('kappa', self.kappa, r0, self.tkappa)
+		if type(self.vessel_volume) != float:
+	    	raise TypeError('The prescribed vessel volume must be of type float') 
 
 
