@@ -17,6 +17,9 @@ class RadialGrid(PrescribedParameter):
         self.B0, self.tB0 = None, None
         self.kappa, self.tkappa = None, None
         self.vessel_volume = None 
+        self.c1 = None 
+        self.c2 = None 
+        self.c3 = None 
 
 
     def setB0(self, B0, t=0):
@@ -56,6 +59,30 @@ class RadialGrid(PrescribedParameter):
     	:param v: Vacuum vessel volume.
 		"""
 		self.vessel_volume = v
+
+    def setRecyclingCoefficient1(self, c1):
+    	"""
+    	Prescribe the vacuum vessel volume.
+    	
+    	:param v: Vacuum vessel volume.
+		"""
+		self.c1 = c1
+		
+    def setRecyclingCoefficient2(self, c2):
+    	"""
+    	Prescribe the vacuum vessel volume.
+    	
+    	:param v: Vacuum vessel volume.
+		"""
+		self.c2 = c2
+		
+    def setRecyclingCoefficient3(self, c3):
+    	"""
+    	Prescribe the vacuum vessel volume.
+    	
+    	:param v: Vacuum vessel volume.
+		"""
+		self.c3 = c3
 	
     def fromdict(self, data):
         """
@@ -65,6 +92,9 @@ class RadialGrid(PrescribedParameter):
         self.B0, self.tB0 = data['B0']['x'], data['B0']['t']
         self.kappa, self.tkappa = data['kappa']['x'], data['kappa']['t']
         self.vessel_volume = data['vessel_volume']['x']
+        self.c1 = data['c1']
+        self.c2 = data['c2']
+        self.c3 = data['c3']
 
 
     def todict(self, verify=True):
@@ -89,7 +119,10 @@ class RadialGrid(PrescribedParameter):
             },
             'vessel_volume': {
             	'x': self.vessel_volume
-            }
+            },
+            'c1': self.c1
+            'c2': self.c2
+            'c3': self.c3
         }
 
         return data
@@ -104,7 +137,12 @@ class RadialGrid(PrescribedParameter):
         self._verifySettingsPrescribedData('a', self.a, r0, self.ta)
         self._verifySettingsPrescribedData('B0', self.B0, r0, self.tB0)
         self._verifySettingsPrescribedData('kappa', self.kappa, r0, self.tkappa)
-		if type(self.vessel_volume) != float:
+	if type(self.vessel_volume) != float:
 	    	raise TypeError('The prescribed vessel volume must be of type float') 
-
+	if type(self.c1) != float:
+	    	raise TypeError('The prescribed recycle coefficient 1 must be of type float') 
+    	if type(self.c2) != float:
+	    	raise TypeError('The prescribed recycle coefficient 2 must be of type float') 
+    	if type(self.c3) != float:
+	    	raise TypeError('The prescribed recycle coefficient 3 must be of type float') 
 
