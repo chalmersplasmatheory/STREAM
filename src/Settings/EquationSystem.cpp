@@ -129,14 +129,13 @@ void SimulationGenerator::ConstructEquations(
     
     // Neutral influx 
     SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
-    PlasmaVolume *PV = eqsys->GetPlasmaVolume(); //Korrekt? Skulle inte volumes som skapas på rad 120 kunna användas direkt?
     ConfinementTime *coefftauinv = eqsys->GetConfinementTime();//Korrekt? 
 
     real_t c1 = s->GetReal("radialgrid/wall/c1"); 
     real_t c2 = s->GetReal("radialgrid/wall/c2"); 
     real_t c3 = s->GetReal("radialgrid/wall/c3"); 
     NeutralInflux *neutralInflux = new NeutralInflux(
-        ionHandler, SRC, coefftauinv, PV, c1, c2, c3 // Hur göra med SRC och coefftauinv?
+        ionHandler, SRC, coefftauinv, volumes, c1, c2, c3 // Hur göra med SRC och coefftauinv?
     );
     eqsys->SetNeutralInflux(neutralInflux); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
 

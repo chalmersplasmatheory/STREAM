@@ -55,7 +55,7 @@ void SimulationGenerator::ConstructEquation_Ions(
     len_t nZ, ntypes;
     const int_t *_Z  = s->GetIntegerArray(MODULENAME "/Z", 1, &nZ);
     const int_t *itypes = s->GetIntegerArray(MODULENAME "/types", 1, &ntypes);
-    //const int_t *iopacity_modes = s->GetIntegerArray(MODULENAME "/opacity_modes", 1, &ntypes); // TODO: Remove since we do not use opacity?
+
 
     // Parse list of ion names (stored as one contiguous string,
     // each substring separated by ';')
@@ -99,20 +99,6 @@ void SimulationGenerator::ConstructEquation_Ions(
                 ionNames[i].c_str(), Z[i]
             );
     }
-    /* TODO: Remove since we do not use opacity?
-    enum DREAM::OptionConstants::ion_opacity_mode *opacity_mode = new enum DREAM::OptionConstants::ion_opacity_mode[ntypes];
-    for (len_t i = 0; i < ntypes; i++)
-        opacity_mode[i] = (enum DREAM::OptionConstants::ion_opacity_mode)iopacity_modes[i];
-        
-    // Verify that all non-prescribed elements have ground state opaque coefficients available
-    for (len_t i = 0; i < nZ; i++) {
-        if (Z[i]!=1 && opacity_mode[i]==DREAM::OptionConstants::OPACITY_MODE_GROUND_STATE_OPAQUE){
-            throw DREAM::SettingsException(
-            	"ions: There are no rate coefficients implemented for plasmas opaque to radiative transitions to the ground state for other species than hydrogen isotopes"
-            );
-        }
-    }
-    */
     
     // Sputtering-recycling coefficient table
     SputteredRecycledCoefficient *src = nullptr;
