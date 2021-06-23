@@ -26,11 +26,13 @@ namespace STREAM {
         real_t dN_i;
         real_t dn_cold;
         
+        len_t sum_derivs=0;
+        
         len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni, id_ncold;
 		
 	public:
 		NeutralTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon, DREAM::FVM::UnknownQuantityHandler*, NeutralInflux*, PlasmaVolume*);
-		~NeutralTransport();
+		//~NeutralTransport();
         
         void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*);
         
@@ -47,7 +49,7 @@ namespace STREAM {
         
         virtual len_t GetNumberOfNonZerosPerRow() const override{ return 1; }
         
-        virtual len_t GetNumberOfNonZerosPerRow_jac() const override { return 6; }
+        virtual len_t GetNumberOfNonZerosPerRow_jac() const override { return sum_derivs+6; }
 	};
 }
 #endif/*_STREAM_EQUATIONS_NEUTRAL_TRANSPORT_HPP*/

@@ -47,7 +47,7 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
         scalarGrid, fluidGrid,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr, 
-        nullptr, nullptr
+        nullptr, nullptr, nullptr
     );
 
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms =

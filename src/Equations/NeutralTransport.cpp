@@ -18,6 +18,14 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
     this->id_Wi    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
     this->id_Ni    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS);
     this->id_ncold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD);
+    
+    len_t nZ = ions->GetNZ();
+    for (len_t k = 0; k < nZ; k++) {
+        len_t Z = ions->GetZ(k);
+        for (len_t l = 0; l <= Z; l++) {
+            sum_derivs++;
+        }
+    }
 }
 
 void NeutralTransport::Rebuild(const real_t t, const real_t, FVM::UnknownQuantityHandler*){
@@ -54,7 +62,7 @@ bool NeutralTransport::SetCSJacobianBlock(
             for (len_t l = 0; l <= Z; l++, idx++) {
                 jac->SetElement(rOffset+idx, rOffset+idx,this->dn_ij);
             }
-        }  
+        }
 		return true;
     } else 
     if(derivId==id_Ip){

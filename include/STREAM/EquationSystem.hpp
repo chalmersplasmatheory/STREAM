@@ -12,27 +12,20 @@
 namespace STREAM {
     class EquationSystem : public DREAM::EquationSystem {
         public: 
-            EllipticalRadialGridGenerator *r=nullptr;
-            //PlasmaVolume *PV=nullptr;  Antar ska vara som ConfinementTime istället för EllipticalRadialGrid?
-
-        public: 
             ConfinementTime *CT;
-            PlasmaVolume *PV
+            PlasmaVolume *PV;
+            EllipticalRadialGridGenerator *r;
             
             EquationSystem(DREAM::FVM::Grid*, DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*, 
-            ConfinementTime*, PlasmaVolume*);
+            ConfinementTime*, PlasmaVolume*, EllipticalRadialGridGenerator*);
             
             void SetConfinementTime(ConfinementTime *CT);
-            //void SetNeutralInflux(NeutralInflux *NI);
-            void SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator *r);
-            //void SetSputteredRecycledCoefficient(SputteredRecycledCoefficient *SRC);
             void SetPlasmaVolume(PlasmaVolume *PV);
+            void SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator *r);
             
-            EllipticalRadialGridGenerator *GetEllipticalRadialGridGenerator();
-            //SputteredRecycledCoefficient *GetSputteredRecycledCoefficient();
             PlasmaVolume *GetPlasmaVolume();
             ConfinementTime *GetConfinementTime();
-            //NeutralInflux *GetNeutralInflux();
+            EllipticalRadialGridGenerator *GetEllipticalRadialGridGenerator();
             
     };
 }
