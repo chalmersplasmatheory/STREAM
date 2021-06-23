@@ -31,12 +31,12 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
  *
  * s: Settings object containing a specification of the grid.
  */
-DREAM::FVM::Grid *SimulationGenerator::ConstructRadialGrid(DREAM::Settings *s) {
+/*DREAM::FVM::Grid *SimulationGenerator::ConstructRadialGrid(DREAM::Settings *s) {
     //DREAM::FVM::RadialGrid *rg = ConstructRadialGrid_Cylindrical(s);
     DREAM::FVM::RadialGrid *rg = ConstructRadialGrid_Elliptical(s);
 
     return new DREAM::FVM::Grid(rg, new DREAM::FVM::EmptyMomentumGrid(rg));
-}
+}*/
 
 /**
  * Construction of basic cylindrical radial grid.
@@ -60,7 +60,7 @@ DREAM::FVM::RadialGrid *SimulationGenerator::ConstructRadialGrid_Cylindrical(
 /**
  * Construction of basic elliptical radial grid.
  */
-DREAM::FVM::RadialGrid *SimulationGenerator::ConstructRadialGrid_Elliptical(
+EllipticalRadialGridGenerator *SimulationGenerator::ConstructRadialGrid_Elliptical(
     DREAM::Settings *s
 ) {
     // Plasma minor radius
@@ -76,10 +76,8 @@ DREAM::FVM::RadialGrid *SimulationGenerator::ConstructRadialGrid_Elliptical(
     DREAM::FVM::Interpolator1D *delta
         = DREAM::SimulationGenerator::LoadDataT(MODULENAME, s, "delta");
 
-    return new DREAM::FVM::RadialGrid(
-        new EllipticalRadialGridGenerator(
-            a, B0, kappa, delta
-        )
+    return new EllipticalRadialGridGenerator(
+        a, B0, kappa, delta
     );
 }
 

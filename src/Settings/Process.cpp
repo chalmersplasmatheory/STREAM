@@ -5,6 +5,7 @@
 #include "DREAM/ADAS.hpp"
 #include "DREAM/AMJUEL.hpp"
 #include "DREAM/NIST.hpp"
+#include "FVM/Grid/EmptyMomentumGrid.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
 
 using namespace STREAM;
@@ -31,7 +32,12 @@ DREAM::Simulation *SimulationGenerator::ProcessSettings(DREAM::Settings *s) {
     // Construct grids
     enum DREAM::OptionConstants::momentumgrid_type ht_type, re_type;
     DREAM::FVM::Grid *scalarGrid  = DREAM::SimulationGenerator::ConstructScalarGrid();
-    DREAM::FVM::Grid *fluidGrid   = ConstructRadialGrid(s);
+
+    // Fluid grid
+    EllipticalRadialGridGenerator *ergg = ConstructRadialGrid_Elliptical(s);
+    auto rg = new DREAM::FVM::RadialGrid(ergg);
+    DREAM::FVM::Grid *fluidGrid   = new DREAM::FVM::Grid(rg, new DREAM::FVM::EmptyMomentumGrid(rg));
+
     DREAM::FVM::Grid *hottailGrid = DREAM::SimulationGenerator::ConstructHotTailGrid(s, fluidGrid->GetRadialGrid(), &ht_type);
 
     scalarGrid->Rebuild(t0);
@@ -51,7 +57,7 @@ DREAM::Simulation *SimulationGenerator::ProcessSettings(DREAM::Settings *s) {
 
     // Construct equation system
     EquationSystem *eqsys = ConstructEquationSystem(
-        s, scalarGrid, fluidGrid, adas, amjuel, nist
+        s, scalarGrid, fluidGrid, adas, amjuel, nist, ergg
     );
 
     // Construct simulation object

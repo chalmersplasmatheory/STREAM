@@ -25,7 +25,8 @@ namespace STREAM {
         // Equation system
         static EquationSystem *ConstructEquationSystem(
             DREAM::Settings*, DREAM::FVM::Grid*, DREAM::FVM::Grid*,
-            DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*
+            DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
+            EllipticalRadialGridGenerator*
         );
         static void ConstructEquations(
             EquationSystem*, DREAM::Settings*, DREAM::ADAS*,
@@ -73,9 +74,9 @@ namespace STREAM {
             const std::string& subname="transport"
         );
         // STREAM main grid
-        static DREAM::FVM::Grid *ConstructRadialGrid(DREAM::Settings*);
+        //static DREAM::FVM::Grid *ConstructRadialGrid(DREAM::Settings*);
         static DREAM::FVM::RadialGrid *ConstructRadialGrid_Cylindrical(DREAM::Settings*);
-        static DREAM::FVM::RadialGrid *ConstructRadialGrid_Elliptical(DREAM::Settings*);
+        static EllipticalRadialGridGenerator *ConstructRadialGrid_Elliptical(DREAM::Settings*);
     };
 }
 

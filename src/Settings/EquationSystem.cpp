@@ -41,7 +41,8 @@ void SimulationGenerator::DefineOptions_wall(DREAM::Settings *s) {
  */
 EquationSystem *SimulationGenerator::ConstructEquationSystem(
     DREAM::Settings *s, DREAM::FVM::Grid *scalarGrid, DREAM::FVM::Grid *fluidGrid,
-    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist
+    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
+    EllipticalRadialGridGenerator *ergg
 ) {
     EquationSystem *eqsys = new EquationSystem(
         scalarGrid, fluidGrid,
@@ -49,6 +50,7 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr, 
         nullptr, nullptr, nullptr
     );
+    eqsys->SetEllipticalRadialGridGenerator(ergg);
 
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms =
         new DREAM::OtherQuantityHandler::eqn_terms;
