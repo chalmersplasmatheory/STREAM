@@ -29,7 +29,7 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime(le
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
 
     real_t a = radials->GetMinorRadius();
-    real_t B = radials->GetMagneticField(); /*Kanske ändrar sig*/
+    real_t B = radials->GetMagneticField();
     
     return Constants::c/a + 4 * Constants::c/(a*B) * exp(-I_p/I_ref) * sqrt(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall);
 }
@@ -42,7 +42,7 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dI
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
 
     real_t a = radials->GetMinorRadius();
-    real_t B = radials->GetMagneticField(); /*Kanske ändrar sig*/
+    real_t B = radials->GetMagneticField();
     
     return -4 * Constants::c/(a*B*I_ref) * exp(-I_p/I_ref) * sqrt(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall);
 }
@@ -55,7 +55,7 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dI
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
 
     real_t a = radials->GetMinorRadius();
-    real_t B = radials->GetMagneticField(); /*Kanske ändrar sig*/
+    real_t B = radials->GetMagneticField();
     
     
     return 4 * Constants::c/(a*B) *Constants::mu0*Constants::mu0*I_wall/ (M_PI*M_PI*l_MK2*l_MK2) * exp(-I_p/I_ref) * sqrt(1/(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall));

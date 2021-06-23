@@ -107,13 +107,13 @@ void SimulationGenerator::ConstructEquations(
     DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
     
     // Confinement time 
-    EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); //Korrekt?
+    EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); 
     
-    real_t l_MK2 = s->GetReal("radialgrid/wall_radius"); // Ska denna sättas här?
+    real_t l_MK2 = s->GetReal("radialgrid/wall_radius");
     ConfinementTime *confinementTime = new ConfinementTime(
         unknowns, r, l_MK2
     );
-    eqsys->SetConfinementTime(confinementTime); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
+    eqsys->SetConfinementTime(confinementTime);
     
     //Plasma Volume
     real_t vessel_volume = s->GetReal("radialgrid/wall/vessel_volume");
@@ -127,18 +127,19 @@ void SimulationGenerator::ConstructEquations(
     );
     eqsys->SetPlasmaVolume(volumes);
     
+    /*
     // Neutral influx 
     SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
-    ConfinementTime *coefftauinv = eqsys->GetConfinementTime();//Korrekt? 
 
     real_t c1 = s->GetReal("radialgrid/wall/c1"); 
     real_t c2 = s->GetReal("radialgrid/wall/c2"); 
     real_t c3 = s->GetReal("radialgrid/wall/c3"); 
     NeutralInflux *neutralInflux = new NeutralInflux(
-        ionHandler, SRC, coefftauinv, volumes, c1, c2, c3 // Hur göra med SRC och coefftauinv?
+        ionHandler, SRC, confinementTime, volumes, c1, c2, c3 
     );
-    eqsys->SetNeutralInflux(neutralInflux); //Rätt? Finns en sådan funktion? Hittade ingen för post-processor
-
+    eqsys->SetNeutralInflux(neutralInflux); 
+    */
+    
     // TODO
     ConstructEquation_Ions(eqsys, s, adas, amjuel);
 

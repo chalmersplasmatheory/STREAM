@@ -15,7 +15,7 @@ ElectronHeatTransportDiffusion::ElectronHeatTransportDiffusion(
     EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *unknowns
 ) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) { 
 
-    SetName("ElectronHeatTransportDiffusion"); // Behövs?
+    SetName("ElectronHeatTransportDiffusion"); 
 
     this->unknowns  = unknowns;
     this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);

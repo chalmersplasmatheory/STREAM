@@ -49,9 +49,9 @@ real_t NeutralInflux::EvaluateNeutralInflux_dnij(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0; 
     real_t Y = 0;
-    for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
+    for (len_t i=0; i<nZ; i++) {
         if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
             Y=DeuteriumRecyclingCoefficient(t);
         } else {
@@ -72,10 +72,10 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0;
     real_t n_ij = 0;
     real_t Y = 0;
-    for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
+    for (len_t i=0; i<nZ; i++) { 
         if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
             Y=DeuteriumRecyclingCoefficient(t);
         } else {
@@ -99,10 +99,10 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0;
     real_t n_ij = 0;
     real_t Y = 0;
-    for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
+    for (len_t i=0; i<nZ; i++) { 
         if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
             Y=DeuteriumRecyclingCoefficient(t);
         } else {
@@ -126,10 +126,10 @@ real_t NeutralInflux::EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0;
     real_t n_ij = 0;
     real_t Y = 0;
-    for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
+    for (len_t i=0; i<nZ; i++) { 
         if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
             Y=DeuteriumRecyclingCoefficient(t);
         } else {
@@ -153,10 +153,10 @@ real_t NeutralInflux::EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0;
     real_t n_ij = 0;
     real_t Y = 0;
-    for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
+    for (len_t i=0; i<nZ; i++) { 
         if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
             Y=DeuteriumRecyclingCoefficient(t);
         } else {
@@ -180,10 +180,10 @@ real_t NeutralInflux::EvaluateNeutralInflux_dNi(real_t t, const len_t iIon){
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
     
-    real_t dGamma0=0; // Är detta rätt sätt att börja en summa?
+    real_t dGamma0=0;
     real_t n_ij = 0;
     real_t Y = 0;
-    for (len_t i=0; i<nZ; i++) { // Är det såhär man loopar genom array?
+    for (len_t i=0; i<nZ; i++) { 
         if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
             Y=DeuteriumRecyclingCoefficient(t);
         } else {

@@ -83,7 +83,7 @@ bool NeutralTransport::SetCSJacobianBlock(
 void NeutralTransport::SetCSMatrixElements(
     FVM::Matrix *mat, real_t*, const len_t, const len_t, const len_t rOffset
 ) {
-    mat->SetElement(rOffset, rOffset, wall_term); // Är det en operator som ska verka på en parameter? Vilken parameter?
+    mat->SetElement(rOffset, rOffset, wall_term); 
 } 
 
 

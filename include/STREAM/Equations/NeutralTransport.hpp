@@ -8,7 +8,6 @@
 #include "STREAM/Equations/NeutralInflux.hpp"
 #include "DREAM/Equations/Fluid/IonEquationTerm.hpp"
 
-//TODO Använda Esmées redan existerande kod för gamma_{n,i}
 
 namespace STREAM {
 	class NeutralTransport : public DREAM::IonEquationTerm<DREAM::FVM::EquationTerm> { 

@@ -9,7 +9,6 @@
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 
 
-
 /** 
  * Implementation of the runaway electron confinement time
  */
