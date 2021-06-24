@@ -58,29 +58,29 @@ class RadialGrid(PrescribedParameter):
     	
     	:param v: Vacuum vessel volume.
 		"""
-		self.vessel_volume = v
+	    self.vessel_volume = v
 
     def setRecyclingCoefficient1(self, c1):
     	"""
-    	Prescribe the vacuum vessel volume.
+    	Prescribe the first recycling coefficient for deuterium.
     	
-    	:param v: Vacuum vessel volume.
+    	:param c1: recycling coefficient.
 		"""
 		self.c1 = c1
 		
     def setRecyclingCoefficient2(self, c2):
     	"""
-    	Prescribe the vacuum vessel volume.
-    	
-    	:param v: Vacuum vessel volume.
+    	Prescribe the second recycling coefficient for deuterium.
+
+    	:param c2: recycling coefficient.
 		"""
 		self.c2 = c2
 		
     def setRecyclingCoefficient3(self, c3):
     	"""
-    	Prescribe the vacuum vessel volume.
-    	
-    	:param v: Vacuum vessel volume.
+    	Prescribe the third recycling coefficient for deuterium.
+
+    	:param c3: recycling coefficient.
 		"""
 		self.c3 = c3
 	
@@ -141,8 +141,8 @@ class RadialGrid(PrescribedParameter):
 	    	raise TypeError('The prescribed vessel volume must be of type float') 
 	if type(self.c1) != float:
 	    	raise TypeError('The prescribed recycle coefficient 1 must be of type float') 
-    	if type(self.c2) != float:
-	    	raise TypeError('The prescribed recycle coefficient 2 must be of type float') 
-    	if type(self.c3) != float:
-	    	raise TypeError('The prescribed recycle coefficient 3 must be of type float') 
+    if type(self.c2) != float:
+	   	raise TypeError('The prescribed recycle coefficient 2 must be of type float')
+    if type(self.c3) != float:
+	   	raise TypeError('The prescribed recycle coefficient 3 must be of type float')
 
