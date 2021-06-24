@@ -27,6 +27,7 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/EquationSystem.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/NeutralInflux.cpp" 
     "${PROJECT_SOURCE_DIR}/src/Equations/NeutralTransport.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/Equations/RadiatedPowerTerm.cpp"
 )
 
 add_library(stream STATIC ${stream})

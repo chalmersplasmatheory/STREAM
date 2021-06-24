@@ -62,25 +62,25 @@ class RadialGrid(PrescribedParameter):
 
     def setRecyclingCoefficient1(self, c1):
     	"""
-    	Prescribe the vacuum vessel volume.
+    	Prescribe the first recycle coefficient.
     	
-    	:param v: Vacuum vessel volume.
+    	:param c1: Recycle coefficient 1.
 		"""
 		self.c1 = c1
 		
     def setRecyclingCoefficient2(self, c2):
     	"""
-    	Prescribe the vacuum vessel volume.
+    	Prescribe the second recycle coefficient.
     	
-    	:param v: Vacuum vessel volume.
+    	:param c2: Recycle coefficient 2.
 		"""
 		self.c2 = c2
 		
     def setRecyclingCoefficient3(self, c3):
     	"""
-    	Prescribe the vacuum vessel volume.
+    	Prescribe the third recycle coefficient.
     	
-    	:param v: Vacuum vessel volume.
+    	:param c3: Recycle coefficient 3.
 		"""
 		self.c3 = c3
 	
@@ -91,7 +91,7 @@ class RadialGrid(PrescribedParameter):
         self.a, self.ta = data['a']['x'], data['a']['t']
         self.B0, self.tB0 = data['B0']['x'], data['B0']['t']
         self.kappa, self.tkappa = data['kappa']['x'], data['kappa']['t']
-        self.vessel_volume = data['vessel_volume']['x']
+        self.vessel_volume = data['vessel_volume']
         self.c1 = data['c1']
         self.c2 = data['c2']
         self.c3 = data['c3']
@@ -117,9 +117,7 @@ class RadialGrid(PrescribedParameter):
                 't': self.tkappa,
                 'x': self.kappa
             },
-            'vessel_volume': {
-            	'x': self.vessel_volume
-            },
+            'vessel_volume': self.vessel_volume
             'c1': self.c1
             'c2': self.c2
             'c3': self.c3
@@ -137,10 +135,10 @@ class RadialGrid(PrescribedParameter):
         self._verifySettingsPrescribedData('a', self.a, r0, self.ta)
         self._verifySettingsPrescribedData('B0', self.B0, r0, self.tB0)
         self._verifySettingsPrescribedData('kappa', self.kappa, r0, self.tkappa)
-	if type(self.vessel_volume) != float:
-	    	raise TypeError('The prescribed vessel volume must be of type float') 
-	if type(self.c1) != float:
-	    	raise TypeError('The prescribed recycle coefficient 1 must be of type float') 
+	    if type(self.vessel_volume) != float:
+	        raise TypeError('The prescribed vessel volume must be of type float') 
+	    if type(self.c1) != float:
+	        raise TypeError('The prescribed recycle coefficient 1 must be of type float') 
     	if type(self.c2) != float:
 	    	raise TypeError('The prescribed recycle coefficient 2 must be of type float') 
     	if type(self.c3) != float:
