@@ -1,4 +1,4 @@
-
+sys.path.append('../extern/DREAM/py/')
 
 from DREAM.Settings.PrescribedParameter import PrescribedParameter
 
@@ -16,10 +16,10 @@ class RadialGrid(PrescribedParameter):
         self.a, self.ta = None, None
         self.B0, self.tB0 = None, None
         self.kappa, self.tkappa = None, None
-        self.vessel_volume = None 
-        self.c1 = None 
-        self.c2 = None 
-        self.c3 = None 
+        self.vessel_volume = None
+        self.c1 = None
+        self.c2 = None
+        self.c3 = None
 
 
     def setB0(self, B0, t=0):
@@ -53,36 +53,36 @@ class RadialGrid(PrescribedParameter):
         self.kappa, _, self.tkappa = self._setPrescribedData(data=kappa, times=t)
         
     def setVesselVolume(self, v):
-    	"""
-    	Prescribe the vacuum vessel volume.
-    	
-    	:param v: Vacuum vessel volume.
-		"""
-		self.vessel_volume = v
+        """
+        Prescribe the vacuum vessel volume.
+
+        :param v: Vacuum vessel volume.
+        """
+        self.vessel_volume = v
 
     def setRecyclingCoefficient1(self, c1):
-    	"""
-    	Prescribe the first recycle coefficient.
-    	
-    	:param c1: Recycle coefficient 1.
-		"""
-		self.c1 = c1
+        """
+        Prescribe the first recycling coefficient for deuterium.
+
+        :param c1: recycling coefficient.
+        """
+        self.c1 = c1
 		
     def setRecyclingCoefficient2(self, c2):
-    	"""
-    	Prescribe the second recycle coefficient.
-    	
-    	:param c2: Recycle coefficient 2.
-		"""
-		self.c2 = c2
+        """
+        Prescribe the second recycling coefficient for deuterium.
+
+        :param c2: recycling coefficient.
+        """
+        self.c2 = c2
 		
     def setRecyclingCoefficient3(self, c3):
-    	"""
-    	Prescribe the third recycle coefficient.
-    	
-    	:param c3: Recycle coefficient 3.
-		"""
-		self.c3 = c3
+        """
+        Prescribe the third recycling coefficient for deuterium.
+
+        :param c3: recycling coefficient.
+        """
+        self.c3 = c3
 	
     def fromdict(self, data):
         """
@@ -117,9 +117,9 @@ class RadialGrid(PrescribedParameter):
                 't': self.tkappa,
                 'x': self.kappa
             },
-            'vessel_volume': self.vessel_volume
-            'c1': self.c1
-            'c2': self.c2
+            'vessel_volume': self.vessel_volume,
+            'c1': self.c1,
+            'c2': self.c2,
             'c3': self.c3
         }
 
@@ -135,12 +135,11 @@ class RadialGrid(PrescribedParameter):
         self._verifySettingsPrescribedData('a', self.a, r0, self.ta)
         self._verifySettingsPrescribedData('B0', self.B0, r0, self.tB0)
         self._verifySettingsPrescribedData('kappa', self.kappa, r0, self.tkappa)
-	    if type(self.vessel_volume) != float:
-	        raise TypeError('The prescribed vessel volume must be of type float') 
-	    if type(self.c1) != float:
-	        raise TypeError('The prescribed recycle coefficient 1 must be of type float') 
-    	if type(self.c2) != float:
-	    	raise TypeError('The prescribed recycle coefficient 2 must be of type float') 
-    	if type(self.c3) != float:
-	    	raise TypeError('The prescribed recycle coefficient 3 must be of type float') 
-
+        if type(self.vessel_volume) != float:
+            raise TypeError('The prescribed vessel volume must be of type float')
+        if type(self.c1) != float:
+            raise TypeError('The prescribed recycle coefficient 1 must be of type float')
+        if type(self.c2) != float:
+            raise TypeError('The prescribed recycle coefficient 2 must be of type float')
+        if type(self.c3) != float:
+            raise TypeError('The prescribed recycle coefficient 3 must be of type float')
