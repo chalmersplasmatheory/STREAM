@@ -1,6 +1,6 @@
 
 try:
-    from DREAM.GeriMap import register
+    from DREAM import GeriMap
 except ModuleNotFoundError:
     # Add DREAM from 
     import sys

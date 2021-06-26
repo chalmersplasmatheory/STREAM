@@ -1,6 +1,5 @@
-sys.path.append('../extern/DREAM/py/')
 
-from DREAM.Settings.PrescribedParameter import PrescribedParameter
+from DREAM.Settings.Equations.PrescribedParameter import PrescribedParameter
 
 class RadialGrid(PrescribedParameter):
     

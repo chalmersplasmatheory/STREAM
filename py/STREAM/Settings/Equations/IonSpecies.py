@@ -1,8 +1,23 @@
 
-from DREAM.Settings.Equations.IonSpecies import IonSpecies as DREAMIonSpecies
+import DREAM.Settings.Equations.IonSpecies as DREAMIonSpecies
 
 
-class IonSpecies(DREAMIonSpecies):
+# Types in DREAM
+IONS_PRESCRIBED = DREAMIonSpecies.IONS_PRESCRIBED 
+IONS_EQUILIBRIUM = DREAMIonSpecies.IONS_EQUILIBRIUM 
+IONS_DYNAMIC = DREAMIonSpecies.IONS_DYNAMIC 
+
+# Types which are extensions implemented in this interface
+# (which are special cases of the DREAM types above)
+IONS_DYNAMIC_NEUTRAL = DREAMIonSpecies.IONS_DYNAMIC_NEUTRAL 
+IONS_DYNAMIC_FULLY_IONIZED = DREAMIonSpecies.IONS_DYNAMIC_FULLY_IONIZED 
+IONS_PRESCRIBED_NEUTRAL = DREAMIonSpecies.IONS_PRESCRIBED_NEUTRAL 
+IONS_PRESCRIBED_FULLY_IONIZED = DREAMIonSpecies.IONS_PRESCRIBED_FULLY_IONIZED 
+IONS_EQUILIBRIUM_NEUTRAL = DREAMIonSpecies.IONS_EQUILIBRIUM_NEUTRAL 
+IONS_EQUILIBRIUM_FULLY_IONIZED = DREAMIonSpecies.IONS_EQUILIBRIUM_FULLY_IONIZED 
+
+
+class IonSpecies(DREAMIonSpecies.IonSpecies):
     
 
     def __init__(self, *args, **kwargs):
