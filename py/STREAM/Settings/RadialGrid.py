@@ -19,6 +19,8 @@ class RadialGrid(PrescribedParameter):
         self.c1 = None
         self.c2 = None
         self.c3 = None
+        self.b = 0.0
+        self.R0 = 2.0
 
 
     def setB0(self, B0, t=0):
@@ -40,6 +42,24 @@ class RadialGrid(PrescribedParameter):
         :param t: Time vector (if ``a`` varies with time).
         """
         self.a, _, self.ta = self._setPrescribedData(data=a, times=t)
+
+
+    def setMajorRadius(self, R0):
+        """
+        (Analytic toroidal)
+        Set the tokamak major radius.
+        """
+        if R0 <= 0:
+            raise DREAMException("RadialGrid: Invalid value assigned to major radius 'R0': {}".format(R0))
+
+        self.R0 = float(R0)
+
+    def setWallRadius(self, wall_radius):
+        """
+        (Cylindrical, Analytic toroidal)
+        Set the minor radius of the wall
+        """
+        self.b = float(wall_radius)
 
 
     def setElongation(self, kappa, t=0):
@@ -94,6 +114,14 @@ class RadialGrid(PrescribedParameter):
         self.c1 = data['c1']
         self.c2 = data['c2']
         self.c3 = data['c3']
+        self.R0 = data['R0']
+
+        if 'wall_radius' in data:
+            self.b = data['wall_radius']
+            if type(self.b) == np.ndarray:
+                self.b = float(self.b[0])
+            else:
+                self.b = float(self.b)
 
 
     def todict(self, verify=True):
@@ -121,7 +149,9 @@ class RadialGrid(PrescribedParameter):
             },
             'c1': self.c1,
             'c2': self.c2,
-            'c3': self.c3
+            'c3': self.c3,
+            'R0': self.R0,
+            'wall_radius': self.b
         }
 
         return data
@@ -144,4 +174,9 @@ class RadialGrid(PrescribedParameter):
             raise TypeError('The prescribed recycle coefficient 2 must be of type float')
         if type(self.c3) != float:
             raise TypeError('The prescribed recycle coefficient 3 must be of type float')
-
+        if self.R0 is None or self.R0 <= 0:
+            raise DREAMException("RadialGrid: Invalid value assigned to tokamak major radius 'R0': {}".format(self.R0))
+        if self.b is None or self.b < self.a:
+            raise DREAMException("RadialGrid: Invalid value assigned to wall radius 'b' (must be explicitly set to >= 'a' using 'setWallRadius'): ".format(self.b))
+        if not np.isscalar(self.b):
+            raise DREAMException("RadialGrid: The specified wall radius is not a scalar: {}.".format(self.b))

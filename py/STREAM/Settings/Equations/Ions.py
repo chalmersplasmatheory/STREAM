@@ -1,8 +1,8 @@
 # Wrapper for handling ion species
 
-
-from DREAM.Settings.Equations.Ions import Ions as DREAMIons
-from . IonSpecies import IonSpecies
+import numpy as np
+import DREAM.Settings.Equations.Ions as DREAMIons
+from . IonSpecies import IonSpecies, IONS_PRESCRIBED, ION_OPACITY_MODE_TRANSPARENT
 
 
 # Model to use for ion heat
@@ -10,7 +10,7 @@ IONS_T_I_NEGLECT = DREAMIons.IONS_T_I_NEGLECT
 IONS_T_I_INCLUDE = DREAMIons.IONS_T_I_INCLUDE
 
 
-class Ions(DREAMIons):
+class Ions(DREAMIons.Ions):
     
 
     def __init__(self, settings, *args, **kwargs):
