@@ -4,7 +4,7 @@
 
 #include <string>
 #include "DREAM/Equations/Fluid/MaxwellianCollisionalEnergyTransferTerm.hpp"
-#include "DREAM/Equations/Fluid/RadiatedPowerTerm.hpp"
+//#include "DREAM/Equations/Fluid/RadiatedPowerTerm.hpp"
 #include "DREAM/OtherQuantityHandler.hpp"
 #include "FVM/Equation/TransientTerm.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
@@ -12,6 +12,7 @@
 #include "STREAM/Equations/IonHeatTransport.hpp"
 #include "STREAM/Settings/OptionConstants.hpp"
 #include "DREAM/Equations/Fluid/IonSpeciesTransientTerm.hpp"
+#include "STREAM/Equations/RadiatedPowerTerm.hpp"
 
 using namespace std;
 using namespace STREAM;
@@ -94,18 +95,22 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     op_E_field->AddTerm(oqty_terms->T_cold_ohmic);
 
     // Gather opacity settings
-    len_t ni_types;
-    const int_t *iopacity_modes = s->GetIntegerArray(MODULENAME "/opacity_modes", 1, &ni_types);
+    //len_t ni_types;
+    //const int_t *iopacity_modes = s->GetIntegerArray(MODULENAME "/opacity_modes", 1, &ni_types);
+    len_t ni_types = ionHandler->GetNZ();
     enum DREAM::OptionConstants::ion_opacity_mode *opacity_mode =
         new enum DREAM::OptionConstants::ion_opacity_mode[ni_types];
     for (len_t i = 0; i < ni_types; i++)
-        opacity_mode[i] = (enum DREAM::OptionConstants::ion_opacity_mode)iopacity_modes[i];
-
+        //opacity_mode[i] = (enum DREAM::OptionConstants::ion_opacity_mode)iopacity_modes[i];
+        opacity_mode[i] = DREAM::OptionConstants::OPACITY_MODE_TRANSPARENT;
+    
+    PlasmaVolume *pv = eqsys->GetPlasmaVolume();    
+    
     // Add radiation loss term (TODO TODO TODO)
     bool withRecombinationRadiation = s->GetBool(MODULENAME "/recombination");
-    oqty_terms->T_cold_radiation = new DREAM::RadiatedPowerTerm(
+    oqty_terms->T_cold_radiation = new STREAM::RadiatedPowerTerm(
         fluidGrid, unknowns, ionHandler, adas, nist,
-        amjuel, opacity_mode, withRecombinationRadiation
+        amjuel, opacity_mode, withRecombinationRadiation, pv
     );
     op_n_cold->AddTerm(oqty_terms->T_cold_radiation);
 
