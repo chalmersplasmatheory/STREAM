@@ -6,6 +6,7 @@ import copy
 import numpy as np
 from DREAM import DREAMIO, DREAMSettings
 
+from .Settings.EquationSystem import EquationSystem
 from .Settings.RadialGrid import RadialGrid
 
 
