@@ -13,13 +13,16 @@
 namespace STREAM{
     class RadiatedPowerTerm : public DREAM::RadiatedPowerTerm{ //Subclass like this ok?
     private:
+        DREAM::FVM::UnknownQuantityHandler *unknowns;
+        DREAM::IonHandler *ions;
         PlasmaVolume *volumes;
+        len_t id_T_cold, id_n_cold;
     protected:
         void SetWeights() override;
         void SetDiffWeights(len_t derivId, len_t nMultiples) override;
-        virtual bool SetJacobianBlock(const len_t, const len_t, Matrix*, const real_t*) override;
+        virtual bool SetJacobianBlock(const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*) override;
     public:
-        RadiatedPowerTerm(DREAM::FVM::Grid*, DREAM::FVM::UnknownQuantityHandler*, DREAM::IonHandler*, DREAM::ADAS*, DREAM::NIST*, DREAM::AMJUEL*, bool, PlasmaVolume*);
+        RadiatedPowerTerm(DREAM::FVM::Grid*, DREAM::FVM::UnknownQuantityHandler*, DREAM::IonHandler*, DREAM::ADAS*, DREAM::NIST*, DREAM::AMJUEL*, DREAM::OptionConstants::ion_opacity_mode*, bool, PlasmaVolume*);
     };
 }
 
