@@ -48,7 +48,8 @@ c1       = 1.1
 c2       = 0.09
 c3       = 0.1
 
-# TODO resistance and inductance L/R för MK2
+R = 7.5e-4  # Ohm, i MK2 struktur
+L = 9.1e-5  # H, i MK2 struktur
 
 r=np.array([0])
 #print(str(n_D))
