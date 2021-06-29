@@ -12,7 +12,6 @@
 namespace STREAM {
     class ElectronTransportDiffusion : public DREAM::FVM::DiffusionTerm {
     private:
-        enum DREAM::OptionConstants::momentumgrid_type mgtype;
         ConfinementTime *coefftauinv; 
         DREAM::FVM::UnknownQuantityHandler *unknowns;
         EllipticalRadialGridGenerator *radials;
@@ -32,7 +31,7 @@ namespace STREAM {
         virtual void SetPartialDiffusionTerm(len_t, len_t) override;
 
     public:
-        ElectronTransportDiffusion(DREAM::FVM::Grid *grid, enum DREAM::OptionConstants::momentumgrid_type mgtype, EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *unknowns);
+        ElectronTransportDiffusion(DREAM::FVM::Grid *grid, EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *unknowns);
         ~ElectronTransportDiffusion();
 
         virtual bool GridRebuilt() override;

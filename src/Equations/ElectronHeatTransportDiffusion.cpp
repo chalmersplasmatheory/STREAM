@@ -11,9 +11,8 @@ using namespace STREAM;
  * Constructor.
  */
 ElectronHeatTransportDiffusion::ElectronHeatTransportDiffusion(
-    FVM::Grid *grid, enum OptionConstants::momentumgrid_type mgtype,
-    EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *unknowns
-) : FVM::DiffusionTerm(grid), mgtype(mgtype), coefftauinv(tauinv) { 
+    FVM::Grid *grid, EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *unknowns
+) : FVM::DiffusionTerm(grid), coefftauinv(tauinv) { 
 
     SetName("ElectronHeatTransportDiffusion"); 
 
