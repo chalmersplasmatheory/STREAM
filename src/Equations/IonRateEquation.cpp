@@ -137,6 +137,7 @@ void IonRateEquation::Rebuild(
 
     ADASRateInterpolator *acd = adas->GetACD(Zion);
     ADASRateInterpolator *scd = adas->GetSCD(Zion);
+    //ADASRateInterpolator *ccd = adas->GetCCD(Zion); For charge exchange term
 
     real_t eps = sqrt(std::numeric_limits<real_t>::epsilon());
     // Iterate over charge state (0 ... Z)
