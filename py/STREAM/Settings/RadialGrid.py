@@ -110,7 +110,7 @@ class RadialGrid(PrescribedParameter):
         self.a, self.ta = data['a']['x'], data['a']['t']
         self.B0, self.tB0 = data['B0']['x'], data['B0']['t']
         self.kappa, self.tkappa = data['kappa']['x'], data['kappa']['t']
-        self.vessel_volume = data['vessel_volume']['x']
+        self.vessel_volume = data['vessel_volume']
         self.c1 = data['c1']
         self.c2 = data['c2']
         self.c3 = data['c3']
@@ -144,9 +144,7 @@ class RadialGrid(PrescribedParameter):
                 't': self.tkappa,
                 'x': self.kappa
             },
-            'vessel_volume': {
-                'x': self.vessel_volume
-            },
+            'vessel_volume': self.vessel_volume,
             'c1': self.c1,
             'c2': self.c2,
             'c3': self.c3,
