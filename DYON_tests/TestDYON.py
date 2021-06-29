@@ -1,3 +1,5 @@
+# Bestäm
+
 #'''
 import numpy as np
 import sys
@@ -60,24 +62,22 @@ V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 
 V_s = interp1d(t_d, V_d, kind='linear')
 V_loop_wall = V_s(t)
 
-E_initial = V_loop_wall[0]/(np.pi*r_0)
-T_initial = 1 # eV
+E_initial = V_d[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
+T_e_initial = 1 # eV
+T_i_initial = 0.03
 
 sts = STREAMSettings()
-sts.collisions.collfreq_type = Collisions.COLLFREQ_TYPE_PARTIALLY_SCREENED
 
 sts.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts.eqsys.E_field.setInitialProfile(efield=E_initial)
 sts.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=R/L, R0=r_0)
 
 sts.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
-sts.eqsys.T_cold.setInitialProfile(T_initial)
+sts.eqsys.T_cold.setInitialProfile(T_e_initial)
 
-sts.eqsys.n_cold.setType(ColdElectrons.TYPE_SELFCONSISTENT)
-
-sts.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=n_D, r=r)
-sts.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_C, r=r)
-sts.eqsys.n_i.addIon(name='O', Z=8, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_O, r=r)
+sts.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=n_D, r=r, T=T_i_initial)
+sts.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_C, r=r, T=T_i_initial)
+sts.eqsys.n_i.addIon(name='O', Z=8, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_O, r=r, T=T_i_initial)
 
 sts.eqsys.n_re.setAvalanche(avalanche=Runaways.AVALANCHE_MODE_NEGLECT)
 sts.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_DISABLED)
@@ -94,7 +94,7 @@ sts.radialgrid.setRecyclingCoefficient2(c2)
 sts.radialgrid.setRecyclingCoefficient3(c3)
 
 
-sts.solver.setType(Solver.LINEAR_IMPLICIT)
+sts.solver.setType(Solver.NONLINEAR)
 
 sts.runawaygrid.setEnabled(False)
 
