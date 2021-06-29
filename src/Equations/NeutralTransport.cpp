@@ -37,18 +37,18 @@ void NeutralTransport::Rebuild(const real_t t, const real_t, FVM::UnknownQuantit
     real_t dGamma0dWi    = this->NI->EvaluateNeutralInflux_dWi(t, iIon); 
     real_t dGamma0dNi    = this->NI->EvaluateNeutralInflux_dNi(t, iIon);
     
-    real_t V_ptot       = PV->GetTotalNeutralVolume(iIon);
-    real_t dVptotdTcold = PV->GetTotalNeutralVolume_dT(iIon);
-    real_t dVptotdncold = PV->GetTotalNeutralVolume_dn(iIon);
+    real_t V_tot       = PV->GetTotalNeutralVolume(iIon);
+    real_t dVtotdTcold = PV->GetTotalNeutralVolume_dT(iIon);
+    real_t dVtotdncold = PV->GetTotalNeutralVolume_dn(iIon);
         
-    this->wall_term = Gamma0/V_ptot;
-    this->dn_ij     = dGamma0dnij/V_ptot;
-    this->dI_p      = dGamma0dIp/V_ptot;
-    this->dI_wall   = dGamma0dIwall/V_ptot;
-    this->dT_cold   = dGamma0dTcold/V_ptot - Gamma0/(V_ptot*V_ptot)*dVptotdTcold;
-    this->dW_i      = dGamma0dWi/V_ptot;
-    this->dN_i      = dGamma0dNi/V_ptot;
-    this->dn_cold   = - Gamma0/(V_ptot*V_ptot)*dVptotdncold;
+    this->wall_term = Gamma0/V_tot;
+    this->dn_ij     = dGamma0dnij/V_tot;
+    this->dI_p      = dGamma0dIp/V_tot;
+    this->dI_wall   = dGamma0dIwall/V_tot;
+    this->dT_cold   = dGamma0dTcold/V_tot - Gamma0/(V_tot*V_tot)*dVtotdTcold;
+    this->dW_i      = dGamma0dWi/V_tot;
+    this->dN_i      = dGamma0dNi/V_tot;
+    this->dn_cold   = - Gamma0/(V_tot*V_tot)*dVtotdncold;
 }
 
 bool NeutralTransport::SetCSJacobianBlock(
