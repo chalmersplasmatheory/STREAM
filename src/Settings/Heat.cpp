@@ -12,6 +12,7 @@
 #include "STREAM/Settings/OptionConstants.hpp"
 #include "DREAM/Equations/Fluid/IonSpeciesTransientTerm.hpp"
 #include "STREAM/Equations/RadiatedPowerTerm.hpp"
+#include "STREAM/Equations/ElectronHeatTransportDiffusion.hpp"
 
 using namespace std;
 using namespace STREAM;
@@ -111,8 +112,8 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     op_n_cold->AddTerm(oqty_terms->T_cold_radiation);
 
     // Add transport (TODO TODO TODO)
-    bool hasTransport = false;      // TODO Load from settings...
-    //op_W_cold->AddTerm(...)
+    bool hasTransport = true;      // TODO Load from settings...
+    op_W_cold->AddTerm(new ElectronHeatTransportDiffusion(eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(), eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
 
     eqsys->SetOperator(id_T_cold, id_E_field, op_E_field);
     eqsys->SetOperator(id_T_cold, id_n_cold, op_n_cold);
