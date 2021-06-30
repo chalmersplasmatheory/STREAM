@@ -55,7 +55,7 @@ namespace STREAM {
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
         static void ConstructEquation_T_i_selfconsistent(
-            EquationSystem *eqsys, DREAM::Settings* /*s*/
+            EquationSystem *eqsys, DREAM::Settings* /*s*/, DREAM::ADAS *
         );
         
         //Mean free path equation

@@ -2,33 +2,37 @@
 #define _STREAM_EQUATIONS_CHARGE_EXCHANGE_TERM_HPP
 
 #include "DREAM/IonHandler.hpp"
-#include "FVM/Equation/DiagonalLinearTerm.hpp"
+#include "FVM/Equation/DiagonalComplexTerm.hpp"
 #include "DREAM/ADAS.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
 #include "STREAM/Equations/PlasmaVolume.hpp"
 
 namespace STREAM {
-    class ChargeExchangeTerm : public DREAM::FVM::DiagonalLinearTerm {
+    class ChargeExchangeTerm : public DREAM::FVM::DiagonalComplexTerm {
         private:
             DREAM::IonHandler *ions;
             const len_t iIon;
-            DREAM::FVM::UnknownQuantityHandler *unknowns; 
             DREAM::ADAS *adas;
             PlasmaVolume *pv;
             
-            real_t T_0 = 0.026;
+            const real_t T_0 = 0.026; // Room temperature in eV
             
-            real_t id_Wi, id_Ni;
+            real_t id_Tcold, id_ncold, id_Wi, id_Ni, id_ni;
+            
+            virtual void AllocateDiffWeights() override;
+            virtual void DeallocateDiffWeights() override;
+            virtual void ResetDiffWeights() override;
             
         protected:
             virtual len_t GetNumberOfWeightsElements() override
                 {return ions->GetNzs()*grid->GetNCells();} 
             
             virtual void SetWeights() override;
+            virtual void SetDiffWeights(len_t derivId, len_t nMultiples) override;
         public:
-            ChargeExchangeTerm(DREAM::FVM::Grid*, DREAM::IonHandler*, const len_t, DREAM::FVM::UnknownQuantityHandler*, DREAM::ADAS*, PlasmaVolume*);
+            ChargeExchangeTerm(DREAM::FVM::Grid*, DREAM::FVM::UnknownQuantityHandler*, DREAM::IonHandler*, const len_t, DREAM::ADAS*, PlasmaVolume*, DREAM::FVM::Grid *operandGrid=nullptr);
 
-            virtual len_t GetNumberOfNonZerosPerRow() const override { return this->ions->1; } 
+            virtual len_t GetNumberOfNonZerosPerRow() const override { return 1; } 
             
             virtual void SetMatrixElements(DREAM::FVM::Matrix*, real_t*) override;
             virtual void SetVectorElements(real_t*, const real_t*) override;
