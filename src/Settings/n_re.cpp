@@ -17,7 +17,7 @@ void SimulationGenerator::ConstructEquation_n_re(
     EquationSystem *eqsys, DREAM::Settings *s,
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
-    DREAM::SimulationGenerator::ConstructEquation_n_re(eqsys, s, oqty_terms);
+    DREAM::SimulationGenerator::ConstructEquation_n_re(eqsys, s, oqty_terms, nullptr);
     
     len_t id_n_re = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_N_RE);
     

@@ -153,7 +153,7 @@ void SimulationGenerator::ConstructEquations(
 
     // Runaway electron quantities
     if (eqsys->HasRunawayGrid()) {
-        DREAM::SimulationGenerator::ConstructEquation_f_re(eqsys, s, oqty_terms);
+        DREAM::SimulationGenerator::ConstructEquation_f_re(eqsys, s, oqty_terms, nullptr);
     }
 
     // Standard equations
@@ -180,7 +180,7 @@ void SimulationGenerator::ConstructEquations(
     // NOTE: The runaway number density may depend explicitly on
     // the hot-tail equation and must therefore be constructed
     // AFTER the call to 'ConstructEquation_f_hot()'.
-    DREAM::SimulationGenerator::ConstructEquation_n_re(eqsys, s, oqty_terms);
+    ConstructEquation_n_re(eqsys, s, oqty_terms);
 
     DREAM::SimulationGenerator::ConstructEquation_psi_p(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_psi_edge(eqsys, s);

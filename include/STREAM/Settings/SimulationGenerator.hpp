@@ -77,8 +77,8 @@ namespace STREAM {
         static DREAM::FVM::RadialGrid *ConstructRadialGrid_Cylindrical(DREAM::Settings*);
         static EllipticalRadialGridGenerator *ConstructRadialGrid_Elliptical(DREAM::Settings*);
         
-        void DefineOptions_n_re(DREAM::Settings*);
-        void ConstructEquation_n_re(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
+        static void DefineOptions_n_re(DREAM::Settings*);
+        static void ConstructEquation_n_re(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
     };
 }
 
