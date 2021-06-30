@@ -11,29 +11,6 @@ using namespace STREAM;
 
 #define EQUATIONSYSTEM "eqsys"
 
-void SimulationGenerator::DefineOptions_wall(DREAM::Settings *s) {
-    s->DefineSetting(
-        "radialgrid/wall/c1",
-        "Coefficients for deuterium recycling",
-        (real_t)1.1
-    );
-    s->DefineSetting(
-        "radialgrid/wall/c2",
-        "Coefficients for deuterium recycling",
-        (real_t)0.09
-    );
-    s->DefineSetting(
-        "radialgrid/wall/c3",
-        "Coefficients for deuterium recycling",
-        (real_t)0.1
-    );
-    
-    s->DefineSetting(
-        "radialgrid/wall/vessel_volume", 
-        "The vacuum vessel volume",
-        (real_t)0
-    );
-}
 
 
 /**
@@ -128,19 +105,7 @@ void SimulationGenerator::ConstructEquations(
         fluidGrid, vessel_volume, unknowns, r, adas, ionHandler
     );
     eqsys->SetPlasmaVolume(volumes);
-    
-    /*
-    // Neutral influx 
-    SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
-
-    real_t c1 = s->GetReal("radialgrid/wall/c1"); 
-    real_t c2 = s->GetReal("radialgrid/wall/c2"); 
-    real_t c3 = s->GetReal("radialgrid/wall/c3"); 
-    NeutralInflux *neutralInflux = new NeutralInflux(
-        ionHandler, SRC, confinementTime, volumes, c1, c2, c3 
-    );
-    eqsys->SetNeutralInflux(neutralInflux); 
-    */
+   
     
     // TODO
     ConstructEquation_Ions(eqsys, s, adas, amjuel);
@@ -208,7 +173,7 @@ void SimulationGenerator::ConstructEquations(
         throw DREAM::SettingsException(
             "T_i not included: STREAM requires the ion temperatures to be evolved."
         );
-
+    
     DREAM::SimulationGenerator::ConstructEquation_Ion_Ni(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_T_i(eqsys, s);
 
@@ -229,6 +194,8 @@ void SimulationGenerator::ConstructEquations(
     if (ht_mode != DREAM::OptionConstants::EQTERM_HOTTAIL_MODE_DISABLED &&
         ht_dist_mode == DREAM::OptionConstants::UQTY_F_HOT_DIST_MODE_NONREL)
         DREAM::SimulationGenerator::ConstructEquation_tau_coll(eqsys);
+        
+    confinementTime->Initialize();
 }
 
 /**

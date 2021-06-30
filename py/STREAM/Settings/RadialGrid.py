@@ -1,7 +1,8 @@
+import numpy as np
 
-from DREAM.Settings.Equations.PrescribedParameter import PrescribedParameter
+from DREAM.Settings.Equations.PrescribedScalarParameter import PrescribedScalarParameter
 
-class RadialGrid(PrescribedParameter):
+class RadialGrid(PrescribedScalarParameter):
     
 
     def __init__(self):
@@ -15,12 +16,16 @@ class RadialGrid(PrescribedParameter):
         self.a, self.ta = None, None
         self.B0, self.tB0 = None, None
         self.kappa, self.tkappa = None, None
+        self.delta, self.tdelta = None, None
         self.vessel_volume = None
         self.c1 = None
         self.c2 = None
         self.c3 = None
         self.b = 0.0
         self.R0 = 2.0
+
+        self.setElongation(1)
+        self.setTriangularity(0)
 
 
     def setB0(self, B0, t=0):
@@ -31,7 +36,7 @@ class RadialGrid(PrescribedParameter):
         :param B0: Magnetic field strength on the magnetic axis.
         :param t:  Time vector (if ``B0`` varies with time).
         """
-        self.B0, _, self.tB0 = self._setPrescribedData(data=B0, times=t)
+        self.B0, self.tB0 = self._setScalarData(data=B0, times=t)
 
 
     def setMinorRadius(self, a, t=0):
@@ -41,7 +46,7 @@ class RadialGrid(PrescribedParameter):
         :param a: Plasma minor radius.
         :param t: Time vector (if ``a`` varies with time).
         """
-        self.a, _, self.ta = self._setPrescribedData(data=a, times=t)
+        self.a, self.ta = self._setScalarData(data=a, times=t)
 
 
     def setMajorRadius(self, R0):
@@ -69,7 +74,16 @@ class RadialGrid(PrescribedParameter):
         :param kappa: Plasma elongation.
         :param t:     Time vector (if ``kappa`` varies with time).
         """
-        self.kappa, _, self.tkappa = self._setPrescribedData(data=kappa, times=t)
+        self.kappa, self.tkappa = self._setScalarData(data=kappa, times=t)
+
+    def setTriangularity(self, delta, t=0):
+        """
+        Prescribe the (time evolution of the) plasma triangularity parameter.
+
+        :param delta: Plasma elongation.
+        :param t:     Time vector (if ``delt`` varies with time).
+        """
+        self.delta, self.tdelta = self._setScalarData(data=delta, times=t)
         
     def setVesselVolume(self, v):
         """
@@ -77,7 +91,7 @@ class RadialGrid(PrescribedParameter):
 
         :param v: Vacuum vessel volume.
         """
-        self.vessel_volume = v
+        self.vessel_volume = float(v)
 
     def setRecyclingCoefficient1(self, c1):
         """
@@ -85,7 +99,7 @@ class RadialGrid(PrescribedParameter):
 
         :param c1: recycling coefficient.
         """
-        self.c1 = c1
+        self.c1 = float(c1)
 		
     def setRecyclingCoefficient2(self, c2):
         """
@@ -93,7 +107,7 @@ class RadialGrid(PrescribedParameter):
 
         :param c2: recycling coefficient.
         """
-        self.c2 = c2
+        self.c2 = float(c2)
 		
     def setRecyclingCoefficient3(self, c3):
         """
@@ -101,7 +115,7 @@ class RadialGrid(PrescribedParameter):
 
         :param c3: recycling coefficient.
         """
-        self.c3 = c3
+        self.c3 = float(c3)
 	
     def fromdict(self, data):
         """
@@ -110,6 +124,7 @@ class RadialGrid(PrescribedParameter):
         self.a, self.ta = data['a']['x'], data['a']['t']
         self.B0, self.tB0 = data['B0']['x'], data['B0']['t']
         self.kappa, self.tkappa = data['kappa']['x'], data['kappa']['t']
+        self.delta, self.tdelta = data['delta']['x'], data['delta']['t']
         self.vessel_volume = data['vessel_volume']
         self.c1 = data['c1']
         self.c2 = data['c2']
@@ -144,12 +159,18 @@ class RadialGrid(PrescribedParameter):
                 't': self.tkappa,
                 'x': self.kappa
             },
-            'vessel_volume': self.vessel_volume,
-            'c1': self.c1,
-            'c2': self.c2,
-            'c3': self.c3,
+            'delta': {
+                't': self.tdelta,
+                'x': self.delta
+            },
             'R0': self.R0,
-            'wall_radius': self.b
+            'wall_radius': self.b,
+            'wall' : {
+                'vessel_volume': self.vessel_volume,
+                'c1': self.c1,
+                'c2': self.c2,
+                'c3': self.c3
+            }
         }
 
         return data
@@ -159,11 +180,11 @@ class RadialGrid(PrescribedParameter):
         """
         Verify that the RadialGrid settings are consistent.
         """
-        r0 = np.asarray([0])
 
-        self._verifySettingsPrescribedData('a', self.a, r0, self.ta)
-        self._verifySettingsPrescribedData('B0', self.B0, r0, self.tB0)
-        self._verifySettingsPrescribedData('kappa', self.kappa, r0, self.tkappa)
+        self._verifySettingsPrescribedScalarData('a', self.a, self.ta)
+        self._verifySettingsPrescribedScalarData('B0', self.B0, self.tB0)
+        self._verifySettingsPrescribedScalarData('kappa', self.kappa, self.tkappa)
+        self._verifySettingsPrescribedScalarData('delta', self.delta, self.tdelta)
         if type(self.vessel_volume) != float:
             raise TypeError('The prescribed vessel volume must be of type float')
         if type(self.c1) != float:

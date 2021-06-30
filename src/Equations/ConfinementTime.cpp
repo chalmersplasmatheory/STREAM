@@ -17,11 +17,7 @@ ConfinementTime::ConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadia
     radials  = r;
     this->l_MK2=l_MK2;
 
-    id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
-    id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
-    id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
-    id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
-    id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
+
     
 }
 
@@ -120,6 +116,18 @@ real_t ConfinementTime::EvaluateConfinementTime_dNi(len_t ir){
     real_t B = radials->GetMagneticField(); 
     
     return -4/3*1/(a*B)*W_i/(N_i*N_i) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/((T_cold+2/3*W_i/N_i)*(Constants::mD)));
+}
+
+/**
+ * Get IDs for unknowns (since I_wall is defined late during the construction of
+ * the equation system this must be done seperately from other initialization)
+ */
+void ConfinementTime::Initialize() {
+    id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
+    id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
+    id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
+    id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
+    id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
 }
 
 /*

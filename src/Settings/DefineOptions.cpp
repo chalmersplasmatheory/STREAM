@@ -37,5 +37,6 @@ void SimulationGenerator::DefineOptions(DREAM::Settings *s) {
     DREAM::SimulationGenerator::DefineOptions_Solver(s);
     DREAM::SimulationGenerator::DefineOptions_TimeStepper(s);
     DREAM::SimulationGenerator::DefineOptions_OtherQuantities(s);
+    DREAM::SimulationGenerator::DefineOptions_SPI(s);
 }
 
