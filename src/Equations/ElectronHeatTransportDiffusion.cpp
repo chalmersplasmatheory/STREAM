@@ -19,7 +19,6 @@ ElectronHeatTransportDiffusion::ElectronHeatTransportDiffusion(
     this->unknowns  = unknowns;
     this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
     this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
-    this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
     this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
     this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
@@ -28,7 +27,6 @@ ElectronHeatTransportDiffusion::ElectronHeatTransportDiffusion(
     
     AddUnknownForJacobian(unknowns, this->id_ncold); 
     AddUnknownForJacobian(unknowns, this->id_Ip);
-    AddUnknownForJacobian(unknowns, this->id_Iwall);
     AddUnknownForJacobian(unknowns, this->id_Tcold);
     AddUnknownForJacobian(unknowns, this->id_Wi); 
     AddUnknownForJacobian(unknowns, this->id_Ni);
@@ -54,6 +52,7 @@ ElectronHeatTransportDiffusion::~ElectronHeatTransportDiffusion() {
  */
 void ElectronHeatTransportDiffusion::AllocateDiffCoeff() {
     const len_t nr = this->grid->GetNr();
+    this->dn_cold = new real_t[nr+1];
     this->dI_p = new real_t[nr+1];
     this->dI_wall = new real_t[nr+1];
     this->dT_cold = new real_t[nr+1];
@@ -66,7 +65,8 @@ void ElectronHeatTransportDiffusion::AllocateDiffCoeff() {
  */
 bool ElectronHeatTransportDiffusion::GridRebuilt() {
     this->FVM::DiffusionTerm::GridRebuilt();
-
+    
+    delete [] this->dn_cold;
     delete [] this->dI_p;
     delete [] this->dI_wall;
     delete [] this->dT_cold;
@@ -83,19 +83,27 @@ bool ElectronHeatTransportDiffusion::GridRebuilt() {
 void ElectronHeatTransportDiffusion::Rebuild(
     const real_t, const real_t, FVM::UnknownQuantityHandler *unknowns 
 ) {
+    if(this->id_Iwall == 0){
+        this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
+        AddUnknownForJacobian(unknowns, this->id_Iwall);
+    }
     real_t a = radials->GetMinorRadius();
     
     const len_t nr = this->grid->GetNr();
 
     const real_t *ncold = unknowns->GetUnknownData(this->id_ncold);
     
+    #define INTERP(IR, FCN) \
+        ((IR==0?FCN(0):FCN(IR-1))+\
+        (IR==nr?FCN(nr-1):FCN(IR)))*0.5
+    
     for (len_t ir = 0; ir < nr+1; ir++) {
-        real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir); 
-        real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir); 
-        real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir); 
-        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(ir); 
-        real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
-        real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(ir);
+        real_t tauinv        = INTERP(ir,this->coefftauinv->EvaluateConfinementTime); 
+        real_t dtauinvdIp    = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dIp); 
+        real_t dtauinvdIwall = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dIwall); 
+        real_t dtauinvdTcold = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dTcold); 
+        real_t dtauinvdWi    = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dWi); 
+        real_t dtauinvdNi    = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dNi);
          
         real_t n=0;
         if(ir<nr)
@@ -114,6 +122,7 @@ void ElectronHeatTransportDiffusion::Rebuild(
         
         Drr(ir, 0, 0) += 3/2 * Constants::ec * a * a * tauinv * n; 
     }
+    #undef INTERP
 }
 
 /**

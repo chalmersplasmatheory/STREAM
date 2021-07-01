@@ -26,7 +26,7 @@ namespace STREAM {
         real_t *dN_i=nullptr;
 
         // IDs of unknown quantities used by the operator...
-        len_t id_ncold, id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni;
+        len_t id_ncold, id_Ip, id_Iwall=0, id_Tcold, id_Wi, id_Ni;
 
         void AllocateDiffCoeff(); 
         virtual void SetPartialDiffusionTerm(len_t, len_t) override;

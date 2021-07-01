@@ -161,6 +161,27 @@ void SimulationGenerator::ConstructEquation_Ions(
     DREAM::IonHandler *ih = new DREAM::IonHandler(fluidGrid->GetRadialGrid(), eqsys->GetUnknownHandler(), Z, nZ, ionNames, tritiumNames);
     eqsys->SetIonHandler(ih);
     
+    // Confinement time 
+    EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); 
+    
+    real_t l_MK2 = s->GetReal("radialgrid/wall_radius");
+    ConfinementTime *confinementTime = new ConfinementTime(
+        eqsys->GetUnknownHandler(), r, l_MK2
+    );
+    eqsys->SetConfinementTime(confinementTime);
+    
+    //Plasma Volume
+    real_t vessel_volume = s->GetReal("radialgrid/wall/vessel_volume");
+    if (vessel_volume == 0){
+        throw DREAM::SettingsException(
+            "Vessel volume is unspecified" //Is this an ok exception? 
+        );
+    }
+    PlasmaVolume *volumes = new PlasmaVolume(
+        fluidGrid, vessel_volume, eqsys->GetUnknownHandler(), r, adas, ih
+    );
+    eqsys->SetPlasmaVolume(volumes);
+    
     // Neutral influx 
     PlasmaVolume *pv = eqsys->GetPlasmaVolume(); 
     ConfinementTime *ct = eqsys->GetConfinementTime();

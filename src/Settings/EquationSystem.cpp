@@ -83,32 +83,10 @@ void SimulationGenerator::ConstructEquations(
     enum DREAM::OptionConstants::momentumgrid_type ht_type = eqsys->GetHotTailGridType();
     enum DREAM::OptionConstants::momentumgrid_type re_type = eqsys->GetRunawayGridType();
     
-    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
-    
-    // Confinement time 
-    EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); 
-    
-    real_t l_MK2 = s->GetReal("radialgrid/wall_radius");
-    ConfinementTime *confinementTime = new ConfinementTime(
-        unknowns, r, l_MK2
-    );
-    eqsys->SetConfinementTime(confinementTime);
-    
-    //Plasma Volume
-    real_t vessel_volume = s->GetReal("radialgrid/wall/vessel_volume");
-    if (vessel_volume == 0){
-        throw DREAM::SettingsException(
-            "Vessel volume is unspecified" //Is this an ok exception? 
-        );
-    }
-    PlasmaVolume *volumes = new PlasmaVolume(
-        fluidGrid, vessel_volume, unknowns, r, adas, ionHandler
-    );
-    eqsys->SetPlasmaVolume(volumes);
-   
-    
     // TODO
     ConstructEquation_Ions(eqsys, s, adas, amjuel);
+    
+    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
 
     // Construct collision quantity handlers
     if (hottailGrid != nullptr)
@@ -195,7 +173,7 @@ void SimulationGenerator::ConstructEquations(
         ht_dist_mode == DREAM::OptionConstants::UQTY_F_HOT_DIST_MODE_NONREL)
         DREAM::SimulationGenerator::ConstructEquation_tau_coll(eqsys);
         
-    confinementTime->Initialize();
+    eqsys->GetConfinementTime()->Initialize();
 }
 
 /**

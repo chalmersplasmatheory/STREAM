@@ -13,7 +13,6 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
     
     this->unknowns = u;
     this->id_Ip    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_P);
-    this->id_Iwall = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_WALL);
     this->id_Tcold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
     this->id_Wi    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
     this->id_Ni    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS);
@@ -29,6 +28,7 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
 }
 
 void NeutralTransport::Rebuild(const real_t t, const real_t, FVM::UnknownQuantityHandler*){
+    this->id_Iwall = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_WALL);
     real_t Gamma0        = this->NI->EvaluateNeutralInflux(t, iIon);
     real_t dGamma0dnij   = this->NI->EvaluateNeutralInflux_dnij(t, iIon);
     real_t dGamma0dIp    = this->NI->EvaluateNeutralInflux_dIp(t, iIon); 

@@ -16,9 +16,6 @@ RunawayElectronConfinementTime::RunawayElectronConfinementTime(FVM::UnknownQuant
     unknowns = u;
     radials  = r;
     this->l_MK2=l_MK2;
-
-    id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
-    id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
 }
 
 /**
@@ -61,4 +58,7 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dI
     return 4 * Constants::c/(a*B) *Constants::mu0*Constants::mu0*I_wall/ (M_PI*M_PI*l_MK2*l_MK2) * exp(-I_p/I_ref) * sqrt(1/(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall));
 }
 
-
+void RunawayElectronConfinementTime::Initialize() {
+    id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
+    id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
+}

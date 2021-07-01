@@ -11,7 +11,7 @@ namespace STREAM {
         DREAM::FVM::Interpolator1D *a, *B0, *kappa, *delta;
 
         // Radial grid points considered
-        real_t r, r_f[2], dr, dr_f=0;
+        real_t r, r_f[2], dr, dr_f=0, R0;
 
         // Most recently evaluated minor radius, magnetic field and elongation...
         real_t currA=0, currB0=0, currKappa=0, currTriang=0;
@@ -19,7 +19,8 @@ namespace STREAM {
     public:
         EllipticalRadialGridGenerator(
             DREAM::FVM::Interpolator1D*, DREAM::FVM::Interpolator1D*,
-            DREAM::FVM::Interpolator1D*, DREAM::FVM::Interpolator1D*
+            DREAM::FVM::Interpolator1D*, DREAM::FVM::Interpolator1D*, 
+            real_t
         );
         ~EllipticalRadialGridGenerator();
 
@@ -57,6 +58,7 @@ namespace STREAM {
         real_t GetElongation(){ return currKappa; }
         real_t GetTriangularity(){return currTriang; }
         real_t GetMagneticField(){ return currB0; }
+        real_t GetMajorRadius(){ return R0; }
     };
 }
 

@@ -16,6 +16,7 @@ using namespace STREAM;
 
 void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
     s->DefineSetting(MODULENAME "/wall_radius",  "Tokamak wall radius", (real_t)0.5);
+    s->DefineSetting(MODULENAME "/R0",  "Tokamak major radius", (real_t)0);
     
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "a");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "B0");
@@ -96,9 +97,16 @@ EllipticalRadialGridGenerator *SimulationGenerator::ConstructRadialGrid_Elliptic
     // Plasma triangularity
     DREAM::FVM::Interpolator1D *delta
         = DREAM::SimulationGenerator::LoadDataT(MODULENAME, s, "delta");
+    
+    real_t R0 = s->GetReal(MODULENAME "/R0");
+    
+    if(R0 == 0)
+        throw DREAM::SettingsException(
+            "Tokamak major radius has not been specified."
+        );
 
     return new EllipticalRadialGridGenerator(
-        a, B0, kappa, delta
+        a, B0, kappa, delta, R0
     );
 }
 

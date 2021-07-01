@@ -18,7 +18,6 @@ IonTransport::IonTransport(FVM::Grid *g, IonHandler *ihdl,
 
     this->unknowns = u;
     this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
-    this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
     this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
     this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
@@ -42,7 +41,7 @@ IonTransport::~IonTransport() {
 void IonTransport::Rebuild(
     const real_t, const real_t, FVM::UnknownQuantityHandler* 
 ) {
-    
+    this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0); 
     real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0); 
     real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(0); 

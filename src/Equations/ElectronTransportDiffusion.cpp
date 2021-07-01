@@ -17,7 +17,6 @@ ElectronTransportDiffusion::ElectronTransportDiffusion(
 
     this->unknowns = unknowns;
     this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
-    this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
     this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
     this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
@@ -25,7 +24,6 @@ ElectronTransportDiffusion::ElectronTransportDiffusion(
     this->radials = radials;
     
     AddUnknownForJacobian(unknowns, this->id_Ip);
-    AddUnknownForJacobian(unknowns, this->id_Iwall);
     AddUnknownForJacobian(unknowns, this->id_Tcold);
     AddUnknownForJacobian(unknowns, this->id_Wi); 
     AddUnknownForJacobian(unknowns, this->id_Ni);
@@ -80,19 +78,25 @@ bool ElectronTransportDiffusion::GridRebuilt() {
 void ElectronTransportDiffusion::Rebuild(
     const real_t, const real_t, FVM::UnknownQuantityHandler*
 ) {
+    if(this->id_Iwall == 0){
+        this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
+        AddUnknownForJacobian(unknowns, this->id_Iwall);
+    }
     real_t a = radials->GetMinorRadius();
     
     const len_t nr = this->grid->GetNr();
     
+    #define INTERP(IR, FCN) \
+        ((IR==0?FCN(0):FCN(IR-1))+\
+        (IR==nr?FCN(nr-1):FCN(IR)))*0.5
+    
     for (len_t ir = 0; ir < nr+1; ir++) {
-        real_t tauinv        = this->coefftauinv->EvaluateConfinementTime(ir); 
-        real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(ir); 
-        real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(ir); 
-        real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(ir); 
-        real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
-        real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(ir);
-         
-
+        real_t tauinv        = INTERP(ir,this->coefftauinv->EvaluateConfinementTime); 
+        real_t dtauinvdIp    = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dIp); 
+        real_t dtauinvdIwall = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dIwall); 
+        real_t dtauinvdTcold = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dTcold); 
+        real_t dtauinvdWi    = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dWi); 
+        real_t dtauinvdNi    = INTERP(ir,this->coefftauinv->EvaluateConfinementTime_dNi);
 
         this->dI_p[ir]    = a * a * dtauinvdIp;
         this->dI_wall[ir] = a * a * dtauinvdIwall;
@@ -102,6 +106,7 @@ void ElectronTransportDiffusion::Rebuild(
         
         Drr(ir, 0, 0) += a * a * tauinv;
     }
+    #undef INTERP
 }
 
 /**

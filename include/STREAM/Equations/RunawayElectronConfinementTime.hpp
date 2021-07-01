@@ -35,6 +35,8 @@ namespace STREAM{
                         real_t EvaluateRunawayElectronConfinementTime_dIp(len_t ir);
 
                         real_t EvaluateRunawayElectronConfinementTime_dIwall(len_t ir);
+                        
+                        void Initialize();
     };
 }
 

@@ -14,8 +14,9 @@ using namespace STREAM;
  */
 EllipticalRadialGridGenerator::EllipticalRadialGridGenerator(
     DREAM::FVM::Interpolator1D *a, DREAM::FVM::Interpolator1D *B0,
-    DREAM::FVM::Interpolator1D *kappa, DREAM::FVM::Interpolator1D *delta
-) : RadialGridGenerator(1), a(a), B0(B0), kappa(kappa), delta(delta) {
+    DREAM::FVM::Interpolator1D *kappa, DREAM::FVM::Interpolator1D *delta,
+    real_t R0
+) : RadialGridGenerator(1), a(a), B0(B0), kappa(kappa), delta(delta), R0(R0) {
     ntheta_interp = 1;
     isUpDownSymmetric = true;
 }

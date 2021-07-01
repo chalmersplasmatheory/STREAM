@@ -30,6 +30,7 @@ void SimulationGenerator::DefineOptions_T_cold(DREAM::Settings *s) {
         "Type of equation to use for determining the electron temperature evolution",
         (int_t)DREAM::OptionConstants::UQTY_T_COLD_EQN_PRESCRIBED
     );
+    s->DefineSetting(MODULENAME "/recombination", "Whether to include recombination radiation (true) or ionization energy loss (false)", (bool)false);
     
     // Prescribed data
     DREAM::SimulationGenerator::DefineDataRT(MODULENAME, s, "data");
