@@ -137,18 +137,14 @@ void IonRateEquation::Rebuild(
 
     ADASRateInterpolator *acd = adas->GetACD(Zion);
     ADASRateInterpolator *scd = adas->GetSCD(Zion);
-    //ADASRateInterpolator *ccd = adas->GetCCD(Zion); For charge exchange term
 
-    real_t eps = sqrt(std::numeric_limits<real_t>::epsilon());
     // Iterate over charge state (0 ... Z)
     for (len_t i = 0; i < Nr; i++){
-        real_t hn = eps*(1 + n[i]);
-        real_t hT = eps*(1 + T[i]);
         for (len_t Z0 = 0; Z0 <= Zion; Z0++){
             Rec[Z0][i]         = acd->Eval(Z0, n[i], T[i]);
-            PartialNRec[Z0][i] = (acd->Eval(Z0, n[i]+hn, T[i]) - Rec[Z0][i])/hn;
-            PartialTRec[Z0][i] = (acd->Eval(Z0, n[i], T[i]+hT) - Rec[Z0][i])/hT;
-            Ion[Z0][i]         = 0;
+            PartialNRec[Z0][i] = acd->Eval_deriv_n(Z0, n[i], T[i]);
+            PartialTRec[Z0][i] = acd->Eval_deriv_T(Z0, n[i], T[i]);
+            Ion[Z0][i]         = 0; 
             PartialNIon[Z0][i] = 0;
             PartialTIon[Z0][i] = 0;
         }
@@ -156,12 +152,10 @@ void IonRateEquation::Rebuild(
     // if not covered by the kinetic ionization model, set fluid ionization rates
     if(addFluidIonization || addFluidJacobian)
         for (len_t i = 0; i < Nr; i++){
-            real_t hn = eps*(1 + n[i]);
-            real_t hT = eps*(1 + T[i]);
             for (len_t Z0 = 0; Z0 <= Zion; Z0++){
                 Ion[Z0][i]         = scd->Eval(Z0, n[i], T[i]);
-                PartialNIon[Z0][i] = (scd->Eval(Z0, n[i]+hn, T[i]) - Ion[Z0][i])/hn;
-                PartialTIon[Z0][i] = (scd->Eval(Z0, n[i], T[i]+hT) - Ion[Z0][i])/hT;
+                PartialNIon[Z0][i] = scd->Eval_deriv_n(Z0, n[i], T[i]);
+                PartialTIon[Z0][i] = scd->Eval_deriv_T(Z0, n[i], T[i]);
             }
         }
 }
