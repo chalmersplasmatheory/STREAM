@@ -11,12 +11,13 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
 	IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon), NI(NI), PV(PV) {
     SetName("NeutralTransport");
     
-    this->unknowns = u;
-    this->id_Ip    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_P);
-    this->id_Tcold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
-    this->id_Wi    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
-    this->id_Ni    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS);
-    this->id_ncold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD);
+    this->unknowns   = u;
+    this->id_Ip      = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_P);
+    this->id_Tcold   = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
+    this->id_Wi      = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
+    this->id_Ni      = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS);
+    this->id_ncold   = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD);
+    this->id_lambdai = unknowns->GetUnknownID(STREAM::OptionConstants::UQTY_LAMBDA_I);
     
     len_t nZ = ions->GetNZ();
     for (len_t k = 0; k < nZ; k++) {
@@ -37,18 +38,17 @@ void NeutralTransport::Rebuild(const real_t t, const real_t, FVM::UnknownQuantit
     real_t dGamma0dWi    = this->NI->EvaluateNeutralInflux_dWi(t, iIon); 
     real_t dGamma0dNi    = this->NI->EvaluateNeutralInflux_dNi(t, iIon);
     
-    real_t V_tot       = PV->GetTotalNeutralVolume(iIon);
-    real_t dVtotdTcold = PV->GetTotalNeutralVolume_dT(iIon);
-    real_t dVtotdncold = PV->GetTotalNeutralVolume_dn(iIon);
+    real_t V_tot         = PV->GetTotalNeutralVolume(iIon);
+    real_t dVtotdlambdai = PV->GetTotalNeutralVolume_dLambdai(iIon);
         
-    this->wall_term = Gamma0/V_tot;
-    this->dn_ij     = dGamma0dnij/V_tot;
-    this->dI_p      = dGamma0dIp/V_tot;
-    this->dI_wall   = dGamma0dIwall/V_tot;
-    this->dT_cold   = dGamma0dTcold/V_tot - Gamma0/(V_tot*V_tot)*dVtotdTcold;
-    this->dW_i      = dGamma0dWi/V_tot;
-    this->dN_i      = dGamma0dNi/V_tot;
-    this->dn_cold   = - Gamma0/(V_tot*V_tot)*dVtotdncold;
+    this->wall_term = - Gamma0/V_tot;
+    this->dn_ij     = - dGamma0dnij/V_tot;
+    this->dI_p      = - dGamma0dIp/V_tot;
+    this->dI_wall   = - dGamma0dIwall/V_tot;
+    this->dT_cold   = - dGamma0dTcold/V_tot;
+    this->dW_i      = - dGamma0dWi/V_tot;
+    this->dN_i      = - dGamma0dNi/V_tot;
+    this->dlambda_i   = Gamma0/(V_tot*V_tot)*dVtotdlambdai;
 }
 
 bool NeutralTransport::SetCSJacobianBlock(
@@ -80,8 +80,8 @@ bool NeutralTransport::SetCSJacobianBlock(
 	} else if(derivId==id_Ni){
 		jac->SetElement(rOffset, iIon,this->dN_i);
 		return true;
-	} else if(derivId==id_ncold){
-		jac->SetElement(rOffset, 0,this->dn_cold);
+	} else if(derivId==id_lambdai){
+		jac->SetElement(rOffset, 0,this->dlambda_i);
 		return true;
 	}
 	else {
