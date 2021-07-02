@@ -115,7 +115,18 @@ struct cmd_args *parse_args(int argc, char *argv[]) {
 
 void splash() {
     cout << endl;
-    cout << R"(TBA: Fancy STREAM splash screen)" << endl;
+    /*cout << R"(TBA: Fancy STREAM splash screen)" << endl;*/
+    cout << R"( Swim against the...)" << endl;
+    cout << R"(       ----o---o--    --o---o----o----o-         --o---o--    )" << endl;
+    cout << R"( --o--  ______ _________ ____   ______  ___--o-___  ___       )" << endl;
+    cout << R"(      // ____//___  ___// __  \/  ____//   \ //   \/   \ --o--)" << endl;
+    cout << R"(-o-- // /_____  // /  // /_// /  /__ // /\  \/  / / /  /      )" << endl;
+    cout << R"(  __ \\_____  \// /  //      /   __/// /_/  /  / / /  /       )" << endl;
+    cout << R"( \\ \______// // /  //  /\  \   /__//  __  /  / / /  / --o--- )" << endl;
+    cout << R"(  \\_________//_/  //__/ \\__\_____//_///_/__//_//__/         )" << endl;
+    cout << R"(   --o--          ---o---      ----o---o----                  )" << endl;
+    cout << R"(o--     ---o--o---      ----o---           --o----o----o--    )" << endl;
+    cout << R"(  ---o---                          --o---o---       ...baby...)" << endl;
     /*cout << R"( It's time to...)" << endl;
     cout << endl;
     cout << R"( * * ________   _____  ______ ___* *  ___  ___       )" << endl;
