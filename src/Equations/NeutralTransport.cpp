@@ -96,7 +96,7 @@ void NeutralTransport::SetCSMatrixElements(
 
 
 void NeutralTransport::SetCSVectorElements(
-    real_t* vec, const real_t*, const len_t iIon, const len_t, const len_t rOffset
+    real_t* vec, const real_t*, const len_t, const len_t, const len_t rOffset
 ) {
     vec[rOffset]=wall_term; 
 }
