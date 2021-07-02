@@ -53,11 +53,11 @@ void ChargeExchangeTerm::SetWeights(){
     
     for(len_t iz=0; iz<nZ; iz++) {
         real_t n_i = ions->GetIonDensity(0, iz, 1);
-        if(ions->IsTritium(iz)){
+        if(ions->IsTritium(iz)){ 
             R_icx = adas->GetCCD(1,3)->Eval(1, n_cold, T_cold);
-        } else {
+        } else { 
             len_t Z  = ions->GetZ(iz);
-            R_icx = adas->GetCCD(Z)->Eval(Z, n_cold, T_cold);
+            R_icx = adas->GetCCD(Z)->Eval(1, n_cold, T_cold);
         }
         weights[n] += V_ni/V_p * 3/2 * (2/3 * W_i / N_i - T_0) * R_icx * n_i; 
     }
@@ -114,7 +114,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
     } else if(derivId == id_Wi) {
         for(len_t iz=0; iz<nZ; iz++) {
             real_t n_i = ions->GetIonDensity(0, iz, 1);
-            if(ions->IsTritium(iz)){
+            if(ions->IsTritium(iz)){ 
                 R_icx = adas->GetCCD(1,3)->Eval(1, n_cold, T_cold);
             } else {
                 len_t Z = ions->GetZ(iz);

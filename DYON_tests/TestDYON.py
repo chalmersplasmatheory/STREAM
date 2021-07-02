@@ -31,7 +31,7 @@ import numpy as np
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
 tMax = 0.5  # simulation time in seconds
-Nt   = 5000000   # number of time steps
+Nt   = 500000   # number of time steps
 
 pgp = 4.3135e-5
 n_D_0 = 2.78e22 * pgp
