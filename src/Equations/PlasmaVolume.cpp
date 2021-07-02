@@ -17,7 +17,7 @@ using namespace DREAM;
     }
     
     real_t PlasmaVolume::GetPlasmaVolume() const{
-        return grid->GetVpVol(0) * grid->GetRadialGrid()->GetDr(0) * grid->GetRadialGrid()->GetR0(); 
+        return grid->GetVpVol(0) * grid->GetRadialGrid()->GetDr(0) * radials->GetMajorRadius(); 
     }
     
     real_t PlasmaVolume::GetNeutralVolume(const len_t iz){ 
@@ -26,7 +26,7 @@ using namespace DREAM;
                        
         //Eq. 13 in startup-appendix + added triangularity 
         if (lambda_i <= a){
-            real_t R0 = grid->GetRadialGrid()->GetR0();
+            real_t R0 = radials->GetMajorRadius();
             real_t kappa = radials->GetElongation(); 
             real_t delta = radials->GetTriangularity();  
             
@@ -54,7 +54,7 @@ using namespace DREAM;
         real_t lambda_i = unknowns->GetUnknownData(id_lambda_i)[iz];
 
         if (lambda_i <= a){
-            real_t R0 = grid->GetRadialGrid()->GetR0();
+            real_t R0 = radials->GetMajorRadius();
             real_t kappa = radials->GetElongation(); 
             real_t delta = radials->GetTriangularity(); 
             real_t W_i = unknowns->GetUnknownData(id_W_i)[iz];
@@ -62,10 +62,13 @@ using namespace DREAM;
             real_t T_cold = unknowns->GetUnknownData(id_T_cold)[0];
             real_t n_cold = unknowns->GetUnknownData(id_n_cold)[0];
         
-            real_t I_i = adas->GetSCD(iz)->Eval(0, n_cold, T_cold); //Evaluate I_i^(0)
-            real_t dIdT = adas->GetSCD(iz)->Eval_deriv_T(0, n_cold, T_cold); // Derivative w.r.t. T_cold
+            len_t Z = ions->GetZ(iz);
+            real_t I_i = adas->GetSCD(Z)->Eval(0, n_cold, T_cold); //Evaluate I_i^(0)
+            real_t dIdT = adas->GetSCD(Z)->Eval_deriv_T(0, n_cold, T_cold); // Derivative w.r.t. T_cold
 
-            real_t v_i = sqrt(4 * W_i/(3 * n_i * ions->GetIonSpeciesMass(iz)));
+            real_t v_i = 0;
+            if(n_i != 0) 
+                v_i = sqrt(4 * W_i/(3 * n_i * ions->GetIonSpeciesMass(iz)));
             
             return  (4*M_PI*M_PI*R0*kappa*(a-lambda_i)+2*(8-3*M_PI*M_PI)*kappa*delta*(a-lambda_i)*(a-lambda_i)) * -v_i/(n_cold*I_i*I_i) * dIdT; 
         } else {
@@ -78,7 +81,7 @@ using namespace DREAM;
         real_t lambda_i = unknowns->GetUnknownData(id_lambda_i)[iz];
         
         if (lambda_i <= a){
-            real_t R0 = grid->GetRadialGrid()->GetR0();
+            real_t R0 = radials->GetMajorRadius();
             real_t kappa = radials->GetElongation(); 
             real_t delta = radials->GetTriangularity(); 
             real_t W_i = unknowns->GetUnknownData(id_W_i)[iz];
@@ -86,15 +89,34 @@ using namespace DREAM;
             real_t T_cold = unknowns->GetUnknownData(id_T_cold)[0];
             real_t n_cold = unknowns->GetUnknownData(id_n_cold)[0];
             
-            real_t I_i = adas->GetSCD(iz)->Eval(0, n_cold, T_cold); //Evaluate I_i^(0)
-            real_t dIdn = adas->GetSCD(iz)->Eval_deriv_n(0, n_cold, T_cold); // Derivative w.r.t. n_cold
+            len_t Z = ions->GetZ(iz);
+            real_t I_i = adas->GetSCD(Z)->Eval(0, n_cold, T_cold); //Evaluate I_i^(0)
+            real_t dIdn = adas->GetSCD(Z)->Eval_deriv_n(0, n_cold, T_cold); // Derivative w.r.t. n_cold
             
-            real_t v_i = sqrt(4 * W_i/(3 * n_i * ions->GetIonSpeciesMass(iz)));
+            real_t v_i = 0;
+            if(n_i != 0)
+                v_i = sqrt(4 * W_i/(3 * n_i * ions->GetIonSpeciesMass(iz)));
         
             return  (4*M_PI*M_PI*R0*kappa*(a-lambda_i)+2*(8-3*M_PI*M_PI)*kappa*delta*(a-lambda_i)*(a-lambda_i)) * -v_i/(n_cold*I_i) * (1/n_cold + dIdn/I_i); 
         } else {
             return 0;
         }
+    }
+
+    real_t PlasmaVolume::GetNeutralVolume_dLambdai(const len_t iz) {
+        real_t a = radials->GetMinorRadius();
+        real_t lambda_i = unknowns->GetUnknownData(id_lambda_i)[iz];
+        real_t R0 = radials->GetMajorRadius();
+        real_t kappa = radials->GetElongation(); 
+        real_t delta = radials->GetTriangularity(); 
+
+        real_t a_l = a-lambda_i;
+
+        return (4*M_PI*M_PI*R0*kappa*a_l + 2*kappa*delta*(8-3*M_PI*M_PI)*a_l*a_l);
+    }
+
+    real_t PlasmaVolume::GetTotalNeutralVolume_dLambdai(const len_t iz) {
+        return GetNeutralVolume_dLambdai(iz);
     }
     
     real_t PlasmaVolume::GetTotalNeutralVolume_dT(const len_t iz){

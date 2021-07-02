@@ -93,10 +93,10 @@ class Ions(DREAMIons.Ions):
         # recycling coefficient table
         rec = np.zeros((nions, nions))
 
-        for i in range(nion):
+        for i in range(nions):
             ion = self.ions[i]
 
-            for j in range(nion):
+            for j in range(nions):
                 rec[i,j] = ion.getRecyclingCoefficient(self.ions[j].name)
 
         data['recycling'] = rec

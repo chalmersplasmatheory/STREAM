@@ -15,13 +15,35 @@ using namespace STREAM;
 
 
 void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
-    s->DefineSetting(MODULENAME "/a",  "Tokamak minor radius", (real_t)0.5);
-    s->DefineSetting(MODULENAME "/B0", "Tokamak magnetic field strength on-axis", (real_t)1.0);
+    s->DefineSetting(MODULENAME "/wall_radius",  "Tokamak wall radius", (real_t)0.5);
+    s->DefineSetting(MODULENAME "/R0",  "Tokamak major radius", (real_t)0);
     
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "a");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "B0");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "kappa");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "delta");
+    
+    s->DefineSetting(
+        "radialgrid/wall/c1",
+        "Coefficients for deuterium recycling",
+        (real_t)1.1
+    );
+    s->DefineSetting(
+        "radialgrid/wall/c2",
+        "Coefficients for deuterium recycling",
+        (real_t)0.09
+    );
+    s->DefineSetting(
+        "radialgrid/wall/c3",
+        "Coefficients for deuterium recycling",
+        (real_t)0.1
+    );
+    
+    s->DefineSetting(
+        "radialgrid/wall/vessel_volume", 
+        "The vacuum vessel volume",
+        (real_t)0
+    );
     
     DREAM::SimulationGenerator::DefineOptions_f_ripple(MODULENAME, s);
 }
@@ -75,9 +97,16 @@ EllipticalRadialGridGenerator *SimulationGenerator::ConstructRadialGrid_Elliptic
     // Plasma triangularity
     DREAM::FVM::Interpolator1D *delta
         = DREAM::SimulationGenerator::LoadDataT(MODULENAME, s, "delta");
+    
+    real_t R0 = s->GetReal(MODULENAME "/R0");
+    
+    if(R0 == 0)
+        throw DREAM::SettingsException(
+            "Tokamak major radius has not been specified."
+        );
 
     return new EllipticalRadialGridGenerator(
-        a, B0, kappa, delta
+        a, B0, kappa, delta, R0
     );
 }
 

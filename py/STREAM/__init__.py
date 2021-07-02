@@ -12,7 +12,8 @@ except ModuleNotFoundError:
 from . STREAMException import STREAMException
 from . STREAMSettings import STREAMSettings
 from . STREAMOutput import STREAMOutput
+from . runiface import runiface
 
 # Register essential color map
-GeriMap.register()
+#GeriMap.register()
 

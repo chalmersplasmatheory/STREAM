@@ -13,6 +13,7 @@
 #include "DREAM/Equations/Fluid/IonSpeciesTransientTerm.hpp"
 #include "STREAM/Equations/RadiatedPowerTerm.hpp"
 #include "STREAM/Equations/ElectronHeatTransportDiffusion.hpp"
+#include "STREAM/Equations/ChargeExchangeTerm.hpp"
 
 using namespace std;
 using namespace STREAM;
@@ -29,6 +30,7 @@ void SimulationGenerator::DefineOptions_T_cold(DREAM::Settings *s) {
         "Type of equation to use for determining the electron temperature evolution",
         (int_t)DREAM::OptionConstants::UQTY_T_COLD_EQN_PRESCRIBED
     );
+    s->DefineSetting(MODULENAME "/recombination", "Whether to include recombination radiation (true) or ionization energy loss (false)", (bool)false);
     
     // Prescribed data
     DREAM::SimulationGenerator::DefineDataRT(MODULENAME, s, "data");
@@ -113,7 +115,7 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
 
     // Add transport (TODO TODO TODO)
     bool hasTransport = true;      // TODO Load from settings...
-    op_W_cold->AddTerm(new ElectronHeatTransportDiffusion(eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(), eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
+    //op_W_cold->AddTerm(new ElectronHeatTransportDiffusion(eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(), eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
 
     eqsys->SetOperator(id_T_cold, id_E_field, op_E_field);
     eqsys->SetOperator(id_T_cold, id_n_cold, op_n_cold);
@@ -194,9 +196,10 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     DREAM::SimulationGenerator::ConstructEquation_W_cold(eqsys, s);
 }
 
-void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *eqsys, DREAM::Settings* /*s*/){
+void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *eqsys, DREAM::Settings* /*s*/, DREAM::ADAS *adas){
     const len_t id_Wi = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER); 
     const len_t id_Wcold = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_W_COLD);
+    const len_t id_ni = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
 
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
     DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
@@ -206,6 +209,7 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *e
 
     DREAM::FVM::Operator *Op_Wij = new DREAM::FVM::Operator(fluidGrid);
     DREAM::FVM::Operator *Op_Wie = new DREAM::FVM::Operator(fluidGrid);
+    DREAM::FVM::Operator *Op_ni = new DREAM::FVM::Operator(fluidGrid);
 
     DREAM::CoulombLogarithm *lnLambda = eqsys->GetREFluid()->GetLnLambda();
     for(len_t iz=0; iz<nZ; iz++){
@@ -230,9 +234,13 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *e
                     0, false,
                     unknowns, lnLambda, ionHandler)
         );
-        Op_Wij->AddTerm(new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
+        Op_Wij->AddTerm(new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator()));
+        if(eqsys->GetIonHandler()->GetZ(iz) == 1){
+            Op_ni->AddTerm(new ChargeExchangeTerm(eqsys->GetFluidGrid(), eqsys->GetUnknownHandler(), eqsys->GetIonHandler(), iz, adas, eqsys->GetPlasmaVolume(), nullptr));
+        }
     }
     eqsys->SetOperator(id_Wi, id_Wi, Op_Wij, "dW_i/dt = sum_j Q_ij + Q_ie");
     eqsys->SetOperator(id_Wi, id_Wcold, Op_Wie);
+    eqsys->SetOperator(id_Wi, id_ni, Op_ni, "dW_i/dt = V_n,i/V_p * [ 3/2 * n_i^(0) * ( T_i - 0.026 ) * ( sum R_j,cx^(1) n_j^(1) ) ]");
 }
 

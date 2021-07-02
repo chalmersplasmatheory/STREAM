@@ -23,6 +23,7 @@
 #include "DREAM/IonHandler.hpp"
 #include "DREAM/NotImplementedException.hpp"
 #include "FVM/Grid/Grid.hpp"
+#include "STREAM/Settings/OptionConstants.hpp"
 
 using namespace STREAM;
 using namespace DREAM;
@@ -43,14 +44,14 @@ IonRateEquation::IonRateEquation(
     this->unknowns  = unknowns;
     if(isAbl){
 		this->id_ions   = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES_ABL);
-		this->id_n_cold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_ABL);
-		this->id_T_cold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_ABL);
     }else{
 		this->id_ions   = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
-		this->id_n_cold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD);
 		this->id_n_tot  = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_TOT);
-		this->id_T_cold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
     }
+
+    this->id_n_cold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD);
+    this->id_T_cold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
+    this->id_lambda_i = unknowns->GetUnknownID(OptionConstants::UQTY_LAMBDA_I);
 
     AllocateRateCoefficients();
 }
@@ -195,11 +196,12 @@ bool IonRateEquation::SetCSJacobianBlock(
     if(derivId == id_T_cold) {
         contributes = true;
         #include "IonRateEquation.setDT.cpp"
-    }
-
-    if(derivId == id_n_cold){
+    } else if(derivId == id_n_cold){
         contributes = true;
         #include "IonRateEquation.setDN.cpp"        
+    } else if (derivId == id_lambda_i) {
+        contributes = true;
+        #include "IonRateEquation.setDL.cpp"
     }
     #undef NI
 

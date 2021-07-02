@@ -20,7 +20,6 @@ namespace STREAM {
         static void DefineOptions_T_cold(DREAM::Settings*);
         static void DefineOptions_Ions(DREAM::Settings*);
         static void DefineOptions_Transport(const std::string&, DREAM::Settings*, bool, const std::string& subname="transport");
-        static void DefineOptions_wall(DREAM::Settings *s);
 
         // Equation system
         static EquationSystem *ConstructEquationSystem(
@@ -55,7 +54,7 @@ namespace STREAM {
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
         static void ConstructEquation_T_i_selfconsistent(
-            EquationSystem *eqsys, DREAM::Settings* /*s*/
+            EquationSystem *eqsys, DREAM::Settings* /*s*/, DREAM::ADAS *
         );
         
         //Mean free path equation
@@ -78,8 +77,8 @@ namespace STREAM {
         static DREAM::FVM::RadialGrid *ConstructRadialGrid_Cylindrical(DREAM::Settings*);
         static EllipticalRadialGridGenerator *ConstructRadialGrid_Elliptical(DREAM::Settings*);
         
-        void DefineOptions_n_re(DREAM::Settings*);
-        void ConstructEquation_n_re(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
+        static void DefineOptions_n_re(DREAM::Settings*);
+        static void ConstructEquation_n_re(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
     };
 }
 

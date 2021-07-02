@@ -8,8 +8,6 @@ using namespace std;
  * Constructor
  */
 NeutralInflux::NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, PlasmaVolume *PV, real_t c1, real_t c2, real_t c3) : ions(ihdl), SRC(SRC), coefftauinv(coefftauinv), PV(PV), c1(c1), c2(c2), c3(c3) {
-    this->tauinv = coefftauinv->EvaluateConfinementTime(0);
-    this->V_p    = PV->GetPlasmaVolume(); 
 } 
 
 real_t NeutralInflux::DeuteriumRecyclingCoefficient(real_t t){
@@ -20,6 +18,8 @@ real_t NeutralInflux::DeuteriumRecyclingCoefficient(real_t t){
  * Evaluates the neutral influx
  */
 real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
+    real_t tauinv = coefftauinv->EvaluateConfinementTime(0);
+    real_t V_p    = PV->GetPlasmaVolume(); 
     len_t Z   = ions->GetZ(iIon);  
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
@@ -45,6 +45,8 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
  * Evaluates the derivative of the neutral influx with respect to the ion species density
  */
 real_t NeutralInflux::EvaluateNeutralInflux_dnij(real_t t, const len_t iIon){
+    real_t tauinv = coefftauinv->EvaluateConfinementTime(0);
+    real_t V_p    = PV->GetPlasmaVolume(); 
     len_t Z   = ions->GetZ(iIon); 
     const len_t *Zs = ions->GetZs(); 
     len_t nZ = ions->GetNZ();
@@ -66,6 +68,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dnij(real_t t, const len_t iIon){
  * Evaluates the derivative of the neutral influx with respect to the plasma current
  */
 real_t NeutralInflux::EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
+    real_t V_p = PV->GetPlasmaVolume(); 
     real_t dtauinvdIp = this->coefftauinv->EvaluateConfinementTime_dIp(0); 
     
     len_t Z   = ions->GetZ(iIon); 
@@ -93,6 +96,8 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
  * Evaluates the derivative of the neutral influx with respect to the wall current
  */
 real_t NeutralInflux::EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
+    real_t V_p = PV->GetPlasmaVolume(); 
+
     real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0); 
     
     len_t Z   = ions->GetZ(iIon); 
@@ -120,6 +125,8 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
  * Evaluates the derivative of the neutral influx with respect to the electron temperature
  */
 real_t NeutralInflux::EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
+    real_t V_p = PV->GetPlasmaVolume(); 
+
     real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(0); 
     
     len_t Z   = ions->GetZ(iIon); 
@@ -147,6 +154,8 @@ real_t NeutralInflux::EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
  * Evaluates the derivative of the neutral influx with respect to the ion energy
  */
 real_t NeutralInflux::EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
+    real_t V_p = PV->GetPlasmaVolume(); 
+
     real_t dtauinvdWi = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
     
     len_t Z   = ions->GetZ(iIon); 
@@ -174,6 +183,8 @@ real_t NeutralInflux::EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
  * Evaluates the derivative of the neutral influx with respect to the total ion density
  */
 real_t NeutralInflux::EvaluateNeutralInflux_dNi(real_t t, const len_t iIon){
+    real_t V_p = PV->GetPlasmaVolume(); 
+
     real_t dtauinvdNi = this->coefftauinv->EvaluateConfinementTime_dNi(0); 
     
     len_t Z   = ions->GetZ(iIon); 

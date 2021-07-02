@@ -11,29 +11,6 @@ using namespace STREAM;
 
 #define EQUATIONSYSTEM "eqsys"
 
-void SimulationGenerator::DefineOptions_wall(DREAM::Settings *s) {
-    s->DefineSetting(
-        "radialgrid/wall/c1",
-        "Coefficients for deuterium recycling",
-        (real_t)1.1
-    );
-    s->DefineSetting(
-        "radialgrid/wall/c2",
-        "Coefficients for deuterium recycling",
-        (real_t)0.09
-    );
-    s->DefineSetting(
-        "radialgrid/wall/c3",
-        "Coefficients for deuterium recycling",
-        (real_t)0.1
-    );
-    
-    s->DefineSetting(
-        "radialgrid/wall/vessel_volume", 
-        "The vacuum vessel volume",
-        (real_t)0
-    );
-}
 
 
 /**
@@ -68,6 +45,9 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
 
     // Construct equations according to settings
     ConstructEquations(eqsys, s, adas, amjuel, nist, oqty_terms);
+
+    // Construct the "other" quantity handler
+    DREAM::SimulationGenerator::ConstructOtherQuantityHandler(eqsys, s, oqty_terms);
 
     // Figure out which unknowns must be part of the matrix,
     // and set initial values for those quantities which don't
@@ -106,44 +86,10 @@ void SimulationGenerator::ConstructEquations(
     enum DREAM::OptionConstants::momentumgrid_type ht_type = eqsys->GetHotTailGridType();
     enum DREAM::OptionConstants::momentumgrid_type re_type = eqsys->GetRunawayGridType();
     
-    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
-    
-    // Confinement time 
-    EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); 
-    
-    real_t l_MK2 = s->GetReal("radialgrid/wall_radius");
-    ConfinementTime *confinementTime = new ConfinementTime(
-        unknowns, r, l_MK2
-    );
-    eqsys->SetConfinementTime(confinementTime);
-    
-    //Plasma Volume
-    real_t vessel_volume = s->GetReal("radialgrid/wall/vessel_volume");
-    if (vessel_volume == 0){
-        throw DREAM::SettingsException(
-            "Vessel volume is unspecified" //Is this an ok exception? 
-        );
-    }
-    PlasmaVolume *volumes = new PlasmaVolume(
-        fluidGrid, vessel_volume, unknowns, r, adas, ionHandler
-    );
-    eqsys->SetPlasmaVolume(volumes);
-    
-    /*
-    // Neutral influx 
-    SputteredRecycledCoefficient *SRC = eqsys->GetSputteredRecycledCoefficient(); //Korrekt?
-
-    real_t c1 = s->GetReal("radialgrid/wall/c1"); 
-    real_t c2 = s->GetReal("radialgrid/wall/c2"); 
-    real_t c3 = s->GetReal("radialgrid/wall/c3"); 
-    NeutralInflux *neutralInflux = new NeutralInflux(
-        ionHandler, SRC, confinementTime, volumes, c1, c2, c3 
-    );
-    eqsys->SetNeutralInflux(neutralInflux); 
-    */
-    
     // TODO
     ConstructEquation_Ions(eqsys, s, adas, amjuel);
+    
+    DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
 
     // Construct collision quantity handlers
     if (hottailGrid != nullptr)
@@ -188,7 +134,7 @@ void SimulationGenerator::ConstructEquations(
 
     // Runaway electron quantities
     if (eqsys->HasRunawayGrid()) {
-        DREAM::SimulationGenerator::ConstructEquation_f_re(eqsys, s, oqty_terms);
+        DREAM::SimulationGenerator::ConstructEquation_f_re(eqsys, s, oqty_terms, nullptr);
     }
 
     // Standard equations
@@ -208,14 +154,14 @@ void SimulationGenerator::ConstructEquations(
         throw DREAM::SettingsException(
             "T_i not included: STREAM requires the ion temperatures to be evolved."
         );
-
+    
     DREAM::SimulationGenerator::ConstructEquation_Ion_Ni(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_T_i(eqsys, s);
 
     // NOTE: The runaway number density may depend explicitly on
     // the hot-tail equation and must therefore be constructed
     // AFTER the call to 'ConstructEquation_f_hot()'.
-    DREAM::SimulationGenerator::ConstructEquation_n_re(eqsys, s, oqty_terms);
+    ConstructEquation_n_re(eqsys, s, oqty_terms);
 
     DREAM::SimulationGenerator::ConstructEquation_psi_p(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_psi_edge(eqsys, s);
@@ -229,6 +175,8 @@ void SimulationGenerator::ConstructEquations(
     if (ht_mode != DREAM::OptionConstants::EQTERM_HOTTAIL_MODE_DISABLED &&
         ht_dist_mode == DREAM::OptionConstants::UQTY_F_HOT_DIST_MODE_NONREL)
         DREAM::SimulationGenerator::ConstructEquation_tau_coll(eqsys);
+        
+    eqsys->GetConfinementTime()->Initialize();
 }
 
 /**
@@ -242,6 +190,8 @@ void SimulationGenerator::ConstructUnknowns(
         eqsys->GetScalarGrid(), eqsys->GetFluidGrid(),
         eqsys->GetHotTailGrid(), eqsys->GetRunawayGrid()
     );
-    eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid());
+    
+    len_t nIonSpecies = DREAM::SimulationGenerator::GetNumberOfIonSpecies(s);
+    eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid(), nIonSpecies);
 }
 

@@ -14,8 +14,11 @@ using namespace STREAM;
  */
 EllipticalRadialGridGenerator::EllipticalRadialGridGenerator(
     DREAM::FVM::Interpolator1D *a, DREAM::FVM::Interpolator1D *B0,
-    DREAM::FVM::Interpolator1D *kappa, DREAM::FVM::Interpolator1D *delta
-) : RadialGridGenerator(1), a(a), B0(B0), kappa(kappa), delta(delta) {
+    DREAM::FVM::Interpolator1D *kappa, DREAM::FVM::Interpolator1D *delta,
+    real_t R0
+) : RadialGridGenerator(1), a(a), B0(B0), kappa(kappa), delta(delta), R0(R0) {
+    ntheta_interp = 1;
+    isUpDownSymmetric = true;
 }
 
 /**
@@ -72,10 +75,10 @@ bool EllipticalRadialGridGenerator::Rebuild(
     // Reference magnetic field data
     // (TODO make new allocation here unnecessary)
     real_t R0 = std::numeric_limits<real_t>::infinity();
-    real_t *BtorGOverR0 = new real_t[1];
-    real_t *psiPrimeRef = new real_t[1];
-    real_t *BtorGOverR0_f = new real_t[2];
-    real_t *psiPrimeRef_f = new real_t[2];
+    this->BtorGOverR0 = new real_t[1];
+    this->psiPrimeRef = new real_t[1];
+    this->BtorGOverR0_f = new real_t[2];
+    this->psiPrimeRef_f = new real_t[2];
 
     BtorGOverR0[0] = this->currB0;
     psiPrimeRef[0] = 0;     // no poloidal magnetic field

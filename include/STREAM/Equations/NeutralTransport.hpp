@@ -25,10 +25,11 @@ namespace STREAM {
         real_t dW_i;
         real_t dN_i;
         real_t dn_cold;
+        real_t dlambda_i;
         
         len_t sum_derivs=0;
         
-        len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni, id_ncold;
+        len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni, id_ncold, id_lambdai;
 		
 	public:
 		NeutralTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon, DREAM::FVM::UnknownQuantityHandler*, NeutralInflux*, PlasmaVolume*);

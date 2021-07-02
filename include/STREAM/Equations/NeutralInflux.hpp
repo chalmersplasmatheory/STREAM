@@ -17,8 +17,6 @@ namespace STREAM{
 
             real_t c1, c2, c3;
             
-            real_t tauinv, V_p;
-
             real_t DeuteriumRecyclingCoefficient(real_t t);
         
         public:
