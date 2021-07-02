@@ -115,7 +115,7 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
 
     // Add transport (TODO TODO TODO)
     bool hasTransport = true;      // TODO Load from settings...
-    op_W_cold->AddTerm(new ElectronHeatTransportDiffusion(eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(), eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
+    //op_W_cold->AddTerm(new ElectronHeatTransportDiffusion(eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(), eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
 
     eqsys->SetOperator(id_T_cold, id_E_field, op_E_field);
     eqsys->SetOperator(id_T_cold, id_n_cold, op_n_cold);

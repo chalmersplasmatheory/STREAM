@@ -46,6 +46,9 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
     // Construct equations according to settings
     ConstructEquations(eqsys, s, adas, amjuel, nist, oqty_terms);
 
+    // Construct the "other" quantity handler
+    DREAM::SimulationGenerator::ConstructOtherQuantityHandler(eqsys, s, oqty_terms);
+
     // Figure out which unknowns must be part of the matrix,
     // and set initial values for those quantities which don't
     // yet have an initial value.

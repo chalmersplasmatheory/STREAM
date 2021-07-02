@@ -60,7 +60,7 @@ L = 9.1e-5  # H, i MK2 struktur
 r=np.array([0])
 #print(str(n_D))
 
-t   = np.linspace(0, tMax, Nt+1)
+t   = np.linspace(0, tMax, 100)
 t_d = np.array([0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
 V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
 V_s = interp1d(t_d, V_d, kind='linear')
@@ -72,9 +72,11 @@ T_i_initial = 0.03
 
 sts = STREAMSettings()
 
+wall_time = 100
+print('wall_time = {} s'.format(wall_time))
 sts.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts.eqsys.E_field.setInitialProfile(efield=E_initial)
-sts.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=R/L, R0=r_0)
+sts.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
 
 sts.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
 sts.eqsys.T_cold.setInitialProfile(T_e_initial)
@@ -99,6 +101,8 @@ sts.radialgrid.setRecyclingCoefficient2(c2)
 sts.radialgrid.setRecyclingCoefficient3(c3)
 
 sts.solver.setType(Solver.NONLINEAR)
+#sts.solver.setDebug(savejacobian=True, savenumericaljacobian=True, timestep=1, iteration=5)
+sts.solver.setDebug(savesystem=True)
 
 #sts.hottailgrid.setNxi(Nxi)
 #sts.hottailgrid.setNp(Np)

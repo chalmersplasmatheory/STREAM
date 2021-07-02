@@ -201,11 +201,12 @@ bool IonRateEquation::SetCSJacobianBlock(
     if(derivId == id_T_cold) {
         contributes = true;
         #include "IonRateEquation.setDT.cpp"
-    }
-
-    if(derivId == id_n_cold){
+    } else if(derivId == id_n_cold){
         contributes = true;
         #include "IonRateEquation.setDN.cpp"        
+    } else if (derivId == id_lambda_i) {
+        contributes = true;
+        #include "IonRateEquation.setDL.cpp"
     }
     #undef NI
 
