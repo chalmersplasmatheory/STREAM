@@ -13,8 +13,9 @@ J1 = load('petsc_jac')
 J2 = load('petsc_jac_num')
 
 
-#cmp(J1, J2, eqsys=d, tollow=0.99)
-plotrowl(J1, J2, eqsys=d, row=23, legend=['Analytical', 'Numerical'])
+#spy(J1, eqsys=d)
+cmp(J2, J1, eqsys=d, tollow=0.99)
+#plotrowl(J1, J2, eqsys=d, row=37, legend=['Analytical', 'Numerical'])
 #plotrowl(J1, eqsys=d, row=10)
 
 plt.show()

@@ -17,12 +17,17 @@ namespace STREAM{
         DREAM::IonHandler *ions;
         PlasmaVolume *volumes;
         len_t id_T_cold, id_n_cold, id_lambda_i;
+
+        real_t *Volfac, *jacWeights;
     protected:
-        void SetWeights() override;
-        void SetDiffWeights(len_t derivId, len_t nMultiples) override;
+        virtual void SetWeights() override;
+        virtual void SetDiffWeights(len_t derivId, len_t nMultiples) override;
         virtual bool SetJacobianBlock(const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*) override;
+
+        void SetWeights(bool includeIonized=true, real_t *w=nullptr);
     public:
         RadiatedPowerTerm(DREAM::FVM::Grid*, DREAM::FVM::UnknownQuantityHandler*, DREAM::IonHandler*, DREAM::ADAS*, DREAM::NIST*, DREAM::AMJUEL*, DREAM::OptionConstants::ion_opacity_mode*, bool, PlasmaVolume*);
+        virtual ~RadiatedPowerTerm();
     };
 }
 

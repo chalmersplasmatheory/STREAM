@@ -30,8 +30,8 @@ import numpy as np
 #pMax = 1    # maximum momentum in units of m_e*c
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
-tMax = 0.5  # simulation time in seconds
-Nt   = 500000   # number of time steps
+tMax = 1e-4  # simulation time in seconds
+Nt   = 500   # number of time steps
 
 pgp = 4.3135e-5
 n_D_0 = 2.78e22 * pgp
@@ -72,7 +72,7 @@ T_i_initial = 0.03
 
 sts = STREAMSettings()
 
-wall_time = 100
+wall_time = L/R
 print('wall_time = {} s'.format(wall_time))
 sts.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts.eqsys.E_field.setInitialProfile(efield=E_initial)
@@ -101,8 +101,9 @@ sts.radialgrid.setRecyclingCoefficient2(c2)
 sts.radialgrid.setRecyclingCoefficient3(c3)
 
 sts.solver.setType(Solver.NONLINEAR)
-#sts.solver.setDebug(savejacobian=True, savenumericaljacobian=True, timestep=1, iteration=5)
-sts.solver.setDebug(savesystem=True)
+#sts.solver.setDebug(savejacobian=True, savenumericaljacobian=True, timestep=1, iteration=2)
+#sts.solver.setDebug(savesystem=True)
+sts.solver.setMaxIterations(500)
 
 #sts.hottailgrid.setNxi(Nxi)
 #sts.hottailgrid.setNp(Np)
@@ -122,5 +123,5 @@ sts.other.include('fluid')
 
 sts.save('STREAMSettings.h5')
 
-sto = runiface(sts, quiet=False)
+sto = runiface(sts, 'output.h5', quiet=False)
 #'''

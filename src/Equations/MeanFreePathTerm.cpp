@@ -45,7 +45,7 @@ using namespace std; //Standard functions
         this->lambda_i = 0;
         if(n_i != 0){
             v_i = sqrt(4*W_i/(3*n_i*ions->GetIonSpeciesMass(iz))); 
-            this->lambda_i = v_i/(n_i*I_i); 
+            this->lambda_i = v_i/(n_cold*I_i); 
         }
     }
     
@@ -62,7 +62,7 @@ using namespace std; //Standard functions
         real_t I_i = interp->Eval(0, n_cold, T_cold); //Evaluate I_i^(0)
         real_t dIdn = interp->Eval_deriv_n(0, n_cold, T_cold); // Derivative w.r.t. n_cold
         real_t dIdT = interp->Eval_deriv_T(0, n_cold, T_cold); // Derivative w.r.t. T_cold
-        
+
         real_t v_i = 0;
         if(n_i != 0){
             v_i = sqrt(4*W_i/(3*n_i*ions->GetIonSpeciesMass(iz))); 
@@ -75,13 +75,12 @@ using namespace std; //Standard functions
             if(n_i != 0)
                 jac->SetElement(iz, iz, -v_i/(2*n_cold*I_i*n_i)); 
         } else if (derivId == id_T_cold){
-            jac->SetElement(iz, 0, -v_i/(n_cold*I_i*I_i) * dIdT);     
+            jac->SetElement(iz, 0, -v_i/(n_cold*I_i*I_i) * dIdT);
         } else if (derivId == id_n_cold){
             jac->SetElement(iz, 0, -v_i/(n_cold*I_i) * (1/n_cold + dIdn/I_i)); 
         }
         
         return true; 
-      
     }
     
     //This is the linear implicit solver

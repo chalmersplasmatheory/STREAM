@@ -190,6 +190,8 @@ void SimulationGenerator::ConstructUnknowns(
         eqsys->GetScalarGrid(), eqsys->GetFluidGrid(),
         eqsys->GetHotTailGrid(), eqsys->GetRunawayGrid()
     );
-    eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid());
+    
+    len_t nIonSpecies = DREAM::SimulationGenerator::GetNumberOfIonSpecies(s);
+    eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid(), nIonSpecies);
 }
 
