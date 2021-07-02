@@ -14,10 +14,13 @@ namespace STREAM {
             const len_t iIon;
             DREAM::ADAS *adas;
             PlasmaVolume *pv;
+            EllipticalRadialGridGenerator *radials;
             
             const real_t T_0 = 0.026; // Room temperature in eV
             
-            real_t id_Tcold, id_ncold, id_Wi, id_Ni, id_ni;
+            real_t id_Tcold, id_ncold, id_Wi, id_Ni, id_ni, id_lambdai;
+            
+            len_t D_index;
             
             virtual void AllocateDiffWeights() override;
             virtual void DeallocateDiffWeights() override;
@@ -30,7 +33,11 @@ namespace STREAM {
             virtual void SetWeights() override;
             virtual void SetDiffWeights(len_t derivId, len_t nMultiples) override;
         public:
-            ChargeExchangeTerm(DREAM::FVM::Grid*, DREAM::FVM::UnknownQuantityHandler*, DREAM::IonHandler*, const len_t, DREAM::ADAS*, PlasmaVolume*, DREAM::FVM::Grid *operandGrid=nullptr);
+            ChargeExchangeTerm(
+                DREAM::FVM::Grid*, DREAM::FVM::UnknownQuantityHandler*, DREAM::IonHandler*, 
+                const len_t, DREAM::ADAS*, PlasmaVolume*, EllipticalRadialGridGenerator *r, 
+                DREAM::FVM::Grid *operandGrid=nullptr, len_t D_index=0
+            );
 
             virtual len_t GetNumberOfNonZerosPerRow() const override { return 1; } 
             

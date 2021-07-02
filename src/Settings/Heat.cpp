@@ -234,7 +234,7 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *e
                     0, false,
                     unknowns, lnLambda, ionHandler)
         );
-        Op_Wij->AddTerm(new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
+        Op_Wij->AddTerm(new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator()));
         if(eqsys->GetIonHandler()->GetZ(iz) == 1){
             Op_ni->AddTerm(new ChargeExchangeTerm(eqsys->GetFluidGrid(), eqsys->GetUnknownHandler(), eqsys->GetIonHandler(), iz, adas, eqsys->GetPlasmaVolume(), nullptr));
         }

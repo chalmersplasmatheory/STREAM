@@ -11,8 +11,9 @@ using namespace STREAM;
  * Constructor.
  */
 IonHeatTransport::IonHeatTransport(FVM::Grid *g, IonHandler *ihdl,
-	const len_t iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u
-	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon), coefftauinv(tauinv), ions(ihdl) {
+	const len_t iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u, 
+	EllipticalRadialGridGenerator *r, len_t D_index
+	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon), coefftauinv(tauinv), ions(ihdl), radials(r), D_index(D_index) {
 	
     SetName("IonHeatTransport");
 
@@ -47,15 +48,14 @@ void IonHeatTransport::Rebuild(
     real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(0); 
     real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
     real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(0);
-    
-    this->W_i     = unknowns->GetUnknownData(id_Wi)[0];
+    len_t nr = radials->GetNr();
+    this->W_i     = unknowns->GetUnknownData(id_Wi)[D_index*nr];
     this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
     this->dI_p    = - 2/3 * dtauinvdIp * W_i;
     this->dI_wall = - 2/3 * dtauinvdIwall * W_i;
     this->dT_cold = - 2/3 * dtauinvdTcold * W_i;
     this->dW_i    = - 2/3 * ( dtauinvdWi * W_i + tauinv);
     this->dN_i    = - 2/3 * dtauinvdNi * W_i;
-    
 }
 
 bool IonHeatTransport::SetCSJacobianBlock(
