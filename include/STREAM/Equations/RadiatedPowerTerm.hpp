@@ -16,7 +16,7 @@ namespace STREAM{
         DREAM::FVM::UnknownQuantityHandler *unknowns;
         DREAM::IonHandler *ions;
         PlasmaVolume *volumes;
-        len_t id_T_cold, id_n_cold;
+        len_t id_T_cold, id_n_cold, id_lambda_i;
     protected:
         void SetWeights() override;
         void SetDiffWeights(len_t derivId, len_t nMultiples) override;
