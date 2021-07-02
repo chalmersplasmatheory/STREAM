@@ -219,6 +219,7 @@ void IonRateEquation::SetCSMatrixElements(
     FVM::Matrix *mat, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset, SetMode sm
 ) {
     bool setIonization = addFluidIonization || (sm==JACOBIAN&&addFluidJacobian);
+    const real_t *nions = this->unknowns->GetUnknownData(id_ions);
     #define NI(J,V) \
         mat->SetElement(\
             rOffset+ir, rOffset+ir+(J)*Nr, \
