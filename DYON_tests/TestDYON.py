@@ -46,9 +46,10 @@ n_O = 0.01 * n_D_0
 
 V_vessel = 100
 B        = 2.7
-a        = 0.08513
-r_0      = 3.0381
+a        = 0.9 # Instead of EFIT-data 0.08519 (think there's a typo should be 0.8519)
+r_0      = 3   # Instead of EFIT-data 3.0381 (Should use 2.96?)
 r_wall   = 1/np.pi*np.sqrt(V_vessel/(2*r_0))
+
 kappa    = 1
 c1       = 1.1
 c2       = 0.09
