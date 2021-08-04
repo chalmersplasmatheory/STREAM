@@ -48,7 +48,7 @@
                     const len_t IonOffset = ions->GetIndex(iz,0); 
                     ADASRateInterpolator *ccd = adas->GetCCD(Zi); 
                     for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ 
-                        real_t PartialTRcx = ccd->Eval_deriv_T(Z0i, n_cold[ir], T_cold[ir]); 
+                        real_t PartialTRcx = ccd->Eval_deriv_T(Z0i-1, n_cold[ir], T_cold[ir]); 
                         NI(-1, PartialTRcx * V_n/V_p * nions[IonOffset+Z0i*Nr+ir]); 
                     }
                 }
@@ -59,7 +59,7 @@
                     continue;
                 const len_t Doffset = ions->GetIndex(iz,0); 
                 ADASRateInterpolator *ccd = adas->GetCCD(Z); 
-                real_t PartialTRcx = ccd->Eval_deriv_T(Z0+1, n_cold[ir], T_cold[ir]); 
+                real_t PartialTRcx = ccd->Eval_deriv_T(Z0+1-1, n_cold[ir], T_cold[ir]); 
                 const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                 if (Z0 == 0){
                     NI(+1, PartialTRcx * V_n_D/V_n_tot * nions[Doffset + ir]); 
@@ -79,18 +79,18 @@
                     const len_t IonOffset = ions->GetIndex(iz,0);
                     ADASRateInterpolator *ccd = adas->GetCCD(Zi);
                     for(len_t Z0i=1; Z0i<Zi+1; Z0i++){
-                        real_t PartialTRcx = ccd->Eval_deriv_T(Z0i, n_cold[ir], T_cold[ir]);
+                        real_t PartialTRcx = ccd->Eval_deriv_T(Z0i-1, n_cold[ir], T_cold[ir]);
                         NI(0, -PartialTRcx * V_n/V_n_tot * nions[IonOffset+Z0i*Nr+ir]); 
                     }
                 }
             }
-        } else if (Z0 > 1){  
+        } else if (Z0 >= 1){  
             for (len_t iz=0; iz<NZ; iz++){ 
                 if(ions->GetZ(iz)!=1) 
                     continue;
                 const len_t Doffset = ions->GetIndex(iz,0); 
                 ADASRateInterpolator *ccd = adas->GetCCD(Z); 
-                real_t PartialTRcx = ccd->Eval_deriv_T(Z0, n_cold[ir], T_cold[ir]); 
+                real_t PartialTRcx = ccd->Eval_deriv_T(Z0-1, n_cold[ir], T_cold[ir]); 
                 const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                 NI(0, -PartialTRcx * V_n_D/V_p * nions[Doffset + ir]); 
                 

@@ -45,7 +45,7 @@
                         const len_t IonOffset = ions->GetIndex(iz,0); 
                         ADASRateInterpolator *ccd = adas->GetCCD(Zi); 
                         for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ 
-                            real_t Rcx = ccd->Eval(Z0i, n_cold[ir], T_cold[ir]); 
+                            real_t Rcx = ccd->Eval(Z0i-1, n_cold[ir], T_cold[ir]); 
                             NI(-1, Rcx * dV_n/V_p * nions[IonOffset+Z0i*Nr+ir]); 
                         }
                     }
@@ -56,13 +56,13 @@
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); 
                     ADASRateInterpolator *ccd = adas->GetCCD(Z); 
-                    real_t Rcx = ccd->Eval(Z0+1, n_cold[ir], T_cold[ir]); 
+                    real_t Rcx = ccd->Eval(Z0, n_cold[ir], T_cold[ir]); 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz);
                     const real_t dV_n_D = this->volumes->GetNeutralVolume_dLambdai(iz);
                     if (Z0 == 0){
-                        NI(+1, Rcx * (dV_n_D/V_n_tot - V_n_D * dV_n_tot /(V_n_tot * V_n_tot)) * nions[Doffset + ir]); 
+                        NI(+1, Rcx * (dV_n_D/V_n_tot - V_n_D * dV_n_tot /(V_n_tot * V_n_tot)) * nions[Doffset*Nr + ir]); 
                     }else{
-                        NI(+1, Rcx * dV_n_D/V_p * nions[Doffset + ir]);
+                        NI(+1, Rcx * dV_n_D/V_p * nions[Doffset*Nr + ir]);
                     }
                 }
             }
@@ -77,8 +77,8 @@
                         const len_t IonOffset = ions->GetIndex(iz,0);
                         ADASRateInterpolator *ccd = adas->GetCCD(Zi);
                         for(len_t Z0i=1; Z0i<Zi+1; Z0i++){
-                            real_t Rcx = ccd->Eval(Z0i, n_cold[ir], T_cold[ir]);
-                            NI(0, -Rcx * (dV_n/V_n_tot - V_n * dV_n_tot/(V_n_tot*V_n_tot)) * nions[IonOffset+Z0i*Nr+ir]); 
+                            real_t Rcx = ccd->Eval(Z0i-1, n_cold[ir], T_cold[ir]);
+                            NI(0, -Rcx * (dV_n/V_n_tot - V_n * dV_n_tot/(V_n_tot*V_n_tot)) * nions[(IonOffset+Z0i)*Nr+ir]); 
                         }
                     }
                 }
@@ -88,9 +88,9 @@
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); 
                     ADASRateInterpolator *ccd = adas->GetCCD(Z); 
-                    real_t Rcx = ccd->Eval(Z0, n_cold[ir], T_cold[ir]); 
+                    real_t Rcx = ccd->Eval(Z0-1, n_cold[ir], T_cold[ir]); 
                     const real_t dV_n_D = this->volumes->GetNeutralVolume_dLambdai(iz); 
-                    NI(0, -Rcx * dV_n_D/V_p * nions[Doffset + ir]); 
+                    NI(0, -Rcx * dV_n_D/V_p * nions[Doffset*Nr + ir]); 
                     
                 }
             }
