@@ -104,7 +104,6 @@ sts.radialgrid.setRecyclingCoefficient3(c3)
 sts.solver.setType(Solver.NONLINEAR)
 #sts.solver.setDebug(savejacobian=True, savenumericaljacobian=True, timestep=1, iteration=2)
 #sts.solver.setDebug(savesystem=True)
-sts.solver.setMaxIterations(500)
 
 #sts.hottailgrid.setNxi(Nxi)
 #sts.hottailgrid.setNp(Np)
