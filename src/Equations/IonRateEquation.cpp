@@ -200,8 +200,19 @@ bool IonRateEquation::SetCSJacobianBlock(
         contributes = true;
         #include "IonRateEquation.setDN.cpp"        
     } else if (derivId == id_lambda_i) {
+        #undef NI
+        #define NI_Z(IZ,J,V) \
+            jac->SetElement( \
+                rOffset+ir, IZ*Nr+ir,\
+                (V) * nions[rOffset+ir+(J)*Nr] \
+            )
+        #define NI(J,V) NI_Z(iIon,(J),(V))
+
+        const len_t Nr = this->grid->GetNr();
         contributes = true;
         #include "IonRateEquation.setDL.cpp"
+
+        #undef NI_Z
     }
     #undef NI
 

@@ -95,7 +95,7 @@
                     }
                 }
             }
-        } else*/ if (Z0 >= 1){  //Not Deuterium/Tritium. Z0>1 since this term not present if Z0=0
+        } else*/ if (Z != 1 && Z0 >= 1){  //Not Deuterium/Tritium. Z0>1 since this term not present if Z0=0
             for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
                 if(ions->GetZ(iz)!=1) //Don't add anything if the other ion is not D/T
                     continue;

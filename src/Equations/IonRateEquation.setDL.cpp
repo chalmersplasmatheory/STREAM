@@ -4,7 +4,6 @@
  * methods of the 'IonRateEquation' class.
  */
 
-    const len_t Nr = this->grid->GetNr();
     const len_t Z  = this->ions->GetZ(iIon);
     const real_t *n_cold = this->unknowns->GetUnknownData(id_n_cold);
     const real_t *T_cold = this->unknowns->GetUnknownData(id_T_cold);
@@ -46,7 +45,7 @@
                         ADASRateInterpolator *ccd = adas->GetCCD(Zi); 
                         for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ 
                             real_t Rcx = ccd->Eval(Z0i-1, n_cold[ir], T_cold[ir]); 
-                            NI(-1, Rcx * dV_n/V_p * nions[IonOffset+Z0i*Nr+ir]); 
+                            NI_Z(iIon, -1, Rcx * dV_n/V_p * nions[IonOffset+Z0i*Nr+ir]); 
                         }
                     }
                 }
@@ -60,9 +59,9 @@
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz);
                     const real_t dV_n_D = this->volumes->GetNeutralVolume_dLambdai(iz);
                     if (Z0 == 0){
-                        NI(+1, Rcx * (dV_n_D/V_n_tot - V_n_D * dV_n_tot /(V_n_tot * V_n_tot)) * nions[Doffset*Nr + ir]); 
+                        NI_Z(iz, +1, Rcx * (dV_n_D/V_n_tot - V_n_D * dV_n_tot /(V_n_tot * V_n_tot)) * nions[Doffset*Nr + ir]); 
                     }else{
-                        NI(+1, Rcx * dV_n_D/V_p * nions[Doffset*Nr + ir]);
+                        NI_Z(iz, +1, Rcx * dV_n_D/V_p * nions[Doffset*Nr + ir]);
                     }
                 }
             }
@@ -78,7 +77,7 @@
                         ADASRateInterpolator *ccd = adas->GetCCD(Zi);
                         for(len_t Z0i=1; Z0i<Zi+1; Z0i++){
                             real_t Rcx = ccd->Eval(Z0i-1, n_cold[ir], T_cold[ir]);
-                            NI(0, -Rcx * (dV_n/V_n_tot - V_n * dV_n_tot/(V_n_tot*V_n_tot)) * nions[(IonOffset+Z0i)*Nr+ir]); 
+                            NI_Z(iIon, 0, -Rcx * (dV_n/V_n_tot - V_n * dV_n_tot/(V_n_tot*V_n_tot)) * nions[(IonOffset+Z0i)*Nr+ir]); 
                         }
                     }
                 }
@@ -90,10 +89,9 @@
                     ADASRateInterpolator *ccd = adas->GetCCD(Z); 
                     real_t Rcx = ccd->Eval(Z0-1, n_cold[ir], T_cold[ir]); 
                     const real_t dV_n_D = this->volumes->GetNeutralVolume_dLambdai(iz); 
-                    NI(0, -Rcx * dV_n_D/V_p * nions[Doffset*Nr + ir]); 
+                    NI_Z(iz, 0, -Rcx * dV_n_D/V_p * nions[Doffset*Nr + ir]); 
                     
                 }
             }
-            
         }
     }
