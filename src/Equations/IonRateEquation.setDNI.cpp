@@ -1,10 +1,10 @@
 /**
- *
- * Common implementation of the 'SetMatrixElements()' and 'SetVectorElements()'
- * methods of the 'IonRateEquation' class.
+ * Implementation of derivate w.r.t. ion densities in the charge-exchange
+ * term. These derivates are NOT w.r.t. the density of the ion to which
+ * the term is applied, but w.r.t. to the other ion density which is being
+ * multiplied with.
  */
-
-    const len_t Nr = this->grid->GetNr();
+    
     const len_t Z  = this->ions->GetZ(iIon);
     const real_t *n_cold = this->unknowns->GetUnknownData(id_n_cold);
     const real_t *T_cold = this->unknowns->GetUnknownData(id_T_cold);
@@ -12,37 +12,8 @@
     const real_t V_n = this->volumes->GetNeutralVolume(iIon); 
     const real_t V_n_tot = this->volumes->GetTotalNeutralVolume(iIon);
     const len_t NZ = this->ions->GetNZ();
-    
+
     for (len_t ir = 0; ir < Nr; ir++) {
-        if(setIonization){
-            // I_i^(j-1) n_cold * n_i^(j-1) * Vhat_i^(j-1)/V_i^(j)
-            if (Z0 == 1){
-                NI(-1, Ion[Z0-1][ir] * n_cold[ir] * V_n/V_p);
-            } else if (Z0 > 1){
-                NI(-1, Ion[Z0-1][ir] * n_cold[ir]);
-            }
-
-            // -I_i^(j) n_cold * n_i^(j) * Vhat_i^(j)/V_i^(j)
-            if (Z0 == 0){
-                NI(0, -Ion[Z0][ir] * n_cold[ir] * V_n/V_n_tot);
-            }else{
-                NI(0, -Ion[Z0][ir] * n_cold[ir]);
-            }
-        }
-        
-        // R_i^(j+1) n_cold * n_i^(j+1) * Vhat_i^(j+1)/V_i^(j)
-        if (Z0 == 0){
-            NI(+1, Rec[Z0+1][ir] * n_cold[ir] * V_p/V_n_tot);
-        } else if (Z0 < Z){
-            NI(+1, Rec[Z0+1][ir] * n_cold[ir]);
-        }
-
-        // -R_i^(j) n_cold * n_i^(j) * Vhat_i^(j)/V_i^(j)
-        // Does not contribute when Z0=0 since there is no recombination for neutrals
-        if (Z0 > 0){                        
-            NI(0, -Rec[Z0][ir] * n_cold[ir]);
-        }
-        
         // Positive charge-exchange term
         if (Z == 1){ //Deuterium or Tritium
             //if (Z0 == 1){
@@ -57,10 +28,10 @@
 
                         if (Z0 == 0)
                             // Apply to neutral deuterium (Z0=0)
-                            NI(0, -Rcx * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir]); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
+                            NI_Z(IonOffset+Z0i, 0, -Rcx * V_n/V_n_tot); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
                         else if (Z0 == 1)
                             // Apply to neutral deuterium (Z0-1 = 0)
-                            NI(-1, Rcx * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir]); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
+                            NI_Z(IonOffset+Z0i, -1, Rcx * V_n/V_p); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
                     }
                 }
             //}
@@ -73,9 +44,9 @@
                 real_t Rcx = ccd->Eval(Z0+1-1, n_cold[ir], T_cold[ir]); //Evaluate cx-coeff. for charge state 
                 const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                 if (Z0 == 0){
-                    NI(+1, Rcx * V_n_D/V_n_tot * nions[Doffset*Nr + ir]); 
+                    NI_Z(Doffset, +1, Rcx * V_n_D/V_n_tot); 
                 }else{
-                    NI(+1, Rcx * V_n_D/V_p * nions[Doffset*Nr + ir]);
+                    NI_Z(Doffset, +1, Rcx * V_n_D/V_p);
                 }
             }
         }
@@ -89,8 +60,9 @@
                 ADASRateInterpolator *ccd = adas->GetCCD(Z); //Get cx-coeff. for the ion that is not D/T (or should this be 1, 2+IsTritium(iz)?)
                 real_t Rcx = ccd->Eval(Z0-1, n_cold[ir], T_cold[ir]); //Evaluate cx-coeff. for charge state 
                 const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
-                NI(0, -Rcx * V_n_D/V_p * nions[Doffset*Nr + ir]); 
+                NI_Z(Doffset, 0, -Rcx * V_n_D/V_p); 
                 
             }
         }
     }
+

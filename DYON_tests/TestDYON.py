@@ -46,8 +46,10 @@ n_O = 0.01 * n_D_0
 
 V_vessel = 100
 B        = 2.7
-a        = 0.08513
-r_0      = 3.0381
+#a        = 0.08513
+#r_0      = 3.0381
+a        = 0.9
+r_0      = 1.2
 r_wall   = 1/np.pi*np.sqrt(V_vessel/(2*r_0))
 kappa    = 1
 c1       = 1.1
@@ -101,9 +103,9 @@ sts.radialgrid.setRecyclingCoefficient2(c2)
 sts.radialgrid.setRecyclingCoefficient3(c3)
 
 sts.solver.setType(Solver.NONLINEAR)
-#sts.solver.setDebug(savejacobian=True, savenumericaljacobian=True, timestep=1, iteration=2)
+#sts.solver.setDebug(savejacobian=True, savenumericaljacobian=True, timestep=1, iteration=50)
 #sts.solver.setDebug(savesystem=True)
-sts.solver.setMaxIterations(500)
+sts.solver.setMaxIterations(100)
 
 #sts.hottailgrid.setNxi(Nxi)
 #sts.hottailgrid.setNp(Np)
@@ -119,7 +121,7 @@ sts.solver.preconditioner.setEnabled(False)
 
 sts.solver.setVerbose(True)
 
-sts.other.include('fluid')
+sts.other.include('fluid', 'stream')
 
 sts.save('STREAMSettings.h5')
 

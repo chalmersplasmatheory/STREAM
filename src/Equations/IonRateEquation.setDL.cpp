@@ -50,12 +50,12 @@
                     }
                 }
             }else if (Z0 < Z){  
+                ADASRateInterpolator *ccd = adas->GetCCD(Z); 
+                real_t Rcx = ccd->Eval(Z0, n_cold[ir], T_cold[ir]); 
                 for (len_t iz=0; iz<NZ; iz++){ 
                     if(ions->GetZ(iz)!=1) 
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); 
-                    ADASRateInterpolator *ccd = adas->GetCCD(Z); 
-                    real_t Rcx = ccd->Eval(Z0, n_cold[ir], T_cold[ir]); 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz);
                     const real_t dV_n_D = this->volumes->GetNeutralVolume_dLambdai(iz);
                     if (Z0 == 0){
@@ -82,12 +82,12 @@
                     }
                 }
             } else if (Z0 >= 1){  
+                ADASRateInterpolator *ccd = adas->GetCCD(Z); 
+                real_t Rcx = ccd->Eval(Z0-1, n_cold[ir], T_cold[ir]); 
                 for (len_t iz=0; iz<NZ; iz++){ 
                     if(ions->GetZ(iz)!=1) 
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); 
-                    ADASRateInterpolator *ccd = adas->GetCCD(Z); 
-                    real_t Rcx = ccd->Eval(Z0-1, n_cold[ir], T_cold[ir]); 
                     const real_t dV_n_D = this->volumes->GetNeutralVolume_dLambdai(iz); 
                     NI_Z(iz, 0, -Rcx * dV_n_D/V_p * nions[Doffset*Nr + ir]); 
                     
