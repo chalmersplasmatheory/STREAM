@@ -119,6 +119,8 @@ sts.solver.preconditioner.setEnabled(False)
 
 sts.solver.setVerbose(True)
 
+sts.solver.setDebug(printjacobianinfo=True, timestep=1, iteration=0, savesystem=True)
+
 sts.other.include('fluid')
 
 sts.save('STREAMSettings.h5')
