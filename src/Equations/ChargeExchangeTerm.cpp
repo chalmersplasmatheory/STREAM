@@ -59,10 +59,10 @@ void ChargeExchangeTerm::SetWeights(){
     for(len_t iz=0; iz<nZ; iz++) {
         real_t n_i = ions->GetIonDensity(0, iz, 1);
         if(ions->IsTritium(iz)){
-            R_icx = adas->GetCCD(1,3)->Eval(1, n_cold, T_cold);
+            R_icx = adas->GetCCD(1,3)->Eval(0, n_cold, T_cold);
         } else { 
             len_t Z  = ions->GetZ(iz);
-            R_icx = adas->GetCCD(Z)->Eval(1, n_cold, T_cold);
+            R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
         }
         weights[n] -= V_ni/V_p * 3/2 * (2/3 * W_i / N_i - T_0) * R_icx * n_i; 
     }
@@ -93,12 +93,12 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
             real_t dR_icxdT;
             real_t n_i = ions->GetIonDensity(0, iz, 1);
             if(ions->IsTritium(iz)){
-                R_icx = adas->GetCCD(1,3)->Eval(1, n_cold, T_cold);
-                dR_icxdT = adas->GetCCD(1,3)->Eval_deriv_T(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(1,3)->Eval(0, n_cold, T_cold);
+                dR_icxdT = adas->GetCCD(1,3)->Eval_deriv_T(0, n_cold, T_cold);
             } else {
                 len_t Z = ions->GetZ(iz);
-                R_icx = adas->GetCCD(Z)->Eval(1, n_cold, T_cold);
-                dR_icxdT = adas->GetCCD(Z)->Eval_deriv_T(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
+                dR_icxdT = adas->GetCCD(Z)->Eval_deriv_T(0, n_cold, T_cold);
             }
             diffWeights[iIon] -= V_ni/V_p * 3/2 * (2/3 * W_i / N_i-T_0) * dR_icxdT * n_i; 
         }
@@ -107,12 +107,12 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
             real_t dR_icxdn;
             real_t n_i = ions->GetIonDensity(0, iz, 1);
             if(ions->IsTritium(iz)){
-                R_icx = adas->GetCCD(1,3)->Eval(1, n_cold, T_cold);
-                dR_icxdn = adas->GetCCD(1,3)->Eval_deriv_n(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(1,3)->Eval(0, n_cold, T_cold);
+                dR_icxdn = adas->GetCCD(1,3)->Eval_deriv_n(0, n_cold, T_cold);
             } else {
                 len_t Z = ions->GetZ(iz);
-                R_icx = adas->GetCCD(Z)->Eval(1, n_cold, T_cold);
-                dR_icxdn = adas->GetCCD(Z)->Eval_deriv_n(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
+                dR_icxdn = adas->GetCCD(Z)->Eval_deriv_n(0, n_cold, T_cold);
             }
             diffWeights[iIon] -= V_ni/V_p * 3/2 * (2/3 * W_i / N_i-T_0) * dR_icxdn * n_i; 
         }
@@ -120,10 +120,10 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
         for(len_t iz=0; iz<nZ; iz++) {
             real_t n_i = ions->GetIonDensity(0, iz, 1);
             if(ions->IsTritium(iz)){ 
-                R_icx = adas->GetCCD(1,3)->Eval(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(1,3)->Eval(0, n_cold, T_cold);
             } else {
                 len_t Z = ions->GetZ(iz);
-                R_icx = adas->GetCCD(Z)->Eval(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
             }
             diffWeights[iIon*nZ+n] -= V_ni/V_p * 3/2 * (2/3 * 1 / N_i) * R_icx * n_i; 
         }
@@ -131,10 +131,10 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
         for(len_t iz=0; iz<nZ; iz++) {
             real_t n_i = ions->GetIonDensity(0, iz, 1);
             if(ions->IsTritium(iz)){
-                R_icx = adas->GetCCD(1,3)->Eval(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(1,3)->Eval(0, n_cold, T_cold);
             } else {
                 len_t Z = ions->GetZ(iz);
-                R_icx = adas->GetCCD(Z)->Eval(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
             }
             diffWeights[iIon*nZ+n] -= V_ni/V_p * 3/2 * (-2/3 * W_i / (N_i*N_i)) * R_icx * n_i; 
         }
@@ -142,10 +142,10 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
         for(len_t iz=0; iz<nZ; iz++) {
             real_t n_i = ions->GetIonDensity(0, iz, 1);
             if(ions->IsTritium(iz)){
-                R_icx = adas->GetCCD(1,3)->Eval(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(1,3)->Eval(0, n_cold, T_cold);
             } else {
                 len_t Z = ions->GetZ(iz);
-                R_icx = adas->GetCCD(Z)->Eval(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
             }
             diffWeights[iIon*nZ+n] -= dV_nidlambdai/V_p * 3/2 * (2/3 * W_i / N_i - T_0) * R_icx * n_i; 
         }
@@ -153,12 +153,12 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
         for(len_t iz=0; iz<nZ; iz++) {
             len_t n_iz = ions->GetIndex(iz,1);
             if(ions->IsTritium(iz)){
-                R_icx = adas->GetCCD(1,3)->Eval(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(1,3)->Eval(0, n_cold, T_cold);
             } else {
                 len_t Z = ions->GetZ(iz);
-                R_icx = adas->GetCCD(Z)->Eval(1, n_cold, T_cold);
+                R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
             }
-            diffWeights[iIon*nMultiples+n_iz] -= V_ni/V_p * 3/2 * (2/3 * W_i / N_i - T_0) * R_icx; 
+            diffWeights[iIon*nMultiples+n_iz] -= V_ni/V_p * 3/2 * (2/3 * W_i / N_i - T_0) * R_icx;  //fel?
         }
     } 
 }
