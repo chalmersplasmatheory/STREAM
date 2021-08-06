@@ -30,6 +30,8 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Equations/NeutralTransport.cpp" 
     "${PROJECT_SOURCE_DIR}/src/Equations/RadiatedPowerTerm.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ChargeExchangeTerm.cpp"
+    "${PROJECT_SOURCE_DIR}/src/OtherQuantityHandler.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Settings/OtherQuantityHandler.cpp"
 )
 
 add_library(stream STATIC ${stream})

@@ -31,7 +31,7 @@ import numpy as np
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
 tMax = 1e-4  # simulation time in seconds
-Nt   = 500   # number of time steps
+Nt   = 4000  # number of time steps
 
 pgp = 4.3135e-5
 n_D_0 = 2.78e22 * pgp
@@ -48,6 +48,7 @@ V_vessel = 100
 B        = 2.7
 a        = 0.9 # Instead of EFIT-data 0.08519 (think there's a typo should be 0.8519)
 r_0      = 3   # Instead of EFIT-data 3.0381 (Should use 2.96?)
+#r_0      = 1.2
 r_wall   = 1/np.pi*np.sqrt(V_vessel/(2*r_0))
 
 kappa    = 1
@@ -116,12 +117,22 @@ sts.hottailgrid.setEnabled(False)
 sts.runawaygrid.setEnabled(False)
 
 sts.solver.preconditioner.setEnabled(False)
+#sts.solver.tolerance.set('lambda_i', reltol=1e-4)
+#sts.solver.tolerance.set('n_i', reltol=1e-4)
+#sts.solver.tolerance.set('n_tot', reltol=1e-4)
+#sts.solver.tolerance.set('N_i', reltol=1e-4)
 
-sts.solver.setVerbose(True)
+#sts.solver.setVerbose(True)
 
-sts.other.include('fluid')
+sts.other.include('fluid', 'stream')
 
 sts.save('STREAMSettings.h5')
 
 sto = runiface(sts, 'output.h5', quiet=False)
+
+sts2 = STREAMSettings(sts)
+sts2.timestep.setTmax(1e-2)
+sts2.timestep.setNt(1000)
+
+sto2 = runiface(sts2, 'output2.h5', quiet=False)
 #'''

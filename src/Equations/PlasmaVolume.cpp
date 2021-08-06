@@ -30,7 +30,8 @@ using namespace DREAM;
             real_t kappa = radials->GetElongation(); 
             real_t delta = radials->GetTriangularity();  
             
-            return  2*M_PI*M_PI*R0*kappa*(a*a-(a-lambda_i)*(a-lambda_i)) + 2*(8-3*M_PI*M_PI) *kappa *delta*(a*a*a - (a-lambda_i)*(a-lambda_i)*(a-lambda_i))/3;
+            return  2*M_PI*M_PI*R0*kappa*(a*a-(a-lambda_i)*(a-lambda_i)) +
+                    2*(8-3*M_PI*M_PI) *kappa *delta*(a*a*a - (a-lambda_i)*(a-lambda_i)*(a-lambda_i))/3;
         } else {
             return GetPlasmaVolume();
         }
@@ -106,13 +107,17 @@ using namespace DREAM;
     real_t PlasmaVolume::GetNeutralVolume_dLambdai(const len_t iz) {
         real_t a = radials->GetMinorRadius();
         real_t lambda_i = unknowns->GetUnknownData(id_lambda_i)[iz];
-        real_t R0 = radials->GetMajorRadius();
-        real_t kappa = radials->GetElongation(); 
-        real_t delta = radials->GetTriangularity(); 
 
-        real_t a_l = a-lambda_i;
+        if (lambda_i <= a){
+            real_t R0 = radials->GetMajorRadius();
+            real_t kappa = radials->GetElongation(); 
+            real_t delta = radials->GetTriangularity(); 
 
-        return (4*M_PI*M_PI*R0*kappa*a_l + 2*kappa*delta*(8-3*M_PI*M_PI)*a_l*a_l);
+            real_t a_l = a-lambda_i;
+
+            return (4*M_PI*M_PI*R0*kappa*a_l + 2*kappa*delta*(8-3*M_PI*M_PI)*a_l*a_l);
+        } else
+            return 0;
     }
 
     real_t PlasmaVolume::GetTotalNeutralVolume_dLambdai(const len_t iz) {
