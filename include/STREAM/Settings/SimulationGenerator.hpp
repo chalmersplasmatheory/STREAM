@@ -32,6 +32,10 @@ namespace STREAM {
             DREAM::AMJUEL*, DREAM::NIST*,
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
+        static void ConstructOtherQuantityHandler(
+            EquationSystem*, DREAM::Settings*,
+            struct DREAM::OtherQuantityHandler::eqn_terms*
+        );
         static void ConstructUnknowns(
             EquationSystem*, DREAM::Settings*
         );

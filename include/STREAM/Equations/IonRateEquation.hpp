@@ -25,6 +25,8 @@ namespace STREAM {
             **Ion,         // Ionization rate coefficients (nZs x nr)
             **PartialNIon, // d/dn_cold of ionization rate coefficients (nZs x nr)
             **PartialTIon; // d/dT_cold of ionization rate coefficients (nZs x nr)
+
+        const bool includeChargeExchange=true;
     public:
         IonRateEquation(
             DREAM::FVM::Grid*, DREAM::IonHandler*, const len_t, DREAM::ADAS*, 
