@@ -20,12 +20,18 @@ PlasmaVolume* EquationSystem::GetPlasmaVolume()
     {return this->PV;}
 ConfinementTime* EquationSystem::GetConfinementTime()
     {return this->CT;}
+NeutralInflux *EquationSystem::GetNeutralInflux()
+    {return this->NI;}
     
 void EquationSystem::SetConfinementTime(ConfinementTime *CT)
     { this->CT = CT; }
 
 void EquationSystem::SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator *r){
     this->r=r;
+}
+
+void EquationSystem::SetNeutralInflux(NeutralInflux *NI) {
+    this->NI = NI;
 }
 
 void EquationSystem::SetPlasmaVolume(PlasmaVolume *PV){

@@ -190,6 +190,7 @@ void SimulationGenerator::ConstructEquation_Ions(
     real_t c2 = s->GetReal("radialgrid/wall/c2"); 
     real_t c3 = s->GetReal("radialgrid/wall/c3"); 
     NeutralInflux *neutralInflux = new NeutralInflux(ih, src, ct, pv, c1, c2, c3);
+    eqsys->SetNeutralInflux(neutralInflux);
 
     // Initialize ion equations
     DREAM::FVM::Operator *eqn = new DREAM::FVM::Operator(fluidGrid);

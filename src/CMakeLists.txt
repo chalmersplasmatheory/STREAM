@@ -34,6 +34,11 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Settings/OtherQuantityHandler.cpp"
 )
 
+set_property(
+    SOURCE "${PROJECT_SOURCE_DIR}/src/OtherQuantityHandler.cpp"
+    PROPERTY COMPILE_FLAGS -Wno-unused-parameter
+)
+
 add_library(stream STATIC ${stream})
 target_include_directories(stream PUBLIC "${PROJECT_BINARY_DIR}/include" "${PROJECT_SOURCE_DIR}/include")
 target_link_libraries(stream PUBLIC fvm)
