@@ -119,7 +119,7 @@ sts_initial.runawaygrid.setEnabled(False)
 
 sts_initial.solver.preconditioner.setEnabled(False)
 
-#sts_initial.solver.setVerbose(True)
+sts_initial.solver.setVerbose(True)
 
 sts_initial.other.include('fluid', 'stream')
 
