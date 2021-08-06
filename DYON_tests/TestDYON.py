@@ -30,8 +30,8 @@ import numpy as np
 #pMax = 1    # maximum momentum in units of m_e*c
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
-tMax = 1e-4  # simulation time in seconds
-Nt   = 4000  # number of time steps
+tMax = 5*1e-1  # simulation time in seconds
+Nt   = 5*40000  # number of time steps
 
 pgp = 4.3135e-5
 n_D_0 = 2.78e22 * pgp
@@ -131,8 +131,8 @@ sts.save('STREAMSettings.h5')
 sto = runiface(sts, 'output.h5', quiet=False)
 
 sts2 = STREAMSettings(sts)
-sts2.timestep.setTmax(1e-2)
-sts2.timestep.setNt(1000)
+sts2.timestep.setTmax(tMax)
+sts2.timestep.setNt(Nt/10)
 
 sto2 = runiface(sts2, 'output2.h5', quiet=False)
 #'''
