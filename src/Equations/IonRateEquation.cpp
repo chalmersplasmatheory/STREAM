@@ -191,7 +191,13 @@ bool IonRateEquation::SetCSJacobianBlock(
             rOffset+ir, ir, \
             (V) * nions[rOffset+ir+(J)*Nr] \
         )
+    #define NI_Z(IZ,J,V) \
+        jac->SetElement( \
+            rOffset+ir, (IZ)*Nr+ir,\
+            (V) * nions[rOffset+ir+(J)*Nr] \
+        )
     bool setIonization = addFluidIonization || addFluidJacobian;
+    const len_t Nr = this->grid->GetNr();
 
     if(derivId == id_T_cold) {
         contributes = true;
@@ -201,19 +207,18 @@ bool IonRateEquation::SetCSJacobianBlock(
         #include "IonRateEquation.setDN.cpp"        
     } else if (derivId == id_lambda_i) {
         #undef NI
-        #define NI_Z(IZ,J,V) \
-            jac->SetElement( \
-                rOffset+ir, IZ*Nr+ir,\
-                (V) * nions[rOffset+ir+(J)*Nr] \
-            )
         #define NI(J,V) NI_Z(iIon,(J),(V))
 
-        const len_t Nr = this->grid->GetNr();
         contributes = true;
         #include "IonRateEquation.setDL.cpp"
+    } else if (derivId == uqtyId) {     // Cross-terms from n_i
+        #undef NI
+        #define NI(J,V) NI_Z(iIon,(J),(V))
 
-        #undef NI_Z
+        contributes = true;
+        #include "IonRateEquation.setDNI.cpp"
     }
+    #undef NI_Z
     #undef NI
 
     return contributes;

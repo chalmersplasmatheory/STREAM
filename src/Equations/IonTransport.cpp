@@ -55,7 +55,6 @@ void IonTransport::Rebuild(
     this->dT_cold = - dtauinvdTcold;
     this->dW_i    = - dtauinvdWi;
     this->dN_i    = - dtauinvdNi;
-    
 }
 
 bool IonTransport::SetCSJacobianBlock(
@@ -67,22 +66,22 @@ bool IonTransport::SetCSJacobianBlock(
     real_t n_i = ions->GetIonDensity(0, iIon, Z0);
     
     if(derivId==uqtyId){
-		jac->SetElement(rOffset+Z0, rOffset+Z0,this->dn_i); 
+		jac->SetElement(rOffset, rOffset,this->dn_i); 
 		return true;
     } else if(derivId==id_Ip){
-		jac->SetElement(rOffset+Z0, 0,this->dI_p*n_i);
+		jac->SetElement(rOffset, 0,this->dI_p*n_i);
 		return true;
 	} else if(derivId==id_Iwall){
-		jac->SetElement(rOffset+Z0, 0,this->dI_wall*n_i);
+		jac->SetElement(rOffset, 0,this->dI_wall*n_i);
 		return true;
 	} else if(derivId==id_Tcold){
-		jac->SetElement(rOffset+Z0, 0,this->dT_cold*n_i);
+		jac->SetElement(rOffset, 0,this->dT_cold*n_i);
 		return true;
 	} else if(derivId==id_Wi){
-		jac->SetElement(rOffset+Z0, iIon,this->dW_i*n_i);
+		jac->SetElement(rOffset, iIon,this->dW_i*n_i);
 		return true;
 	} else if(derivId==id_Ni){
-		jac->SetElement(rOffset+Z0, iIon,this->dN_i*n_i);
+		jac->SetElement(rOffset, iIon,this->dN_i*n_i);
 		return true;
 	}
 	else {
@@ -94,7 +93,7 @@ void IonTransport::SetCSMatrixElements(
 ) {
 	if(Z0==0)
 		return;
-    mat->SetElement(rOffset+Z0, rOffset+Z0, -tauinv);
+    mat->SetElement(rOffset, rOffset, -tauinv);
 } 
 
 
@@ -103,7 +102,7 @@ void IonTransport::SetCSVectorElements(
 ) {
 	if(Z0==0)
 		return;
-    real_t n_i     = ions->GetIonDensity(0, iIon, Z0);
-    vec[rOffset+Z0]=-n_i*tauinv; 
+    real_t n_i      = ions->GetIonDensity(0, iIon, Z0);
+    vec[rOffset] += -n_i*tauinv;
 }
 

@@ -158,7 +158,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
                 len_t Z = ions->GetZ(iz);
                 R_icx = adas->GetCCD(Z)->Eval(1, n_cold, T_cold);
             }
-            diffWeights[iIon*nMultiples+n_iz] = -V_ni/V_p * 3/2 * (2/3 * W_i / N_i - T_0) * R_icx; 
+            diffWeights[iIon*nMultiples+n_iz] -= V_ni/V_p * 3/2 * (2/3 * W_i / N_i - T_0) * R_icx;  //fel?
         }
     } 
 }

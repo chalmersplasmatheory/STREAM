@@ -125,10 +125,10 @@ class RadialGrid(PrescribedScalarParameter):
         self.B0, self.tB0 = data['B0']['x'], data['B0']['t']
         self.kappa, self.tkappa = data['kappa']['x'], data['kappa']['t']
         self.delta, self.tdelta = data['delta']['x'], data['delta']['t']
-        self.vessel_volume = data['vessel_volume']
-        self.c1 = data['c1']
-        self.c2 = data['c2']
-        self.c3 = data['c3']
+        self.vessel_volume = data['wall']['vessel_volume']
+        self.c1 = data['wall']['c1']
+        self.c2 = data['wall']['c2']
+        self.c3 = data['wall']['c3']
         self.R0 = data['R0']
 
         if 'wall_radius' in data:

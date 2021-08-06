@@ -60,7 +60,7 @@ bool NeutralTransport::SetCSJacobianBlock(
         for (len_t k = 0, idx = 0; k < nZ; k++) {
             len_t Z = ions->GetZ(k);
             for (len_t l = 0; l <= Z; l++, idx++) {
-                jac->SetElement(rOffset+idx, rOffset+idx,this->dn_ij);
+                jac->SetElement(rOffset, rOffset+idx,this->dn_ij);
             }
         }
 		return true;
@@ -98,5 +98,5 @@ void NeutralTransport::SetCSMatrixElements(
 void NeutralTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t, const len_t, const len_t rOffset
 ) {
-    vec[rOffset]=wall_term; 
+    vec[rOffset]+=wall_term; 
 }
