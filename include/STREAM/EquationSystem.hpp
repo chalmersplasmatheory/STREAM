@@ -13,6 +13,7 @@ namespace STREAM {
     class EquationSystem : public DREAM::EquationSystem {
         public: 
             ConfinementTime *CT;
+            NeutralInflux *NI;
             PlasmaVolume *PV;
             EllipticalRadialGridGenerator *r;
             
@@ -22,10 +23,12 @@ namespace STREAM {
             void SetConfinementTime(ConfinementTime *CT);
             void SetPlasmaVolume(PlasmaVolume *PV);
             void SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator *r);
+            void SetNeutralInflux(NeutralInflux *NI);
             
             PlasmaVolume *GetPlasmaVolume();
             ConfinementTime *GetConfinementTime();
             EllipticalRadialGridGenerator *GetEllipticalRadialGridGenerator();
+            NeutralInflux *GetNeutralInflux();
             
     };
 }

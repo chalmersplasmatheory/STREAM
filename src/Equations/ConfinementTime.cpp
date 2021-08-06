@@ -26,6 +26,14 @@ ConfinementTime::ConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadia
  * Evaluates the inverted confinement time
  */
 real_t ConfinementTime::EvaluateConfinementTime(len_t ir){
+    return EvaluatePerpendicularConfinementTime(ir)
+        + EvaluateParallelConfinementTime(ir);
+}
+
+/**
+ * Evaluates the parallel confinement time.
+ */
+real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
     real_t T_cold    = unknowns->GetUnknownData(id_Tcold)[ir];
@@ -37,7 +45,19 @@ real_t ConfinementTime::EvaluateConfinementTime(len_t ir){
     real_t B = radials->GetMagneticField();
     real_t ec = DREAM::Constants::ec;
     
-    return T_cold/(8*a*a*B) + 4/(a*B) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2/3*W_i/N_i)*(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/(Constants::mD));
+    return 4/(a*B) * exp(-I_p/I_ref) *
+        sqrt((ec*T_cold+2/3*W_i/N_i)*(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/(Constants::mD));
+}
+
+/**
+ * Evaluates the perpendicular confinement time.
+ */
+real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) {
+    real_t a      = radials->GetMinorRadius();
+    real_t B      = radials->GetMagneticField();
+    real_t T_cold = unknowns->GetUnknownData(id_Tcold)[ir];
+
+    return T_cold/(8*a*a*B);
 }
 
 /**
