@@ -137,5 +137,5 @@ sts_final.fromOutput('output_initial.h5')
 sts_final.output.setFilename('output_final.h5')
 sts_final.save('STREAMSettings_final.h5')
 
-sto_final = runiface(sts_final, 'output_initial.h5', quiet=False)
+sto_final = runiface(sts_final, 'output_final.h5', quiet=False)
 #'''
