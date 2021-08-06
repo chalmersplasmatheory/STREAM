@@ -1,6 +1,7 @@
 #!/usr/bin/python3 -i
 
 import argparse
+import matplotlib.pyplot as plt
 import pathlib
 import sys
 

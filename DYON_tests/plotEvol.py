@@ -14,7 +14,8 @@ if len(sys.argv) != 2:
 
 param = sys.argv[1]
 
-PATH = 'debug/debugout_1_{}.h5'
+ITERATION = 344
+PATH = f'debug/debugout_{ITERATION}_{{}}.h5'
 iters = []
 vals  = []
 i = 1
