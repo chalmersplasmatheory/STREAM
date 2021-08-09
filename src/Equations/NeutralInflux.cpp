@@ -27,14 +27,10 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
     real_t Gamma0=0; 
     real_t n_ij = 0;
     real_t Y = 0;
-    for (len_t i=0; i<nZ; i++) { 
+    /*for (len_t i=0; i<nZ; i++) { 
         if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
             Y=DeuteriumRecyclingCoefficient(t);
-        } /*else if(Z==6 && Zs[i]==1) {
-            Y=0.03;
-        } else if(Zs[i]==8 && (Z==6 || Z==8)) {
-            Y=1;
-        }*/ else {
+        } else {
             Y=0;//this->SRC->GetSRCoefficient(iIon,i);
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
@@ -42,6 +38,16 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
             Gamma0 += V_p * Y * n_ij * tauinv;
         }
     }
+    return Gamma0;*/
+
+    if (Z == 1) {
+        n_ij = ions->GetIonDensity(0, iIon, 1);
+        Y = DeuteriumRecyclingCoefficient(t);
+        Gamma0 = V_p * Y * n_ij * tauinv;
+    } else {
+        Gamma0 = 0;
+    }
+
     return Gamma0;
 }
 
