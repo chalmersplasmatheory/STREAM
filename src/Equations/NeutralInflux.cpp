@@ -30,7 +30,11 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
     for (len_t i=0; i<nZ; i++) { 
         if (Z==1 && Zs[i]==1 && !ions->IsTritium(iIon)) {
             Y=DeuteriumRecyclingCoefficient(t);
-        } else {
+        } /*else if(Z==6 && Zs[i]==1) {
+            Y=0.03;
+        } else if(Zs[i]==8 && (Z==6 || Z==8)) {
+            Y=1;
+        }*/ else {
             Y=this->SRC->GetSRCoefficient(iIon,i);
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {

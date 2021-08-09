@@ -120,8 +120,7 @@ void ElectronHeatTransportDiffusion::Rebuild(
         this->dW_i[ir]    = 3/2 * Constants::ec * a * a * dtauinvdWi * n;
         this->dN_i[ir]    = 3/2 * Constants::ec * a * a * dtauinvdNi * n;
         
-        Drr(ir, 0, 0) += 3/2 * Constants::ec * a * a * tauinv * n; 
-        printf("Electron heat transport diffusion: %.7e \n",3/2 * Constants::ec * a * a * tauinv * n);
+        Drr(ir, 0, 0) += 3/2 * Constants::ec * a * a * tauinv * n;
     }
     #undef INTERP
 }

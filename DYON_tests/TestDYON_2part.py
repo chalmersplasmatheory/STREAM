@@ -69,6 +69,9 @@ V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 
 V_s = interp1d(t_d, V_d, kind='linear')
 V_loop_wall = V_s(t)
 
+#plt.plot(t,V_loop_wall)
+#plt.show()
+
 E_initial = V_d[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
 T_e_initial = 1 # eV
 T_i_initial = 0.03
@@ -119,7 +122,7 @@ sts_initial.runawaygrid.setEnabled(False)
 
 sts_initial.solver.preconditioner.setEnabled(False)
 
-sts_initial.solver.setVerbose(True)
+#sts_initial.solver.setVerbose(True)
 
 sts_initial.other.include('fluid', 'stream')
 
