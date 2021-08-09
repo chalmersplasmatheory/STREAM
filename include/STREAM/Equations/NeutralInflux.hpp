@@ -16,10 +16,10 @@ namespace STREAM{
             PlasmaVolume *PV; 
 
             real_t c1, c2, c3;
-            
-            real_t DeuteriumRecyclingCoefficient(real_t t);
         
         public:
+            real_t DeuteriumRecyclingCoefficient(real_t t);
+            
             NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, PlasmaVolume *PV,  real_t c1, real_t c2, real_t c3);
             
             real_t EvaluateNeutralInflux_dnij(real_t t, const len_t iIon);

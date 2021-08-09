@@ -99,4 +99,5 @@ void NeutralTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t, const len_t, const len_t rOffset
 ) {
     vec[rOffset]+=wall_term; 
+    printf("%.7e \n",wall_term);
 }

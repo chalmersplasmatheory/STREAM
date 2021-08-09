@@ -35,7 +35,7 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
         } else if(Zs[i]==8 && (Z==6 || Z==8)) {
             Y=1;
         }*/ else {
-            Y=this->SRC->GetSRCoefficient(iIon,i);
+            Y=0;//this->SRC->GetSRCoefficient(iIon,i);
         }
         for (len_t Z0=1; Z0<=Z; Z0++) {
             n_ij = ions->GetIonDensity(0, iIon, Z0);
