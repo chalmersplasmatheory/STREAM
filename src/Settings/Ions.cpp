@@ -14,6 +14,7 @@
 #include "STREAM/Equations/SputteredRecycledCoefficient.hpp"
 #include "STREAM/Equations/IonRateEquation.hpp"
 #include "STREAM/Equations/NeutralTransport.hpp"
+#include "STREAM/OtherQuantityHandler.hpp"
 
 
 using namespace STREAM;
@@ -213,17 +214,20 @@ void SimulationGenerator::ConstructEquation_Ions(
                     new DREAM::IonTransientTerm(fluidGrid, ih, iZ, id_ni)
                 );
                 [[fallthrough]];
-            case DREAM::OptionConstants::ION_DATA_EQUILIBRIUM:
+            case DREAM::OptionConstants::ION_DATA_EQUILIBRIUM: {
                 nEquil++;              
-	            eqn->AddTerm(new IonRateEquation(
+	            IonRateEquation *ire = new IonRateEquation(
 	                fluidGrid, ih, iZ, adas, eqsys->GetUnknownHandler(), 
 	                eqsys->GetPlasmaVolume(), true, false, false
-	            ));
+	            );
+                eqn->AddTerm(ire);
                 eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
                 if (iZ == 0) {
                     eqn->AddTerm(new NeutralTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetUnknownHandler(), neutralInflux, eqsys->GetPlasmaVolume()));
                 }
-                break;
+
+                eqsys->AddIonRateEquation(ire);
+            } break;
 
             default:
                 throw DREAM::SettingsException(

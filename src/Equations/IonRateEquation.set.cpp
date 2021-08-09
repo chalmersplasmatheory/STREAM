@@ -17,30 +17,30 @@
         if(setIonization){
             // I_i^(j-1) n_cold * n_i^(j-1) * Vhat_i^(j-1)/V_i^(j)
             if (Z0 == 1){
-                NI(-1, Ion[Z0-1][ir] * n_cold[ir] * V_n/V_p);
+                NI(-1, Ion[Z0-1][ir] * n_cold[ir] * V_n/V_p, posIoniz);
             } else if (Z0 > 1){
-                NI(-1, Ion[Z0-1][ir] * n_cold[ir]);
+                NI(-1, Ion[Z0-1][ir] * n_cold[ir], posIoniz);
             }
 
             // -I_i^(j) n_cold * n_i^(j) * Vhat_i^(j)/V_i^(j)
             if (Z0 == 0){
-                NI(0, -Ion[Z0][ir] * n_cold[ir] * V_n/V_n_tot);
+                NI(0, -Ion[Z0][ir] * n_cold[ir] * V_n/V_n_tot, negIoniz);
             }else{
-                NI(0, -Ion[Z0][ir] * n_cold[ir]);
+                NI(0, -Ion[Z0][ir] * n_cold[ir], negIoniz);
             }
         }
         
         // R_i^(j+1) n_cold * n_i^(j+1) * Vhat_i^(j+1)/V_i^(j)
         if (Z0 == 0){
-            NI(+1, Rec[Z0+1][ir] * n_cold[ir] * V_p/V_n_tot);
+            NI(+1, Rec[Z0+1][ir] * n_cold[ir] * V_p/V_n_tot, posRec);
         } else if (Z0 < Z){
-            NI(+1, Rec[Z0+1][ir] * n_cold[ir]);
+            NI(+1, Rec[Z0+1][ir] * n_cold[ir], posRec);
         }
 
         // -R_i^(j) n_cold * n_i^(j) * Vhat_i^(j)/V_i^(j)
         // Does not contribute when Z0=0 since there is no recombination for neutrals
         if (Z0 > 0){                        
-            NI(0, -Rec[Z0][ir] * n_cold[ir]);
+            NI(0, -Rec[Z0][ir] * n_cold[ir], negRec);
         }
         
         // Positive charge-exchange term
@@ -58,10 +58,10 @@
 
                             if (Z0 == 0)
                                 // Apply to neutral deuterium (Z0=0)
-                                NI(0, -Rcx * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir]); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
+                                NI(0, -Rcx * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir], posCX); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
                             else if (Z0 == 1)
                                 // Apply to neutral deuterium (Z0-1 = 0)
-                                NI(-1, Rcx * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir]); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
+                                NI(-1, Rcx * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir], posCX); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
                         }
                     }
                 //}
@@ -74,9 +74,9 @@
                     real_t Rcx = ccd->Eval(Z0+1-1, n_cold[ir], T_cold[ir]); //Evaluate cx-coeff. for charge state 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                     if (Z0 == 0){
-                        NI(+1, Rcx * V_n_D/V_n_tot * nions[Doffset*Nr + ir]); 
+                        NI(+1, Rcx * V_n_D/V_n_tot * nions[Doffset*Nr + ir], posCX); 
                     }else{
-                        NI(+1, Rcx * V_n_D/V_p * nions[Doffset*Nr + ir]);
+                        NI(+1, Rcx * V_n_D/V_p * nions[Doffset*Nr + ir], posCX);
                     }
                 }
             }
@@ -90,7 +90,7 @@
                     ADASRateInterpolator *ccd = adas->GetCCD(Z); //Get cx-coeff. for the ion that is not D/T (or should this be 1, 2+IsTritium(iz)?)
                     real_t Rcx = ccd->Eval(Z0-1, n_cold[ir], T_cold[ir]); //Evaluate cx-coeff. for charge state 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
-                    NI(0, -Rcx * V_n_D/V_p * nions[Doffset*Nr + ir]); 
+                    NI(0, -Rcx * V_n_D/V_p * nions[Doffset*Nr + ir], negCX); 
                     
                 }
             }
