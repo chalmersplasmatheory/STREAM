@@ -13,7 +13,7 @@ using namespace STREAM;
  */
 OtherQuantityHandler::OtherQuantityHandler(
     ConfinementTime *confinementTime, NeutralInflux *neutralInflux,
-    PlasmaVolume *plasmaVolume,
+    PlasmaVolume *plasmaVolume, std::vector<IonRateEquation*> ionRateEquations,
     // Carried over from DREAM...
     DREAM::CollisionQuantityHandler *cqtyHottail, DREAM::CollisionQuantityHandler *cqtyRunaway,
     DREAM::PostProcessor *postProcessor, DREAM::RunawayFluid *REFluid, DREAM::FVM::UnknownQuantityHandler *unknowns,
@@ -23,7 +23,8 @@ OtherQuantityHandler::OtherQuantityHandler(
 ) : DREAM::OtherQuantityHandler(cqtyHottail, cqtyRunaway, postProcessor, REFluid,
         unknowns, unknown_equations, ions, fluidGrid, hottailGrid, runawayGrid,
         scalarGrid, oqty_terms),
-    confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume) {
+    confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume),
+    ionRateEquations(ionRateEquations) {
 
     this->DefineQuantitiesSTREAM();
 }
@@ -89,6 +90,8 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         this->all_quantities.push_back(new DREAM::OtherQuantity((NAME), (DESC), runawayGrid, 1, DREAM::FVM::FLUXGRIDTYPE_P2, [this,nr_re,n1_re,n2_re](const real_t, DREAM::FVM::QuantityData *qd) {FUNC}));
 
     const len_t nIons = this->ions->GetNZ();
+    const len_t nChargeStates = this->ions->GetNzs();
+
     DEF_SC_MUL("stream/neutralinflux", nIons, "Influx rate of neutral particles of each species",
         const len_t nZ = this->ions->GetNZ();
         real_t *v = qd->StoreEmpty();
@@ -132,6 +135,97 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         real_t v = this->plasmaVolume->GetVesselVolume();
         qd->Store(&v);
     );
+
+    // Diagnostics for ion rate equations
+    DEF_FL_MUL("stream/ionrateequation_posIonization", nChargeStates, "Positive ionization term in ion rate equation",
+        real_t *v = qd->StoreEmpty();
+        len_t offset = 0;
+        for (len_t iz = 0; iz < this->ionRateEquations.size(); iz++) {
+            IonRateEquation *ire = this->ionRateEquations[iz];
+            len_t Z = ire->GetZ();
+
+            real_t **t = ire->GetPositiveIonizationTerm();
+            for (len_t Z0 = 0; Z0 <= Z; Z0++)
+                for (len_t ir = 0; ir < nr; ir++)
+                    v[offset+Z0*nr+ir] = t[Z0][ir];
+        }
+    );
+
+    // Diagnostics for ion rate equations
+    DEF_FL_MUL("stream/ionrateequation_negIonization", nChargeStates, "Negative ionization term in ion rate equation",
+        real_t *v = qd->StoreEmpty();
+        len_t offset = 0;
+        for (len_t iz = 0; iz < this->ionRateEquations.size(); iz++) {
+            IonRateEquation *ire = this->ionRateEquations[iz];
+            len_t Z = ire->GetZ();
+
+            real_t **t = ire->GetNegativeIonizationTerm();
+            for (len_t Z0 = 0; Z0 <= Z; Z0++)
+                for (len_t ir = 0; ir < nr; ir++)
+                    v[offset+Z0*nr+ir] = t[Z0][ir];
+        }
+    );
+
+    // Diagnostics for ion rate equations
+    DEF_FL_MUL("stream/ionrateequation_posRecombination", nChargeStates, "Positive recombination term in ion rate equation",
+        real_t *v = qd->StoreEmpty();
+        len_t offset = 0;
+        for (len_t iz = 0; iz < this->ionRateEquations.size(); iz++) {
+            IonRateEquation *ire = this->ionRateEquations[iz];
+            len_t Z = ire->GetZ();
+
+            real_t **t = ire->GetPositiveRecombinationTerm();
+            for (len_t Z0 = 0; Z0 <= Z; Z0++)
+                for (len_t ir = 0; ir < nr; ir++)
+                    v[offset+Z0*nr+ir] = t[Z0][ir];
+        }
+    );
+
+    // Diagnostics for ion rate equations
+    DEF_FL_MUL("stream/ionrateequation_negRecombination", nChargeStates, "Negative recombination term in ion rate equation",
+        real_t *v = qd->StoreEmpty();
+        len_t offset = 0;
+        for (len_t iz = 0; iz < this->ionRateEquations.size(); iz++) {
+            IonRateEquation *ire = this->ionRateEquations[iz];
+            len_t Z = ire->GetZ();
+
+            real_t **t = ire->GetNegativeRecombinationTerm();
+            for (len_t Z0 = 0; Z0 <= Z; Z0++)
+                for (len_t ir = 0; ir < nr; ir++)
+                    v[offset+Z0*nr+ir] = t[Z0][ir];
+        }
+    );
+
+    // Diagnostics for ion rate equations
+    DEF_FL_MUL("stream/ionrateequation_posChargeExchange", nChargeStates, "Positive charge-exchange term in ion rate equation",
+        real_t *v = qd->StoreEmpty();
+        len_t offset = 0;
+        for (len_t iz = 0; iz < this->ionRateEquations.size(); iz++) {
+            IonRateEquation *ire = this->ionRateEquations[iz];
+            len_t Z = ire->GetZ();
+
+            real_t **t = ire->GetPositiveChargeExchangeTerm();
+            for (len_t Z0 = 0; Z0 <= Z; Z0++)
+                for (len_t ir = 0; ir < nr; ir++)
+                    v[offset+Z0*nr+ir] = t[Z0][ir];
+        }
+    );
+
+    // Diagnostics for ion rate equations
+    DEF_FL_MUL("stream/ionrateequation_negChargeExchange", nChargeStates, "Negative charge-exchange term in ion rate equation",
+        real_t *v = qd->StoreEmpty();
+        len_t offset = 0;
+        for (len_t iz = 0; iz < this->ionRateEquations.size(); iz++) {
+            IonRateEquation *ire = this->ionRateEquations[iz];
+            len_t Z = ire->GetZ();
+
+            real_t **t = ire->GetNegativeChargeExchangeTerm();
+            for (len_t Z0 = 0; Z0 <= Z; Z0++)
+                for (len_t ir = 0; ir < nr; ir++)
+                    v[offset+Z0*nr+ir] = t[Z0][ir];
+        }
+    );
+
 
     for (auto qty : all_quantities) {
         if (qty->GetName().substr(0, 6) == "stream")

@@ -77,12 +77,27 @@ void IonRateEquation::AllocateRateCoefficients() {
     this->PartialNIon = new real_t*[(Zion+1)];
     this->PartialTIon = new real_t*[(Zion+1)];
 
+    // Diagnostic utilities
+    this->posIonizTerm = new real_t*[(Zion+1)];
+    this->negIonizTerm = new real_t*[(Zion+1)];
+    this->posRecTerm = new real_t*[(Zion+1)];
+    this->negRecTerm = new real_t*[(Zion+1)];
+    this->posCXTerm = new real_t*[(Zion+1)];
+    this->negCXTerm = new real_t*[(Zion+1)];
+
     this->Rec[0]         = new real_t[Nr*(Zion+1)];
     this->PartialNRec[0] = new real_t[Nr*(Zion+1)];
     this->PartialTRec[0] = new real_t[Nr*(Zion+1)];
     this->Ion[0]         = new real_t[Nr*(Zion+1)];
     this->PartialNIon[0] = new real_t[Nr*(Zion+1)];
     this->PartialTIon[0] = new real_t[Nr*(Zion+1)];
+
+    this->posIonizTerm[0] = new real_t[Nr*(Zion+1)];
+    this->negIonizTerm[0] = new real_t[Nr*(Zion+1)];
+    this->posRecTerm[0] = new real_t[Nr*(Zion+1)];
+    this->negRecTerm[0] = new real_t[Nr*(Zion+1)];
+    this->posCXTerm[0] = new real_t[Nr*(Zion+1)];
+    this->negCXTerm[0] = new real_t[Nr*(Zion+1)];
 
     for (len_t i = 1; i <= Zion; i++) {
         this->Rec[i]         = this->Rec[i-1] + Nr;
@@ -91,6 +106,13 @@ void IonRateEquation::AllocateRateCoefficients() {
         this->Ion[i]         = this->Ion[i-1] + Nr;
         this->PartialNIon[i] = this->PartialNIon[i-1] + Nr;
         this->PartialTIon[i] = this->PartialTIon[i-1] + Nr;
+
+        this->posIonizTerm[i] = this->posIonizTerm[i-1] + Nr;
+        this->negIonizTerm[i] = this->negIonizTerm[i-1] + Nr;
+        this->posRecTerm[i] = this->posRecTerm[i-1] + Nr;
+        this->negRecTerm[i] = this->negRecTerm[i-1] + Nr;
+        this->posCXTerm[i] = this->posCXTerm[i-1] + Nr;
+        this->negCXTerm[i] = this->negCXTerm[i-1] + Nr;
     }
 }
 
@@ -111,6 +133,20 @@ void IonRateEquation::DeallocateRateCoefficients() {
     delete [] this->Rec;
     delete [] this->PartialNRec;
     delete [] this->PartialTRec;
+
+    delete [] this->posIonizTerm[0];
+    delete [] this->negIonizTerm[0];
+    delete [] this->posRecTerm[0];
+    delete [] this->negRecTerm[0];
+    delete [] this->posCXTerm[0];
+    delete [] this->negCXTerm[0];
+
+    delete [] this->posIonizTerm;
+    delete [] this->negIonizTerm;
+    delete [] this->posRecTerm;
+    delete [] this->negRecTerm;
+    delete [] this->posCXTerm;
+    delete [] this->negCXTerm;
 }
 
 /**
@@ -148,6 +184,13 @@ void IonRateEquation::Rebuild(
             Ion[Z0][i]         = 0; 
             PartialNIon[Z0][i] = 0;
             PartialTIon[Z0][i] = 0;
+
+            posIonizTerm[Z0][i] = 0;
+            negIonizTerm[Z0][i] = 0;
+            posRecTerm[Z0][i] = 0;
+            negRecTerm[Z0][i] = 0;
+            posCXTerm[Z0][i] = 0;
+            negCXTerm[Z0][i] = 0;
         }
     }
     // if not covered by the kinetic ionization model, set fluid ionization rates
@@ -238,11 +281,14 @@ void IonRateEquation::SetCSMatrixElements(
 ) {
     bool setIonization = addFluidIonization || (sm==JACOBIAN&&addFluidJacobian);
     const real_t *nions = this->unknowns->GetUnknownData(id_ions);
-    #define NI(J,V) \
-        mat->SetElement(\
-            rOffset+ir, rOffset+ir+(J)*Nr, \
-            (V) \
-        )
+    #define NI(J,V,DIAG) \
+        do { \
+            mat->SetElement(\
+                rOffset+ir, rOffset+ir+(J)*Nr, \
+                (V) \
+            ); \
+            this->DIAG ## Term[Z0][ir] += (V)*nions[rOffset+ir+(J)*Nr]; \
+        } while (false)
     #   include "IonRateEquation.set.cpp"
     #undef NI
 }
@@ -261,8 +307,11 @@ void IonRateEquation::SetCSVectorElements(
     const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
     bool setIonization = addFluidIonization;
-    #define NI(J,V) \
-        vec[rOffset+ir] += (V) * nions[rOffset+ir+(J)*Nr]
+    #define NI(J,V,DIAG) \
+        do { \
+            vec[rOffset+ir] += (V) * nions[rOffset+ir+(J)*Nr]; \
+            this->DIAG ## Term[Z0][ir] += (V) * nions[rOffset+ir+(J)*Nr]; \
+        } while (false)
     #   include "IonRateEquation.set.cpp"
     #undef NI
 }
