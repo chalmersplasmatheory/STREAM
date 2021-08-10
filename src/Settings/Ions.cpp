@@ -14,6 +14,7 @@
 #include "STREAM/Equations/SputteredRecycledCoefficient.hpp"
 #include "STREAM/Equations/IonRateEquation.hpp"
 #include "STREAM/Equations/NeutralTransport.hpp"
+#include "STREAM/OtherQuantityHandler.hpp"
 
 
 using namespace STREAM;
@@ -190,6 +191,7 @@ void SimulationGenerator::ConstructEquation_Ions(
     real_t c2 = s->GetReal("radialgrid/wall/c2"); 
     real_t c3 = s->GetReal("radialgrid/wall/c3"); 
     NeutralInflux *neutralInflux = new NeutralInflux(ih, src, ct, pv, c1, c2, c3);
+    eqsys->SetNeutralInflux(neutralInflux);
 
     // Initialize ion equations
     DREAM::FVM::Operator *eqn = new DREAM::FVM::Operator(fluidGrid);
@@ -212,17 +214,20 @@ void SimulationGenerator::ConstructEquation_Ions(
                     new DREAM::IonTransientTerm(fluidGrid, ih, iZ, id_ni)
                 );
                 [[fallthrough]];
-            case DREAM::OptionConstants::ION_DATA_EQUILIBRIUM:
+            case DREAM::OptionConstants::ION_DATA_EQUILIBRIUM: {
                 nEquil++;              
-	            eqn->AddTerm(new IonRateEquation(
+	            IonRateEquation *ire = new IonRateEquation(
 	                fluidGrid, ih, iZ, adas, eqsys->GetUnknownHandler(), 
 	                eqsys->GetPlasmaVolume(), true, false, false
-	            ));
+	            );
+                eqn->AddTerm(ire);
                 eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
                 if (iZ == 0) {
                     eqn->AddTerm(new NeutralTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetUnknownHandler(), neutralInflux, eqsys->GetPlasmaVolume()));
                 }
-                break;
+
+                eqsys->AddIonRateEquation(ire);
+            } break;
 
             default:
                 throw DREAM::SettingsException(

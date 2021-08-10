@@ -26,6 +26,15 @@ namespace STREAM {
             **PartialNIon, // d/dn_cold of ionization rate coefficients (nZs x nr)
             **PartialTIon; // d/dT_cold of ionization rate coefficients (nZs x nr)
 
+        // Diagnostic utilities
+        real_t
+            **posIonizTerm,
+            **negIonizTerm,
+            **posRecTerm,
+            **negRecTerm,
+            **posCXTerm,
+            **negCXTerm;
+
         const bool includeChargeExchange=true;
     public:
         IonRateEquation(
@@ -66,6 +75,16 @@ namespace STREAM {
         virtual void SetCSVectorElements(
             real_t*, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
         ) override;
+
+        real_t **GetPositiveIonizationTerm() { return this->posIonizTerm; }
+        real_t **GetNegativeIonizationTerm() { return this->negIonizTerm; }
+        real_t **GetPositiveRecombinationTerm() { return this->posRecTerm; }
+        real_t **GetNegativeRecombinationTerm() { return this->negRecTerm; }
+        real_t **GetPositiveChargeExchangeTerm() { return this->posCXTerm; }
+        real_t **GetNegativeChargeExchangeTerm() { return this->negCXTerm; }
+
+        len_t GetZ() { return this->Zion; }
+        len_t GetIon() { return this->iIon; }
     };
 }
 

@@ -41,14 +41,14 @@ void NeutralTransport::Rebuild(const real_t t, const real_t, FVM::UnknownQuantit
     real_t V_tot         = PV->GetTotalNeutralVolume(iIon);
     real_t dVtotdlambdai = PV->GetTotalNeutralVolume_dLambdai(iIon);
         
-    this->wall_term = - Gamma0/V_tot;
-    this->dn_ij     = - dGamma0dnij/V_tot;
-    this->dI_p      = - dGamma0dIp/V_tot;
-    this->dI_wall   = - dGamma0dIwall/V_tot;
-    this->dT_cold   = - dGamma0dTcold/V_tot;
-    this->dW_i      = - dGamma0dWi/V_tot;
-    this->dN_i      = - dGamma0dNi/V_tot;
-    this->dlambda_i   = Gamma0/(V_tot*V_tot)*dVtotdlambdai;
+    this->wall_term = Gamma0/V_tot;
+    this->dn_ij     = dGamma0dnij/V_tot;
+    this->dI_p      = dGamma0dIp/V_tot;
+    this->dI_wall   = dGamma0dIwall/V_tot;
+    this->dT_cold   = dGamma0dTcold/V_tot;
+    this->dW_i      = dGamma0dWi/V_tot;
+    this->dN_i      = dGamma0dNi/V_tot;
+    this->dlambda_i = - Gamma0/(V_tot*V_tot)*dVtotdlambdai;
 }
 
 bool NeutralTransport::SetCSJacobianBlock(

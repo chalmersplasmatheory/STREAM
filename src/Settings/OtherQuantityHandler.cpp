@@ -25,7 +25,8 @@ void SimulationGenerator::ConstructOtherQuantityHandler(
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
     OtherQuantityHandler *oqh = new OtherQuantityHandler(
-        eqsys->GetPlasmaVolume(),
+        eqsys->GetConfinementTime(), eqsys->GetNeutralInflux(),
+        eqsys->GetPlasmaVolume(), eqsys->GetIonRateEquations(),
         eqsys->GetHotTailCollisionHandler(), eqsys->GetRunawayCollisionHandler(),
         eqsys->GetPostProcessor(), eqsys->GetREFluid(), eqsys->GetUnknownHandler(),
         eqsys->GetEquations(), eqsys->GetIonHandler(), eqsys->GetFluidGrid(),

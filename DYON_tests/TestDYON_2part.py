@@ -30,9 +30,9 @@ import numpy as np
 #pMax = 1    # maximum momentum in units of m_e*c
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
-tMax_initial = 5e-5  # simulation time in seconds
-Nt_initial   = 500   # number of time steps
-tMax_final   = 1e-2  # simulation time in seconds
+tMax_initial = 1e-4  # simulation time in seconds
+Nt_initial   = 4000   # number of time steps
+tMax_final   = 5e-1  # simulation time in seconds
 Nt_final     = 1000   # number of time steps
 
 pgp = 4.3135e-5
@@ -63,7 +63,7 @@ L = 9.1e-5  # H, i MK2 struktur
 r=np.array([0])
 #print(str(n_D))
 
-t   = np.linspace(0, tMax, 100)
+t   = np.linspace(0, 0.5, 100)
 t_d = np.array([0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
 V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
 V_s = interp1d(t_d, V_d, kind='linear')
@@ -120,19 +120,22 @@ sts_initial.runawaygrid.setEnabled(False)
 
 sts_initial.solver.preconditioner.setEnabled(False)
 
-sts_initial.solver.setVerbose(True)
+#sts_initial.solver.setVerbose(True)
 
 sts_initial.other.include('fluid')
 
 sts_initial.save('STREAMSettings_initial.h5')
 
-sto = runiface(sts_initial, 'output_initial.h5', quiet=False)
+sto_initial = runiface(sts_initial, 'output_initial.h5', quiet=False)
 
-sts_final = DREAMSettings(sts_initial)
+
+sts_final = STREAMSettings(sts_initial)
 sts_final.timestep.setTmax(tMax_final)
 sts_final.timestep.setNt(Nt_final)
 
-sts_final.fromOutput('output_initial.h5', ignore=['n_i'])
+sts_final.fromOutput('output_initial.h5')
 sts_final.output.setFilename('output_final.h5')
 sts_final.save('STREAMSettings_final.h5')
+
+sto_final = runiface(sts_final, 'output_final.h5', quiet=False)
 #'''

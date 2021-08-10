@@ -6,6 +6,8 @@
 import numpy as np
 from DREAM import DREAMOutput
 
+from DREAM.Output.OtherIonSpeciesFluidQuantity import OtherIonSpeciesFluidQuantity
+from DREAM.Output.OtherIonSpeciesScalarQuantity import OtherIonSpeciesScalarQuantity
 from . Output.MeanFreePath import MeanFreePath
 
 
@@ -39,4 +41,9 @@ class STREAMOutput(DREAMOutput):
         super().load(filename=filename, path=path, lazy=lazy, *args, **kwargs)
 
         self.eqsys.resetUnknown('lambda_i', MeanFreePath)
+
+        if 'stream' in self.other:
+            self.other.stream.resetQuantity('V_n', OtherIonSpeciesScalarQuantity)
+            self.other.stream.resetQuantity('V_n_tot', OtherIonSpeciesScalarQuantity)
+            self.other.stream.resetQuantity('neutralinflux', OtherIonSpeciesScalarQuantity)
         
