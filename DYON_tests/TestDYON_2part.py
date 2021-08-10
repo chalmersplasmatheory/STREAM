@@ -50,7 +50,7 @@ V_vessel = 100
 B        = 2.7
 a        = 0.9 # Instead of EFIT-data 0.08519 (think there's a typo should be 0.8519)
 r_0      = 3   # Instead of EFIT-data 3.0381 (Should use 2.96?)
-r_wall   = 1 # approx 1.5-2.0 m
+r_wall   = 1.05 # approx 1.5-2.0 m
 
 kappa    = 1
 c1       = 1.1
@@ -80,6 +80,8 @@ sts_initial = STREAMSettings()
 
 wall_time = L/R
 print('wall_time = {} s'.format(wall_time))
+
+print(str(r_wall))
 sts_initial.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
 sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
@@ -126,11 +128,14 @@ sts_initial.solver.preconditioner.setEnabled(False)
 
 sts_initial.other.include('fluid', 'stream')
 
-sts_initial.save('STREAMSettings_initial.h5')
-
-sto_initial = runiface(sts_initial, 'output_initial.h5', quiet=False)
+#sts_initial.save('STREAMSettings_initial.h5')
 
 
+
+#sts_initial.radialgrid.setWallRadius(r_wall)
+
+sto_initial = runiface(sts_initial, 'output_initial.h5',
+                       quiet=False)
 sts_final = STREAMSettings(sts_initial)
 sts_final.timestep.setTmax(tMax_final)
 sts_final.timestep.setNt(Nt_final)
@@ -139,5 +144,11 @@ sts_final.fromOutput('output_initial.h5')
 sts_final.output.setFilename('output_final.h5')
 sts_final.save('STREAMSettings_final.h5')
 
-sto_final = runiface(sts_final, 'output_final.h5', quiet=False)
+sto_final = runiface(sts_final, 'output_final.h5',
+                        quiet=False)
+
+sto_final.eqsys.T_cold.plot()
+plt.show()
+sto_final.eqsys.I_p.plot()
+plt.show()
 #'''
