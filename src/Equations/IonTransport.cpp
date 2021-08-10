@@ -11,16 +11,16 @@ using namespace STREAM;
  * Constructor.
  */
 IonTransport::IonTransport(FVM::Grid *g, IonHandler *ihdl,
-	const len_t iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u
-	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon), coefftauinv(tauinv), ions(ihdl) {
+	const len_t iIon, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *u, PlasmaVolume *PV
+	) : IonEquationTerm<DREAM::FVM::EquationTerm>(g, ihdl, iIon), coefftauinv(tauinv), ions(ihdl), PV(PV) {
 	
     SetName("IonTransport");
 
     this->unknowns = u;
-    this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
-    this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
-    this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
-    this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
+    this->id_Ip    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_P);
+    this->id_Tcold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
+    this->id_Wi    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
+    this->id_Ni    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS);
     
 }
 
@@ -41,20 +41,20 @@ IonTransport::~IonTransport() {
 void IonTransport::Rebuild(
     const real_t, const real_t, FVM::UnknownQuantityHandler* 
 ) {
-    this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
+    this->id_Iwall = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_WALL);
     real_t dtauinvdIp    = this->coefftauinv->EvaluateConfinementTime_dIp(0); 
     real_t dtauinvdIwall = this->coefftauinv->EvaluateConfinementTime_dIwall(0); 
     real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(0); 
     real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
     real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(0);
-    
-    this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
-    this->dn_i    = - tauinv; 
-    this->dI_p    = - dtauinvdIp;
-    this->dI_wall = - dtauinvdIwall;
-    this->dT_cold = - dtauinvdTcold;
-    this->dW_i    = - dtauinvdWi;
-    this->dN_i    = - dtauinvdNi;
+    real_t V_p    = PV->GetPlasmaVolume(); 
+    this->tauinv  = coefftauinv->EvaluateConfinementTime(0)/* *V_p*/;
+    this->dn_i    = - tauinv/* *V_p*/; 
+    this->dI_p    = - dtauinvdIp/* *V_p*/;
+    this->dI_wall = - dtauinvdIwall/* *V_p*/;
+    this->dT_cold = - dtauinvdTcold/* *V_p*/;
+    this->dW_i    = - dtauinvdWi/* *V_p*/;
+    this->dN_i    = - dtauinvdNi/* *V_p*/;
 }
 
 bool IonTransport::SetCSJacobianBlock(

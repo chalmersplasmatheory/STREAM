@@ -3,3 +3,7 @@ build
 *.swo
 __pycache__
 .idea
+DYON_tests/STREAMSettings_final.h5
+DYON_tests/STREAMSettings_initial.h5
+DYON_tests/output_final.h5
+DYON_tests/output_initial.h5

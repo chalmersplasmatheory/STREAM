@@ -221,10 +221,10 @@ void SimulationGenerator::ConstructEquation_Ions(
 	                eqsys->GetPlasmaVolume(), true, false, false
 	            );
                 eqn->AddTerm(ire);
-                eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
-                if (iZ == 0) {
-                    eqn->AddTerm(new NeutralTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetUnknownHandler(), neutralInflux, eqsys->GetPlasmaVolume()));
-                }
+                eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetPlasmaVolume()));
+                //if (iZ == 0) {
+                eqn->AddTerm(new NeutralTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetUnknownHandler(), neutralInflux, eqsys->GetPlasmaVolume()));
+                //}
 
                 eqsys->AddIonRateEquation(ire);
             } break;

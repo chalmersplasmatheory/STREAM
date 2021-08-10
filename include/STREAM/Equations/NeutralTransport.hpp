@@ -18,7 +18,7 @@ namespace STREAM {
 		
 		real_t wall_term;
 		
-        real_t dn_ij;
+        real_t *dn_kj;
         real_t dI_p;
         real_t dI_wall;
         real_t dT_cold;

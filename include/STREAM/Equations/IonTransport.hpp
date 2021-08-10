@@ -6,6 +6,7 @@
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
+#include "STREAM/Equations/PlasmaVolume.hpp" 
 
 namespace STREAM {
 	class IonTransport : public DREAM::IonEquationTerm<DREAM::FVM::EquationTerm> { 
@@ -13,6 +14,7 @@ namespace STREAM {
 	    ConfinementTime *coefftauinv; 
 		DREAM::IonHandler *ions;
 		DREAM::FVM::UnknownQuantityHandler *unknowns;
+        PlasmaVolume *PV; 
 		
 		real_t dn_i;
         real_t dI_p;
@@ -28,7 +30,7 @@ namespace STREAM {
 		
 	public:
 		IonTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon,
-			ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *u);
+			ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *u, PlasmaVolume *PV);
 		/*~IonTransport();*/
         
         void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*);

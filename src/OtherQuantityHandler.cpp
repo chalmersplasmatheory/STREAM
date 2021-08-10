@@ -57,7 +57,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     // HELPER MACROS (to make definitions more compact)
     // Define on scalar grid
     #define DEF_SC(NAME, DESC, FUNC) \
-        this->all_quantities.push_back(new DREAM::OtherQuantity((NAME), (DESC), scalarGrid, 1, DREAM::FVM::FLUXGRIDTYPE_DISTRIBUTION, [this,nr](const real_t, DREAM::FVM::QuantityData *qd) {FUNC}));
+        this->all_quantities.push_back(new DREAM::OtherQuantity((NAME), (DESC), scalarGrid, 1, DREAM::FVM::FLUXGRIDTYPE_DISTRIBUTION, [this,nr](const real_t t, DREAM::FVM::QuantityData *qd) {FUNC}));
     #define DEF_SC_MUL(NAME, MUL, DESC, FUNC) \
         this->all_quantities.push_back(new DREAM::OtherQuantity((NAME), (DESC), scalarGrid, (MUL), DREAM::FVM::FLUXGRIDTYPE_DISTRIBUTION, [this,nr](const real_t t, DREAM::FVM::QuantityData *qd) {FUNC}));
 
@@ -102,17 +102,17 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     DEF_FL("stream/tau_D", "Deuterium confinement time",
         real_t *v = qd->StoreEmpty();
         for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->confinementTime->EvaluateConfinementTime(ir);
+            v[ir] = 1/this->confinementTime->EvaluateConfinementTime(ir);
     );
     DEF_FL("stream/tau_D_par", "Parallel deuterium confinement time",
         real_t *v = qd->StoreEmpty();
         for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->confinementTime->EvaluateParallelConfinementTime(ir);
+            v[ir] = 1/this->confinementTime->EvaluateParallelConfinementTime(ir);
     );
     DEF_FL("stream/tau_D_perp", "Perpendicular deuterium confinement time",
         real_t *v = qd->StoreEmpty();
         for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
+            v[ir] = 1/this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
     );
 
     DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals",
@@ -135,6 +135,10 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         real_t v = this->plasmaVolume->GetVesselVolume();
         qd->Store(&v);
     );
+    DEF_SC("stream/Y_D", "Deuterium recycling coefficient",
+        real_t y_d = this->neutralInflux->DeuteriumRecyclingCoefficient(t);
+        qd->Store(&y_d);
+    );
 
     // Diagnostics for ion rate equations
     DEF_FL_MUL("stream/ionrateequation_posIonization", nChargeStates, "Positive ionization term in ion rate equation",
@@ -148,6 +152,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             for (len_t Z0 = 0; Z0 <= Z; Z0++)
                 for (len_t ir = 0; ir < nr; ir++)
                     v[offset+Z0*nr+ir] = t[Z0][ir];
+            offset+=(Z+1)*nr;
         }
     );
 
@@ -163,6 +168,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             for (len_t Z0 = 0; Z0 <= Z; Z0++)
                 for (len_t ir = 0; ir < nr; ir++)
                     v[offset+Z0*nr+ir] = t[Z0][ir];
+            offset+=(Z+1)*nr;
         }
     );
 
@@ -178,6 +184,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             for (len_t Z0 = 0; Z0 <= Z; Z0++)
                 for (len_t ir = 0; ir < nr; ir++)
                     v[offset+Z0*nr+ir] = t[Z0][ir];
+            offset+=(Z+1)*nr;
         }
     );
 
@@ -193,6 +200,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             for (len_t Z0 = 0; Z0 <= Z; Z0++)
                 for (len_t ir = 0; ir < nr; ir++)
                     v[offset+Z0*nr+ir] = t[Z0][ir];
+            offset+=(Z+1)*nr;
         }
     );
 
@@ -208,6 +216,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             for (len_t Z0 = 0; Z0 <= Z; Z0++)
                 for (len_t ir = 0; ir < nr; ir++)
                     v[offset+Z0*nr+ir] = t[Z0][ir];
+            offset+=(Z+1)*nr;
         }
     );
 
@@ -223,6 +232,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             for (len_t Z0 = 0; Z0 <= Z; Z0++)
                 for (len_t ir = 0; ir < nr; ir++)
                     v[offset+Z0*nr+ir] = t[Z0][ir];
+            offset+=(Z+1)*nr;
         }
     );
 

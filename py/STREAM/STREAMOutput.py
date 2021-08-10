@@ -8,6 +8,7 @@ from DREAM import DREAMOutput
 
 from DREAM.Output.OtherIonSpeciesFluidQuantity import OtherIonSpeciesFluidQuantity
 from DREAM.Output.OtherIonSpeciesScalarQuantity import OtherIonSpeciesScalarQuantity
+from . Output.IonHandler import IonHandler
 from . Output.MeanFreePath import MeanFreePath
 
 
@@ -41,6 +42,7 @@ class STREAMOutput(DREAMOutput):
         super().load(filename=filename, path=path, lazy=lazy, *args, **kwargs)
 
         self.eqsys.resetUnknown('lambda_i', MeanFreePath)
+        self.eqsys.resetUnknown('n_i', IonHandler)
 
         if 'stream' in self.other:
             self.other.stream.resetQuantity('V_n', OtherIonSpeciesScalarQuantity)

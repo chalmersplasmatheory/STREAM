@@ -50,7 +50,7 @@ V_vessel = 100
 B        = 2.7
 a        = 0.9 # Instead of EFIT-data 0.08519 (think there's a typo should be 0.8519)
 r_0      = 3   # Instead of EFIT-data 3.0381 (Should use 2.96?)
-r_wall   = 1.5 # approx 1.5-2.0 m
+r_wall   = 1 # approx 1.5-2.0 m
 
 kappa    = 1
 c1       = 1.1
@@ -68,6 +68,9 @@ t_d = np.array([0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 
 V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
 V_s = interp1d(t_d, V_d, kind='linear')
 V_loop_wall = V_s(t)
+
+#plt.plot(t,V_loop_wall)
+#plt.show()
 
 E_initial = V_d[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
 T_e_initial = 1 # eV
@@ -106,7 +109,6 @@ sts_initial.radialgrid.setRecyclingCoefficient3(c3)
 sts_initial.solver.setType(Solver.NONLINEAR)
 #sts_initial.solver.setDebug(savejacobian=True, savenumericaljacobian=True, timestep=1, iteration=2)
 #sts_initial.solver.setDebug(savesystem=True)
-sts_initial.solver.setMaxIterations(500)
 
 #sts_initial.hottailgrid.setNxi(Nxi)
 #sts_initial.hottailgrid.setNp(Np)
@@ -122,7 +124,7 @@ sts_initial.solver.preconditioner.setEnabled(False)
 
 #sts_initial.solver.setVerbose(True)
 
-sts_initial.other.include('fluid')
+sts_initial.other.include('fluid', 'stream')
 
 sts_initial.save('STREAMSettings_initial.h5')
 
