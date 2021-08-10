@@ -41,6 +41,7 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
             }
         }
     }
+
     return Gamma0;
 }
 

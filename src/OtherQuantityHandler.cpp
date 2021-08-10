@@ -102,17 +102,17 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     DEF_FL("stream/tau_D", "Deuterium confinement time",
         real_t *v = qd->StoreEmpty();
         for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->confinementTime->EvaluateConfinementTime(ir);
+            v[ir] = 1/this->confinementTime->EvaluateConfinementTime(ir);
     );
     DEF_FL("stream/tau_D_par", "Parallel deuterium confinement time",
         real_t *v = qd->StoreEmpty();
         for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->confinementTime->EvaluateParallelConfinementTime(ir);
+            v[ir] = 1/this->confinementTime->EvaluateParallelConfinementTime(ir);
     );
     DEF_FL("stream/tau_D_perp", "Perpendicular deuterium confinement time",
         real_t *v = qd->StoreEmpty();
         for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
+            v[ir] = 1/this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
     );
 
     DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals",

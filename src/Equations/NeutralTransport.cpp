@@ -74,8 +74,11 @@ void NeutralTransport::Rebuild(const real_t t, const real_t, FVM::UnknownQuantit
 
 bool NeutralTransport::SetCSJacobianBlock(
     const len_t uqtyId, const len_t derivId, FVM::Matrix *jac, const real_t*,
-    const len_t iIon, const len_t, const len_t rOffset
-) {    
+    const len_t iIon, const len_t Z0, const len_t rOffset
+) {
+    if (Z0 != 0)
+        return false;
+
     if(derivId==uqtyId){
         len_t Z_i = ions->GetZ(iIon);
         if(Z_i==1 && !ions->IsTritium(iIon)){
@@ -90,24 +93,23 @@ bool NeutralTransport::SetCSJacobianBlock(
             }
         }
 		return true;
-    } else 
-    if(derivId==id_Ip){
-		jac->SetElement(rOffset, 0,this->dI_p);
+    } else if(derivId==id_Ip){
+		jac->SetElement(rOffset, 0, this->dI_p);
 		return true;
 	} else if(derivId==id_Iwall){
-		jac->SetElement(rOffset, 0,this->dI_wall);
+		jac->SetElement(rOffset, 0, this->dI_wall);
 		return true;
 	} else if(derivId==id_Tcold){
-		jac->SetElement(rOffset, 0,this->dT_cold);
+		jac->SetElement(rOffset, 0, this->dT_cold);
 		return true;
 	} else if(derivId==id_Wi){
-		jac->SetElement(rOffset, iIon,this->dW_i);
+		jac->SetElement(rOffset, iIon, this->dW_i);
 		return true;
 	} else if(derivId==id_Ni){
-		jac->SetElement(rOffset, iIon,this->dN_i);
+		jac->SetElement(rOffset, iIon, this->dN_i);
 		return true;
 	} else if(derivId==id_lambdai){
-		jac->SetElement(rOffset, 0,this->dlambda_i);
+		jac->SetElement(rOffset, iIon, this->dlambda_i);
 		return true;
 	}
 	else {
@@ -115,15 +117,21 @@ bool NeutralTransport::SetCSJacobianBlock(
     }
 }
 void NeutralTransport::SetCSMatrixElements(
-    FVM::Matrix *mat, real_t*, const len_t, const len_t, const len_t rOffset
+    FVM::Matrix *mat, real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
+    if (Z0 != 0)
+        return;
+
     mat->SetElement(rOffset, rOffset, wall_term); 
 } 
 
 
 void NeutralTransport::SetCSVectorElements(
-    real_t* vec, const real_t*, const len_t, const len_t, const len_t rOffset
+    real_t* vec, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
 ) {
+    if (Z0 != 0)
+        return;
+
     vec[rOffset]+=wall_term; 
     //printf("%.7e \n",wall_term);
 }
