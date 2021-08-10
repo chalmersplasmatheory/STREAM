@@ -26,29 +26,50 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
             sum_derivs++;
         }
     }
+    
+    delete [] this->dn_kj;
+    len_t Z_i = ions->GetZ(iIon);
+    if(Z_i==1 && !ions->IsTritium(iIon)){
+        this->dn_kj = new real_t[1];
+    } else {
+        this->dn_kj = new real_t[nZ];
+    }
+    
 }
 
 void NeutralTransport::Rebuild(const real_t t, const real_t, FVM::UnknownQuantityHandler*){
     this->id_Iwall = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_WALL);
     real_t Gamma0        = this->NI->EvaluateNeutralInflux(t, iIon);
-    real_t dGamma0dnij   = this->NI->EvaluateNeutralInflux_dnij(t, iIon);
     real_t dGamma0dIp    = this->NI->EvaluateNeutralInflux_dIp(t, iIon); 
     real_t dGamma0dIwall = this->NI->EvaluateNeutralInflux_dIwall(t, iIon); 
     real_t dGamma0dTcold = this->NI->EvaluateNeutralInflux_dTcold(t, iIon); 
     real_t dGamma0dWi    = this->NI->EvaluateNeutralInflux_dWi(t, iIon); 
     real_t dGamma0dNi    = this->NI->EvaluateNeutralInflux_dNi(t, iIon);
-    
+            
     real_t V_tot         = PV->GetTotalNeutralVolume(iIon);
     real_t dVtotdlambdai = PV->GetTotalNeutralVolume_dLambdai(iIon);
         
     this->wall_term = Gamma0/V_tot;
-    this->dn_ij     = dGamma0dnij/V_tot;
     this->dI_p      = dGamma0dIp/V_tot;
     this->dI_wall   = dGamma0dIwall/V_tot;
     this->dT_cold   = dGamma0dTcold/V_tot;
     this->dW_i      = dGamma0dWi/V_tot;
     this->dN_i      = dGamma0dNi/V_tot;
     this->dlambda_i = - Gamma0/(V_tot*V_tot)*dVtotdlambdai;
+    
+    len_t nZ = ions->GetNZ();
+    len_t Z_i = ions->GetZ(iIon);
+    real_t dGamma0dnkj=0;
+    if(Z_i==1 && !ions->IsTritium(iIon)){
+        dGamma0dnkj = this->NI->EvaluateNeutralInflux_dnkj(t, iIon, iIon);
+        this->dn_kj[0] = dGamma0dnkj/V_tot;
+    } else {
+        for (len_t kIon = 0; kIon < nZ; kIon++) {
+            dGamma0dnkj = this->NI->EvaluateNeutralInflux_dnkj(t, iIon, kIon);
+            this->dn_kj[kIon] = dGamma0dnkj/V_tot;
+        }
+    }
+
 }
 
 bool NeutralTransport::SetCSJacobianBlock(
@@ -56,11 +77,16 @@ bool NeutralTransport::SetCSJacobianBlock(
     const len_t iIon, const len_t, const len_t rOffset
 ) {    
     if(derivId==uqtyId){
-        len_t nZ = ions->GetNZ();
-        for (len_t k = 0, idx = 0; k < nZ; k++) {
-            len_t Z = ions->GetZ(k);
-            for (len_t l = 0; l <= Z; l++, idx++) {
-                jac->SetElement(rOffset, rOffset+idx,this->dn_ij);
+        len_t Z_i = ions->GetZ(iIon);
+        if(Z_i==1 && !ions->IsTritium(iIon)){
+            jac->SetElement(rOffset, rOffset,this->dn_kj[0]);
+        } else {
+            len_t nZ = ions->GetNZ();
+            for (len_t kIon = 0, idx = 0; kIon < nZ; kIon++) {
+                len_t Z_k = ions->GetZ(kIon);
+                for (len_t j = 0; j <= Z_k; j++, idx++) {
+                    jac->SetElement(rOffset, rOffset+idx,this->dn_kj[kIon]);
+                }
             }
         }
 		return true;
@@ -99,5 +125,5 @@ void NeutralTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t, const len_t, const len_t rOffset
 ) {
     vec[rOffset]+=wall_term; 
-    printf("%.7e \n",wall_term);
+    //printf("%.7e \n",wall_term);
 }
