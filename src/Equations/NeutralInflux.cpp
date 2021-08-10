@@ -31,14 +31,14 @@ real_t NeutralInflux::EvaluateNeutralInflux(real_t t, const len_t iIon){
         n_kj = ions->GetIonDensity(0, iIon, 1);
         Gamma0 = V_p * Y * n_kj * tauinv;
     } else {
-        Gamma0=0;/*for (len_t kIon=0; kIon<nZ; kIon++) { 
+        for (len_t kIon=0; kIon<nZ; kIon++) { 
             len_t Z_k   = ions->GetZ(kIon); 
             Y=this->SRC->GetSRCoefficient(iIon,kIon);
             for (len_t j=1; j<=Z_k; j++) {
                 n_kj = ions->GetIonDensity(0, kIon, j);
                 Gamma0 += V_p * Y * n_kj * tauinv;
             }
-        }*/
+        }
     }
     return Gamma0;
 }
@@ -55,7 +55,7 @@ real_t NeutralInflux::EvaluateNeutralInflux_dnkj(real_t t, const len_t iIon, con
     if (Z_i==1 && !ions->IsTritium(iIon)) {
         Y=DeuteriumRecyclingCoefficient(t);
     } else {
-        Y=0;//this->SRC->GetSRCoefficient(iIon,kIon);
+        Y=this->SRC->GetSRCoefficient(iIon,kIon);
     }
     real_t dGamma0 = V_p * Y * tauinv;
     return dGamma0;
@@ -79,14 +79,14 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIp(real_t t, const len_t iIon){
         n_kj = ions->GetIonDensity(0, iIon, 1);
         dGamma0 = V_p * Y * n_kj * dtauinvdIp;
     } else {
-        dGamma0=0;/*for (len_t kIon=0; kIon<nZ; kIon++) { 
+        for (len_t kIon=0; kIon<nZ; kIon++) { 
             len_t Z_k   = ions->GetZ(kIon); 
             Y=this->SRC->GetSRCoefficient(iIon,kIon);
             for (len_t j=1; j<=Z_k; j++) {
                 n_kj = ions->GetIonDensity(0, kIon, j);
                 dGamma0 += V_p * Y * n_kj * dtauinvdIp;
             }
-        }*/
+        }
     }
     return dGamma0;
 }
@@ -110,14 +110,14 @@ real_t NeutralInflux::EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon){
         n_kj = ions->GetIonDensity(0, iIon, 1);
         dGamma0 = V_p * Y * n_kj * dtauinvdIwall;
     } else {
-        dGamma0=0;/*for (len_t kIon=0; kIon<nZ; kIon++) { 
+        for (len_t kIon=0; kIon<nZ; kIon++) { 
             len_t Z_k   = ions->GetZ(kIon); 
             Y=this->SRC->GetSRCoefficient(iIon,kIon);
             for (len_t j=1; j<=Z_k; j++) {
                 n_kj = ions->GetIonDensity(0, kIon, j);
                 dGamma0 += V_p * Y * n_kj * dtauinvdIwall;
             }
-        }*/
+        }
     }
     return dGamma0;
 }
@@ -141,14 +141,14 @@ real_t NeutralInflux::EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon){
         n_kj = ions->GetIonDensity(0, iIon, 1);
         dGamma0 = V_p * Y * n_kj * dtauinvdTcold;
     } else {
-        dGamma0=0;/*for (len_t kIon=0; kIon<nZ; kIon++) { 
+        for (len_t kIon=0; kIon<nZ; kIon++) { 
             len_t Z_k   = ions->GetZ(kIon); 
             Y=this->SRC->GetSRCoefficient(iIon,kIon);
             for (len_t j=1; j<=Z_k; j++) {
                 n_kj = ions->GetIonDensity(0, kIon, j);
                 dGamma0 += V_p * Y * n_kj * dtauinvdTcold;
             }
-        }*/
+        }
     }
     return dGamma0;
 }
@@ -172,14 +172,14 @@ real_t NeutralInflux::EvaluateNeutralInflux_dWi(real_t t, const len_t iIon){
         n_kj = ions->GetIonDensity(0, iIon, 1);
         dGamma0 = V_p * Y * n_kj * dtauinvdWi;
     } else {
-        dGamma0=0;/*for (len_t kIon=0; kIon<nZ; kIon++) { 
+        for (len_t kIon=0; kIon<nZ; kIon++) { 
             len_t Z_k   = ions->GetZ(kIon); 
             Y=this->SRC->GetSRCoefficient(iIon,kIon);
             for (len_t j=1; j<=Z_k; j++) {
                 n_kj = ions->GetIonDensity(0, kIon, j);
                 dGamma0 += V_p * Y * n_kj * dtauinvdWi;
             }
-        }*/
+        }
     }
     return dGamma0;
 }
@@ -203,14 +203,14 @@ real_t NeutralInflux::EvaluateNeutralInflux_dNi(real_t t, const len_t iIon){
         n_kj = ions->GetIonDensity(0, iIon, 1);
         dGamma0 = V_p * Y * n_kj * dtauinvdNi;
     } else {
-        dGamma0=0;/*for (len_t kIon=0; kIon<nZ; kIon++) { 
+        for (len_t kIon=0; kIon<nZ; kIon++) { 
             len_t Z_k   = ions->GetZ(kIon); 
             Y=this->SRC->GetSRCoefficient(iIon,kIon);
             for (len_t j=1; j<=Z_k; j++) {
                 n_kj = ions->GetIonDensity(0, kIon, j);
                 dGamma0 += V_p * Y * n_kj * dtauinvdNi;
             }
-        }*/
+        }
     }
     return dGamma0;
 }

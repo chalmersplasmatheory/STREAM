@@ -82,13 +82,14 @@ bool NeutralTransport::SetCSJacobianBlock(
     if(derivId==uqtyId){
         len_t Z_i = ions->GetZ(iIon);
         if(Z_i==1 && !ions->IsTritium(iIon)){
-            jac->SetElement(rOffset, rOffset,this->dn_kj[0]);
+            jac->SetElement(rOffset, rOffset+1, this->dn_kj[iIon]);
         } else {
             len_t nZ = ions->GetNZ();
             for (len_t kIon = 0, idx = 0; kIon < nZ; kIon++) {
                 len_t Z_k = ions->GetZ(kIon);
-                for (len_t j = 0; j <= Z_k; j++, idx++) {
-                    jac->SetElement(rOffset, rOffset+idx,this->dn_kj[kIon]);
+                idx++;
+                for (len_t j = 1; j <= Z_k; j++, idx++) {
+                    jac->SetElement(rOffset, idx, this->dn_kj[kIon]);
                 }
             }
         }
