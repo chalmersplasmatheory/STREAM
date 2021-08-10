@@ -56,12 +56,13 @@
                         for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ //Loop over all charge states of other ion
                             real_t Rcx = ccd->Eval(Z0i-1, n_cold[ir], T_cold[ir]); //Evaluate cx-coeff. for the charge state
 
-                            if (Z0 == 0)
+                            if (Z0 == 0){
                                 // Apply to neutral deuterium (Z0=0)
-                                NI(0, -Rcx * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir], posCX); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
-                            else if (Z0 == 1)
+                                NI(0, -Rcx * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir], negCX); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
+                            }else if (Z0 == 1){
                                 // Apply to neutral deuterium (Z0-1 = 0)
                                 NI(-1, Rcx * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir], posCX); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
+                            }    
                         }
                     }
                 //}
