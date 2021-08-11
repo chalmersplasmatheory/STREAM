@@ -1,6 +1,9 @@
+
 #include "STREAM/EquationSystem.hpp"
 #include "DREAM/EquationSystem.hpp"
+#include "DREAM/EqsysInitializer.hpp"
 #include "DREAM/OtherQuantityHandler.hpp"
+#include "DREAM/Equations/Scalar/WallCurrentTerms.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
 #include "STREAM/Settings/OptionConstants.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
@@ -166,6 +169,8 @@ void SimulationGenerator::ConstructEquations(
     DREAM::SimulationGenerator::ConstructEquation_psi_p(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_psi_edge(eqsys, s);
 
+    ResetPoloidalFluxInitialization(eqsys, s);
+
     // Helper quantities
     DREAM::SimulationGenerator::ConstructEquation_n_tot(eqsys, s);
     enum DREAM::OptionConstants::eqterm_hottail_mode ht_mode =
@@ -193,5 +198,56 @@ void SimulationGenerator::ConstructUnknowns(
     
     len_t nIonSpecies = DREAM::SimulationGenerator::GetNumberOfIonSpecies(s);
     eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid(), nIonSpecies);
+}
+
+/**
+ * In STREAM, since we always have nr=1, we can workaround the inaccuracy
+ * in the initialization of psi_p in DREAM by analytically solving for psi_p
+ * in the differential form of Ampère's law. In this method we remove the
+ * usual initialization rule from DREAM and replace it with a specialized
+ * version for STREAM.
+ */
+void SimulationGenerator::ResetPoloidalFluxInitialization(
+    EquationSystem *eqsys, DREAM::Settings *s
+) {
+    const len_t id_psi_p = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_POL_FLUX);
+    const len_t id_psi_edge = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_PSI_EDGE);
+    const len_t id_j_tot = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_J_TOT);
+    
+    DREAM::FVM::RadialGrid *rGrid = eqsys->GetFluidGrid()->GetRadialGrid();
+    const real_t a = rGrid->GetMinorRadius();
+    const real_t b = s->GetReal("radialgrid/wall_radius");
+    const real_t M_inductance = DREAM::PlasmaEdgeToWallInductanceTerm::GetInductance(a, b);
+
+    eqsys->initializer->RemoveRule(id_psi_p);
+
+    std::function<void(DREAM::FVM::UnknownQuantityHandler*, real_t*)> initfunc_PsiP =
+        [rGrid,M_inductance,id_psi_edge,id_j_tot](DREAM::FVM::UnknownQuantityHandler *u, real_t *psi_p_init)
+    {
+        const real_t j_tot = u->GetUnknownData(id_j_tot)[0];
+        const real_t psi_edge = u->GetUnknownData(id_psi_edge)[0];
+        
+        const real_t a = rGrid->GetMinorRadius();
+        const real_t r1 = rGrid->GetR(0);
+        const real_t dr1 = rGrid->GetDr(0);
+        const real_t BdotGradPhiOverB =
+            rGrid->GetFSA_1OverR2(0) * rGrid->GetBTorG(0) / rGrid->GetBmin(0);
+        const real_t Vp_1 = rGrid->GetVpVol(0);
+        const real_t Vp_32 = rGrid->GetVpVol_f(1);
+
+        psi_p_init[0] = psi_edge -
+            (2*M_PI*DREAM::Constants::mu0 * BdotGradPhiOverB * (a-r1)*dr1*Vp_1) /
+            (Vp_32 * rGrid->GetFSA_NablaR2OverR2_f(1))
+            * j_tot;
+    };
+
+    eqsys->initializer->AddRule(
+        id_psi_p,
+        DREAM::EqsysInitializer::INITRULE_EVAL_FUNCTION,
+        initfunc_PsiP,
+        // Dependencies
+        id_j_tot,
+        id_psi_edge
+    );
 }
 

@@ -30,10 +30,10 @@ import numpy as np
 #pMax = 1    # maximum momentum in units of m_e*c
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
-tMax_initial = 1e-4  # simulation time in seconds
-Nt_initial   = 4000   # number of time steps
+tMax_initial = 1e-2  # simulation time in seconds
+Nt_initial   = 40000   # number of time steps
 tMax_final   = 5e-1  # simulation time in seconds
-Nt_final     = 1000   # number of time steps
+Nt_final     = 5000   # number of time steps
 
 pgp = 4.3135e-5
 n_D_0 = 2.78e22 * pgp
@@ -82,7 +82,7 @@ wall_time = L/R
 print('wall_time = {} s'.format(wall_time))
 sts_initial.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
-sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
+sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_d[0]/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
 
 sts_initial.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
 sts_initial.eqsys.T_cold.setInitialProfile(T_e_initial)
@@ -132,6 +132,7 @@ sto_initial = runiface(sts_initial, 'output_initial.h5', quiet=False)
 
 
 sts_final = STREAMSettings(sts_initial)
+sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
 sts_final.timestep.setTmax(tMax_final)
 sts_final.timestep.setNt(Nt_final)
 
@@ -140,4 +141,6 @@ sts_final.output.setFilename('output_final.h5')
 sts_final.save('STREAMSettings_final.h5')
 
 sto_final = runiface(sts_final, 'output_final.h5', quiet=False)
+
+
 #'''

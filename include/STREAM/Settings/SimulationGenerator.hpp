@@ -65,6 +65,8 @@ namespace STREAM {
         static void ConstructEquation_lambda_i(
             EquationSystem*, DREAM::Settings*, DREAM::ADAS*
         );
+
+        static void ResetPoloidalFluxInitialization(EquationSystem*, DREAM::Settings*);
         
         
         // General transport interface
