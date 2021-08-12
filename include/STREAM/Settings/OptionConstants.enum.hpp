@@ -7,3 +7,9 @@ enum eqterm_transport_type {
     EQTERM_TRANSPORT_DYON = 5
 };
 
+enum eqterm_E_field_eqn {
+    UQTY_E_FIELD_EQN_PRESCRIBED=1,
+    UQTY_E_FIELD_EQN_SELFCONSISTENT=2,
+    UQTY_E_FIELD_EQN_CIRCUIT=3
+};
+

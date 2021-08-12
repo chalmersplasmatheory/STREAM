@@ -16,6 +16,7 @@ namespace STREAM {
         static DREAM::Simulation *ProcessSettings(DREAM::Settings*);
 
         // Define options
+        static void DefineOptions_ElectricField(DREAM::Settings*);
         static void DefineOptions_Grid(DREAM::Settings*);
         static void DefineOptions_T_cold(DREAM::Settings*);
         static void DefineOptions_Ions(DREAM::Settings*);
@@ -39,6 +40,11 @@ namespace STREAM {
         static void ConstructUnknowns(
             EquationSystem*, DREAM::Settings*
         );
+
+        // Electric field and related equations
+        static void ConstructEquation_E_field(EquationSystem*, DREAM::Settings*);
+        static void ConstructEquation_E_field_selfconsistent(EquationSystem*, DREAM::Settings*);
+        static void ConstructEquation_E_field_circuit(EquationSystem*, DREAM::Settings*);
 
         // Ion density equation
         static void ConstructEquation_Ions(

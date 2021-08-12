@@ -148,7 +148,7 @@ void SimulationGenerator::ConstructEquations(
     DREAM::SimulationGenerator::ConstructEquation_j_re(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_n_cold(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_n_hot(eqsys, s);
-    ConstructEquation_T_cold(eqsys, s, adas, amjuel, nist, oqty_terms);   // TODO
+    ConstructEquation_T_cold(eqsys, s, adas, amjuel, nist, oqty_terms);
     ConstructEquation_lambda_i(eqsys, s, adas); 
 
     enum DREAM::OptionConstants::uqty_T_i_eqn typeTi =
@@ -165,11 +165,6 @@ void SimulationGenerator::ConstructEquations(
     // the hot-tail equation and must therefore be constructed
     // AFTER the call to 'ConstructEquation_f_hot()'.
     ConstructEquation_n_re(eqsys, s, oqty_terms);
-
-    DREAM::SimulationGenerator::ConstructEquation_psi_p(eqsys, s);
-    DREAM::SimulationGenerator::ConstructEquation_psi_edge(eqsys, s);
-
-    ResetPoloidalFluxInitialization(eqsys, s);
 
     // Helper quantities
     DREAM::SimulationGenerator::ConstructEquation_n_tot(eqsys, s);
@@ -190,64 +185,104 @@ void SimulationGenerator::ConstructEquations(
 void SimulationGenerator::ConstructUnknowns(
     EquationSystem *eqsys, DREAM::Settings *s
 ) {
-    DREAM::SimulationGenerator::ConstructUnknowns(
-        eqsys, s,
-        eqsys->GetScalarGrid(), eqsys->GetFluidGrid(),
-        eqsys->GetHotTailGrid(), eqsys->GetRunawayGrid()
-    );
-    
-    len_t nIonSpecies = DREAM::SimulationGenerator::GetNumberOfIonSpecies(s);
-    eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid(), nIonSpecies);
-}
+    DREAM::FVM::Grid *scalarGrid = eqsys->GetScalarGrid();
+    DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
+    DREAM::FVM::Grid *hottailGrid = eqsys->GetHotTailGrid();
+    DREAM::FVM::Grid *runawayGrid = eqsys->GetRunawayGrid();
 
-/**
- * In STREAM, since we always have nr=1, we can workaround the inaccuracy
- * in the initialization of psi_p in DREAM by analytically solving for psi_p
- * in the differential form of Ampère's law. In this method we remove the
- * usual initialization rule from DREAM and replace it with a specialized
- * version for STREAM.
- */
-void SimulationGenerator::ResetPoloidalFluxInitialization(
-    EquationSystem *eqsys, DREAM::Settings *s
-) {
-    const len_t id_psi_p = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_POL_FLUX);
-    const len_t id_psi_edge = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_PSI_EDGE);
-    const len_t id_j_tot = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_J_TOT);
-    
-    DREAM::FVM::RadialGrid *rGrid = eqsys->GetFluidGrid()->GetRadialGrid();
-    const real_t a = rGrid->GetMinorRadius();
-    const real_t b = s->GetReal("radialgrid/wall_radius");
-    const real_t M_inductance = DREAM::PlasmaEdgeToWallInductanceTerm::GetInductance(a, b);
+    #define DEFU_HOT(NAME) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        hottailGrid)
+    #define DEFU_RE(NAME) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        runawayGrid)
+    #define DEFU_FLD(NAME) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        fluidGrid)
+    #define DEFU_FLD_N(NAME,NMULT) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        fluidGrid, (NMULT))
+    #define DEFU_SCL(NAME) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        scalarGrid)
+    #define DEFU_SCL_N(NAME,NMULT) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        scalarGrid,(NMULT))
 
-    eqsys->initializer->RemoveRule(id_psi_p);
+    // Hot-tail quantities
+    if (hottailGrid != nullptr) {
+        DEFU_HOT(F_HOT);
+    }
 
-    std::function<void(DREAM::FVM::UnknownQuantityHandler*, real_t*)> initfunc_PsiP =
-        [rGrid,M_inductance,id_psi_edge,id_j_tot](DREAM::FVM::UnknownQuantityHandler *u, real_t *psi_p_init)
-    {
-        const real_t j_tot = u->GetUnknownData(id_j_tot)[0];
-        const real_t psi_edge = u->GetUnknownData(id_psi_edge)[0];
+    // Runaway quantities
+    if (runawayGrid != nullptr) {
+        DEFU_RE(F_RE);
+    }
+
+    // Fluid quantities
+    len_t nIonChargeStates = DREAM::SimulationGenerator::GetNumberOfIonChargeStates(s);
+    DEFU_FLD_N(ION_SPECIES, nIonChargeStates);
+    DEFU_FLD(N_HOT);
+    DEFU_FLD(N_COLD);
+    DEFU_FLD(N_RE);
+    DEFU_FLD(J_OHM);
+    DEFU_FLD(J_HOT);
+    DEFU_FLD(J_RE);
+    DEFU_FLD(J_TOT);
+    DEFU_FLD(T_COLD);
+    DEFU_FLD(W_COLD);
+    DEFU_FLD(E_FIELD);
+    DEFU_SCL(I_P);
+
+    enum DREAM::OptionConstants::eqterm_spi_ablation_mode spi_ablation_mode = (enum DREAM::OptionConstants::eqterm_spi_ablation_mode)s->GetInteger("eqsys/spi/ablation");
+    if(spi_ablation_mode!=DREAM::OptionConstants::EQTERM_SPI_ABLATION_MODE_NEGLECT){
+        len_t nShard;
+        s->GetRealArray("eqsys/spi/init/rp", 1, &nShard);
+        DEFU_SCL_N(Y_P,nShard);
+        DEFU_SCL_N(X_P,3*nShard);
+        DEFU_SCL_N(V_P,3*nShard);
         
-        const real_t a = rGrid->GetMinorRadius();
-        const real_t r1 = rGrid->GetR(0);
-        const real_t dr1 = rGrid->GetDr(0);
-        const real_t BdotGradPhiOverB =
-            rGrid->GetFSA_1OverR2(0) * rGrid->GetBTorG(0) / rGrid->GetBmin(0);
-        const real_t Vp_1 = rGrid->GetVpVol(0);
-        const real_t Vp_32 = rGrid->GetVpVol_f(1);
+        if (hottailGrid != nullptr){
+        	DEFU_FLD(Q_HOT);
+        	DEFU_FLD(W_HOT);
+    	}
+    	if(spi_ablation_mode==DREAM::OptionConstants::EQTERM_SPI_ABLATION_MODE_NGPS){
+    		DEFU_FLD_N(ION_SPECIES_ABL, nIonChargeStates);
+    		DEFU_FLD(N_ABL);
+    		DEFU_FLD(T_ABL);
+    		DEFU_FLD(W_ABL);
+		}
+    }
 
-        psi_p_init[0] = psi_edge -
-            (2*M_PI*DREAM::Constants::mu0 * BdotGradPhiOverB * (a-r1)*dr1*Vp_1) /
-            (Vp_32 * rGrid->GetFSA_NablaR2OverR2_f(1))
-            * j_tot;
-    };
+    len_t nIonSpecies = DREAM::SimulationGenerator::GetNumberOfIonSpecies(s);
+    if( (DREAM::OptionConstants::uqty_T_i_eqn)s->GetInteger("eqsys/n_i/typeTi") == DREAM::OptionConstants::UQTY_T_I_INCLUDE ){
+        DEFU_FLD_N(WI_ENER, nIonSpecies);
+        DEFU_FLD_N(NI_DENS, nIonSpecies);
+    }
+    
+    // Fluid helper quantities
+    DEFU_FLD(N_TOT);
+    if (hottailGrid != nullptr){
+        DEFU_FLD(S_PARTICLE);
+    }
+    DREAM::OptionConstants::eqterm_hottail_mode hottail_mode = (enum DREAM::OptionConstants::eqterm_hottail_mode)s->GetInteger("eqsys/n_re/hottail");
+    DREAM::OptionConstants::uqty_f_hot_dist_mode ht_dist_mode = (enum DREAM::OptionConstants::uqty_f_hot_dist_mode)s->GetInteger("eqsys/f_hot/dist_mode");    
+    if(hottail_mode != DREAM::OptionConstants::EQTERM_HOTTAIL_MODE_DISABLED && ht_dist_mode == DREAM::OptionConstants::UQTY_F_HOT_DIST_MODE_NONREL){
+        DEFU_FLD(TAU_COLL);
+    }
 
-    eqsys->initializer->AddRule(
-        id_psi_p,
-        DREAM::EqsysInitializer::INITRULE_EVAL_FUNCTION,
-        initfunc_PsiP,
-        // Dependencies
-        id_j_tot,
-        id_psi_edge
+    // Mean-free path
+    eqsys->SetUnknown(
+        OptionConstants::UQTY_LAMBDA_I,
+        OptionConstants::UQTY_LAMBDA_I_DESC,
+        fluidGrid,
+        nIonSpecies
     );
 }
 
