@@ -48,13 +48,13 @@ void IonTransport::Rebuild(
     real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
     real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(0);
     real_t V_p    = PV->GetPlasmaVolume(); 
-    this->tauinv  = coefftauinv->EvaluateConfinementTime(0)/* *V_p*/;
-    this->dn_i    = - tauinv/* *V_p*/; 
-    this->dI_p    = - dtauinvdIp/* *V_p*/;
-    this->dI_wall = - dtauinvdIwall/* *V_p*/;
-    this->dT_cold = - dtauinvdTcold/* *V_p*/;
-    this->dW_i    = - dtauinvdWi/* *V_p*/;
-    this->dN_i    = - dtauinvdNi/* *V_p*/;
+    this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
+    this->dn_i    = - tauinv; 
+    this->dI_p    = - dtauinvdIp;
+    this->dI_wall = - dtauinvdIwall;
+    this->dT_cold = - dtauinvdTcold;
+    this->dW_i    = - dtauinvdWi;
+    this->dN_i    = - dtauinvdNi;
 }
 
 bool IonTransport::SetCSJacobianBlock(
