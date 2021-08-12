@@ -30,8 +30,8 @@ import numpy as np
 #pMax = 1    # maximum momentum in units of m_e*c
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
-tMax = 1e-4  # simulation time in seconds
-Nt   = 4000  # number of time steps
+tMax = 5e-3  # simulation time in seconds
+Nt   = 100000  # number of time steps
 
 pgp = 4.3135e-5
 n_D_0 = 2.78e22 * pgp
@@ -57,7 +57,7 @@ c2       = 0.09
 c3       = 0.1
 
 R = 7.5e-4  # Ohm, i MK2 struktur
-L = 9.1e-5  # H, i MK2 struktur
+L = 9.1e-6  # H, i MK2 struktur
 
 r=np.array([0])
 #print(str(n_D))
@@ -71,6 +71,8 @@ V_loop_wall = V_s(t)
 E_initial = V_d[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
 T_e_initial = 1 # eV
 T_i_initial = 0.03
+t_e=np.array([0, 0.01, 0.02,  0.03,  0.05,   0.1,   0.15,   0.2,   0.25,   0.3,   0.35,   0.4,   0.45,   0.5])
+T_e=np.array([1, 2   , 7   , 10   , 42   , 152  , 206   , 250  , 277   , 294  , 312   , 320  , 330   , 335])
 
 sts = STREAMSettings()
 
@@ -83,11 +85,12 @@ sts.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop
 """
 sts.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
 sts.eqsys.E_field.setInitialProfile(efield=E_initial)
-sts.eqsys.E_field.setInductances(Lp=5.4e-6, Lwall=L, M=2.49e-6, Rwall=7.5e-4)
+sts.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=L, M=2.49e-6, Rwall=7.5e-4)
 sts.eqsys.E_field.setCircuitVloop(V_loop_wall, t)
 
 sts.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
 sts.eqsys.T_cold.setInitialProfile(T_e_initial)
+#sts.eqsys.T_cold.setPrescribedData(T_e, times=t_e)
 
 sts.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=n_D, r=r, T=T_i_initial)
 sts.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_C, r=r, T=T_i_initial)

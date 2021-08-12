@@ -82,6 +82,7 @@ T_e_initial = 1 # eV
 T_i_initial = 0.03
 t_e=np.array([0, 0.01, 0.02,  0.03,  0.05,   0.1,   0.15,   0.2,   0.25,   0.3,   0.35,   0.4,   0.45,   0.5])
 T_e=np.array([1, 2   , 7   , 10   , 42   , 152  , 206   , 250  , 277   , 294  , 312   , 320  , 330   , 335])
+
 sts_initial = STREAMSettings()
 
 wall_time = L/R
