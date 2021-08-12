@@ -1,6 +1,7 @@
 # Electric field settings for STREAM
 
 from DREAM.Settings.Equations.ElectricField import ElectricField as DREAMEfield
+from DREAM.Settings.Equations.PrescribedScalarParameter import PrescribedScalarParameter
 
 
 TYPE_PRESCRIBED = 1
@@ -26,6 +27,13 @@ class ElectricField(DREAMEfield):
 
         self.circuit_Vloop = None
         self.circuit_Vloop_t = None
+
+
+    def setType(self, ttype):
+        if ttype == TYPE_CIRCUIT:
+            self.type = ttype
+        else:
+            super().setType(ttype)
 
 
     def setInductances(self, Lp, Lwall, M, Rwall):
@@ -55,8 +63,8 @@ class ElectricField(DREAMEfield):
         to this value.
         """
         _data, _time = self._setScalarData(data=Vloop, times=times)
-        self.Vloop = _data
-        self.Vloop_t = _time
+        self.circuit_Vloop = _data
+        self.circuit_Vloop_t = _time
 
 
     def fromdict(self, data):
@@ -64,6 +72,9 @@ class ElectricField(DREAMEfield):
         Sets this parameter from settings provided in the given dictionary.
         """
         if self.type == TYPE_CIRCUIT:
+            self.efiel = data['init']['x']
+            self.radius = data['init']['r']
+
             self.circuit_Lp = data['circuit']['Lp']
             self.circuit_Lwall = data['circuit']['Lwall']
             self.circuit_M = data['circuit']['M']
@@ -120,7 +131,7 @@ class ElectricField(DREAMEfield):
             elif self.circuit_Rwall <= 0:
                 raise Exception("E_field: Parameter 'Rwall' must be given a value > 0.")
 
-            self._verifySettingsPrescribedScalarData('Vloop', self.circuit_Vloop, self.circuit_Vloop_t)
+            PrescribedScalarParameter._verifySettingsPrescribedScalarData(self, name='Vloop', data=self.circuit_Vloop, times=self.circuit_Vloop_t)
             self._verifySettingsPrescribedInitialData()
         else:
             super().verifySettings()
