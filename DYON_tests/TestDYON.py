@@ -12,13 +12,13 @@ import DREAM.Settings.Solver as Solver
 import DREAM.Settings.CollisionHandler as Collisions
 import DREAM.Settings.Equations.ColdElectrons as ColdElectrons
 import DREAM.Settings.Equations.ColdElectronTemperature as ColdElectronTemperature
-import DREAM.Settings.Equations.ElectricField as ElectricField
 import DREAM.Settings.Equations.DistributionFunction as DistFunc
 
 sys.path.append('../py/')
 from STREAM.STREAMSettings import STREAMSettings
 from STREAM.STREAMOutput import STREAMOutput
 from STREAM import runiface
+import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 import STREAM.Settings.TransportSettings as Transport
 #'''
@@ -74,11 +74,17 @@ T_i_initial = 0.03
 
 sts = STREAMSettings()
 
+"""
 wall_time = L/R
 print('wall_time = {} s'.format(wall_time))
 sts.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts.eqsys.E_field.setInitialProfile(efield=E_initial)
 sts.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
+"""
+sts.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+sts.eqsys.E_field.setInitialProfile(efield=E_initial)
+sts.eqsys.E_field.setInductances(Lp=5.4e-6, Lwall=L, M=2.49e-6, Rwall=7.5e-4)
+sts.eqsys.E_field.setCircuitVloop(V_loop_wall, t)
 
 sts.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
 sts.eqsys.T_cold.setInitialProfile(T_e_initial)
@@ -132,6 +138,7 @@ sts.save('STREAMSettings.h5')
 
 sto = runiface(sts, 'output.h5', quiet=False)
 
+'''
 sts2 = STREAMSettings(sts)
 sts2.timestep.setTmax(1e-2)
 sts2.timestep.setNt(1000)
