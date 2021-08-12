@@ -72,7 +72,7 @@ class ElectricField(DREAMEfield):
         Sets this parameter from settings provided in the given dictionary.
         """
         if self.type == TYPE_CIRCUIT:
-            self.efiel = data['init']['x']
+            self.efield = data['init']['x']
             self.radius = data['init']['r']
 
             self.circuit_Lp = data['circuit']['Lp']
