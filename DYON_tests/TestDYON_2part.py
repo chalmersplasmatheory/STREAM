@@ -30,8 +30,8 @@ import numpy as np
 #pMax = 1    # maximum momentum in units of m_e*c
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
-tMax_initial = 1e-2  # simulation time in seconds
-Nt_initial   = 40000   # number of time steps
+tMax_initial = 1e-4  # simulation time in seconds
+Nt_initial   = 4000   # number of time steps
 tMax_final   = 5e-1  # simulation time in seconds
 Nt_final     = 5000   # number of time steps
 
