@@ -39,13 +39,13 @@ class IonState(DREAMIonState):
             'ionrateequation_negChargeExchange': 'Negative charge-exchange'
         }
 
-        offset = self.output.eqsys.n_i.getIonOffset(self.name, self.Z0)
+        nm = self.name.partition('-')[0]
+        offset = self.output.eqsys.n_i.getIonOffset(nm, self.Z0)
 
         stream = self.output.other.stream
         for term, desc in qty.items():
             trm = stream[term][:,offset,0]
             trm = trm.reshape((trm.size,))
-            print(trm.shape)
             ax.plot(self.grid.t[1:], trm, label=desc)
 
         ax.legend()

@@ -16,6 +16,7 @@ using namespace STREAM;
  */
 void SimulationGenerator::DefineOptions(DREAM::Settings *s) {
     // STREAM-specific
+    DefineOptions_ElectricField(s);
     DefineOptions_Grid(s);
     DefineOptions_T_cold(s);
     DefineOptions_Ions(s);
@@ -26,7 +27,6 @@ void SimulationGenerator::DefineOptions(DREAM::Settings *s) {
     DREAM::SimulationGenerator::DefineOptions_EquationSystem(s);
     DREAM::SimulationGenerator::DefineOptions_Initializer(s);
     DREAM::SimulationGenerator::DefineOptions_HotTailGrid(s);
-    DREAM::SimulationGenerator::DefineOptions_ElectricField(s);
     DREAM::SimulationGenerator::DefineOptions_f_hot(s);
     DREAM::SimulationGenerator::DefineOptions_f_re(s);
     DREAM::SimulationGenerator::DefineOptions_j_ohm(s);
