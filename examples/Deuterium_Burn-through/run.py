@@ -32,8 +32,7 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03,
     :param tmax:    Simulation time [s]
     """
     n0 = 3.22e22 * prefill  # Initial total deuterium density
-    Vn_Vp = 6.75    # Factor to account for limited ionized volume
-    nD = n0 * np.array([[1-gamma], [gamma*Vn_Vp]])  # Vn/Vp only appears on the ionized component
+    nD = n0 * np.array([[1-gamma], [gamma]])
 
     Btor = 2.3      # Toroidal magnetic field [T]
     a = 0.5         # Plasma minor radius [m]
@@ -52,7 +51,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03,
     # Electric field
     ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
     ss.eqsys.E_field.setInitialProfile(E0)
-    ss.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
+    #ss.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
+    ss.eqsys.E_field.setInductances(Lp=8e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
     ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
 
     # Electron temperature
@@ -92,7 +92,7 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03,
     ss.timestep.setNt(nt)
     ss.timestep.setNumberOfSaveSteps(10000)
 
-    ss.other.include('fluid', 'stream')
+    ss.other.include('fluid', 'stream', 'scalar')
 
     return ss
 
@@ -103,18 +103,7 @@ def drawplot1(axs, so, color='r'):
     """
     t = so.grid.t[:]
     plotInternal(axs[0], t[1:], np.diff(so.eqsys.W_cold[:,0]) / np.diff(so.grid.t[:]), ylabel=r'Power consumption (W/m$^3$)', color=color)
-    plotInternal(axs[1], t, so.eqsys.I_p[:,0], ylabel=r'Plasma current $I_{\rm p}$ (A)', color=color)
-    """
-    axs[0].plot(so.grid.t[1:], , color)
-    axs[0].set_xlim([0, so.grid.t[-1]])
-    axs[0].set_xlabel(r'Time (s)')
-    axs[0].set_ylabel(r'Power consumption (W/m$^3$)')
-
-    axs[1].semilogy(so.grid.t, so.eqsys.I_p[:,0], color)
-    axs[1].set_xlim([0, so.grid.t[-1]])
-    axs[1].set_xlabel(r'Time (s)')
-    axs[1].set_ylabel(r'Plasma current $I_{\rm p}$ (A)')
-    """
+    plotInternal(axs[1], t, so.eqsys.I_p[:,0], ylabel=r'Plasma current $I_{\rm p}$ (A)', color=color, log=True)
 
 
 def drawplot2(axs, so, color='r'):
@@ -125,7 +114,8 @@ def drawplot2(axs, so, color='r'):
     #dWr_dt  = np.diff(so.other.fluid.Tcold_radiation[:,0]) / np.diff(t[1:])
     nD0 = so.eqsys.n_i['D'][0][1:,0]
     nD1 = so.eqsys.n_i['D'][1][1:,0]
-    gamma_i = nD1*V_p / (nD1*V_p + nD0*V_n_tot)
+    #gamma_i = nD1*V_p / (nD1*V_p + nD0*V_n_tot)
+    gamma_i = nD1 / (nD1 + nD0)
 
     plotInternal(axs[0], t[1:], so.other.fluid.Tcold_radiation[:,0], 'Power loss (W)', color=color, xlbl=False)
     plotInternal(axs[1], t[1:], gamma_i*100, r'Degree of ionization (\%)', color=color, ylim=[0,100], xlbl=False)
@@ -133,8 +123,12 @@ def drawplot2(axs, so, color='r'):
     plotInternal(axs[3], t, so.eqsys.n_cold[:,0]*1e-18, 'Electron density (10$^{18}$ m$^-3$)', color=color)
 
 
-def plotInternal(ax, x, y, ylabel, color, xlbl=True, ylim=None):
-    ax.plot(x, y, color=color)
+def plotInternal(ax, x, y, ylabel, color, xlbl=True, ylim=None, log=False):
+    if log:
+        ax.semilogy(x, y, color=color)
+    else:
+        ax.plot(x, y, color=color)
+
     ax.set_xlim([0, x[-1]])
     if xlbl:
         ax.set_xlabel(r'Time (s)')
@@ -157,19 +151,22 @@ def main(argv):
     settings = parser.parse_args()
 
     if settings.skip is None or (len(settings.skip) > 0 and 1 not in settings.skip):
+        print('RUN 1')
         ss1 = generate(prefill=5e-5, nt=80000)
+        ss1.save('settings1.h5')
         so1 = runiface(ss1, 'output1.h5', quiet=False)
     else:
         so1 = STREAMOutput('output1.h5')
 
     if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
+        print('RUN 2')
         ss2 = generate(prefill=7e-5, nt=80000)
         so2 = runiface(ss2, 'output2.h5', quiet=False)
     else:
         so2 = STREAMOutput('output2.h5')
 
     if settings.plot:
-        fig1, axs1 = plt.subplots(1, 2, figsize=(12,5), sharex=True)
+        fig1, axs1 = plt.subplots(2, 1, figsize=(7,5), sharex=True)
 
         drawplot1(axs1, so1, color='b')
         drawplot1(axs1, so2, color='r')
