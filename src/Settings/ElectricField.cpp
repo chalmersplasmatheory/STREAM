@@ -22,8 +22,14 @@ namespace STREAM {
 
         virtual void SetWeights() override {
             len_t offset = 0;
+            DREAM::FVM::RadialGrid *rg = grid->GetRadialGrid();
             for (len_t ir = 0; ir < nr; ir++){
-                real_t w = 2*M_PI*grid->GetVpVol(ir)*sqrt(grid->GetRadialGrid()->GetFSA_B2(ir));
+                // E_field is defined as E = <E.B>/sqrt(<B^2>), and Vloop is
+                // defined as Vloop = 2*pi * <E.B>/G
+                // To go from E_field to Vloop we must therefore multiply E by
+                // a factor 2*pi * sqrt(<B^2>) / G
+                // (the Bmin comes from the fact that FSA_B2 is normalized to Bmin)
+                real_t w = 2*M_PI * (sqrt(rg->GetFSA_B2(ir)) * rg->GetBmin(ir)) / rg->GetBTorG(ir);
                 for(len_t i = 0; i < n1[ir]*n2[ir]; i++)
                     weights[offset + i] = w;
                 offset += n1[ir]*n2[ir];
