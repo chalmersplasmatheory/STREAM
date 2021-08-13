@@ -30,8 +30,8 @@ import numpy as np
 #pMax = 1    # maximum momentum in units of m_e*c
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
-tMax = 5*1e-1  # simulation time in seconds
-Nt   = 5*40000  # number of time steps
+tMax = 5e-1  # simulation time in seconds
+Nt   = 400000 # number of time steps
 
 pgp = 4.3135e-5
 n_D_0 = 2.78e22 * pgp
@@ -44,12 +44,12 @@ n_D[1]=n_D_1
 n_C = 0
 n_O = 0.01 * n_D_0
 
-V_vessel = 100
+V_vessel = 50#100
 B        = 2.7
 a        = 0.9 # Instead of EFIT-data 0.08519 (think there's a typo should be 0.8519)
 r_0      = 3   # Instead of EFIT-data 3.0381 (Should use 2.96?)
 #r_0      = 1.2
-r_wall   = 1#1/np.pi*np.sqrt(V_vessel/(2*r_0))
+r_wall   = 1.5 #1/np.pi*np.sqrt(V_vessel/(2*r_0))
 
 kappa    = 1
 c1       = 1.1
@@ -68,9 +68,12 @@ V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 
 V_s = interp1d(t_d, V_d, kind='linear')
 V_loop_wall = V_s(t)
 
-E_initial = V_d[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
+E_initial = 0.04 #V_d[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
 T_e_initial = 1 # eV
 T_i_initial = 0.03
+
+t_e=np.array([0, 0.01, 0.02,  0.03,  0.05,   0.1,   0.15 ,  0.2,   0.25,   0.3 ,  0.35,   0.4,   0.45,   0.5])
+T_e=np.array([1, 2,    7 ,   10,    42,    152,  206,    250,   277,    294,   312,    320,   330,    335])
 
 sts = STREAMSettings()
 
@@ -86,8 +89,9 @@ sts.eqsys.E_field.setInitialProfile(efield=E_initial)
 sts.eqsys.E_field.setInductances(Lp=5.4e-6, Lwall=L, M=2.49e-6, Rwall=7.5e-4)
 sts.eqsys.E_field.setCircuitVloop(V_loop_wall, t)
 
-sts.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
-sts.eqsys.T_cold.setInitialProfile(T_e_initial)
+#sts.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
+#sts.eqsys.T_cold.setInitialProfile(T_e_initial)
+sts.eqsys.T_cold.setPrescribedData(T_e, times=t_e)
 
 sts.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=n_D, r=r, T=T_i_initial)
 sts.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_C, r=r, T=T_i_initial)
@@ -117,6 +121,7 @@ sts.solver.setType(Solver.NONLINEAR)
 #sts.hottailgrid.setPmax(pMax)
 sts.timestep.setTmax(tMax)
 sts.timestep.setNt(Nt)
+sts.timestep.setNumberOfSaveSteps(Nt/100)
 
 sts.hottailgrid.setEnabled(False)
 
