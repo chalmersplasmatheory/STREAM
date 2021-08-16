@@ -71,6 +71,8 @@ class ElectricField(DREAMEfield):
         """
         Sets this parameter from settings provided in the given dictionary.
         """
+        self.type = data['type']
+
         if self.type == TYPE_CIRCUIT:
             self.efield = data['init']['x']
             self.radius = data['init']['r']
