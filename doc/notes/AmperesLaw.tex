@@ -1,0 +1,100 @@
+\documentclass{notes}
+
+\author{Mathias Hoppe}
+\title{A direct solution of Ampère's law}
+
+\begin{document}
+    \maketitle
+
+    \noindent
+    In \DREAM, the initial value of the poloidal flux $\psi$ is calculated
+    from an inverted Amp\'ere's law. In other words, the Amp\'ere's law which
+    is usually solved in \DREAM\ is rewritten on an integral form and evaluated
+    numerically. While this is analytically consistent, the numerical solutions
+    to the differential and integral forms of the equation are generally
+    different. This in turn gives rise to a mismatch in the electric field and
+    poloidal flux when the latter is eventually being evolved according to the
+    differential form of Amp\'ere's law in the main part of the simulation.
+
+    The implications of this for disruption simulations are minor since
+    $E\approx 0$ at the start of the simulation (at least compared to the
+    electric field in the current quench). However, in the startup simulations
+    conducted with \STREAM, the exact value of the initial electric field
+    could potentially play an important role. In \STREAM\ it might therefore
+    be crucial to solve Amp\'ere's law consistently for both the initial value
+    of $\psi$ as well as its time evolution.
+
+    In this document we derive the solution to the differential form of
+    Amp\'ere's law in the special case $N_r = 1$ (one radial grid point), which
+    could be straightforwardly implemented in \DREAM\ and improve the
+    solution accuracy.
+
+    \section*{Derivation}
+    Amp\'ere's law, as stated in \DREAM\ and \STREAM, is
+    \begin{equation}\label{eq:ampere}
+        \frac{1}{V'}\frac{\partial}{\partial r}\left[
+            V'\left\langle \frac{\left|\nabla r\right|^2}{R^2} \right\rangle
+            \frac{\partial\psi}{\partial r}
+        \right]
+        = 2\pi\mu_0\left\langle\bb{B}\cdot\nabla\phi\right\rangle\frac{j_{\rm tot}}{B},
+    \end{equation}
+    where $V'$ is the spatial jacobian, $r$ the minor radius coordinate, $R$ the
+    major radius coordinate, $\bb{B}$ the magnetic field vector, $\phi$ the
+    toroidal angle coordinate, and $j_{\rm tot}$ the plasma current density.
+
+    We proceed by discretizing equation~\eqref{eq:ampere} in the special case of
+    one radial grid point. According to equation~(56) of the \DREAM\ paper,
+    equation~\eqref{eq:ampere} discretizes as
+    \begin{equation}\label{eq:discr}
+        \frac{1}{V_1'\Delta r_1}\left[
+            V_{3/2}'
+            \left.\left\langle\frac{\left|\nabla r\right|^2}{R^2}\right\rangle\right|_{3/2}
+            \left.\frac{\partial\psi}{\partial r}\right|_{3/2}
+            -
+            V_{1/2}'
+            \left.\left\langle\frac{\left|\nabla r\right|^2}{R^2}\right\rangle\right|_{1/2}
+            \left.\frac{\partial\psi}{\partial r}\right|_{1/2}
+        \right]
+        = 2\pi\mu_0\left.\left\langle\bb{B}\cdot\nabla\phi\right\rangle\right|_{1}
+        \frac{j_1}{B(r_1)}.
+    \end{equation}
+    The second term on the LHS vanishes identically, either by noting that
+    $V_{1/2}' = 0$, or by noting that because of symmetry
+    $\partial\psi/\partial r = 0$ in the center of the plasma, $r=r_{1/2}$.
+    The remaining $r$-derivative can be evaluated with the help of
+    equation~(59) in the \DREAM\ paper, but with $r_{2}$ (which is so far
+    undefined in this single-radial-grid-point system) taken as the plasma
+    edge:
+    \begin{equation}\label{eq:deriv}
+        \left.\frac{\partial\psi}{\partial r}\right|_{3/2} =
+        \frac{\psi_2-\psi_1}{\Delta r_{3/2}}.
+    \end{equation}
+    Taking $r_2=a$, with $a$ the plasma minor radius, we obtain
+    \begin{equation}
+        \begin{aligned}\label{eq:edge}
+            \psi_2 &\equiv \psi_{\rm edge},\\
+            \Delta r_{3/2} &\equiv a-r_1.
+        \end{aligned}
+    \end{equation}
+    Plugging equations~\eqref{eq:deriv} and~\eqref{eq:edge} into
+    equation~\eqref{eq:ampere} we obtain the following algebraic expression for
+    $\psi_1$:
+    \begin{equation}
+        \left.V_{3/2}'\left\langle\frac{\left|\nabla r\right|^2}{R^2}\right\rangle\right|_{3/2}
+        \frac{\psi_{\rm edge} - \psi_1}{(a-r_1)V_1'\Delta r_1}
+        =
+        \left.2\pi\mu_0\left\langle \bb{B}\cdot\nabla\phi \right\rangle\right|_1
+        \frac{j_1}{B(r_1)}.
+    \end{equation}
+    Finally, solving for $\psi_1$ we arrive at
+    \begin{equation}
+        \psi_1 = \psi_{\rm edge} -
+        \frac{
+            \left.2\pi\mu_0\left\langle \bb{B}\cdot\nabla\phi \right\rangle\right|_1
+            (a-r_1)V_1'\Delta r_1
+        }{
+            \left.V_{3/2}'\left\langle\frac{\left|\nabla r\right|^2}{R^2}\right\rangle\right|_{3/2}
+            B(r_1)
+        } j_1.
+    \end{equation}
+\end{document}

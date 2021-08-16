@@ -10,6 +10,7 @@ from DREAM.Output.OtherIonSpeciesFluidQuantity import OtherIonSpeciesFluidQuanti
 from DREAM.Output.OtherIonSpeciesScalarQuantity import OtherIonSpeciesScalarQuantity
 from . Output.IonHandler import IonHandler
 from . Output.MeanFreePath import MeanFreePath
+from DREAM.Output.ScalarQuantity import ScalarQuantity
 
 
 class STREAMOutput(DREAMOutput):
@@ -43,8 +44,9 @@ class STREAMOutput(DREAMOutput):
 
         self.eqsys.resetUnknown('lambda_i', MeanFreePath)
         self.eqsys.resetUnknown('n_i', IonHandler)
+        self.eqsys.resetUnknown('Vloop', ScalarQuantity)
 
-        if 'stream' in self.other:
+        if self.other is not None and 'stream' in self.other:
             self.other.stream.resetQuantity('V_n', OtherIonSpeciesScalarQuantity)
             self.other.stream.resetQuantity('V_n_tot', OtherIonSpeciesScalarQuantity)
             self.other.stream.resetQuantity('neutralinflux', OtherIonSpeciesScalarQuantity)

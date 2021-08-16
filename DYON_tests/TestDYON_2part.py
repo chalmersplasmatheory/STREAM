@@ -33,7 +33,7 @@ import numpy as np
 tMax_initial = 1e-4  # simulation time in seconds
 Nt_initial   = 4000   # number of time steps
 tMax_final   = 5e-1  # simulation time in seconds
-Nt_final     = 1000   # number of time steps
+Nt_final     = 5000   # number of time steps
 
 pgp = 4.3135e-5
 n_D_0 = 2.78e22 * pgp
@@ -58,23 +58,30 @@ c2       = 0.09
 c3       = 0.1
 
 R = 7.5e-4  # Ohm, i MK2 struktur
-L = 9.1e-5  # H, i MK2 struktur
+L = 9.1e-6  # H, i MK2 struktur
 
 r=np.array([0])
 #print(str(n_D))
 
+#t_1   = np.linspace(0, tMax_initial, 100)
+#t_2   = np.linspace(tMax_initial, 0.5, 100)
 t   = np.linspace(0, 0.5, 100)
 t_d = np.array([0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
 V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
 V_s = interp1d(t_d, V_d, kind='linear')
+#V_loop_wall_1 = V_s(t_1)
+#V_loop_wall_2 = V_s(t_2)
 V_loop_wall = V_s(t)
 
 #plt.plot(t,V_loop_wall)
 #plt.show()
 
-E_initial = V_d[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
+E_initial = V_loop_wall[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
+E = V_loop_wall/(2*np.pi*r_0)
 T_e_initial = 1 # eV
 T_i_initial = 0.03
+t_e=np.array([0, 0.01, 0.02,  0.03,  0.05,   0.1,   0.15,   0.2,   0.25,   0.3,   0.35,   0.4,   0.45,   0.5])
+T_e=np.array([1, 2   , 7   , 10   , 42   , 152  , 206   , 250  , 277   , 294  , 312   , 320  , 330   , 335])
 
 sts_initial = STREAMSettings()
 
@@ -84,10 +91,12 @@ print('wall_time = {} s'.format(wall_time))
 print(str(r_wall))
 sts_initial.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
-sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
+sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall[0]/r_0, times=0, inverse_wall_time=1/wall_time, R0=r_0)
+#sts_initial.eqsys.E_field.setPrescribedData(E, times=t)
 
-sts_initial.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
-sts_initial.eqsys.T_cold.setInitialProfile(T_e_initial)
+#sts_initial.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
+#sts_initial.eqsys.T_cold.setInitialProfile(T_e_initial)
+sts_initial.eqsys.T_cold.setPrescribedData(T_e, times=t_e)
 
 sts_initial.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=n_D, r=r, T=T_i_initial)
 sts_initial.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_C, r=r, T=T_i_initial)
@@ -137,6 +146,7 @@ sts_initial.other.include('fluid', 'stream')
 sto_initial = runiface(sts_initial, 'output_initial.h5',
                        quiet=False)
 sts_final = STREAMSettings(sts_initial)
+sts_final.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
 sts_final.timestep.setTmax(tMax_final)
 sts_final.timestep.setNt(Nt_final)
 

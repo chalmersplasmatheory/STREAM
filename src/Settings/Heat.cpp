@@ -113,9 +113,18 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     );
     op_n_cold->AddTerm(oqty_terms->T_cold_radiation);
 
-    // Add transport (TODO TODO TODO)
+    // Add transport
     bool hasTransport = true;      // TODO Load from settings...
-    op_W_cold->AddTerm(new ElectronHeatTransportDiffusion(eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(), eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()));
+    ElectronHeatTransportDiffusion *ht = new ElectronHeatTransportDiffusion(
+        eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(),
+        eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()
+    );
+    DREAM::TransportDiffusiveBC *bc = new DREAM::TransportDiffusiveBC(
+        eqsys->GetFluidGrid(), ht, DREAM::TransportDiffusiveBC::TRANSPORT_BC_F0
+    );
+
+    op_W_cold->AddTerm(ht);
+    op_W_cold->AddBoundaryCondition(bc);
 
     eqsys->SetOperator(id_T_cold, id_E_field, op_E_field);
     eqsys->SetOperator(id_T_cold, id_n_cold, op_n_cold);
@@ -123,6 +132,7 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
 
     if (hasTransport) {
         oqty_terms->T_cold_transport = op_W_cold->GetAdvectionDiffusion();
+        oqty_terms->T_cold_diffusive_bc = bc;
         eqsys->SetOperator(id_T_cold, id_W_cold, op_W_cold);
         desc += " - transport";
     }

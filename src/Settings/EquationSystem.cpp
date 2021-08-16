@@ -1,6 +1,9 @@
+
 #include "STREAM/EquationSystem.hpp"
 #include "DREAM/EquationSystem.hpp"
+#include "DREAM/EqsysInitializer.hpp"
 #include "DREAM/OtherQuantityHandler.hpp"
+#include "DREAM/Equations/Scalar/WallCurrentTerms.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
 #include "STREAM/Settings/OptionConstants.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
@@ -138,14 +141,14 @@ void SimulationGenerator::ConstructEquations(
     }
 
     // Standard equations
-    DREAM::SimulationGenerator::ConstructEquation_E_field(eqsys, s);
+    ConstructEquation_E_field(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_j_hot(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_j_tot(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_j_ohm(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_j_re(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_n_cold(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_n_hot(eqsys, s);
-    ConstructEquation_T_cold(eqsys, s, adas, amjuel, nist, oqty_terms);   // TODO
+    ConstructEquation_T_cold(eqsys, s, adas, amjuel, nist, oqty_terms);
     ConstructEquation_lambda_i(eqsys, s, adas); 
 
     enum DREAM::OptionConstants::uqty_T_i_eqn typeTi =
@@ -162,9 +165,6 @@ void SimulationGenerator::ConstructEquations(
     // the hot-tail equation and must therefore be constructed
     // AFTER the call to 'ConstructEquation_f_hot()'.
     ConstructEquation_n_re(eqsys, s, oqty_terms);
-
-    DREAM::SimulationGenerator::ConstructEquation_psi_p(eqsys, s);
-    DREAM::SimulationGenerator::ConstructEquation_psi_edge(eqsys, s);
 
     // Helper quantities
     DREAM::SimulationGenerator::ConstructEquation_n_tot(eqsys, s);
@@ -185,13 +185,104 @@ void SimulationGenerator::ConstructEquations(
 void SimulationGenerator::ConstructUnknowns(
     EquationSystem *eqsys, DREAM::Settings *s
 ) {
-    DREAM::SimulationGenerator::ConstructUnknowns(
-        eqsys, s,
-        eqsys->GetScalarGrid(), eqsys->GetFluidGrid(),
-        eqsys->GetHotTailGrid(), eqsys->GetRunawayGrid()
-    );
-    
+    DREAM::FVM::Grid *scalarGrid = eqsys->GetScalarGrid();
+    DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
+    DREAM::FVM::Grid *hottailGrid = eqsys->GetHotTailGrid();
+    DREAM::FVM::Grid *runawayGrid = eqsys->GetRunawayGrid();
+
+    #define DEFU_HOT(NAME) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        hottailGrid)
+    #define DEFU_RE(NAME) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        runawayGrid)
+    #define DEFU_FLD(NAME) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        fluidGrid)
+    #define DEFU_FLD_N(NAME,NMULT) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        fluidGrid, (NMULT))
+    #define DEFU_SCL(NAME) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        scalarGrid)
+    #define DEFU_SCL_N(NAME,NMULT) eqsys->SetUnknown( \
+        DREAM::OptionConstants::UQTY_ ## NAME, \
+        DREAM::OptionConstants::UQTY_ ## NAME ## _DESC, \
+        scalarGrid,(NMULT))
+
+    // Hot-tail quantities
+    if (hottailGrid != nullptr) {
+        DEFU_HOT(F_HOT);
+    }
+
+    // Runaway quantities
+    if (runawayGrid != nullptr) {
+        DEFU_RE(F_RE);
+    }
+
+    // Fluid quantities
+    len_t nIonChargeStates = DREAM::SimulationGenerator::GetNumberOfIonChargeStates(s);
+    DEFU_FLD_N(ION_SPECIES, nIonChargeStates);
+    DEFU_FLD(N_HOT);
+    DEFU_FLD(N_COLD);
+    DEFU_FLD(N_RE);
+    DEFU_FLD(J_OHM);
+    DEFU_FLD(J_HOT);
+    DEFU_FLD(J_RE);
+    DEFU_FLD(J_TOT);
+    DEFU_FLD(T_COLD);
+    DEFU_FLD(W_COLD);
+    DEFU_FLD(E_FIELD);
+    DEFU_SCL(I_P);
+
+    enum DREAM::OptionConstants::eqterm_spi_ablation_mode spi_ablation_mode = (enum DREAM::OptionConstants::eqterm_spi_ablation_mode)s->GetInteger("eqsys/spi/ablation");
+    if(spi_ablation_mode!=DREAM::OptionConstants::EQTERM_SPI_ABLATION_MODE_NEGLECT){
+        len_t nShard;
+        s->GetRealArray("eqsys/spi/init/rp", 1, &nShard);
+        DEFU_SCL_N(Y_P,nShard);
+        DEFU_SCL_N(X_P,3*nShard);
+        DEFU_SCL_N(V_P,3*nShard);
+        
+        if (hottailGrid != nullptr){
+        	DEFU_FLD(Q_HOT);
+        	DEFU_FLD(W_HOT);
+    	}
+    	if(spi_ablation_mode==DREAM::OptionConstants::EQTERM_SPI_ABLATION_MODE_NGPS){
+    		DEFU_FLD_N(ION_SPECIES_ABL, nIonChargeStates);
+    		DEFU_FLD(N_ABL);
+    		DEFU_FLD(T_ABL);
+    		DEFU_FLD(W_ABL);
+		}
+    }
+
     len_t nIonSpecies = DREAM::SimulationGenerator::GetNumberOfIonSpecies(s);
-    eqsys->SetUnknown(OptionConstants::UQTY_LAMBDA_I, OptionConstants::UQTY_LAMBDA_I_DESC, eqsys->GetFluidGrid(), nIonSpecies);
+    if( (DREAM::OptionConstants::uqty_T_i_eqn)s->GetInteger("eqsys/n_i/typeTi") == DREAM::OptionConstants::UQTY_T_I_INCLUDE ){
+        DEFU_FLD_N(WI_ENER, nIonSpecies);
+        DEFU_FLD_N(NI_DENS, nIonSpecies);
+    }
+    
+    // Fluid helper quantities
+    DEFU_FLD(N_TOT);
+    if (hottailGrid != nullptr){
+        DEFU_FLD(S_PARTICLE);
+    }
+    DREAM::OptionConstants::eqterm_hottail_mode hottail_mode = (enum DREAM::OptionConstants::eqterm_hottail_mode)s->GetInteger("eqsys/n_re/hottail");
+    DREAM::OptionConstants::uqty_f_hot_dist_mode ht_dist_mode = (enum DREAM::OptionConstants::uqty_f_hot_dist_mode)s->GetInteger("eqsys/f_hot/dist_mode");    
+    if(hottail_mode != DREAM::OptionConstants::EQTERM_HOTTAIL_MODE_DISABLED && ht_dist_mode == DREAM::OptionConstants::UQTY_F_HOT_DIST_MODE_NONREL){
+        DEFU_FLD(TAU_COLL);
+    }
+
+    // Mean-free path
+    eqsys->SetUnknown(
+        OptionConstants::UQTY_LAMBDA_I,
+        OptionConstants::UQTY_LAMBDA_I_DESC,
+        fluidGrid,
+        nIonSpecies
+    );
 }
 
