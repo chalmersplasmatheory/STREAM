@@ -42,6 +42,28 @@ class IonSpecies(DREAMIonSpecies.IonSpecies):
             return 0.0
 
 
+    def pressureToDensity(p, T=300/11604.51812):
+        """
+        Convert a given prefill pressure (in Torr) to an atom density. The
+        prefill pressure is related to the gas temperature T and density n via
+
+          p = n*T
+        
+        Since 1 Torr = (1 atm)/760 = 133.32 Pa, we have that the atomic density
+        at prefill pressure p (given in Torr) is
+
+                            133.32
+          (n [m^-3]) =  --------------- * (p [Torr])
+                         k_B * (T [eV])
+
+        where k_B is Boltzmann's constant.
+
+        :param p: Prefill gas pressure (in Torr).
+        :param T: Temperature (in eV). Default: room temperature (= 300 K).
+        """
+        return 133.32 * p / (scipy.constants.k * T)
+
+
     def setRecyclingCoefficient(self, species, value):
         """
         Sets the recycling coefficient :math:`Y_i^j`, where :math:`i` denotes
