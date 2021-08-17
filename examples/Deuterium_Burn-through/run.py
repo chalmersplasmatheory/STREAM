@@ -98,17 +98,17 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.04,
     return ss
 
 
-def drawplot1(axs, so, color='r'):
+def drawplot1(axs, so, color='r', toffset=0):
     """
     Draw a plot with a output from the given STREAMOutput object.
     """
-    t = so.grid.t[:]
+    t = so.grid.t[:] + toffset
     plotInternal(axs[0], t[1:], np.diff(so.eqsys.W_cold[:,0]) / np.diff(so.grid.t[:]), ylabel=r'Power consumption (W/m$^3$)', color=color)
     plotInternal(axs[1], t, so.eqsys.I_p[:,0], ylabel=r'Plasma current $I_{\rm p}$ (A)', color=color, log=True)
 
 
-def drawplot2(axs, so, color='r'):
-    t = so.grid.t[:]
+def drawplot2(axs, so, color='r', toffset=0):
+    t = so.grid.t[:] + toffset
 
     V_p = so.other.stream.V_p[:,0]
     #V_n_tot = so.other.stream.V_n_tot['D'][:]
@@ -119,16 +119,50 @@ def drawplot2(axs, so, color='r'):
     gamma_i = nD1 / (nD1 + nD0)
 
     plotInternal(axs[0], t[1:], so.other.fluid.Tcold_radiation[:,0], 'Power loss (W)', color=color, xlbl=False)
-    plotInternal(axs[1], t[1:], gamma_i*100, r'Degree of ionization (\%)', color=color, ylim=[0,100], xlbl=False)
+    plotInternal(axs[1], t[1:], gamma_i*100, r'Degree of ionization (\%)', color=color, ylim=[0,105], xlbl=False)
     plotInternal(axs[2], t, so.eqsys.T_cold[:,0], 'Electron temperature (eV)', color=color, xlbl=False)
     plotInternal(axs[3], t, so.eqsys.n_cold[:,0]*1e-18, 'Electron density (10$^{18}$ m$^-3$)', color=color)
 
 
-def plotInternal(ax, x, y, ylabel, color, xlbl=True, ylim=None, log=False):
+def drawplot3(axs, so, toffset=0, showlabel=True):
+    t = so.grid.t[:] + toffset
+
+    V_p = so.other.stream.V_p[:,0]
+
+    Prad    = so.other.fluid.Tcold_radiation[:,0] * V_p
+    Pequi   = so.other.fluid.Tcold_ion_coll[:,0] * V_p
+    Ptransp = so.other.scalar.energyloss_T_cold[:,0] * V_p
+    P_tot   = Prad + Pequi + Ptransp
+    P_net   = P_tot + so.other.fluid.Tcold_ohmic[:,0] * V_p
+
+    nD0 = so.eqsys.n_i['D'][0][1:,0]
+    nD1 = so.eqsys.n_i['D'][1][1:,0]
+    gamma_i = nD1 / (nD1 + nD0)
+
+    plotInternal(axs[0], t, so.eqsys.I_p[:,0]/1e3, r'$I_{\rm p}$ (kA)', linestyle='-.', color='b', xlbl=False)
+    plotInternal(axs[1], t[1:], gamma_i*100, r'Degree of ionization (\%)', color='k', ylim=[0,105], xlbl=False)
+
+    ylbl = r'Power balance'
+    plotInternal(axs[2], t[1:], P_tot, ylbl, label='Total electron power loss', showlabel=showlabel, color='r', linestyle='--')
+    plotInternal(axs[2], t[1:], Prad, ylbl, label='Radiation + ionization', showlabel=showlabel, color='b', linestyle='-.')
+    plotInternal(axs[2], t[1:], Pequi, ylbl, label='Equilibration', showlabel=showlabel, color='g', linestyle='--')
+    plotInternal(axs[2], t[1:], Ptransp, ylbl, label='Electron transport', showlabel=showlabel, color='m', linestyle=':')
+    plotInternal(axs[2], t[1:], P_net, ylbl, label='Net electron heating power', showlabel=showlabel, color='k', linestyle='-', ylim=[0, 2e5])
+
+    axs[0].set_xlim([0, 0.05])
+    axs[1].set_xlim([0, 0.05])
+    axs[2].set_xlim([0, 0.05])
+    axs[2].legend(frameon=False)
+
+
+def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, *args, **kwargs):
+    if label is not None and showlabel == False:
+        label = None
+
     if log:
-        ax.semilogy(x, y, color=color)
+        ax.semilogy(x, y, label=label, *args, **kwargs)
     else:
-        ax.plot(x, y, color=color)
+        ax.plot(x, y, label=label, *args, **kwargs)
 
     ax.set_xlim([0, x[-1]])
     if xlbl:
@@ -153,30 +187,60 @@ def main(argv):
 
     if settings.skip is None or (len(settings.skip) > 0 and 1 not in settings.skip):
         print('RUN 1')
-        ss1 = generate(prefill=5e-5, nt=80000)
-        ss1.save('settings1.h5')
-        so1 = runiface(ss1, 'output1.h5', quiet=False)
+        ss11 = generate(prefill=5e-5, nt=80000)
+        ss11.save('settings11.h5')
+        so11 = runiface(ss11, 'output11.h5', quiet=False)
+
+        ss12 = STREAMSettings(ss11)
+        ss12.fromOutput('output11.h5')
+        ss12.timestep.setTmax(0.1 - ss11.timestep.tmax)
+        ss12.timestep.setNumberOfSaveSteps(0)
+        ss12.timestep.setNt(1000)
+        so12 = runiface(ss12, 'output12.h5', quiet=False)
     else:
-        so1 = STREAMOutput('output1.h5')
+        so11 = STREAMOutput('output11.h5')
+        so12 = STREAMOutput('output12.h5')
 
     if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
         print('RUN 2')
-        ss2 = generate(prefill=7e-5, nt=80000)
-        so2 = runiface(ss2, 'output2.h5', quiet=False)
+        ss21 = generate(prefill=7e-5, nt=80000)
+        #so21 = runiface(ss21, 'output21.h5', quiet=False)
+        so21 = STREAMOutput('output21.h5')
+
+        ss22 = STREAMSettings(ss21)
+        ss22.fromOutput('output21.h5')
+        ss22.timestep.setTmax(0.1 - ss21.timestep.tmax)
+        ss22.timestep.setNumberOfSaveSteps(0)
+        ss22.timestep.setNt(1000)
+        so22 = runiface(ss22, 'output22.h5', quiet=False)
     else:
-        so2 = STREAMOutput('output2.h5')
+        so21 = STREAMOutput('output21.h5')
+        so22 = STREAMOutput('output22.h5')
 
     if settings.plot:
         fig1, axs1 = plt.subplots(2, 1, figsize=(7,5), sharex=True)
 
-        drawplot1(axs1, so1, color='b')
-        drawplot1(axs1, so2, color='r')
+        drawplot1(axs1, so11, color='b')
+        drawplot1(axs1, so12, color='b', toffset=so11.grid.t[-1])
+        drawplot1(axs1, so21, color='r')
+        drawplot1(axs1, so22, color='r', toffset=so21.grid.t[-1])
 
         fig2, axs2 = plt.subplots(4, 1, figsize=(7, 10))
-        drawplot2(axs2, so1, color='b')
-        drawplot2(axs2, so2, color='r')
+        drawplot2(axs2, so11, color='b')
+        drawplot2(axs2, so12, color='b', toffset=so11.grid.t[-1])
+        drawplot2(axs2, so21, color='r')
+        drawplot2(axs2, so22, color='r', toffset=so21.grid.t[-1])
 
         axs2[0].legend([r'$p = 5\times 10^{-5}\,\mathrm{Torr}$', r'$p = 7\times 10^{-5}\,\mathrm{Torr}$'])
+
+        fig3, axs3 = plt.subplots(3, 1, figsize=(7, 10))
+        fig4, axs4 = plt.subplots(3, 1, figsize=(7, 10))
+
+        drawplot3(axs3, so11)
+        drawplot3(axs3, so12, toffset=so11.grid.t[-1], showlabel=False)
+
+        drawplot3(axs4, so21)
+        drawplot3(axs4, so22, toffset=so21.grid.t[-1], showlabel=False)
 
         plt.tight_layout()
         plt.show()
