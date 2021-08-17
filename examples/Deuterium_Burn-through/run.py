@@ -10,7 +10,8 @@ import numpy as np
 import sys
 sys.path.append('../../py')
 
-from DREAM.Formulas import PlasmaParameters as Formulas
+#from DREAM.Formulas 
+import PlasmaParameters as Formulas
 import DREAM.Settings.Equations.ColdElectronTemperature as Tcold
 import DREAM.Settings.Solver as Solver
 
@@ -19,7 +20,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03, nt=1000):
+def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.04, nt=4000):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -90,7 +91,7 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03,
     ss.solver.preconditioner.setEnabled(False)
     ss.timestep.setTmax(tmax)
     ss.timestep.setNt(nt)
-    ss.timestep.setNumberOfSaveSteps(10000)
+    ss.timestep.setNumberOfSaveSteps(5000)
 
     ss.other.include('fluid', 'stream', 'scalar')
 
@@ -110,7 +111,7 @@ def drawplot2(axs, so, color='r'):
     t = so.grid.t[:]
 
     V_p = so.other.stream.V_p[:,0]
-    V_n_tot = so.other.stream.V_n_tot['D'][:]
+    #V_n_tot = so.other.stream.V_n_tot['D'][:]
     #dWr_dt  = np.diff(so.other.fluid.Tcold_radiation[:,0]) / np.diff(t[1:])
     nD0 = so.eqsys.n_i['D'][0][1:,0]
     nD1 = so.eqsys.n_i['D'][1][1:,0]
