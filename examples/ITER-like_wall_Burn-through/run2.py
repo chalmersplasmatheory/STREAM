@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 #
-# This example uses parameters from Table 4.1 of [H. T. Kim, PhD Thesis (2013)]
-# to simulate basic Deuterium burn-through in a JET-like plasma.
+# This example uses parameters from Table 6.2 of [H. T. Kim, PhD Thesis (2013)]
+# to simulate burn-through in a JET-like plasma with ITER-like wall.
 #
 
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+from scipy.interpolate import interp1d
 sys.path.append('../../py')
 
 #from DREAM.Formulas 
@@ -20,7 +21,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03, nt=4000):
+def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=223.2, tmax=0.04, nt=4000):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -34,8 +35,10 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03,
     """
     n0 = 2.78e22 * prefill  # Initial total deuterium density
     nD = n0 * np.array([[1-gamma], [gamma]])
-
-    Btor = 2.3      # Toroidal magnetic field [T]
+    nC = 0
+    nO = 0.01 * nD[0]    
+    
+    Btor = 2.7      # Toroidal magnetic field [T]
     a = 0.5         # Plasma minor radius [m]
     R0 = 3          # Plasma major radius [m]
     l_MK2 = 1       # Distance between plasma centre and passive structure [m]
@@ -46,7 +49,19 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03,
 
     # Initial electric field
     E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
-
+    
+    # Prescribed loop voltage
+    Vloop_t   = np.linspace(0, 0.5, 100)
+    t_d = np.array([0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
+    V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
+    V_s = interp1d(t_d, V_d, kind='linear')
+    Vloop = V_s(Vloop_t)
+    
+    # Recycling coefficients
+    c1 = 1.1
+    c2 = 0.09
+    c3 = 0.1    
+    
     ss = STREAMSettings()
 
     # Electric field
@@ -63,6 +78,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03,
 
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
+    ss.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nC, r=np.array([0]), T=Ti0)
+    ss.eqsys.n_i.addIon(name='O', Z=8, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nO, r=np.array([0]), T=Ti0)
 
     # Disable runaway
     ss.eqsys.n_re.setAvalanche(False)
@@ -78,9 +95,9 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03,
     ss.radialgrid.setWallRadius(l_MK2)
     ss.radialgrid.setVesselVolume(V_vessel)
 
-    ss.radialgrid.setRecyclingCoefficient1(1)
-    ss.radialgrid.setRecyclingCoefficient2(0)
-    ss.radialgrid.setRecyclingCoefficient3(1)
+    ss.radialgrid.setRecyclingCoefficient1(c1)
+    ss.radialgrid.setRecyclingCoefficient2(c2)
+    ss.radialgrid.setRecyclingCoefficient3(c3)
     
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)
