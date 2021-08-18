@@ -54,14 +54,15 @@ class IonSpecies(DREAMIonSpecies.IonSpecies):
 
                             133.32
           (n [m^-3]) =  --------------- * (p [Torr])
-                         k_B * (T [eV])
+                         k_B * (T [J])
 
         where k_B is Boltzmann's constant.
 
         :param p: Prefill gas pressure (in Torr).
         :param T: Temperature (in eV). Default: room temperature (= 300 K).
         """
-        return 133.32 * p / (scipy.constants.k * T)
+        eV2J = 11604.51812
+        return 133.32 * p / (scipy.constants.k * eV2J * T)
 
 
     def setRecyclingCoefficient(self, species, value):
