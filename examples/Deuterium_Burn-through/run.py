@@ -10,7 +10,7 @@ import numpy as np
 import sys
 sys.path.append('../../py')
 
-from DREAM.Formulas import PlasmaParameters as Formulas
+import PlasmaParameters as Formulas
 import DREAM.Settings.Equations.ColdElectronTemperature as Tcold
 import DREAM.Settings.Solver as Solver
 
@@ -19,7 +19,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.03, nt=1000):
+def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.003, nt=1000):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -186,7 +186,7 @@ def main(argv):
 
     if settings.skip is None or (len(settings.skip) > 0 and 1 not in settings.skip):
         print('RUN 1')
-        ss11 = generate(prefill=5e-5, nt=80000)
+        ss11 = generate(prefill=5e-5, nt=10000)
         ss11.save('settings11.h5')
         so11 = runiface(ss11, 'output11.h5', quiet=False)
 
@@ -195,6 +195,7 @@ def main(argv):
         ss12.timestep.setTmax(0.1 - ss11.timestep.tmax)
         ss12.timestep.setNumberOfSaveSteps(0)
         ss12.timestep.setNt(1000)
+        ss12.save('settings12.h5')
         so12 = runiface(ss12, 'output12.h5', quiet=False)
     else:
         so11 = STREAMOutput('output11.h5')
@@ -202,9 +203,8 @@ def main(argv):
 
     if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
         print('RUN 2')
-        ss21 = generate(prefill=7e-5, nt=80000)
-        #so21 = runiface(ss21, 'output21.h5', quiet=False)
-        so21 = STREAMOutput('output21.h5')
+        ss21 = generate(prefill=7e-5, nt=10000)
+        so21 = runiface(ss21, 'output21.h5', quiet=False)
 
         ss22 = STREAMSettings(ss21)
         ss22.fromOutput('output21.h5')
