@@ -3,9 +3,12 @@ build
 *.swo
 __pycache__
 .idea
-DYON_tests/STREAMSettings_final.h5
-DYON_tests/STREAMSettings_initial.h5
-DYON_tests/output_final.h5
-DYON_tests/output_initial.h5
-DYON_tests/STOs/
 DYON_tests/Read_mat.py
+*.h5
+*.aux
+*.log
+*.run.xml
+*.out
+*.toc
+*.bcf
+
