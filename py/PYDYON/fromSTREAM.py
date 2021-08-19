@@ -15,6 +15,8 @@ def fromSTREAM(so, uqh, time=0, ion='D'):
         'ne': so.eqsys.n_cold[time,0],
         'Te': so.eqsys.T_cold[time,0],
         'Ti': so.eqsys.W_i.getTemperature(ion)[time,0],
+        'Ip': so.eqsys.I_p[time,0],
+        'IMK2': so.eqsys.I_wall[time,0],
         # TODO insert all other ion densities
         f'ni{ion}': so.eqsys.n_i[ion].data[time,:,0]
     }

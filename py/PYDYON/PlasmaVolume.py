@@ -2,6 +2,7 @@
 
 from . ADAS import ADAS
 import numpy as np
+import scipy.constants
 
 
 class PlasmaVolume:
@@ -41,9 +42,10 @@ class PlasmaVolume:
         :param Te:  Electron temperature to evaluate at.
         :param Ti:  Ion temperature to evaluate at.
         """
+        e = scipy.constants.e
         m = self.ions.getMass(ion)
 
-        return np.sqrt(2*Ti/m) / (ne*self.adas.SCD(ion, 0, n=ne, T=Te))
+        return np.sqrt(2*e*Ti/m) / (ne*self.adas.SCD(ion, 0, n=ne, T=Te))
 
 
     def getV_n(self, ion, ne, Te, Ti):
@@ -61,7 +63,11 @@ class PlasmaVolume:
         if lambdai > self.a:
             return self.getV_p()
         else:
-            return 2*np.pi*R*(np.pi*self.kappa*self.a**2 - np.pi*self.kappa*(a-lambdai)**2)
+            R = self.R
+            a = self.a
+            pi = np.pi
+            kappa = self.kappa
+            return 2*pi*R*(pi*kappa*a**2 - pi*kappa*(a-lambdai)**2)
 
 
     def getV_n_tot(self, ion, ne, Te, Ti):

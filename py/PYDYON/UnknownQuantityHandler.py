@@ -7,7 +7,7 @@ class UnknownQuantityHandler:
 
     
     UNKNOWNS = [
-        'ne', 'Te', 'Ti'
+        'ne', 'Te', 'Ti', 'Ip', 'IMK2'
     ]
     
 
@@ -62,6 +62,17 @@ class UnknownQuantityHandler:
             return self[f'ni{ion}']
 
 
+    def getLambda(self, ion):
+        """
+        Returns the mean-free path for the named ion species.
+        """
+        ne = self['ne']
+        Te = self['Te']
+        Ti = self['Ti']
+
+        return self.plasmavolume.getLambda(ion, ne=ne, Te=Te, Ti=Ti)
+
+
     def getNeutralVolume(self, ion):
         """
         Returns the neutral volume for the named ion species.
@@ -78,6 +89,23 @@ class UnknownQuantityHandler:
         Returns the plasma volume V_p.
         """
         return self.plasmavolume.getV_p()
+
+
+    def getZeff(self):
+        """
+        Calculates and returns the plasma effective charge.
+        """
+        Zup, Zdn = 0, 0
+        for ion in self.ions:
+            A  = ion['name']
+            Z  = ion['Z']
+            ni = self[f'ni{A}']
+
+            for Z0 in range(1,Z+1):
+                Zup += ni[Z0] * Z0**2
+                Zdn += ni[Z0] * Z0
+
+        return Zup / Zdn
 
 
     def update(self, x):
