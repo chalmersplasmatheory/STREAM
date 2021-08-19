@@ -13,7 +13,7 @@ import DREAM.Settings.Solver as Solver
 import DREAM.Settings.CollisionHandler as Collisions
 import DREAM.Settings.Equations.ColdElectrons as ColdElectrons
 import DREAM.Settings.Equations.ColdElectronTemperature as ColdElectronTemperature
-import DREAM.Settings.Equations.ElectricField as ElectricField
+#import DREAM.Settings.Equations.ElectricField as ElectricField
 import DREAM.Settings.Equations.DistributionFunction as DistFunc
 
 sys.path.append('../py/')
@@ -22,7 +22,7 @@ from STREAM.STREAMOutput import STREAMOutput
 from STREAM import runiface
 import STREAM.Settings.Equations.IonSpecies as Ions
 import STREAM.Settings.TransportSettings as Transport
-#import STREAM.Settings.Equations.ElectricField as ElectricField
+import STREAM.Settings.Equations.ElectricField as ElectricField
 #'''
 
 # Grid parameters
@@ -34,7 +34,7 @@ import numpy as np
 #Nxi  = 20   # number of pitch grid points
 tMax_initial = 1e-4  # simulation time in seconds
 Nt_initial   = 4000   # number of time steps
-tMax_final   = 5e-1  # simulation time in seconds
+tMax_final   = 1e-1  # simulation time in seconds
 Nt_final     = 1e4*tMax_final   # number of time steps
 
 pgp = 4.3135e-5
@@ -91,14 +91,13 @@ wall_time = L/R
 print('wall_time = {} s'.format(wall_time))
 
 print(str(r_wall))
-sts_initial.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
-sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
-sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall[0]/r_0, times=0, inverse_wall_time=1/wall_time, R0=r_0)
-#sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+#sts_initial.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 #sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
-#sts_initial.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
-#sts_initial.eqsys.E_field.setCircuitVloop(V_loop_wall, t)
-#sts_initial.eqsys.E_field.setPrescribedData(E, times=t)
+#sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall[0]/r_0, times=0, inverse_wall_time=1/wall_time, R0=r_0)
+sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
+sts_initial.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
+sts_initial.eqsys.E_field.setCircuitVloop(V_loop_wall, t)
 
 #sts_initial.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
 #sts_initial.eqsys.T_cold.setInitialProfile(T_e_initial)
@@ -193,7 +192,7 @@ plt.xlim(0,0.5)
 plt.xlabel('Time [s]')
 plt.ylabel('Electron density [m$^{-3}$]')
 plt.show()
-
+'''
 # Ion density
 legend = []
 n_D_0=sto_final.eqsys.n_i['D'][0][:]
@@ -202,7 +201,7 @@ plt.plot(sto_final.grid.t[:],n_D_0,'b-')
 n_D_1=sto_final.eqsys.n_i['D'][1][:]
 plt.plot(sto_final.grid.t[:],n_D_1,'b--')
 legend.append('n_D_1')
-
+'''
 n_O_0=sto_final.eqsys.n_i['O'][0][:]
 legend.append('n_O_0')
 plt.plot(sto_final.grid.t[:],n_O_0,'r-')
@@ -224,7 +223,7 @@ for i in range(2,7):
     n_C_i=sto_final.eqsys.n_i['C'][i][:]
     legend.append('n_C_'+str(i))
     plt.plot(sto_final.grid.t[:],n_C_i,'y:')
-
+'''
 plt.xlabel('Time [s]')
 plt.ylabel('Ion density [m$^{-3}$]')
 fontP = FontProperties()
@@ -232,8 +231,21 @@ fontP.set_size('x-small')
 plt.legend(legend,prop=fontP)
 #plt.xlim(0,0.12)
 plt.show()
-'''
 
+n_D_0 = np.array(n_D_0).flatten()
+dn_idt = np.gradient(n_D_0)
+'''
+dn_idt = np.gradient(n_O_0)
+dn_idt = np.gradient(n_C_0)
+'''
+plt.plot(sto_final.grid.t[:], dn_idt)
+plt.xlabel('Time [s]')
+plt.ylabel('Derivative of ion density [m$^{-3}$]')
+#fontP = FontProperties()
+#fontP.set_size('x-small')
+#plt.legend(legend,prop=fontP)
+#plt.xlim(0,0.12)
+plt.show()
 
 
 
