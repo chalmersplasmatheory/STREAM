@@ -1,6 +1,7 @@
 # Implementation of circuit equation
 
 
+import numpy as np
 from .. import Conductivity
 
 
@@ -29,19 +30,26 @@ class CircuitEquation:
         """
         Evaluate dIp/dt.
         """
-        pf = self.M - self.L_MK2*self.L_p / self.M
-        I_MK2 = self.quantities['IMK2']
         I_p = self.quantities['Ip']
         R_p = Conductivity.evalResistance(self.quantities)
         V = self.Vloop(t)
 
-        return (V - self.R_MK2*I_MK2 - self.L_MK2/self.M * (V - R_p*I_p)) / pf
+        if self.R_MK2 == np.inf:
+            return (V - R_p*I_p) / self.L_p
+        else:
+            pf = self.M - self.L_MK2*self.L_p / self.M
+            I_MK2 = self.quantities['IMK2']
+
+            return (V - self.R_MK2*I_MK2 - self.L_MK2/self.M * (V - R_p*I_p)) / pf
     
 
     def dIMK2_dt(self, t, x):
         """
         Evaluate dIMK2/dt.
         """
+        if self.R_MK2 == np.inf:
+            return 0.0
+
         pf = self.M - self.L_MK2*self.L_p / self.M
         I_MK2 = self.quantities['IMK2']
         I_p = self.quantities['Ip']

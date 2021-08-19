@@ -15,14 +15,13 @@ gamma_i = 2e-3      # Ionization fraction
 nD0 = 3.22e22 * prefill
 nD = nD0 * np.array([1-gamma_i, gamma_i])
 
-sim = Simulation(RMK2=1e5)
+sim = Simulation(RMK2=np.inf)
 
 sim.addIon('D', 1)
 sim.initialize(Te=1, Ti=0.03, Ip=450, IMK2=0, niD=nD)
 
 tic = time.time()
-#solution = sim.solve(tMax=0.03)
-solution = sim.solve(tMax=1e-6)
+solution = sim.solve(tMax=0.03)
 
 print('Obtained solution in {:.3f} s'.format(time.time()-tic))
 

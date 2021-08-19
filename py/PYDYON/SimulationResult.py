@@ -32,14 +32,12 @@ class SimulationResult:
         axs[1,0].legend()
 
         self.plotQuantity('Ip', axs[1,1], color='k', title='Plasma current')
-        self.plotQuantity('IMK2', axs[1,2], color='k', title='MK2 current')
+        #self.plotQuantity('IMK2', axs[1,2], color='k', title='MK2 current')
 
-        """
         gamma_i = self.x['ne'] / (nD[0] + self.x['ne'])
         self.plotQuantity(gamma_i*100, axs[1,2], color='k', title='Ionization fraction')
         axs[1,2].set_ylabel(r'\%')
         axs[1,2].set_ylim([0, 105])
-        """
 
         plt.tight_layout()
         plt.show()
