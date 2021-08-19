@@ -11,6 +11,7 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Settings/n_re.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ConfinementTime.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronTransportDiffusion.cpp"
+    #"${PROJECT_SOURCE_DIR}/src/Equations/ElectronHeatTransport.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronHeatTransportDiffusion.cpp"
 #    "${PROJECT_SOURCE_DIR}/src/Equations/IonTransportDiffusion1D.cpp"
 #    "${PROJECT_SOURCE_DIR}/src/Equations/IonHeatTransportDiffusion1D.cpp"

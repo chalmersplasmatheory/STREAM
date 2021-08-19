@@ -179,42 +179,45 @@ def main(argv):
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-a', '--skip-all', help="Skip all simulations and only generate plots", dest="skip", action='store_const', const=[1,2])
+    parser.add_argument('-e', '--extension', help="Append the specified string to the end of file names", dest="extension", action='store', default='')
     parser.add_argument('-n', '--no-plot', help="Only run simulations, don't generate plots", dest="plot", action='store_false', default=True)
     parser.add_argument('-s', '--skip', help="Skip the specified simulation(s)", dest="skip", nargs="*", type=int)
 
     settings = parser.parse_args()
 
+    ext = '' if not settings.extension else '_' + settings.extension
+
     if settings.skip is None or (len(settings.skip) > 0 and 1 not in settings.skip):
         print('RUN 1')
         ss11 = generate(prefill=5e-5, nt=10000)
-        ss11.save('settings11.h5')
-        so11 = runiface(ss11, 'output11.h5', quiet=False)
+        ss11.save(f'settings11{ext}.h5')
+        so11 = runiface(ss11, f'output11{ext}.h5', quiet=False)
 
         ss12 = STREAMSettings(ss11)
-        ss12.fromOutput('output11.h5')
+        ss12.fromOutput(f'output11{ext}.h5')
         ss12.timestep.setTmax(0.1 - ss11.timestep.tmax)
         ss12.timestep.setNumberOfSaveSteps(0)
         ss12.timestep.setNt(1000)
-        ss12.save('settings12.h5')
-        so12 = runiface(ss12, 'output12.h5', quiet=False)
+        ss12.save(f'settings12{ext}.h5')
+        so12 = runiface(ss12, f'output12{ext}.h5', quiet=False)
     else:
-        so11 = STREAMOutput('output11.h5')
-        so12 = STREAMOutput('output12.h5')
+        so11 = STREAMOutput(f'output11{ext}.h5')
+        so12 = STREAMOutput(f'output12{ext}.h5')
 
     if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
         print('RUN 2')
         ss21 = generate(prefill=7e-5, nt=10000)
-        so21 = runiface(ss21, 'output21.h5', quiet=False)
+        so21 = runiface(ss21, f'output21{ext}.h5', quiet=False)
 
         ss22 = STREAMSettings(ss21)
-        ss22.fromOutput('output21.h5')
+        ss22.fromOutput(f'output21{ext}.h5')
         ss22.timestep.setTmax(0.1 - ss21.timestep.tmax)
         ss22.timestep.setNumberOfSaveSteps(0)
         ss22.timestep.setNt(1000)
-        so22 = runiface(ss22, 'output22.h5', quiet=False)
+        so22 = runiface(ss22, f'output22{ext}.h5', quiet=False)
     else:
-        so21 = STREAMOutput('output21.h5')
-        so22 = STREAMOutput('output22.h5')
+        so21 = STREAMOutput(f'output21{ext}.h5')
+        so22 = STREAMOutput(f'output22{ext}.h5')
 
     if settings.plot:
         fig1, axs1 = plt.subplots(2, 1, figsize=(7,5), sharex=True)

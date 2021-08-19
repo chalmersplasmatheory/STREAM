@@ -12,6 +12,7 @@
 #include "STREAM/Settings/OptionConstants.hpp"
 #include "DREAM/Equations/Fluid/IonSpeciesTransientTerm.hpp"
 #include "STREAM/Equations/RadiatedPowerTerm.hpp"
+#include "STREAM/Equations/ElectronHeatTransport.hpp"
 #include "STREAM/Equations/ElectronHeatTransportDiffusion.hpp"
 #include "STREAM/Equations/ChargeExchangeTerm.hpp"
 
@@ -136,6 +137,16 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
         eqsys->SetOperator(id_T_cold, id_W_cold, op_W_cold);
         desc += " - transport";
     }
+    /*ElectronHeatTransport *ht = new ElectronHeatTransport(
+        eqsys->GetFluidGrid(), eqsys->GetConfinementTime(),
+        eqsys->GetEllipticalRadialGridGenerator(),
+        eqsys->GetUnknownHandler()
+    );
+    op_W_cold->AddTerm(ht);
+
+    eqsys->SetOperator(id_T_cold, id_E_field, op_E_field);
+    eqsys->SetOperator(id_T_cold, id_n_cold, op_n_cold);
+    string desc = "dWc/dt = j_ohm*E - radiation - transport";*/
 
     // Energy transfer from runaways to cold electrons.
     // If the kinetic runaway grid is enabled and we do not resolve the cold
