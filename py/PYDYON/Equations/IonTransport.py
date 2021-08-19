@@ -1,5 +1,7 @@
 # Transport of ions
 
+from .. ConfinementTime import ConfinementTime
+
 
 class IonTransport:
     
@@ -16,20 +18,20 @@ class IonTransport:
         self.quantities = quantities
 
 
-    def __call__(self, x):
-        return self.eval(x)
+    def __call__(self, x, ionname, Z0):
+        return self.eval(x, ionname, Z0)
 
 
-    def eval(self, x, ionname, ionZ0):
+    def eval(self, x, ionname, Z0):
         """
         Evaluate this ion transport term.
 
         :param x:       Latest solution of equations.
         :param ionname: Name of ion to apply transport to.
-        :param ionZ0:   Charge state of ion to apply transport to.
+        :param Z0:      Charge state of ion to apply transport to.
         """
-        niZ = self.quantities.getIonData(ionname)[ionZ0]
+        niZ = self.quantities.getIonData(ionname)[Z0]
 
-        return niZ / tau(x)
+        return niZ / self.tau(x)
 
 

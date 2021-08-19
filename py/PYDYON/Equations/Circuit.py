@@ -25,11 +25,7 @@ class CircuitEquation:
             self.Vloop = lambda t : Vloop
 
 
-    def __call__(self, x):
-        return self.eval(x)
-
-
-    def evalIp(self, t, x):
+    def dIp_dt(self, t, x):
         """
         Evaluate dIp/dt.
         """
@@ -37,11 +33,12 @@ class CircuitEquation:
         I_MK2 = self.quantities['IMK2']
         I_p = self.quantities['Ip']
         R_p = Conductivity.evalResistance(self.quantities)
+        V = self.Vloop(t)
 
-        return (self.Vloop(t) - self.R_MK2*I_MK2 - self.L_MK2/self.M * (Vloop(t) - R_p*I_p)) / pf
+        return (V - self.R_MK2*I_MK2 - self.L_MK2/self.M * (V - R_p*I_p)) / pf
     
 
-    def evalIMK2(self, x):
+    def dIMK2_dt(self, t, x):
         """
         Evaluate dIMK2/dt.
         """

@@ -1,6 +1,9 @@
 # Ion influx due to sputtering and recycling
 
 
+from .. ConfinementTime import ConfinementTime
+
+
 class IonInflux:
     
 
@@ -11,13 +14,13 @@ class IonInflux:
         :param quantities: UnknownQuantityHandler object.
         :param ions:       IonHandler object.
         """
-        self.quantities = quantities,
+        self.quantities = quantities
         self.ions = ions
         self.tau = ConfinementTime(quantities, ions, Bphi=Bphi, Bv=Bv, l_MK2=l_MK2)
 
 
-    def __call__(self, x):
-        return self.eval(x)
+    def __call__(self, x, ionname):
+        return self.eval(x, ionname)
 
 
     def eval(self, x, ionname):

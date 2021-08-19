@@ -23,7 +23,6 @@ class DeuteriumIonBalance:
         """
         Evaluate the deuterium ion balance term.
         """
-        V_n_tot = self.quantities.getV_n_tot('D')
         Vn = self.quantities.getV_n('D')
         Vp = self.quantities.getV_p()
 
@@ -35,12 +34,12 @@ class DeuteriumIonBalance:
         Riz  = self.adas.SCD('D', 0, n=ne, T=Te)
 
         # Ionization & recombination
-        izrec = V_n/Vp * Riz*ne*nD[0] - Rrec*ne*nD[1]
+        izrec = Vn/Vp * Riz*ne*nD[0] - Rrec*ne*nD[1]
 
         # Charge exchange
         cx = 0
         for ion in self.ions:
-            A = ion['A']
+            A = ion['name']
             if A == 'D':
                 continue
             

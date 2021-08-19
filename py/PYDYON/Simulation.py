@@ -4,6 +4,7 @@
 from scipy.integrate import solve_ivp
 from . IonHandler import IonHandler
 from . PlasmaVolume import PlasmaVolume
+from . SimulationResult import SimulationResult
 from . UnknownQuantityHandler import UnknownQuantityHandler
 
 from . Equations import *
@@ -13,7 +14,7 @@ class Simulation:
     
 
     unknowns = None
-    terms = []
+    _terms = []
     
     # Default settings
     settings = {
@@ -24,6 +25,13 @@ class Simulation:
         'Bphi': 2.3,        # Toroidal magnetic field (T)
         'Bv': 1e-3,         # Vertical magnetic field (T)
         'l_MK2': 1,         # Distance between plasma centre and passive structure (m)
+
+        # Electrical parameters
+        'Vloop': 20,        # External loop voltage (V)
+        'Lp': 5.4e-6,       # Plasma inductance (H)
+        'LMK2': 9.1e-6,     # Inductance of passive structure (H)
+        'M': 2.49e-6,       # Mutual inductance of plasma and passive structure (H)
+        'RMK2': 7.5e-4      # Resistance of passive structure (Ohm)
     }
 
 
@@ -34,6 +42,8 @@ class Simulation:
         :param settings: Dictionary containing simulation parameters.
         """
         self.ions = IonHandler()
+
+        s = self.updateSettings(self.settings, settings)
 
 
     def addIon(self, name, Z, m=None):
@@ -51,7 +61,7 @@ class Simulation:
         """
         Constructs the equation system.
         """
-        def i(name): return self.unknowns.map(name)
+        def i(name): return self.unknowns.map[name]
         eqsys = [None] * len(self.unknowns)
 
         s = self.settings
@@ -67,14 +77,57 @@ class Simulation:
         Pcx    = ChargeExchangePowerTerm(self.unknowns, self.ions)
 
         # Ensure that terms are not deleted by the garbage collector
-        self.terms.extend((Poh, Prad, Pequi, Pconve, Pconvi, Pcx))
+        self._terms.extend((Poh, Prad, Pequi, Pconve, Pconvi, Pcx))
 
         eqsys[i('We')] = lambda t, x : Poh(x) - Prad(x) - Pequi(x) - Pconve(x)
         eqsys[i('Wi')] = lambda t, x : Pequi(x) - Pcx(x) - Pconvi(x)
 
-        ######
+        #######
         # Circuit equation
-        circuit = CircuitEquation(
+        circuitsettings = {
+            'Vloop': s['Vloop'],
+            'Lp':    s['Lp'],
+            'LMK2':  s['LMK2'],
+            'M':     s['M'],
+            'RMK2':  s['RMK2']
+        }
+        circuit = CircuitEquation(self.unknowns, self.ions, **circuitsettings)
+        self._terms.append(circuit)
+
+        eqsys[i('Ip')]   = lambda t, x : circuit.dIp_dt(t, x)
+        eqsys[i('IMK2')] = lambda t, x : circuit.dIMK2_dt(t, x)
+
+        #######
+        # Ion equations
+        Dizcx0  = DeuteriumAtomBalance(self.unknowns, self.ions)
+        Dizcx1  = DeuteriumIonBalance(self.unknowns, self.ions)
+        Din     = DeuteriumInflux(self.unknowns, self.ions, simple=True, **tausettings)
+        itransp = IonTransport(self.unknowns, self.ions, **tausettings)
+        Iizcx   = IonParticleBalance(self.unknowns, self.ions)
+        Iin     = IonInflux(self.unknowns, self.ions, **tausettings)
+
+        self._terms.extend((Dizcx0, Dizcx1, Din, itransp, Iizcx, Iin))
+        for ion in self.ions:
+            A = ion['name']
+            Z = ion['Z']
+
+            if A == 'D':
+                eqsys[i('niD_0')] = lambda t, x : Dizcx0(x) + Din(t, x)
+                eqsys[i('niD_1')] = lambda t, x : Dizcx1(x) - itransp(x, 'D', Z0=1)
+            else:
+                # Add neutral equations
+                for Z0 in range(1, Z+1):
+                    if Z0 == 0:
+                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(x, A, Z0) + Iin(x, A)
+                    else:
+                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(x, A, Z0) - Itransp(x, A, Z0=Z0)
+
+        atol = [0.0] * len(eqsys)
+
+        atol[i('Ip')] = 1e-1
+        atol[i('IMK2')] = 1
+
+        return eqsys, atol
 
 
     def initialize(self, **values):
@@ -84,21 +137,44 @@ class Simulation:
         if len(self.ions) == 0:
             raise Exception("Ions must be added before calling 'initialize()'.")
 
-        s = self.updateSettings(self.settings, values)
+        s = self.settings
 
         pv = PlasmaVolume(a=s['a'], R=s['R'], V_vessel=s['V_vessel'], ions=self.ions)
         self.unknowns = UnknownQuantityHandler(self.ions, pv)
         self.unknowns.setvector(values)
 
 
-    def solve(uqh):
+    def solve(self, tMax):
         """
         Solve the system of equations using the given settings.
 
-        :param uqh: UnknownQuantityHandler of 
+        :param tMax: Duration of simulation.
         """
-        dydt = self._constructEquationSystem()
-        pass
+        equations, atol = self._constructEquationSystem()
+
+        def dydt(t, x):
+            print(f't = {t} s')
+            self.unknowns.update(x)
+            return [f(t,x) for f in equations]
+
+        """
+        print('INITIAL RATES')
+        for i in range(len(equations)):
+            print('d/dt {} = {}'.format(self.unknowns.getNameByIndex(i), equations[i](0, self.unknowns.x)))
+        for t in self._terms:
+            try:
+                print('{} = {}'.format(type(t).__name__, t(0, self.unknowns.x)))
+            except TypeError:
+                try:
+                    print('{} = {}'.format(type(t).__name__, t(self.unknowns.x)))
+                except Exception as e:
+                    print(f'ERROR: {e}')
+        print('-----------------------')
+        """
+
+        sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x)
+        
+        return SimulationResult(sol.t, self.unknowns.getdict(x=sol.y))
 
 
     def updateSettings(self, set1, set2):

@@ -94,6 +94,11 @@ class ADASRate:
             raise ValueError(f"Cannot evaluate ADAS rate {self.name} for Z0 = {Z0}.")
 
         ln, lT = np.log10(n), np.log10(T)
-        return 10**(r(ln, lT))
+        exp = r(ln, lT)
+
+        if exp.size == 1:
+            return 10**exp[0]
+        else:
+            return 10**exp
 
 

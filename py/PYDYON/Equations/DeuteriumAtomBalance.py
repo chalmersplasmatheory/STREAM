@@ -40,7 +40,7 @@ class DeuteriumAtomBalance:
         # Charge exchange
         cx = 0
         for ion in self.ions:
-            A = ion['A']
+            A = ion['name']
             if A == 'D':
                 continue
             

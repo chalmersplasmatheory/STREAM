@@ -1,5 +1,7 @@
 # Deuterium influx term
 
+from .. ConfinementTime import ConfinementTime
+
 
 class DeuteriumInflux:
 
@@ -18,14 +20,14 @@ class DeuteriumInflux:
         :param ions:       IonHandler object.
         :param simple:     If ``True``, assumes that the recycling coefficient is Y_D(t) = 1.
         """
-        self.quantities = quantities,
+        self.quantities = quantities
         self.ions = ions
         self.simpleYD = simple
         self.tau = ConfinementTime(quantities, ions, Bphi=Bphi, Bv=Bv, l_MK2=l_MK2)
 
 
-    def __call__(self, x):
-        return self.eval(x)
+    def __call__(self, t, x):
+        return self.eval(t, x)
 
 
     def eval(self, t, x):
@@ -36,14 +38,14 @@ class DeuteriumInflux:
         Vp = self.quantities.getV_p()
         Vn_tot = self.quantities.getV_n_tot('D')
 
-        nD1 = self.quantities.getIonData('D')
+        nD1 = self.quantities.getIonData('D')[1]
 
         Gamma = Vp*YD*nD1 / self.tau(x)
 
         return Gamma / Vn_tot
 
 
-    def evaluateRecyclingCoefficient(t):
+    def evaluateRecyclingCoefficient(self, t):
         """
         Evaluate the deuterium recycling coefficient.
         """

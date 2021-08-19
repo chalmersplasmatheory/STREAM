@@ -12,7 +12,6 @@ def fromSTREAM(so, uqh, time=0, ion='D'):
     :param ion:  Name of main ion species (to use for Ti).
     """
     dct = {
-        'ne': so.eqsys.n_cold[time,0],
         'Te': so.eqsys.T_cold[time,0],
         'Ti': so.eqsys.W_i.getTemperature(ion)[time,0],
         'Ip': so.eqsys.I_p[time,0],

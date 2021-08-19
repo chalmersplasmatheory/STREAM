@@ -25,7 +25,7 @@ class IonConvectivePowerTerm:
         """
         Evaluate this IonConvectivePowerTerm.
         """
-        Te = self.quantities['Ti']
+        Ti = self.quantities['Ti']
         e  = scipy.constants.e
 
         N = 0
@@ -36,7 +36,7 @@ class IonConvectivePowerTerm:
             for Z0 in range(1, Z+1):
                 ni = self.quantities.getIonData(A)
 
-                P += ni[Z0]
+                N += ni[Z0]
 
         return 3/2 * N * e*Ti / self.tau(x)
 
