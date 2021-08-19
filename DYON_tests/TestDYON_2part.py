@@ -5,6 +5,7 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+from matplotlib.font_manager import FontProperties
 
 sys.path.append('../extern/DREAM/py/')
 import DREAM.Settings.Equations.RunawayElectrons as Runaways
@@ -21,6 +22,7 @@ from STREAM.STREAMOutput import STREAMOutput
 from STREAM import runiface
 import STREAM.Settings.Equations.IonSpecies as Ions
 import STREAM.Settings.TransportSettings as Transport
+#import STREAM.Settings.Equations.ElectricField as ElectricField
 #'''
 
 # Grid parameters
@@ -33,7 +35,7 @@ import numpy as np
 tMax_initial = 1e-4  # simulation time in seconds
 Nt_initial   = 4000   # number of time steps
 tMax_final   = 5e-1  # simulation time in seconds
-Nt_final     = 5000   # number of time steps
+Nt_final     = 1e4*tMax_final   # number of time steps
 
 pgp = 4.3135e-5
 n_D_0 = 2.78e22 * pgp
@@ -92,6 +94,10 @@ print(str(r_wall))
 sts_initial.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
 sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall[0]/r_0, times=0, inverse_wall_time=1/wall_time, R0=r_0)
+#sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+#sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
+#sts_initial.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
+#sts_initial.eqsys.E_field.setCircuitVloop(V_loop_wall, t)
 #sts_initial.eqsys.E_field.setPrescribedData(E, times=t)
 
 #sts_initial.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
@@ -99,8 +105,8 @@ sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER
 sts_initial.eqsys.T_cold.setPrescribedData(T_e, times=t_e)
 
 sts_initial.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=n_D, r=r, T=T_i_initial)
-sts_initial.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_C, r=r, T=T_i_initial)
-sts_initial.eqsys.n_i.addIon(name='O', Z=8, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_O, r=r, T=T_i_initial)
+#sts_initial.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_C, r=r, T=T_i_initial)
+#sts_initial.eqsys.n_i.addIon(name='O', Z=8, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=n_O, r=r, T=T_i_initial)
 
 sts_initial.eqsys.n_re.setAvalanche(avalanche=Runaways.AVALANCHE_MODE_NEGLECT)
 sts_initial.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_DISABLED)
@@ -146,9 +152,10 @@ sts_initial.other.include('fluid', 'stream')
 sto_initial = runiface(sts_initial, 'output_initial.h5',
                        quiet=False)
 sts_final = STREAMSettings(sts_initial)
-sts_final.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
+#sts_final.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
 sts_final.timestep.setTmax(tMax_final)
 sts_final.timestep.setNt(Nt_final)
+#sts_final.solver.setDebug(saveresidual=True, timestep=0, iteration=0)
 
 sts_final.fromOutput('output_initial.h5')
 sts_final.output.setFilename('output_final.h5')
@@ -156,9 +163,177 @@ sts_final.save('STREAMSettings_final.h5')
 
 sto_final = runiface(sts_final, 'output_final.h5',
                         quiet=False)
-
-sto_final.eqsys.T_cold.plot()
+#'''
+'''
+plt.plot(sto_final.grid.t[1:],sto_final.other.stream.tau_D[:],'k')
+plt.plot(sto_final.grid.t[1:],sto_final.other.stream.tau_D_par[:],'r--')
+plt.plot(sto_final.grid.t[1:],sto_final.other.stream.tau_D_perp[:],'b-.')
+plt.legend(['tau_D','tau_D_par','tau_D_perp'])
+plt.xlim(0,0.5)
+plt.ylim(0,0.25)
+plt.xlabel('Time [s]')
+plt.ylabel('Confinement time [s]')
 plt.show()
+
 sto_final.eqsys.I_p.plot()
+plt.xlim(0,0.5)
+#plt.ylim(0,12e5)
+plt.xlabel('Time [s]')
+plt.ylabel('Plasma current [A]')
+plt.show()
+sto_final.eqsys.T_cold.plot()
+plt.xlim(0,0.5)
+#plt.ylim(0,600)
+plt.xlabel('Time [s]')
+plt.ylabel('Electron temperature [eV]')
+plt.show()
+sto_final.eqsys.n_cold.plot()
+plt.xlim(0,0.5)
+#plt.ylim(0,5e18)
+plt.xlabel('Time [s]')
+plt.ylabel('Electron density [m$^{-3}$]')
+plt.show()
+
+# Ion density
+legend = []
+n_D_0=sto_final.eqsys.n_i['D'][0][:]
+legend.append('n_D_0')
+plt.plot(sto_final.grid.t[:],n_D_0,'b-')
+n_D_1=sto_final.eqsys.n_i['D'][1][:]
+plt.plot(sto_final.grid.t[:],n_D_1,'b--')
+legend.append('n_D_1')
+
+n_O_0=sto_final.eqsys.n_i['O'][0][:]
+legend.append('n_O_0')
+plt.plot(sto_final.grid.t[:],n_O_0,'r-')
+n_O_1=sto_final.eqsys.n_i['O'][1][:]
+legend.append('n_O_1')
+plt.plot(sto_final.grid.t[:],n_O_1,'r--')
+for i in range(2,9):
+    n_O_i=sto_final.eqsys.n_i['O'][i][:]
+    legend.append('n_O_'+str(i))
+    plt.plot(sto_final.grid.t[:],n_O_i,'r:')
+
+n_C_0=sto_final.eqsys.n_i['C'][0][:]
+legend.append('n_C_0')
+plt.plot(sto_final.grid.t[:],n_C_0,'y-')
+n_C_1=sto_final.eqsys.n_i['C'][1][:]
+legend.append('n_C_1')
+plt.plot(sto_final.grid.t[:],n_C_1,'y--')
+for i in range(2,7):
+    n_C_i=sto_final.eqsys.n_i['C'][i][:]
+    legend.append('n_C_'+str(i))
+    plt.plot(sto_final.grid.t[:],n_C_i,'y:')
+
+plt.xlabel('Time [s]')
+plt.ylabel('Ion density [m$^{-3}$]')
+fontP = FontProperties()
+fontP.set_size('x-small')
+plt.legend(legend,prop=fontP)
+#plt.xlim(0,0.12)
+plt.show()
+'''
+
+
+
+
+
+# Total amount of deuterium ions
+legend = []
+N_D_0=sto_final.eqsys.n_i['D'][0][1:]*np.transpose(np.array(sto_final.other.stream.V_n_tot['D'][:])[np.newaxis])
+legend.append('N_D_0')
+plt.plot(sto_final.grid.t[1:],N_D_0,'b-')
+N_D_1=sto_final.eqsys.n_i['D'][1][1:]*sto_final.other.stream.V_p[:]
+plt.plot(sto_final.grid.t[1:],N_D_1,'b--')
+legend.append('N_D_1')
+'''
+N_O_0=sto_final.eqsys.n_i['O'][0][1:]*sto_final.other.stream.V_n_tot['O'][:]
+legend.append('N_O_0')
+plt.plot(sto_final.grid.t[1:],N_O_0,'r-')
+N_O_1=sto_final.eqsys.n_i['O'][1][1:]*sto_final.other.stream.V_p[:]
+legend.append('N_O_1')
+plt.plot(sto_final.grid.t[1:],N_O_1,'r--')
+for i in range(2,9):
+    N_O_i=sto_final.eqsys.n_i['O'][i][1:]*sto_final.other.stream.V_p[:]
+    legend.append('N_O_'+str(i))
+    plt.plot(sto_final.grid.t[1:],N_O_i,'r:')
+
+N_C_0=sto_final.eqsys.n_i['C'][0][1:]*sto_final.other.stream.V_n_tot['C'][:]
+legend.append('N_C_0')
+plt.plot(sto_final.grid.t[1:],N_C_0,'y-')
+N_C_1=sto_final.eqsys.n_i['C'][1][1:]*sto_final.other.stream.V_p[:]
+legend.append('N_C_1')
+plt.plot(sto_final.grid.t[1:],N_C_1,'y--')
+for i in range(2,7):
+    N_C_i=sto_final.eqsys.n_i['C'][i][1:]*sto_final.other.stream.V_p[:]
+    legend.append('N_C_'+str(i))
+    plt.plot(sto_final.grid.t[1:],N_C_i,'y:')
+'''
+plt.xlabel('Time [s]')
+plt.ylabel('Total amount of ions per state')
+fontP = FontProperties()
+fontP.set_size('x-small')
+plt.legend(legend,prop=fontP)
+#plt.xlim(0,0.12)
+plt.show()
+
+# Total amount of deuterium ions
+legend = []
+N_D_0=sto_final.eqsys.n_i['D'][0][1:]*np.transpose(np.array(sto_final.other.stream.V_n_tot['D'][:])[np.newaxis])
+N_D_1=sto_final.eqsys.n_i['D'][1][1:]*sto_final.other.stream.V_p[:]
+N_D=N_D_0+N_D_1
+plt.plot(sto_final.grid.t[1:],N_D,'b-')
+legend.append('N_D')
+'''
+N_O_0=sto_final.eqsys.n_i['O'][0][1:]*sto_final.other.stream.V_n_tot['O'][:]
+N_O_1=sto_final.eqsys.n_i['O'][1][1:]*sto_final.other.stream.V_p[:]
+N_O=N_O_0+N_O_1
+for i in range(2,9):
+    N_O+=sto_final.eqsys.n_i['O'][i][1:]*sto_final.other.stream.V_p[:]
+legend.append('N_O')
+plt.plot(sto_final.grid.t[1:],N_O,'r-')
+
+N_C_0=sto_final.eqsys.n_i['C'][0][1:]*sto_final.other.stream.V_n_tot['C'][:]
+N_C_1=sto_final.eqsys.n_i['C'][1][1:]*sto_final.other.stream.V_p[:]
+N_C = N_C_0 + N_C_1
+for i in range(2,7):
+    N_C+=sto_final.eqsys.n_i['C'][i][1:]*sto_final.other.stream.V_p[:]
+legend.append('N_C')
+plt.plot(sto_final.grid.t[1:],N_C,'y-')
+'''
+plt.xlabel('Time [s]')
+plt.ylabel('Total amount of ions per species')
+fontP = FontProperties()
+fontP.set_size('x-small')
+plt.legend(legend,prop=fontP)
+#plt.xlim(0,0.12)
+plt.show()
+
+# Total amount of ions
+N_D_0=sto_final.eqsys.n_i['D'][0][1:]*np.transpose(np.array(sto_final.other.stream.V_n_tot['D'][:])[np.newaxis])
+N_D_1=sto_final.eqsys.n_i['D'][1][1:]*sto_final.other.stream.V_p[:]
+N= N_D_0+N_D_1
+'''
+N_O_0=sto_final.eqsys.n_i['O'][0][1:]*sto_final.other.stream.V_n_tot['O'][:]
+N_O_1=sto_final.eqsys.n_i['O'][1][1:]*sto_final.other.stream.V_p[:]
+N+=N_O_0+N_O_1
+for i in range(2,9):
+    N+=sto_final.eqsys.n_i['O'][i][1:]*sto_final.other.stream.V_p[:]
+
+N_C_0=sto_final.eqsys.n_i['C'][0][1:]*sto_final.other.stream.V_n_tot['C'][:]
+N_C_1=sto_final.eqsys.n_i['C'][1][1:]*sto_final.other.stream.V_p[:]
+N += N_C_0 + N_C_1
+for i in range(2,7):
+    N+=sto_final.eqsys.n_i['C'][i][1:]*sto_final.other.stream.V_p[:]
+'''
+plt.plot(sto_final.grid.t[1:],N)
+
+plt.xlabel('Time [s]')
+plt.ylabel('Total amount of ions')
+fontP = FontProperties()
+fontP.set_size('x-small')
+#plt.legend(legend,prop=fontP)
+#plt.xlim(0,0.12)
+plt.ylim(bottom=0)
 plt.show()
 #'''

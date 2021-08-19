@@ -12,18 +12,71 @@ plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_posRecombination[:,Z0,0],
 plt.plot(do.grid.t[1:],do.other.stream.neutralinflux['D'][:,0]/do.other.stream.V_n_tot['D'][:,0], label='posRec')
 #"""
 
-
 #for Z0 in range(9,26):
 #    if np.sum(do.other.stream.ionrateequation_posIonization[:,Z0,0])==0:
 #        continue
-for Z0 in range(0,17):
+for Z0 in range(0,18):
     plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_posIonization[:,Z0,0], label='posIoniz')
     plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_negIonization[:,Z0,0], label='negIoniz')
     plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_posRecombination[:,Z0,0], label='posRec')
     plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_negRecombination[:,Z0,0], label='negRec')
     plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_posChargeExchange[:,Z0,0], label='posCX')
     plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_negChargeExchange[:,Z0,0], label='negCX')
-    plt.plot(do.grid.t[1:],do.other.stream.neutralinflux['D'][:,0]/do.other.stream.V_n_tot['D'][:,0], label='transport')
+    if Z0 > 8:
+        print(str(Z0-9))
+    else:
+        if Z0 > 1:
+            print(str(Z0 - 2))
+        else:
+            print(str(Z0))
+    if Z0 == 0:
+        plt.plot(do.grid.t[1:],do.other.stream.neutralinflux['D'][:]/do.other.stream.V_n_tot['D'][:], label='transport')
+    if Z0 == 2:
+        plt.plot(do.grid.t[1:], do.other.stream.neutralinflux['C'][:]/ do.other.stream.V_n_tot['C'][:],
+                 label='transport')
+    if Z0 == 9:
+        plt.plot(do.grid.t[1:], do.other.stream.neutralinflux['O'][:] / do.other.stream.V_n_tot['O'][:],
+                 label='transport')
     plt.legend()
-    #'''
+    
     plt.show()
+    dndt = do.other.stream.ionrateequation_posIonization[:,Z0,0]\
+         + do.other.stream.ionrateequation_negIonization[:,Z0,0]\
+         + do.other.stream.ionrateequation_posRecombination[:,Z0,0]\
+         + do.other.stream.ionrateequation_negRecombination[:,Z0,0] \
+         + do.other.stream.ionrateequation_posChargeExchange[:,Z0,0]\
+         + do.other.stream.ionrateequation_negChargeExchange[:,Z0,0]
+    if Z0 == 0:
+        dndt+=do.other.stream.neutralinflux['D'][:]/do.other.stream.V_n_tot['D'][:]
+    if Z0 == 2:
+        dndt+=do.other.stream.neutralinflux['C'][:]/ do.other.stream.V_n_tot['C'][:]
+    if Z0 == 9:
+        dndt+=do.other.stream.neutralinflux['O'][:] / do.other.stream.V_n_tot['O'][:]
+    plt.plot(do.grid.t[1:],dndt)
+    plt.show()
+
+'''
+do = STREAMOutput('STOs/output_DYON_f5.0.h5')
+for Z0 in range(0,2):
+    plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_posIonization[:,Z0,0], label='posIoniz')
+    plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_negIonization[:,Z0,0], label='negIoniz')
+    plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_posRecombination[:,Z0,0], label='posRec')
+    plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_negRecombination[:,Z0,0], label='negRec')
+    #plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_posChargeExchange[:,Z0,0], label='posCX')
+    #plt.plot(do.grid.t[1:],do.other.stream.ionrateequation_negChargeExchange[:,Z0,0], label='negCX')
+    if Z0 == 0:
+        plt.plot(do.grid.t[1:],do.other.stream.neutralinflux['D'][:]/do.other.stream.V_n_tot['D'][:], label='transport')
+    plt.legend()
+
+    plt.show()
+    dndt = do.other.stream.ionrateequation_posIonization[:,Z0,0]\
+         + do.other.stream.ionrateequation_negIonization[:,Z0,0]\
+         + do.other.stream.ionrateequation_posRecombination[:,Z0,0]\
+         + do.other.stream.ionrateequation_negRecombination[:,Z0,0] \
+         + do.other.stream.ionrateequation_posChargeExchange[:,Z0,0]\
+         + do.other.stream.ionrateequation_negChargeExchange[:,Z0,0]
+    if Z0 == 0:
+        dndt+=do.other.stream.neutralinflux['D'][:]/do.other.stream.V_n_tot['D'][:]
+    plt.plot(do.grid.t[1:],dndt)
+    plt.show()
+#'''
