@@ -7,6 +7,10 @@ import scipy.interpolate
 
 
 def eval(quantities):
+    return evalConductivity(quantities)
+
+
+def evalConductivity(quantities):
     """
     Evaluate the conductivity using the given UnknownQuantityHandler.
     """
@@ -15,6 +19,21 @@ def eval(quantities):
     Z  = quantities.getZeff()
 
     return evaluateSpitzerConductivity(n=ne, T=Te, Z=Z)
+
+
+def evalResistance(quantities):
+    """
+    Evaluates the plasma resistance, rather than the
+    plasma conductivity.
+    """
+    R = quantities.plasmavolume.R
+    a = quantities.plasmavolume.a
+
+    sg = evalConductivity(quantities)
+    Rp = 2*R/a**2 * (1/sg)
+
+    return Rp
+
 
 
 def evaluateBraamsConductivity(n, T, Z):

@@ -29,12 +29,7 @@ class OhmicPowerTerm:
         """
         Ip = self.quantities['Ip']
         Vp = self.quantities.getPlasmaVolume()
-        sg = Conductivity.eval(self.quantities)
-
-        R = self.quantities.plasmavolume.R
-        a = self.quantities.plasmavolume.a
-
-        Rp = 2*R/a**2 * (1/sg)
+        Rp = Conductivity.evalResistance(self.quantities)
 
         Pohm = Ip**2 * Rp / Vp
         return Pohm
