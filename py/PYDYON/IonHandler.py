@@ -34,6 +34,10 @@ class IonHandler:
         return self[name]['m']
 
 
+    def __len__(self):
+        return len(self.ions)
+
+
     def __getitem__(self, name):
         for i in self.ions:
             if i['name'] == name:

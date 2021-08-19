@@ -7,7 +7,7 @@ class UnknownQuantityHandler:
 
     
     UNKNOWNS = [
-        'ne', 'Te', 'Ti', 'Ip', 'IMK2'
+        'We', 'Wi', 'Ip', 'IMK2'
     ]
     
 
@@ -34,6 +34,13 @@ class UnknownQuantityHandler:
                 idx += 1
 
 
+    def __len__(self):
+        """
+        Returns the number of unknowns in the equation system.
+        """
+        return len(self.map)
+
+
     def __getitem__(self, name):
         """
         Returns data for the quantity with the given name.
@@ -43,6 +50,18 @@ class UnknownQuantityHandler:
 
             idx = self.map[f'ni{name[2:]}_0']
             return self.x[idx:(idx+ion['Z']+1)]
+        elif name == 'ne':
+            return self.getElectronDensity()
+        elif name == 'Te':
+            idx = self.map['We']
+            We  = self.x[idx]
+            ne  = self.getElectronDensity()
+            return 2*We / (3*ne)
+        elif name == 'Ti':
+            idx = self.map['Wi']
+            Wi  = self.x[idx]
+            ni  = self.getTotalIonDensity()
+            return 2*Wi / (3*ni)
         else:
             if name not in self.map:
                 raise KeyError(f"No unknown quantity named '{name}' exists in equation system.")
@@ -50,6 +69,22 @@ class UnknownQuantityHandler:
             idx = self.map[name]
 
             return self.x[idx]
+
+
+    def getElectronDensity(self):
+        """
+        Evaluates and returns the electron density.
+        """
+        ne = 0
+        for ion in self.ions:
+            A = ion['name']
+            Z = ion['Z']
+            ni = self.getIonData(A)
+            
+            for Z0 in range(1,Z0+1):
+                ne += Z0 * ni[Z0]
+
+        return ne
 
 
     def getIonData(self, ion):
@@ -60,6 +95,21 @@ class UnknownQuantityHandler:
             return self['ni{}'.format(ion['name'])]
         else:
             return self[f'ni{ion}']
+
+
+    def getTotalIonDensity(self):
+        """
+        Calculates density of all ions (neutrals not included).
+        """
+        n = 0
+        for ion in self.ions:
+            ni = self.getIonData(ion)
+            Z  = ion['Z']
+
+            for Z0 in range(1, Z+1):
+                n += ni[Z0]
+
+        return n
 
 
     def getLambda(self, ion):
