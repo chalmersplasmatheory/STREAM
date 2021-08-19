@@ -46,7 +46,7 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
     real_t ec = DREAM::Constants::ec;
     
     return 4/(a*B) * exp(-I_p/I_ref) *
-        sqrt((ec*T_cold+2/3*W_i/N_i)*(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/(Constants::mD));
+        sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/(Constants::mD));
 }
 
 /**
@@ -75,7 +75,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir){
     real_t B = radials->GetMagneticField();
     real_t ec = DREAM::Constants::ec;
     
-    return -4/(a*B*I_ref) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2/3*W_i/N_i)*(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/(Constants::mD));
+    return -4/(a*B*I_ref) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*(B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/(Constants::mD));
 }
 
 /**
@@ -94,7 +94,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dIwall(len_t ir){
     real_t ec = DREAM::Constants::ec;
     
     
-    return 4/(a*B) *Constants::mu0*Constants::mu0*I_wall/ (M_PI*M_PI*l_MK2*l_MK2) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2/3*W_i/N_i)/((B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)*(Constants::mD)));
+    return 4/(a*B) *Constants::mu0*Constants::mu0*I_wall/ (M_PI*M_PI*l_MK2*l_MK2) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2.0/3.0*W_i/N_i)/((B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)*(Constants::mD)));
 }
 
 /**
@@ -112,7 +112,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dTcold(len_t ir){
     real_t B = radials->GetMagneticField(); 
     real_t ec = DREAM::Constants::ec;
     
-    return 1/(8*a*a*B) + 2*ec/(a*B) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/((ec*T_cold+2/3*W_i/N_i)*(Constants::mD)));
+    return 1.0/(8*a*a*B) + 2*ec/(a*B) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/((ec*T_cold+2.0/3.0*W_i/N_i)*(Constants::mD)));
 }
 
 /**
@@ -130,7 +130,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dWi(len_t ir){
     real_t B = radials->GetMagneticField(); 
     real_t ec = DREAM::Constants::ec;
     
-    return 4/3*1/(a*B)*1/N_i * exp(-I_p/I_ref) * sqrt((B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/((ec*T_cold+2/3*W_i/N_i)*(Constants::mD)));
+    return 4/3.0*1/(a*B)*1/N_i * exp(-I_p/I_ref) * sqrt((B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/((ec*T_cold+2.0/3.0*W_i/N_i)*(Constants::mD)));
 }
 
 /**
@@ -148,7 +148,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dNi(len_t ir){
     real_t B = radials->GetMagneticField(); 
     real_t ec = DREAM::Constants::ec;
     
-    return -4/3*1/(a*B)*W_i/(N_i*N_i) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/((ec*T_cold+2/3*W_i/N_i)*(Constants::mD)));
+    return -4/3.0*1/(a*B)*W_i/(N_i*N_i) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Constants::mu0*Constants::mu0/ (M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall)/((ec*T_cold+2.0/3.0*W_i/N_i)*(Constants::mD)));
 }
 
 /**

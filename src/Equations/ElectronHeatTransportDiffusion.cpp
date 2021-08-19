@@ -113,14 +113,14 @@ void ElectronHeatTransportDiffusion::Rebuild(
 
         // Factor ec (=elementary charge) to convert from
         // eV to joule
-        this->dn_cold[ir] = 3/2 * Constants::ec * a * a * tauinv; 
-        this->dI_p[ir]    = 3/2 * Constants::ec * a * a * dtauinvdIp * n;
-        this->dI_wall[ir] = 3/2 * Constants::ec * a * a * dtauinvdIwall * n;
-        this->dT_cold[ir] = 3/2 * Constants::ec * a * a * dtauinvdTcold * n;
-        this->dW_i[ir]    = 3/2 * Constants::ec * a * a * dtauinvdWi * n;
-        this->dN_i[ir]    = 3/2 * Constants::ec * a * a * dtauinvdNi * n;
+        this->dn_cold[ir] = 3.0/2.0 * Constants::ec * a * a * tauinv; 
+        this->dI_p[ir]    = 3.0/2.0 * Constants::ec * a * a * dtauinvdIp * n;
+        this->dI_wall[ir] = 3.0/2.0 * Constants::ec * a * a * dtauinvdIwall * n;
+        this->dT_cold[ir] = 3.0/2.0 * Constants::ec * a * a * dtauinvdTcold * n;
+        this->dW_i[ir]    = 3.0/2.0 * Constants::ec * a * a * dtauinvdWi * n;
+        this->dN_i[ir]    = 3.0/2.0 * Constants::ec * a * a * dtauinvdNi * n;
         
-        Drr(ir, 0, 0) += 3/2 * Constants::ec * a * a * tauinv * n;
+        Drr(ir, 0, 0) += 3.0/2.0 * Constants::ec * a * a * tauinv * n;
     }
     #undef INTERP
 }
