@@ -63,19 +63,19 @@ bool IonHeatTransport::SetCSJacobianBlock(
     const len_t iIon, const len_t Z0, const len_t rOffset
 ) { 
     if(derivId==id_Ip){
-		jac->SetElement(rOffset+Z0, 0,this->dI_p);
+		jac->SetElement(rOffset, 0,this->dI_p);
 		return true;
 	} else if(derivId==id_Iwall){
-		jac->SetElement(rOffset+Z0, 0,this->dI_wall);
+		jac->SetElement(rOffset, 0,this->dI_wall);
 		return true;
 	} else if(derivId==id_Tcold){
-		jac->SetElement(rOffset+Z0, 0,this->dT_cold);
+		jac->SetElement(rOffset, 0,this->dT_cold);
 		return true;
 	} else if(derivId==id_Wi){
-		jac->SetElement(rOffset+Z0, iIon,this->dW_i);
+		jac->SetElement(rOffset, iIon,this->dW_i);
 		return true;
 	} else if(derivId==id_Ni){
-		jac->SetElement(rOffset+Z0, iIon,this->dN_i);
+		jac->SetElement(rOffset, iIon,this->dN_i);
 		return true;
 	}
 	else {
@@ -85,13 +85,13 @@ bool IonHeatTransport::SetCSJacobianBlock(
 void IonHeatTransport::SetCSMatrixElements(
     FVM::Matrix *mat, real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
-    mat->SetElement(rOffset+Z0, rOffset+Z0, -2.0/3.0 * tauinv);
+    mat->SetElement(rOffset, rOffset, -2.0/3.0 * tauinv);
 } 
 
 
 void IonHeatTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
-    vec[rOffset+Z0]=-2.0/3.0 * W_i * tauinv; 
+    vec[rOffset]-=2.0/3.0 * W_i * tauinv; 
 }
 

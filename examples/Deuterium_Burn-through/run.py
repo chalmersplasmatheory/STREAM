@@ -91,6 +91,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.003
     # Numerical settings
     ss.solver.setType(Solver.NONLINEAR)
     ss.solver.preconditioner.setEnabled(False)
+    #ss.solver.tolerance.set('lambda_i', reltol=1e-5)
+    #ss.solver.tolerance.set('W_i', reltol=1e-4)
     ss.timestep.setTmax(tmax)
     ss.timestep.setNt(nt)
     ss.timestep.setNumberOfSaveSteps(10000)
