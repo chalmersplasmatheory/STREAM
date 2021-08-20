@@ -217,7 +217,37 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     DREAM::SimulationGenerator::ConstructEquation_W_cold(eqsys, s);
 }
 
-void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *eqsys, DREAM::Settings* /*s*/, DREAM::ADAS *adas){
+void SimulationGenerator::ConstructEquation_T_i(
+    EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas,
+    STREAM::OtherQuantityHandler::eqn_terms *stream_terms
+) {
+    /**
+     * if the electron heat W_cold is evolved self-consistently,
+     * also evolve the ion heat W_i. Otherwise set it to constant.
+     */
+    enum DREAM::OptionConstants::uqty_T_cold_eqn TcoldType = (enum DREAM::OptionConstants::uqty_T_cold_eqn)s->GetInteger("eqsys/T_cold/type");
+    if(TcoldType==DREAM::OptionConstants::UQTY_T_COLD_EQN_PRESCRIBED)
+        DREAM::SimulationGenerator::ConstructEquation_T_i_trivial(eqsys, s);
+    else if (TcoldType == DREAM::OptionConstants::UQTY_T_COLD_SELF_CONSISTENT)
+        ConstructEquation_T_i_selfconsistent(eqsys, s, adas, stream_terms);
+    else 
+        throw DREAM::SettingsException(
+            "T_i: Unrecognized equation type for '%s': %d.",
+            DREAM::OptionConstants::UQTY_T_COLD, TcoldType
+        );
+
+    // Initialize heat from ion densities and input ion temperatures
+    real_t *Ti_init = DREAM::SimulationGenerator::LoadDataIonR("eqsys/n_i", eqsys->GetFluidGrid()->GetRadialGrid(), s, eqsys->GetIonHandler()->GetNZ(), "initialTi");
+    const real_t *Ni_init = eqsys->GetUnknownHandler()->GetUnknownInitialData(eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS));
+    for(len_t it=0; it<eqsys->GetIonHandler()->GetNZ()*eqsys->GetFluidGrid()->GetNr(); it++)
+        Ti_init[it] *= 1.5*DREAM::Constants::ec*Ni_init[it];
+    eqsys->SetInitialValue(eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER), Ti_init);    
+}
+
+void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
+    EquationSystem *eqsys, DREAM::Settings* /*s*/, DREAM::ADAS *adas,
+    struct OtherQuantityHandler::eqn_terms *stream_terms
+){
     const len_t id_Wi = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER); 
     const len_t id_Wcold = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_W_COLD);
     const len_t id_ni = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
@@ -231,6 +261,20 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *e
     DREAM::FVM::Operator *Op_Wij = new DREAM::FVM::Operator(fluidGrid);
     DREAM::FVM::Operator *Op_Wie = new DREAM::FVM::Operator(fluidGrid);
     DREAM::FVM::Operator *Op_ni = new DREAM::FVM::Operator(fluidGrid);
+
+    stream_terms->Wi_iontransport = new IonHeatTransport*[nZ];
+
+    // Locate deuterium
+    len_t D_index;
+    const vector<string>& ionNames = ionHandler->GetNameList();
+    for (D_index = 0; D_index < ionNames.size(); D_index++)
+        if (ionNames[D_index] == "D")
+            break;
+
+    if (D_index == ionNames.size())
+        throw DREAM::SettingsException(
+            "T_i: Expected to find one deuterium ion species named 'D'."
+        );
 
     DREAM::CoulombLogarithm *lnLambda = eqsys->GetREFluid()->GetLnLambda();
     for(len_t iz=0; iz<nZ; iz++){
@@ -255,13 +299,14 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(EquationSystem *e
                     0, false,
                     unknowns, lnLambda, ionHandler)
         );
-        Op_Wij->AddTerm(new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator()));
-        if(eqsys->GetIonHandler()->GetZ(iz) == 1){
-            Op_ni->AddTerm(new ChargeExchangeTerm(eqsys->GetFluidGrid(), eqsys->GetUnknownHandler(), eqsys->GetIonHandler(), iz, adas, eqsys->GetPlasmaVolume(), nullptr));
+        stream_terms->Wi_iontransport[iz] = new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator());
+        Op_ni->AddTerm(stream_terms->Wi_iontransport[iz]);
+        if (iz == D_index){
+            Op_ni->AddTerm(new ChargeExchangeTerm(eqsys->GetFluidGrid(), eqsys->GetUnknownHandler(), eqsys->GetIonHandler(), iz, adas, eqsys->GetPlasmaVolume(), eqsys->GetEllipticalRadialGridGenerator(), fluidGrid, D_index));
         }
     }
-    eqsys->SetOperator(id_Wi, id_Wi, Op_Wij, "dW_i/dt = sum_j Q_ij + Q_ie");
+    eqsys->SetOperator(id_Wi, id_Wi, Op_Wij, "dW_i/dt = sum_j Q_ij + Q_ie - Q_CX - Q_transport");
     eqsys->SetOperator(id_Wi, id_Wcold, Op_Wie);
-    eqsys->SetOperator(id_Wi, id_ni, Op_ni, "dW_i/dt = V_n,i/V_p * [ 3/2 * n_i^(0) * ( T_i - 0.026 ) * ( sum R_j,cx^(1) n_j^(1) ) ]");
+    eqsys->SetOperator(id_Wi, id_ni, Op_ni/*, "dW_i/dt = V_n,i/V_p * [ 3/2 * n_i^(0) * ( T_i - 0.026 ) * ( sum R_j,cx^(1) n_j^(1) ) ]"*/);
 }
 

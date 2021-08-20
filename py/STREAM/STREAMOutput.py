@@ -50,4 +50,5 @@ class STREAMOutput(DREAMOutput):
             self.other.stream.resetQuantity('V_n', OtherIonSpeciesScalarQuantity)
             self.other.stream.resetQuantity('V_n_tot', OtherIonSpeciesScalarQuantity)
             self.other.stream.resetQuantity('neutralinflux', OtherIonSpeciesScalarQuantity)
+            #self.other.stream.resetQuantity('iontransport', OtherIonSpeciesScalarQuantity)
         

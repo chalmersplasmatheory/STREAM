@@ -22,11 +22,13 @@ using namespace std;
  */
 void SimulationGenerator::ConstructOtherQuantityHandler(
     EquationSystem *eqsys, DREAM::Settings *s,
+    struct OtherQuantityHandler::eqn_terms *stream_terms,
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
     OtherQuantityHandler *oqh = new OtherQuantityHandler(
         eqsys->GetConfinementTime(), eqsys->GetNeutralInflux(),
         eqsys->GetPlasmaVolume(), eqsys->GetIonRateEquations(),
+        stream_terms,
         eqsys->GetHotTailCollisionHandler(), eqsys->GetRunawayCollisionHandler(),
         eqsys->GetPostProcessor(), eqsys->GetREFluid(), eqsys->GetUnknownHandler(),
         eqsys->GetEquations(), eqsys->GetIonHandler(), eqsys->GetFluidGrid(),

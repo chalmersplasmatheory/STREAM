@@ -14,6 +14,7 @@ using namespace STREAM;
 OtherQuantityHandler::OtherQuantityHandler(
     ConfinementTime *confinementTime, NeutralInflux *neutralInflux,
     PlasmaVolume *plasmaVolume, std::vector<IonRateEquation*> ionRateEquations,
+    struct eqn_terms *stream_terms,
     // Carried over from DREAM...
     DREAM::CollisionQuantityHandler *cqtyHottail, DREAM::CollisionQuantityHandler *cqtyRunaway,
     DREAM::PostProcessor *postProcessor, DREAM::RunawayFluid *REFluid, DREAM::FVM::UnknownQuantityHandler *unknowns,
@@ -24,7 +25,7 @@ OtherQuantityHandler::OtherQuantityHandler(
         unknowns, unknown_equations, ions, fluidGrid, hottailGrid, runawayGrid,
         scalarGrid, oqty_terms),
     confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume),
-    ionRateEquations(ionRateEquations) {
+    ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
 
     this->DefineQuantitiesSTREAM();
 }
@@ -91,6 +92,28 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
 
     const len_t nIons = this->ions->GetNZ();
     const len_t nChargeStates = this->ions->GetNzs();
+
+    if (this->stream_terms->iontransport != nullptr) {
+        DEF_SC_MUL("stream/ni_iontransport", nChargeStates, "Ion particle transport rate for each species",
+            const len_t nZ = this->ions->GetNZ();
+            real_t *v = qd->StoreEmpty();
+            for (len_t iZ = 0, offset = 0; iZ < nZ; iZ++, offset += this->ions->GetZ(iZ)+1) {
+                if (this->stream_terms->iontransport[iZ] != nullptr)
+                    this->stream_terms->iontransport[iZ]->SetVectorElements(v+offset, nullptr);
+            }
+        );
+    }
+
+    if (this->stream_terms->Wi_iontransport != nullptr) {
+        DEF_SC_MUL("stream/Wi_iontransport", nChargeStates, "Ion heat transport rate for each species",
+            const len_t nZ = this->ions->GetNZ();
+            real_t *v = qd->StoreEmpty();
+            for (len_t iZ = 0, offset = 0; iZ < nZ; iZ++, offset += this->ions->GetZ(iZ)+1) {
+                if (this->stream_terms->iontransport[iZ] != nullptr)
+                    this->stream_terms->iontransport[iZ]->SetVectorElements(v+offset, nullptr);
+            }
+        );
+    }
 
     DEF_SC_MUL("stream/neutralinflux", nIons, "Influx rate of neutral particles of each species",
         const len_t nZ = this->ions->GetNZ();
