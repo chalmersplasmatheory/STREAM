@@ -198,7 +198,7 @@ for pgp in pgp_list:
     sto_list.append(sto_final)
 #'''
 # Power consumption
-'''
+#'''
 legend = []
 colour=['b--','r--','b-','r-']
 for sto, c in zip(sto_list,colour):
@@ -237,7 +237,7 @@ plt.ylabel('Degree of ionization [%]')
 plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
 plt.show()
 #'''
-'''
+#'''
 # Electron temperature
 for sto, c in zip(sto_list,colour):
     t = sto.grid.t[:]
@@ -332,6 +332,22 @@ plt.ylabel('Total amount of deuterium ions')
 plt.legend(legend)
 plt.legend(['STREAM 5 N_D_0', 'STREAM 7 N_D_0', 'DYON 5 N_D_0', 'DYON 7 N_D_0', 'STREAM 5 N_D_1', 'STREAM 7 N_D_1', 'DYON 5 N_D_1', 'DYON 7 N_D_1'])
 plt.show()
+
+# Total amount of deuterium ions
+legend = []
+colour=['b-','r-','b--','r--']
+for sto, c in zip(sto_list, colour):
+    n_D_0=np.array(sto.eqsys.n_i['D'][0][1:])
+    n_D_0 = np.array(n_D_0).flatten()
+    dnD0dt = np.gradient(n_D_0)
+    #legend.append('PGP='+str(i)+', N_D_0')
+    plt.plot(sto.grid.t[1:],dnD0dt,c)
+plt.plot(np.linspace(0,tMax_final,2),np.linspace(0,0,2),'k')
+plt.xlabel('Time [s]')
+plt.ylabel('Derivative of ion density [m$^{-3}$]')
+plt.legend(['STREAM 5 N_D_0', 'STREAM 7 N_D_0', 'DYON 5 N_D_0', 'DYON 7 N_D_0'])
+plt.show()
+
 
 # Total amount of deuterium ions
 legend = []
