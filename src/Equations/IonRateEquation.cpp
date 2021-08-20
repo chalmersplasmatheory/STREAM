@@ -287,7 +287,7 @@ void IonRateEquation::SetCSMatrixElements(
                 rOffset+ir, rOffset+ir+(J)*Nr, \
                 (V) \
             ); \
-            this->DIAG ## Term[Z0][ir] += (V)*nions[rOffset+ir+(J)*Nr]; \
+            if (sm!=JACOBIAN) this->DIAG ## Term[Z0][ir] += (V)*nions[rOffset+ir+(J)*Nr]; \
         } while (false)
     #   include "IonRateEquation.set.cpp"
     #undef NI
