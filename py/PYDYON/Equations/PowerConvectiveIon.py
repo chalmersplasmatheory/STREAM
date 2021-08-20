@@ -17,11 +17,11 @@ class IonConvectivePowerTerm:
         self.tau = ConfinementTime(quantities, ions, Bphi=Bphi, Bv=Bv, l_MK2=l_MK2)
 
 
-    def __call__(self, x):
-        return self.eval(x)
+    def __call__(self, t, x):
+        return self.eval(t, x)
 
 
-    def eval(self, x):
+    def eval(self, t, x):
         """
         Evaluate this IonConvectivePowerTerm.
         """
@@ -38,6 +38,6 @@ class IonConvectivePowerTerm:
 
                 N += ni[Z0]
 
-        return 3/2 * N * e*Ti / self.tau(x)
+        return 3/2 * N * e*Ti / self.tau(t, x)
 
 

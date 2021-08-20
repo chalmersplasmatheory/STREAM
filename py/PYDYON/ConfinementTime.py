@@ -24,22 +24,22 @@ class ConfinementTime:
         self.ions = ions
 
 
-    def __call__(self, x):
-        return self.eval(x)
+    def __call__(self, t, x):
+        return self.eval(t, x)
 
 
-    def eval(self, x):
+    def eval(self, t, x):
         """
         Evaluate this confinement time.
         """
-        tauPar  = self.evalParallel(x)
-        tauPerp = self.evalPerpendicular(x)
+        tauPar  = self.evalParallel(t, x)
+        tauPerp = self.evalPerpendicular(t, x)
         itau = 1/tauPar + 1/tauPerp
 
         return 1/itau
 
 
-    def evalParallel(self, x):
+    def evalParallel(self, t, x):
         """
         Evaluate parallel confinement time.
         """
@@ -64,7 +64,7 @@ class ConfinementTime:
         return Lf / Cs
 
 
-    def evalPerpendicular(self, x):
+    def evalPerpendicular(self, t, x):
         """
         Evaluate perpendicular confinement time.
         """

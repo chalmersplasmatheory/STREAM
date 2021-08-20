@@ -19,11 +19,11 @@ class OhmicPowerTerm:
         self.quantities = quantities
 
 
-    def __call__(self, x):
-        return self.eval(x)
+    def __call__(self, t, x):
+        return self.eval(t, x)
 
 
-    def eval(self, x):
+    def eval(self, t, x):
         """
         Evaluate the radiated power.
         """

@@ -17,11 +17,11 @@ class ElectronConvectivePowerTerm:
         self.tau = ConfinementTime(quantities, ions, Bphi=Bphi, Bv=Bv, l_MK2=l_MK2)
 
 
-    def __call__(self, x):
-        return self.eval(x)
+    def __call__(self, t, x):
+        return self.eval(t, x)
 
 
-    def eval(self, x):
+    def eval(self, t, x):
         """
         Evaluate this ElectronConvectivePowerTerm.
         """
@@ -29,5 +29,5 @@ class ElectronConvectivePowerTerm:
         Te = self.quantities['Te']
         e  = scipy.constants.e
 
-        return 3/2 * ne*e*Te / self.tau(x)
+        return 3/2 * ne*e*Te / self.tau(t, x)
 

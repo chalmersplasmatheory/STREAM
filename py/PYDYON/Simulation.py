@@ -79,8 +79,8 @@ class Simulation:
         # Ensure that terms are not deleted by the garbage collector
         self._terms.extend((Poh, Prad, Pequi, Pconve, Pconvi, Pcx))
 
-        eqsys[i('We')] = lambda t, x : Poh(x) - Prad(x) - Pequi(x) - Pconve(x)
-        eqsys[i('Wi')] = lambda t, x : Pequi(x) - Pcx(x) - Pconvi(x)
+        eqsys[i('We')] = lambda t, x : Poh(t, x) - Prad(t, x) - Pequi(t, x) - Pconve(t, x)
+        eqsys[i('Wi')] = lambda t, x : Pequi(t, x) - Pcx(t, x) - Pconvi(t, x)
 
         #######
         # Circuit equation
@@ -112,15 +112,15 @@ class Simulation:
             Z = ion['Z']
 
             if A == 'D':
-                eqsys[i('niD_0')] = lambda t, x : Dizcx0(x) + Din(t, x)
-                eqsys[i('niD_1')] = lambda t, x : Dizcx1(x) - itransp(x, 'D', Z0=1)
+                eqsys[i('niD_0')] = lambda t, x : Dizcx0(t, x) + Din(t, x)
+                eqsys[i('niD_1')] = lambda t, x : Dizcx1(t, x) - itransp(t, x, 'D', Z0=1)
             else:
                 # Add neutral equations
                 for Z0 in range(1, Z+1):
                     if Z0 == 0:
-                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(x, A, Z0) + Iin(x, A)
+                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(t, x, A, Z0) + Iin(t, x, A)
                     else:
-                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(x, A, Z0) - Itransp(x, A, Z0=Z0)
+                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(t, x, A, Z0) - Itransp(t, x, A, Z0=Z0)
 
         atol = [0.0] * len(eqsys)
 

@@ -18,11 +18,11 @@ class IonTransport:
         self.quantities = quantities
 
 
-    def __call__(self, x, ionname, Z0):
-        return self.eval(x, ionname, Z0)
+    def __call__(self, t, x, ionname, Z0):
+        return self.eval(t, x, ionname, Z0)
 
 
-    def eval(self, x, ionname, Z0):
+    def eval(self, t, x, ionname, Z0):
         """
         Evaluate this ion transport term.
 
@@ -32,6 +32,6 @@ class IonTransport:
         """
         niZ = self.quantities.getIonData(ionname)[Z0]
 
-        return niZ / self.tau(x)
+        return niZ / self.tau(t, x)
 
 

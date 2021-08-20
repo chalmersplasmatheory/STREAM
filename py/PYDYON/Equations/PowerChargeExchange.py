@@ -17,11 +17,11 @@ class ChargeExchangePowerTerm:
         self.adas = ADAS()
 
 
-    def __call__(self, x):
-        return self.eval(x)
+    def __call__(self, t, x):
+        return self.eval(t, x)
 
 
-    def eval(self, x):
+    def eval(self, t, x):
         """
         Evaluate the power lost through charge-exchange.
         """

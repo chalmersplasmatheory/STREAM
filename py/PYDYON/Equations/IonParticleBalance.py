@@ -15,11 +15,11 @@ class IonParticleBalance:
         self.ions = ions
 
 
-    def __call__(self, x, ionname, Z0):
-        return self.eval(x, ionname, Z0)
+    def __call__(self, t, x, ionname, Z0):
+        return self.eval(t, x, ionname, Z0)
 
 
-    def eval(self, x, ionname, Z0):
+    def eval(self, t, x, ionname, Z0):
         """
         Evaluate the deuterium ion balance term.
         """

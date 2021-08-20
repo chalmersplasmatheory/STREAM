@@ -40,7 +40,7 @@ class DeuteriumInflux:
 
         nD1 = self.quantities.getIonData('D')[1]
 
-        Gamma = Vp*YD*nD1 / self.tau(x)
+        Gamma = Vp*YD*nD1 / self.tau(t, x)
 
         return Gamma / Vn_tot
 

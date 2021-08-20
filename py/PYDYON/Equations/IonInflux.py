@@ -19,11 +19,11 @@ class IonInflux:
         self.tau = ConfinementTime(quantities, ions, Bphi=Bphi, Bv=Bv, l_MK2=l_MK2)
 
 
-    def __call__(self, x, ionname):
-        return self.eval(x, ionname)
+    def __call__(self, t, x, ionname):
+        return self.eval(t, x, ionname)
 
 
-    def eval(self, x, ionname):
+    def eval(self, t, x, ionname):
         """
         Evaluate this deuterium influx term.
         """
@@ -40,7 +40,7 @@ class IonInflux:
                 Y = self.evaluateRecyclingCoefficient(ionname, A)
                 Gamma += Y*ni[Z0]
 
-        Gamma *= Vp/(Vn_tot*self.tau(x))
+        Gamma *= Vp/(Vn_tot*self.tau(t, x))
         return Gamma
 
 
