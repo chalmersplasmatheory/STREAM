@@ -7,6 +7,7 @@
 #include "DREAM/Settings/Settings.hpp"
 #include "DREAM/Settings/SimulationGenerator.hpp"
 #include "STREAM/EquationSystem.hpp"
+#include "STREAM/OtherQuantityHandler.hpp"
 
 namespace STREAM {
     class SimulationGenerator {
@@ -31,10 +32,12 @@ namespace STREAM {
         static void ConstructEquations(
             EquationSystem*, DREAM::Settings*, DREAM::ADAS*,
             DREAM::AMJUEL*, DREAM::NIST*,
-            struct DREAM::OtherQuantityHandler::eqn_terms*
+            struct DREAM::OtherQuantityHandler::eqn_terms*,
+            struct OtherQuantityHandler::eqn_terms*
         );
         static void ConstructOtherQuantityHandler(
             EquationSystem*, DREAM::Settings*,
+            struct OtherQuantityHandler::eqn_terms*,
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
         static void ConstructUnknowns(
@@ -49,7 +52,8 @@ namespace STREAM {
         // Ion density equation
         static void ConstructEquation_Ions(
             EquationSystem*, DREAM::Settings*,
-            DREAM::ADAS*, DREAM::AMJUEL*
+            DREAM::ADAS*, DREAM::AMJUEL*,
+            struct OtherQuantityHandler::eqn_terms*
         );
 
         // Temperature equation
@@ -63,8 +67,13 @@ namespace STREAM {
             DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
             struct DREAM::OtherQuantityHandler::eqn_terms*
         );
+        static void ConstructEquation_T_i(
+            EquationSystem *eqsys, DREAM::Settings*, DREAM::ADAS*,
+            struct OtherQuantityHandler::eqn_terms*
+        );
         static void ConstructEquation_T_i_selfconsistent(
-            EquationSystem *eqsys, DREAM::Settings* /*s*/, DREAM::ADAS *
+            EquationSystem *eqsys, DREAM::Settings* /*s*/, DREAM::ADAS *,
+            struct OtherQuantityHandler::eqn_terms*
         );
         
         //Mean free path equation

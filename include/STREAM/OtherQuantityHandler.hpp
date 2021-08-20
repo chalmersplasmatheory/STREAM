@@ -7,25 +7,33 @@
 #include "STREAM/Equations/NeutralInflux.hpp"
 #include "STREAM/Equations/PlasmaVolume.hpp"
 #include "STREAM/Equations/IonRateEquation.hpp"
+#include "STREAM/Equations/IonTransport.hpp"
+#include "STREAM/Equations/IonHeatTransport.hpp"
 
 namespace STREAM {
     class OtherQuantityHandler : public DREAM::OtherQuantityHandler {
+    public:
+        struct eqn_terms {
+            IonTransport **iontransport=nullptr;
+            IonHeatTransport **Wi_iontransport=nullptr;
+        };
     private:
         ConfinementTime *confinementTime;
         NeutralInflux *neutralInflux;
         PlasmaVolume *plasmaVolume;
 
         std::vector<IonRateEquation*> ionRateEquations;
+        struct eqn_terms *stream_terms;
 
     public:
         OtherQuantityHandler(
             ConfinementTime*, NeutralInflux*, PlasmaVolume*,
-            std::vector<IonRateEquation*>,
+            std::vector<IonRateEquation*>, struct eqn_terms*,
             DREAM::CollisionQuantityHandler*, DREAM::CollisionQuantityHandler*,
             DREAM::PostProcessor*, DREAM::RunawayFluid*, DREAM::FVM::UnknownQuantityHandler*,
             std::vector<DREAM::UnknownQuantityEquation*>*, DREAM::IonHandler*,
             DREAM::FVM::Grid*, DREAM::FVM::Grid*, DREAM::FVM::Grid*, DREAM::FVM::Grid*,
-            struct eqn_terms*
+            struct DREAM::OtherQuantityHandler::eqn_terms*
         );
         virtual ~OtherQuantityHandler();
 

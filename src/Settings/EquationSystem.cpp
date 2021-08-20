@@ -34,6 +34,8 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
 
     struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms =
         new DREAM::OtherQuantityHandler::eqn_terms;
+    struct OtherQuantityHandler::eqn_terms *stream_terms =
+        new OtherQuantityHandler::eqn_terms;
 
     // Timing information
     eqsys->SetTiming(s->GetBool("/output/timingstdout"), s->GetBool("/output/timingfile"));
@@ -47,10 +49,10 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
     );
 
     // Construct equations according to settings
-    ConstructEquations(eqsys, s, adas, amjuel, nist, oqty_terms);
+    ConstructEquations(eqsys, s, adas, amjuel, nist, oqty_terms, stream_terms);
 
     // Construct the "other" quantity handler
-    ConstructOtherQuantityHandler(eqsys, s, oqty_terms);
+    ConstructOtherQuantityHandler(eqsys, s, stream_terms, oqty_terms);
 
     // Figure out which unknowns must be part of the matrix,
     // and set initial values for those quantities which don't
@@ -79,7 +81,8 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
 void SimulationGenerator::ConstructEquations(
     EquationSystem *eqsys, DREAM::Settings *s, DREAM::ADAS *adas,
     DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
-    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
+    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms,
+    struct OtherQuantityHandler::eqn_terms *stream_terms
 ) {
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
     DREAM::FVM::Grid *hottailGrid = eqsys->GetHotTailGrid();
@@ -90,7 +93,7 @@ void SimulationGenerator::ConstructEquations(
     enum DREAM::OptionConstants::momentumgrid_type re_type = eqsys->GetRunawayGridType();
     
     // TODO
-    ConstructEquation_Ions(eqsys, s, adas, amjuel);
+    ConstructEquation_Ions(eqsys, s, adas, amjuel, stream_terms);
     
     DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
 
@@ -159,7 +162,7 @@ void SimulationGenerator::ConstructEquations(
         );
     
     DREAM::SimulationGenerator::ConstructEquation_Ion_Ni(eqsys, s);
-    DREAM::SimulationGenerator::ConstructEquation_T_i(eqsys, s);
+    ConstructEquation_T_i(eqsys, s, adas, stream_terms);
 
     // NOTE: The runaway number density may depend explicitly on
     // the hot-tail equation and must therefore be constructed

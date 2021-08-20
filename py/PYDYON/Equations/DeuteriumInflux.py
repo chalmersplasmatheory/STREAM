@@ -1,5 +1,6 @@
 # Deuterium influx term
 
+import numpy as np
 from .. ConfinementTime import ConfinementTime
 
 

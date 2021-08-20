@@ -1,3 +1,5 @@
+
+#include "DREAM/Constants.hpp"
 #include "STREAM/Equations/ChargeExchangeTerm.hpp"
 
 using namespace STREAM;
@@ -64,7 +66,7 @@ void ChargeExchangeTerm::SetWeights(){
             len_t Z  = ions->GetZ(iz);
             R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
         }
-        weights[n] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i - T_0) * R_icx * n_i; 
+        weights[n] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i - DREAM::Constants::ec*T_0) * R_icx * n_i; 
     }
 }
 

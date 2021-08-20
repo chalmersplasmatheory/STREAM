@@ -49,7 +49,8 @@ void SimulationGenerator::DefineOptions_Ions(DREAM::Settings *s) {
  */
 void SimulationGenerator::ConstructEquation_Ions(
     EquationSystem *eqsys, DREAM::Settings *s,
-    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel
+    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel,
+    struct OtherQuantityHandler::eqn_terms *stream_terms
 ) {
     const real_t t0 = 0;
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
@@ -201,6 +202,8 @@ void SimulationGenerator::ConstructEquation_Ions(
         ipp = new DREAM::IonPrescribedParameter(fluidGrid, ih, nZ_prescribed, prescribed_indices, prescribed_densities);
 
     const len_t id_ni = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
+
+    stream_terms->iontransport = new IonTransport*[nZ];
     // Construct dynamic equations
     len_t nDynamic = 0, nEquil = 0;
     for (len_t iZ = 0; iZ < nZ; iZ++) {
@@ -221,7 +224,8 @@ void SimulationGenerator::ConstructEquation_Ions(
 	                eqsys->GetPlasmaVolume(), true, false, false
 	            );
                 eqn->AddTerm(ire);
-                eqn->AddTerm(new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetPlasmaVolume()));
+                stream_terms->iontransport[iZ] = new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetPlasmaVolume());
+                eqn->AddTerm(stream_terms->iontransport[iZ]);
                 //if (iZ == 0) {
                 eqn->AddTerm(new NeutralTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetUnknownHandler(), neutralInflux, eqsys->GetPlasmaVolume()));
                 //}
