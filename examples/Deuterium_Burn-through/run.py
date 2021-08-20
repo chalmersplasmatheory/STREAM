@@ -14,6 +14,7 @@ import PlasmaParameters as Formulas
 import DREAM.Settings.Equations.ColdElectronTemperature as Tcold
 import DREAM.Settings.Solver as Solver
 
+import DREAM.Settings.Atomics as Atomics
 from STREAM import STREAMOutput, STREAMSettings, runiface
 import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
@@ -47,6 +48,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.003
     E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
 
     ss = STREAMSettings()
+
+    ss.atomic.adas_interpolation = Atomics.ADAS_INTERP_BILINEAR
 
     # Electric field
     ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)

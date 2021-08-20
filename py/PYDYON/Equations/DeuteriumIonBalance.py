@@ -19,7 +19,7 @@ class DeuteriumIonBalance:
         return self.eval(t, x)
 
 
-    def eval(self, t, x):
+    def eval(self, t, x, full=False):
         """
         Evaluate the deuterium ion balance term.
         """
@@ -34,7 +34,11 @@ class DeuteriumIonBalance:
         Riz  = self.adas.SCD('D', 0, n=ne, T=Te)
 
         # Ionization & recombination
-        izrec = Vn/Vp * Riz*ne*nD[0] - Rrec*ne*nD[1]
+        posIoniz = Vn/Vp * Riz*ne*nD[0]
+        negIoniz = 0
+        posRec = 0
+        negRec = -Rrec*ne*nD[1]
+        izrec = posIoniz + negRec
 
         # Charge exchange
         cx = 0
@@ -50,6 +54,14 @@ class DeuteriumIonBalance:
                 Rcx = self.adas.CCD(A, Z0, n=ne, T=Te)
                 cx += Rcx*nD[0] * ni
 
-        return izrec + Vn/Vp * cx
+        dn = izrec + Vn/Vp * cx
+
+        posCX = Vn/Vp*cx
+        negCX = 0
+
+        if full:
+            return dn, posIoniz, negIoniz, posRec, negRec, posCX, negCX
+        else:
+            return dn
 
 

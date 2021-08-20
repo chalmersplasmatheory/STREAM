@@ -13,15 +13,31 @@ from . import ConfinementTime, IonHandler, PlasmaVolume, UnknownQuantityHandler
 #   pydyon:   Function constructing the PYDYON object to test.
 #   stream:   Function extracting corresponding data to compare to from a STREAMOutput object.
 # (optional)
+#   atol:     Absolute tolerance required for being considered accurate (default: 0).
 #   eval:     Function to call to evaluate the PYDYON object. If not defined, called as 'obj(t,x)'.
+#   
 TERMS = {
     'Radiated power': { 'pydyon': RadiatedPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_radiation[:,0] },
     'Ohmic power': { 'pydyon': OhmicPowerTerm, 'stream': lambda so : -so.other.fluid.Tcold_ohmic[:,0] },
     'e-i equilibration': { 'pydyon': EquilibrationPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_ion_coll[:,0] },
     'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.scalar.energyloss_T_cold[:,0] },
     'Confinement time': { 'pydyon': ConfinementTime, 'stream': lambda so : so.other.stream.tau_D[:,0] },
-    r'dI\_p / dt': { 'pydyon': CircuitEquation, 'eval': lambda ce, t, x : ce.dIp_dt(t,x), 'stream': lambda so : np.diff(so.eqsys.I_p[:,0]) / np.diff(so.grid.t[:]) },
-    r'dI\_w / dt': { 'pydyon': CircuitEquation, 'eval': lambda ce, t, x : ce.dIMK2_dt(t,x), 'stream': lambda so : np.diff(so.eqsys.I_wall[:,0]) / np.diff(so.grid.t[:]) }
+    r'dI\_p / dt': { 'pydyon': CircuitEquation, 'eval': lambda ce, t, x : ce.dIp_dt(t,x), 'stream': lambda so : np.diff(so.eqsys.I_p[:,0]) / np.diff(so.grid.t[:]) , 'atol': 1 },
+    r'dI\_w / dt': { 'pydyon': CircuitEquation, 'eval': lambda ce, t, x : ce.dIMK2_dt(t,x), 'stream': lambda so : np.diff(so.eqsys.I_wall[:,0]) / np.diff(so.grid.t[:]), 'atol': 1 },
+
+    # Specialized deuterium ionization
+    'D-0 positive ionization': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[1], 'stream': lambda so : so.other.stream.ionrateequation_posIonization[:,0,0] },
+    'D-0 negative ionization': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[2], 'stream': lambda so : so.other.stream.ionrateequation_negIonization[:,0,0] },
+    'D-0 positive recombination': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[3], 'stream': lambda so : so.other.stream.ionrateequation_posRecombination[:,0,0] },
+    'D-0 negative recombination': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[4], 'stream': lambda so : so.other.stream.ionrateequation_negRecombination[:,0,0] },
+    'D-0 positive C-X': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[5], 'stream': lambda so : so.other.stream.ionrateequation_posChargeExchange[:,0,0] },
+    'D-0 negative C-X': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[6], 'stream': lambda so : so.other.stream.ionrateequation_negChargeExchange[:,0,0] },
+    'D-1 positive ionization': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[1], 'stream': lambda so : so.other.stream.ionrateequation_posIonization[:,1,0] },
+    'D-1 negative ionization': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[2], 'stream': lambda so : so.other.stream.ionrateequation_negIonization[:,1,0] },
+    'D-1 positive recombination': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[3], 'stream': lambda so : so.other.stream.ionrateequation_posRecombination[:,1,0] },
+    'D-1 negative recombination': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[4], 'stream': lambda so : so.other.stream.ionrateequation_negRecombination[:,1,0] },
+    'D-1 positive C-X': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[5], 'stream': lambda so : so.other.stream.ionrateequation_posChargeExchange[:,1,0] },
+    'D-1 negative C-X': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[6], 'stream': lambda so : so.other.stream.ionrateequation_negChargeExchange[:,1,0] }
 }
 
 # Mapping from STREAMSettings to PYDYON settings.
@@ -57,19 +73,21 @@ def compareToSTREAM(ss, so, verbose=True):
     unknowns = UnknownQuantityHandler(ions, pv)
 
     # Evaluate terms and plot those which deviate
-    TOL = 1e-1
+    RTOL = 1e-1
     for name, term in TERMS.items():
         t, pydyon, stream = _evaluateTerm(so, term, unknowns, ions, settings)
+        ATOL = 0 if 'atol' not in term else term['atol']
 
-        Delta = np.amax(np.abs((pydyon-stream)/stream))
+        Delta = np.abs(pydyon-stream)
 
-        if Delta > TOL:
-            print("- Term '{}' is INACCURATE (delta = {:.3f}%)".format(name, Delta*100))
+        if np.any(Delta > (RTOL*np.abs(stream) + ATOL)):
+            print("- Term '{}' is INACCURATE (delta = {:.3f}%)".format(name, np.amax(np.abs(Delta/stream))*100))
 
             fig = plt.figure()
             ax = fig.add_subplot(111)
             ax.plot(t, stream, 'k', label='STREAM')
             ax.plot(t, pydyon, 'r--', label='PYDYON')
+            #ax.plot(t, stream/pydyon, 'k')
             ax.set_xlabel('Time (s)')
             ax.set_title(name)
             ax.set_xlim([0, t[-1]])

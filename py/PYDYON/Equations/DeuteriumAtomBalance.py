@@ -19,9 +19,11 @@ class DeuteriumAtomBalance:
         return self.eval(t, x)
 
 
-    def eval(self, t, x):
+    def eval(self, t, x, full=False):
         """
         Evaluate the neutral deuterium particle balance term.
+
+        :param full: If ``True``, also returns values of individual terms.
         """
         V_n_tot = self.quantities.getV_n_tot('D')
         Vn = self.quantities.getV_n('D')
@@ -35,7 +37,12 @@ class DeuteriumAtomBalance:
         Riz  = self.adas.SCD('D', 0, n=ne, T=Te)
 
         # Ionization & recombination
-        izrec = Vp*Rrec*ne*nD[1] - Vn*Riz*ne*nD[0]
+        posRec   = Vp*Rrec*ne*nD[1]
+        negRec   = 0
+        posIoniz = 0
+        negIoniz = -Vn*Riz*ne*nD[0]
+
+        izrec = posRec + negIoniz
 
         # Charge exchange
         cx = 0
@@ -51,6 +58,14 @@ class DeuteriumAtomBalance:
                 Rcx = self.adas.CCD(A, Z0, n=ne, T=Te)
                 cx += Rcx*nD[0] * ni
 
-        return 1/V_n_tot * (izrec - Vn * cx)
+        negCX = -Vn*cx
+        posCX = 0
+
+        dn = 1/V_n_tot * (izrec + Vn * cx)
+
+        if full:
+            return dn, posIoniz/V_n_tot, negIoniz/V_n_tot, posRec/V_n_tot, negRec/V_n_tot, posCX/V_n_tot, negCX/V_n_tot
+        else:
+            return dn
 
 
