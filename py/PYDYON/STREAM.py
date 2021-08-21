@@ -17,12 +17,13 @@ from . import ConfinementTime, IonHandler, PlasmaVolume, UnknownQuantityHandler
 #   eval:     Function to call to evaluate the PYDYON object. If not defined, called as 'obj(t,x)'.
 #   
 TERMS = {
-    #'Radiated power': { 'pydyon': RadiatedPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_radiation[:,0] },
+    'Radiated power': { 'pydyon': RadiatedPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_radiation[:,0] },
     #'Ohmic power': { 'pydyon': OhmicPowerTerm, 'stream': lambda so : -so.other.fluid.Tcold_ohmic[:,0] },
     #'e-i equilibration': { 'pydyon': EquilibrationPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_ion_coll[:,0] },
-    #'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.scalar.energyloss_T_cold[:,0] },
-    'i heat convection': { 'pydyon': IonConvectivePowerTerm, 'stream': lambda so : -so.other.stream.Wi_iontransport[:,1,0] },
-    'Charge-exchange heat loss': { 'pydyon': ChargeExchangePowerTerm, 'stream': lambda so : -so.other.stream.Wi_chargeexchange[:,0,0] },
+    ##'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.scalar.energyloss_T_cold[:,0] },
+    #'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.stream.Tcold_transport[:,0] },
+    #'i heat convection': { 'pydyon': IonConvectivePowerTerm, 'stream': lambda so : -so.other.stream.Wi_iontransport[:,1,0] },
+    #'Charge-exchange heat loss': { 'pydyon': ChargeExchangePowerTerm, 'stream': lambda so : -so.other.stream.Wi_chargeexchange[:,0,0] },
     #'i particle transport': { 'pydyon': IonTransport, 'eval': lambda ce, t, x: ce(t, x, 'D', Z0=1), 'stream': lambda so : -so.other.stream.ni_iontransport[:,1,0] },
     #'Confinement time': { 'pydyon': ConfinementTime, 'stream': lambda so : so.other.stream.tau_D[:,0] },
     #r'dI\_p / dt': { 'pydyon': CircuitEquation, 'eval': lambda ce, t, x : ce.dIp_dt(t,x), 'stream': lambda so : np.diff(so.eqsys.I_p[:,0]) / np.diff(so.grid.t[:]) , 'atol': 1 },
@@ -31,14 +32,14 @@ TERMS = {
     # Specialized deuterium ionization
     #'D-0 positive ionization': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[1], 'stream': lambda so : so.other.stream.ionrateequation_posIonization[:,0,0] },
     #'D-0 negative ionization': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[2], 'stream': lambda so : so.other.stream.ionrateequation_negIonization[:,0,0] },
-    #'D-0 positive recombination': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[3], 'stream': lambda so : so.other.stream.ionrateequation_posRecombination[:,0,0] },
+    'D-0 positive recombination': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[3], 'stream': lambda so : so.other.stream.ionrateequation_posRecombination[:,0,0] },
     #'D-0 negative recombination': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[4], 'stream': lambda so : so.other.stream.ionrateequation_negRecombination[:,0,0] },
     #'D-0 positive C-X': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[5], 'stream': lambda so : so.other.stream.ionrateequation_posChargeExchange[:,0,0] },
     #'D-0 negative C-X': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[6], 'stream': lambda so : so.other.stream.ionrateequation_negChargeExchange[:,0,0] },
     #'D-1 positive ionization': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[1], 'stream': lambda so : so.other.stream.ionrateequation_posIonization[:,1,0] },
     #'D-1 negative ionization': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[2], 'stream': lambda so : so.other.stream.ionrateequation_negIonization[:,1,0] },
     #'D-1 positive recombination': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[3], 'stream': lambda so : so.other.stream.ionrateequation_posRecombination[:,1,0] },
-    #'D-1 negative recombination': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[4], 'stream': lambda so : so.other.stream.ionrateequation_negRecombination[:,1,0] },
+    'D-1 negative recombination': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[4], 'stream': lambda so : so.other.stream.ionrateequation_negRecombination[:,1,0] },
     #'D-1 positive C-X': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[5], 'stream': lambda so : so.other.stream.ionrateequation_posChargeExchange[:,1,0] },
     #'D-1 negative C-X': { 'pydyon': DeuteriumIonBalance, 'eval': lambda dab, t, x : dab.eval(t, x, True)[6], 'stream': lambda so : so.other.stream.ionrateequation_negChargeExchange[:,1,0] },
     #'D-0 influx': { 'pydyon': DeuteriumInflux, 'stream': lambda so : so.other.stream.neutralinflux['D'][:] / so.other.stream.V_n_tot['D'][:] }

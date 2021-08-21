@@ -5,6 +5,7 @@
 #include "DREAM/OtherQuantityHandler.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
 #include "STREAM/Equations/ChargeExchangeTerm.hpp"
+#include "STREAM/Equations/ElectronHeatTransport.hpp"
 #include "STREAM/Equations/NeutralInflux.hpp"
 #include "STREAM/Equations/PlasmaVolume.hpp"
 #include "STREAM/Equations/IonRateEquation.hpp"
@@ -18,6 +19,7 @@ namespace STREAM {
             IonTransport **iontransport=nullptr;
             IonHeatTransport **Wi_iontransport=nullptr;
             ChargeExchangeTerm **Wi_chargeexchange=nullptr;
+            ElectronHeatTransport *Tcold_transport=nullptr;
         };
     private:
         ConfinementTime *confinementTime;

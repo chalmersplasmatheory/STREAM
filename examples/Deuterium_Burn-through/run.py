@@ -212,13 +212,15 @@ def main(argv):
     if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
         print('RUN 2')
         ss21 = generate(prefill=7e-5, nt=10000)
+        ss21.save(f'settings21{ext}.h5')
         so21 = runiface(ss21, f'output21{ext}.h5', quiet=False)
 
         ss22 = STREAMSettings(ss21)
         ss22.fromOutput(f'output21{ext}.h5')
         ss22.timestep.setTmax(0.1 - ss21.timestep.tmax)
         ss22.timestep.setNumberOfSaveSteps(0)
-        ss22.timestep.setNt(1000)
+        ss22.timestep.setNt(10000)
+        ss22.save(f'settings22{ext}.h5')
         so22 = runiface(ss22, f'output22{ext}.h5', quiet=False)
     else:
         so21 = STREAMOutput(f'output21{ext}.h5')
