@@ -5,7 +5,7 @@ import sys
 
 sys.path.append('../../py')
 
-from PYDYON import compareToSTREAM
+from PYDYON import compareToSTREAM, compareToSTREAMdt
 from STREAM import STREAMSettings, STREAMOutput
 
 OUTFILE = '22'
@@ -13,5 +13,6 @@ OUTFILE = '22'
 ss = STREAMSettings(f'settings{OUTFILE}.h5')
 so = STREAMOutput(f'output{OUTFILE}.h5')
 
-compareToSTREAM(ss, so)
+#compareToSTREAM(ss, so)
+compareToSTREAMdt(ss, so)
 

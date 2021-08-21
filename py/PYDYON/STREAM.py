@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate
 from . Equations import *
-from . import ConfinementTime, IonHandler, PlasmaVolume, UnknownQuantityHandler
+from . import ConfinementTime, IonHandler, PlasmaVolume, UnknownQuantityHandler, Simulation
 
 
 # Mapping of PYDYON terms to STREAM terms
@@ -22,7 +22,7 @@ TERMS = {
     #'e-i equilibration': { 'pydyon': EquilibrationPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_ion_coll[:,0] },
     ##'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.scalar.energyloss_T_cold[:,0] },
     #'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.stream.Tcold_transport[:,0] },
-    #'i heat convection': { 'pydyon': IonConvectivePowerTerm, 'stream': lambda so : -so.other.stream.Wi_iontransport[:,1,0] },
+    'i heat convection': { 'pydyon': IonConvectivePowerTerm, 'stream': lambda so : -so.other.stream.Wi_iontransport[:,1,0] },
     #'Charge-exchange heat loss': { 'pydyon': ChargeExchangePowerTerm, 'stream': lambda so : -so.other.stream.Wi_chargeexchange[:,0,0] },
     #'i particle transport': { 'pydyon': IonTransport, 'eval': lambda ce, t, x: ce(t, x, 'D', Z0=1), 'stream': lambda so : -so.other.stream.ni_iontransport[:,1,0] },
     #'Confinement time': { 'pydyon': ConfinementTime, 'stream': lambda so : so.other.stream.tau_D[:,0] },
@@ -65,10 +65,11 @@ SETTINGS = {
 
 
 def compareToSTREAM(ss, so, verbose=True):
-    # Load settings from STREAMSettings object
-    settings = {}
-    for s in SETTINGS.keys():
-        settings[s] = SETTINGS[s](ss)
+    """
+    Compare individual terms in the equations solved by PYDON
+    to their STREAM equivalents.
+    """
+    settings = loadSTREAMSettings(ss)
 
     # Construct ion object
     ions = IonHandler()
@@ -88,7 +89,8 @@ def compareToSTREAM(ss, so, verbose=True):
         Delta = np.abs(pydyon-stream)
 
         if np.any(Delta > (RTOL*np.abs(stream) + ATOL)):
-            print("- Term '{}' is INACCURATE (delta = {:.3f}%)".format(name, np.amax(np.abs(Delta/stream))*100))
+            if verbose:
+                print("- Term '{}' is INACCURATE (delta = {:.3f}%)".format(name, np.amax(np.abs(Delta/stream))*100))
 
             fig = plt.figure()
             ax = fig.add_subplot(111)
@@ -101,7 +103,63 @@ def compareToSTREAM(ss, so, verbose=True):
             ax.legend()
             fig.tight_layout()
         else:
-            print(f"- Term '{name}' ACCURATE to within 10%")
+            if verbose:
+                print(f"- Term '{name}' ACCURATE to within 10%")
+
+    plt.show()
+
+
+def compareToSTREAMdt(ss, so, verbose=True):
+    """
+    Compare the time derivatives of unknown quantities solved for
+    in DYON to their STREAM equivalents.
+    """
+    settings = loadSTREAMSettings(ss)
+    if 'simple' in settings: del settings['simple']
+
+    sim = Simulation(**settings)
+    sim.addIon('D', 1)
+
+    nD0 = np.array([so.eqsys.n_i['D'][0][0,0], so.eqsys.n_i['D'][1][0,0]])
+    sim.initialize(We=so.eqsys.W_cold[0,0], Wi=so.eqsys.W_i['D'][0,0],
+                   Ip=so.eqsys.I_p[0,0], IMK2=so.eqsys.I_wall[0,0],
+                   niD=nD0)
+    uqh = sim.unknowns
+
+    equations, _ = sim._constructEquationSystem()
+
+    dWedt = []
+    dWidt = []
+    dIpdt = []
+    dIMK2dt = []
+    dnD0dt = []
+    dnD1dt = []
+
+    t = so.grid.t
+    sdWedt = np.diff(so.eqsys.W_cold[:,0]) / np.diff(t)
+    sdWidt = np.diff(so.eqsys.W_i['D'][:,0]) / np.diff(t)
+    sdIpdt = np.diff(so.eqsys.I_p[:,0]) / np.diff(t)
+    sdIMK2dt = np.diff(so.eqsys.I_wall[:,0]) / np.diff(t)
+    sdnD0dt = np.diff(so.eqsys.n_i['D'][0][:,0]) / np.diff(t)
+    sdnD1dt = np.diff(so.eqsys.n_i['D'][1][:,0]) / np.diff(t)
+
+    for i in range(1, t.size):
+        x = fromSTREAM(so, uqh, time=i)
+
+        dWedt.append(equations[uqh.map['We']](t[i], x)[0])
+        dWidt.append(equations[uqh.map['Wi']](t[i], x)[0])
+        dIpdt.append(equations[uqh.map['Ip']](t[i], x)[0])
+        dIMK2dt.append(equations[uqh.map['IMK2']](t[i], x))
+        dnD0dt.append(equations[uqh.map['niD_0']](t[i], x)[0])
+        dnD1dt.append(equations[uqh.map['niD_1']](t[i], x)[0])
+
+    # Plot results
+    plotTimeDerivatives(t[1:], sdWedt, dWedt, title='Electron heat')
+    plotTimeDerivatives(t[1:], sdWidt, dWidt, title='Ion heat')
+    plotTimeDerivatives(t[1:], sdIpdt, dIpdt, title='Plasma current')
+    plotTimeDerivatives(t[1:], sdIMK2dt, dIMK2dt, title='MK2 current')
+    plotTimeDerivatives(t[1:], sdnD0dt, dnD0dt, title='D-0 density')
+    plotTimeDerivatives(t[1:], sdnD1dt, dnD1dt, title='D-1 density')
 
     plt.show()
 
@@ -178,4 +236,38 @@ def fromSTREAM(so, uqh, time=0, ion='D'):
     }
 
     return uqh.setvector(dct)
+
+
+def loadSTREAMSettings(ss):
+    """
+    Convert a STREAMSettings object into a dict with settings
+    for PYDYON.
+    """
+    # Load settings from STREAMSettings object
+    settings = {}
+    for s in SETTINGS.keys():
+        settings[s] = SETTINGS[s](ss)
+
+    return settings
+
+
+def plotTimeDerivatives(t, dt1, dt2, title=None):
+    """
+    Plot two time derivatives (helper function for 'compareToSTREAMdt()')
+    """
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    ax.plot(t, dt1, 'k-', label='STREAM')
+    ax.plot(t, dt2, 'r--', label='PYDYON')
+
+    ax.set_xlabel('Time (s)')
+
+    if title is not None:
+        ax.set_title(title)
+
+    ax.legend()
+
+    return ax
+
 

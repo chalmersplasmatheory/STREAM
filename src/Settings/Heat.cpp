@@ -307,10 +307,10 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
         );
         stream_terms->Wi_iontransport[iz] = new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator());
         Op_ni->AddTerm(stream_terms->Wi_iontransport[iz]);
-        if (iz == D_index){
+        /*if (iz == D_index){
             stream_terms->Wi_chargeexchange[iz] = new ChargeExchangeTerm(eqsys->GetFluidGrid(), eqsys->GetUnknownHandler(), eqsys->GetIonHandler(), iz, adas, eqsys->GetPlasmaVolume(), eqsys->GetEllipticalRadialGridGenerator(), fluidGrid, D_index);
             Op_ni->AddTerm(stream_terms->Wi_chargeexchange[iz]);
-        } else
+        } else*/
             stream_terms->Wi_chargeexchange[iz] = nullptr;
     }
     eqsys->SetOperator(id_Wi, id_Wi, Op_Wij, "dW_i/dt = sum_j Q_ij + Q_ie - Q_CX - Q_transport");

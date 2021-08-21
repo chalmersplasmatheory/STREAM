@@ -24,7 +24,7 @@ namespace STREAM {
 		
 		len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni;
 		
-		real_t tauinv, W_i;
+		real_t tauinv, W_i, T_i_J;  // T_i_J = ion temperature in units of Joule
 		
 		len_t D_index;
 		

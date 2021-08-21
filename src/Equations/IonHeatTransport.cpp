@@ -49,7 +49,9 @@ void IonHeatTransport::Rebuild(
     real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
     real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(0);
     len_t nr = radials->GetNr();
-    this->W_i     = unknowns->GetUnknownData(id_Wi)[D_index*nr];
+
+    this->W_i     = unknowns->GetUnknownData(id_Wi)[iIon*nr];
+    this->T_i_J   = 2.0/3.0 * W_i / unknowns->GetUnknownData(id_Ni)[iIon*nr];
     this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
     this->dI_p    = - dtauinvdIp * W_i;
     this->dI_wall = - dtauinvdIwall * W_i;
@@ -85,13 +87,13 @@ bool IonHeatTransport::SetCSJacobianBlock(
 void IonHeatTransport::SetCSMatrixElements(
     FVM::Matrix *mat, real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
-    mat->SetElement(rOffset, rOffset, -tauinv);
+    mat->SetElement(rOffset, rOffset, -3.0/2.0 * T_i_J * tauinv);
 } 
 
 
 void IonHeatTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
-    vec[rOffset]-= W_i * tauinv; 
+    vec[rOffset]-= W_i * tauinv;
 }
 
