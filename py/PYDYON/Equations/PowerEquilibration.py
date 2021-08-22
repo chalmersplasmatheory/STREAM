@@ -29,7 +29,8 @@ class EquilibrationPowerTerm:
         ne = self.quantities['ne']
         Te = self.quantities['Te']
         Ti = self.quantities['Ti']
-        logLambda = Conductivity.getCoulombLogarithm(T=Te, n=ne)
+        #logLambda = Conductivity.getCoulombLogarithm(T=Te, n=ne)
+        logLambda = 10
         amu = scipy.constants.physical_constants['atomic mass constant'][0]
 
         pf = 7.75e-34 * (Te - Ti) * (ne*logLambda)/Te**(3/2)

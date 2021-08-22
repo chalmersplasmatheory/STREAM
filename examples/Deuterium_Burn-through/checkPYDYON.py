@@ -13,6 +13,6 @@ OUTFILE = '22'
 ss = STREAMSettings(f'settings{OUTFILE}.h5')
 so = STREAMOutput(f'output{OUTFILE}.h5')
 
-#compareToSTREAM(ss, so)
-compareToSTREAMdt(ss, so)
+compareToSTREAM(ss, so)
+#compareToSTREAMdt(ss, so)
 

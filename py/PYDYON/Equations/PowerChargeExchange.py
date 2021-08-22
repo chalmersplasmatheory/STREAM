@@ -40,9 +40,12 @@ class ChargeExchangePowerTerm:
             A = ion['name']
             ni1 = self.quantities.getIonData(A)[1]
 
-            rad += self.adas.CCD(A, 1, n=ne, T=Te) * ni1
+            #rad += self.adas.CCD(A, 1, n=ni1, T=Ti) * ni1
+            rad += 1.066e-14*(Ti**.327) * ni1
+            #print('ADAS: {},  Fit: {}'.format(self.adas.CCD(A, 1, n=ni1, T=Ti), 1e-14*Ti**.327))
 
-        Pcx = Vn/Vp * (3/2) * nD0*e*(Ti-T0) * rad
+        #Pcx = Vn/Vp * (3/2) * nD0*e*(Ti-T0) * rad
+        Pcx = Vn/Vp * 1.5 * nD0*e*(Ti-T0) * rad
 
         return Pcx
             

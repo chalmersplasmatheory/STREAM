@@ -2,6 +2,7 @@
 #define _STREAM_OTHER_QUANTITY_HANDLER_HPP
 
 #include <vector>
+#include "DREAM/Equations/Fluid/MaxwellianCollisionalEnergyTransferTerm.hpp"
 #include "DREAM/OtherQuantityHandler.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
 #include "STREAM/Equations/ChargeExchangeTerm.hpp"
@@ -17,8 +18,9 @@ namespace STREAM {
     public:
         struct eqn_terms {
             IonTransport **iontransport=nullptr;
-            IonHeatTransport **Wi_iontransport=nullptr;
             ChargeExchangeTerm **Wi_chargeexchange=nullptr;
+            DREAM::MaxwellianCollisionalEnergyTransferTerm **Wi_e_coll=nullptr;
+            IonHeatTransport **Wi_iontransport=nullptr;
             ElectronHeatTransport *Tcold_transport=nullptr;
         };
     private:

@@ -2,17 +2,40 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+from . Equations import *
 
 
 class SimulationResult:
     
 
-    def __init__(self, t, x):
+    def __init__(self, t, x, simulation):
         """
         Constructor.
         """
         self.t = t
         self.x = x
+
+        self.simulation = simulation
+
+
+    def evaluateTerm(self, term):
+        """
+        Evaluates a term of the given type.
+        """
+        uqh = self.simulation.unknowns
+        val = []
+        for i in range(self.t.size):
+            dct = {
+                'We': self.x['We'][i],
+                'Wi': self.x['Wi'][i],
+                'Ip': self.x['Ip'][i],
+                'IMK2': self.x['IMK2'][i],
+                'niD': self.x['niD'][:,i]
+            }
+            x = uqh.setvector(dct)
+            val.append(term(self.t[i], x))
+
+        return np.array(val)
 
 
     def plot(self):
@@ -40,6 +63,55 @@ class SimulationResult:
         axs[1,2].set_ylim([0, 105])
 
         plt.tight_layout()
+        plt.show()
+
+
+    def plotKimThesis45(self):
+        """
+        Create a plot resembling figure 4.5 Kim's PhD thesis.
+        """
+        fig, axs = plt.subplots(3, 1, figsize=(5, 8))
+        Ip = self.x['Ip']
+
+        self.plotQuantity(self.x['Ip']/1e4, axs[0], title='Plasma current')
+        axs[0].set_xlim([0, 0.05])
+        axs[0].set_ylim([0, 10])
+
+        nD = self.x['niD']
+        gamma_i = self.x['ne'] / (nD[0] + self.x['ne'])
+        self.plotQuantity(gamma_i*100, axs[1], title='Ionization fraction')
+        axs[1].set_xlim([0, 0.05])
+        axs[1].set_ylim([0, 105])
+
+        sim = self.simulation
+        s = sim.settings
+        tausettings = {'Bphi': s['Bphi'], 'Bv': s['Bv'], 'l_MK2': s['l_MK2']}
+
+        Poh    = OhmicPowerTerm(sim.unknowns, sim.ions)
+        Prad   = RadiatedPowerTerm(sim.unknowns, sim.ions)
+        Pequi  = EquilibrationPowerTerm(sim.unknowns, sim.ions)
+        Pconve = ElectronConvectivePowerTerm(sim.unknowns, sim.ions, **tausettings)
+
+        Vp = sim.unknowns.getV_p()
+        vPoh = self.evaluateTerm(Poh) * Vp
+        vPrad = self.evaluateTerm(Prad) * Vp
+        vPequi = self.evaluateTerm(Pequi) * Vp
+        vPconve = self.evaluateTerm(Pconve) * Vp
+        vPtot = vPrad+vPequi+vPconve
+        vPnet = vPoh - vPtot
+
+        axs[2].plot(self.t, vPtot, 'r--', label='Total electron power loss')
+        axs[2].plot(self.t, vPrad, 'b.-', label='Radiation+ionization')
+        axs[2].plot(self.t, vPequi, 'g--', label='Equilibration')
+        axs[2].plot(self.t, vPconve, 'm:', label='Electron transport')
+        axs[2].plot(self.t, vPnet, 'k-', label='Net electron heating power')
+        axs[2].set_title('Power balance')
+        axs[2].legend(frameon=False)
+
+        axs[2].set_xlim([0, 0.05])
+        axs[2].set_ylim([0, 2e5])
+
+        fig.tight_layout()
         plt.show()
 
 

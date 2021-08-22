@@ -120,35 +120,50 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         );
     }
 
-    if (this->stream_terms->Wi_iontransport != nullptr) {
-        DEF_SC_MUL("stream/Wi_iontransport", nChargeStates, "Ion heat transport rate for each species",
+    if (this->stream_terms->Wi_e_coll != nullptr) {
+        DEF_SC_MUL("stream/Wi_e_coll", nIons, "Ion-electron collision heat loss rate",
             const len_t nZ = this->ions->GetNZ();
-            const len_t nZs = this->ions->GetNzs();
+            const real_t *nions = this->unknowns->GetUnknownData(this->id_ni);
             real_t *v = qd->StoreEmpty();
 
-            for (len_t i = 0; i < nZs; i++)
+            for (len_t i = 0; i < nZ; i++)
                 v[i] = 0;
 
-            for (len_t iZ = 0, offset = 0; iZ < nZ; iZ++, offset += this->ions->GetZ(iZ)+1) {
+            for (len_t iZ = 0; iZ < nZ; iZ++) {
+                if (this->stream_terms->Wi_e_coll[iZ] != nullptr)
+                    this->stream_terms->Wi_e_coll[iZ]->SetVectorElements(v+iZ, nions);
+            }
+        );
+    }
+
+    if (this->stream_terms->Wi_iontransport != nullptr) {
+        DEF_SC_MUL("stream/Wi_iontransport", nIons, "Ion heat transport rate for each species",
+            const len_t nZ = this->ions->GetNZ();
+            const real_t *nions = this->unknowns->GetUnknownData(this->id_ni);
+            real_t *v = qd->StoreEmpty();
+
+            for (len_t i = 0; i < nZ; i++)
+                v[i] = 0;
+
+            for (len_t iZ = 0; iZ < nZ; iZ++) {
                 if (this->stream_terms->Wi_iontransport[iZ] != nullptr)
-                    this->stream_terms->Wi_iontransport[iZ]->SetVectorElements(v+offset, nullptr);
+                    this->stream_terms->Wi_iontransport[iZ]->SetVectorElements(v+iZ, nions);
             }
         );
     }
 
     if (this->stream_terms->Wi_chargeexchange != nullptr) {
-        DEF_SC_MUL("stream/Wi_chargeexchange", nChargeStates, "Ion energy loss due to charge-exchange",
+        DEF_SC_MUL("stream/Wi_chargeexchange", nIons, "Ion energy loss due to charge-exchange",
             const len_t nZ = this->ions->GetNZ();
-            const len_t nZs = this->ions->GetNzs();
             const real_t *nions = this->unknowns->GetUnknownData(this->id_ni);
             real_t *v = qd->StoreEmpty();
 
-            for (len_t i = 0; i < nZs; i++)
+            for (len_t i = 0; i < nZ; i++)
                 v[i] = 0;
 
-            for (len_t iZ = 0, offset = 0; iZ < nZ; iZ++, offset += this->ions->GetZ(iZ)+1) { 
+            for (len_t iZ = 0; iZ < nZ; iZ++) { 
                 if (this->stream_terms->Wi_chargeexchange[iZ] != nullptr)
-                    this->stream_terms->Wi_chargeexchange[iZ]->SetVectorElements(v+offset, nions);
+                    this->stream_terms->Wi_chargeexchange[iZ]->SetVectorElements(v+iZ, nions);
             }
         );
     }

@@ -10,7 +10,8 @@ sys.path.append('../../py')
 from PYDYON import Simulation
 
 
-prefill = 5e-5
+#prefill = 5e-5
+prefill = 7e-5
 gamma_i = 2e-3      # Ionization fraction
 nD0 = 3.22e22 * prefill
 nD = nD0 * np.array([1-gamma_i, gamma_i])
@@ -21,10 +22,11 @@ sim.addIon('D', 1)
 sim.initialize(Te=1, Ti=0.03, Ip=450, IMK2=0, niD=nD)
 
 tic = time.time()
-solution = sim.solve(tMax=0.03)
+solution = sim.solve(tMax=0.1)
 
 print('Obtained solution in {:.3f} s'.format(time.time()-tic))
 
 #print(list(solution.keys()))
-solution.plot()
+#solution.plot()
+solution.plotKimThesis45()
 

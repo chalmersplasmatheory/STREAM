@@ -157,9 +157,9 @@ class Simulation:
             self.unknowns.update(x)
             return [f(t,x) for f in equations]
 
-        sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x)
+        sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x, method='Radau')
         
-        return SimulationResult(sol.t, self.unknowns.getdict(x=sol.y))
+        return SimulationResult(sol.t, self.unknowns.getdict(x=sol.y), simulation=self)
 
 
     def updateSettings(self, set1, set2):
