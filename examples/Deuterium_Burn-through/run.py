@@ -32,7 +32,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.003
     :param j0:      Initial plasma current density [A/m^2]
     :param tmax:    Simulation time [s]
     """
-    n0 = 3.22e22 * prefill  # Initial total deuterium density
+    #n0 = 3.22e22 * prefill  # Initial total deuterium density
+    n0 = 2.78e22 * prefill  # Initial total deuterium density
     nD = n0 * np.array([[1-gamma], [gamma]])
 
     Btor = 2.3      # Toroidal magnetic field [T]
@@ -159,6 +160,30 @@ def drawplot3(axs, so, toffset=0, showlabel=True):
     axs[2].legend(frameon=False)
 
 
+def drawplot4(axs, so, toffset=0, showlabel=True):
+    t = so.grid.t[:] + toffset
+
+    V_p = so.other.stream.V_p[:,0]
+    
+    Ti = so.eqsys.W_i.getTemperature()
+    Pequi = so.other.stream.Wi_e_coll[:,0] * V_p
+    PCX = -so.other.stream.Wi_chargeexchange[:,0] * V_p
+    Pconv = -so.other.stream.Wi_iontransport[:,0] * V_p
+    Pnet = Pequi - PCX - Pconv
+
+    plotInternal(axs[0], t, Ti['D'][:,0], 'Ion temperature')
+
+    ylbl = r'Power balance'
+    plotInternal(axs[1], t[1:], Pequi, ylbl, label='Equilibration', showlabel=showlabel, color='g', linestyle='--')
+    plotInternal(axs[1], t[1:], PCX, ylbl, label='Charge exchange', showlabel=showlabel, color='b', linestyle='-.')
+    plotInternal(axs[1], t[1:], Pconv, ylbl, label='Transport', showlabel=showlabel, color='m', linestyle=':')
+    plotInternal(axs[1], t[1:], Pnet, ylbl, label='Net heating power', showlabel=showlabel, color='k', linestyle='-')
+
+    axs[0].set_xlim([0, t[-1]])
+    axs[1].set_xlim([0, t[-1]])
+    axs[1].legend(frameon=False)
+
+
 def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, *args, **kwargs):
     if label is not None and showlabel == False:
         label = None
@@ -194,7 +219,7 @@ def main(argv):
 
     if settings.skip is None or (len(settings.skip) > 0 and 1 not in settings.skip):
         print('RUN 1')
-        ss11 = generate(prefill=5e-5, nt=10000)
+        ss11 = generate(prefill=3e-5, nt=10000)
         ss11.save(f'settings11{ext}.h5')
         so11 = runiface(ss11, f'output11{ext}.h5', quiet=False)
 
@@ -250,6 +275,15 @@ def main(argv):
 
         drawplot3(axs4, so21)
         drawplot3(axs4, so22, toffset=so21.grid.t[-1], showlabel=False)
+
+        fig5, axs5 = plt.subplots(2, 2, figsize=(7,10))
+        drawplot4(axs5[:,0], so11)
+        drawplot4(axs5[:,0], so12, toffset=so11.grid.t[-1], showlabel=False)
+        drawplot4(axs5[:,1], so21)
+        drawplot4(axs5[:,1], so22, toffset=so21.grid.t[-1], showlabel=False)
+
+        axs5[0,0].set_title(r'$p = 5\times 10^{-5}\,\mathrm{Torr}$')
+        axs5[0,1].set_title(r'$p = 7\times 10^{-5}\,\mathrm{Torr}$')
 
         plt.tight_layout()
         plt.show()

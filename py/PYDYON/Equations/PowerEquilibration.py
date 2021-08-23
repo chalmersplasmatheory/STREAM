@@ -33,7 +33,7 @@ class EquilibrationPowerTerm:
         logLambda = 10
         amu = scipy.constants.physical_constants['atomic mass constant'][0]
 
-        pf = 7.75e-34 * (Te - Ti) * (ne*logLambda)/Te**(3/2)
+        pf = 7.75e-34 * (Te - Ti) * (ne*logLambda)/Te**1.5
 
         nz = 0
         for ion in self.ions:
