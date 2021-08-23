@@ -263,6 +263,7 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
     DREAM::FVM::Operator *Op_ni = new DREAM::FVM::Operator(fluidGrid);
 
     stream_terms->Wi_iontransport = new IonHeatTransport*[nZ];
+    stream_terms->Wi_chargeexchange = new ChargeExchangeTerm*[nZ];
 
     // Locate deuterium
     len_t D_index;
@@ -275,6 +276,8 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
         throw DREAM::SettingsException(
             "T_i: Expected to find one deuterium ion species named 'D'."
         );
+
+    D_index = ionHandler->GetIndex(D_index, 0);
 
     DREAM::CoulombLogarithm *lnLambda = eqsys->GetREFluid()->GetLnLambda();
     for(len_t iz=0; iz<nZ; iz++){
@@ -302,8 +305,10 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
         stream_terms->Wi_iontransport[iz] = new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator());
         Op_ni->AddTerm(stream_terms->Wi_iontransport[iz]);
         if (iz == D_index){
-            Op_ni->AddTerm(new ChargeExchangeTerm(eqsys->GetFluidGrid(), eqsys->GetUnknownHandler(), eqsys->GetIonHandler(), iz, adas, eqsys->GetPlasmaVolume(), eqsys->GetEllipticalRadialGridGenerator(), fluidGrid, D_index));
-        }
+            stream_terms->Wi_chargeexchange[iz] = new ChargeExchangeTerm(eqsys->GetFluidGrid(), eqsys->GetUnknownHandler(), eqsys->GetIonHandler(), iz, adas, eqsys->GetPlasmaVolume(), eqsys->GetEllipticalRadialGridGenerator(), fluidGrid, D_index);
+            Op_ni->AddTerm(stream_terms->Wi_chargeexchange[iz]);
+        } else
+            stream_terms->Wi_chargeexchange[iz] = nullptr;
     }
     eqsys->SetOperator(id_Wi, id_Wi, Op_Wij, "dW_i/dt = sum_j Q_ij + Q_ie - Q_CX - Q_transport");
     eqsys->SetOperator(id_Wi, id_Wcold, Op_Wie);

@@ -27,6 +27,8 @@ OtherQuantityHandler::OtherQuantityHandler(
     confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume),
     ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
 
+    this->id_ni = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
+
     this->DefineQuantitiesSTREAM();
 }
 
@@ -109,8 +111,20 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             const len_t nZ = this->ions->GetNZ();
             real_t *v = qd->StoreEmpty();
             for (len_t iZ = 0, offset = 0; iZ < nZ; iZ++, offset += this->ions->GetZ(iZ)+1) {
-                if (this->stream_terms->iontransport[iZ] != nullptr)
-                    this->stream_terms->iontransport[iZ]->SetVectorElements(v+offset, nullptr);
+                if (this->stream_terms->Wi_iontransport[iZ] != nullptr)
+                    this->stream_terms->Wi_iontransport[iZ]->SetVectorElements(v+offset, nullptr);
+            }
+        );
+    }
+
+    if (this->stream_terms->Wi_chargeexchange != nullptr) {
+        DEF_SC_MUL("stream/Wi_chargeexchange", nChargeStates, "Ion energy loss due to charge-exchange",
+            const len_t nZ = this->ions->GetNZ();
+            const real_t *nions = this->unknowns->GetUnknownData(this->id_ni);
+            real_t *v = qd->StoreEmpty();
+            for (len_t iZ = 0, offset = 0; iZ < nZ; iZ++, offset += this->ions->GetZ(iZ)+1) {
+                if (this->stream_terms->Wi_chargeexchange[iZ] != nullptr)
+                    this->stream_terms->Wi_chargeexchange[iZ]->SetVectorElements(v+offset, nions);
             }
         );
     }

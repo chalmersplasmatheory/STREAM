@@ -4,6 +4,7 @@
 #include <vector>
 #include "DREAM/OtherQuantityHandler.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
+#include "STREAM/Equations/ChargeExchangeTerm.hpp"
 #include "STREAM/Equations/NeutralInflux.hpp"
 #include "STREAM/Equations/PlasmaVolume.hpp"
 #include "STREAM/Equations/IonRateEquation.hpp"
@@ -16,6 +17,7 @@ namespace STREAM {
         struct eqn_terms {
             IonTransport **iontransport=nullptr;
             IonHeatTransport **Wi_iontransport=nullptr;
+            ChargeExchangeTerm **Wi_chargeexchange=nullptr;
         };
     private:
         ConfinementTime *confinementTime;
@@ -24,6 +26,8 @@ namespace STREAM {
 
         std::vector<IonRateEquation*> ionRateEquations;
         struct eqn_terms *stream_terms;
+
+        len_t id_ni;
 
     public:
         OtherQuantityHandler(
