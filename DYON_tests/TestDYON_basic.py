@@ -30,7 +30,7 @@ import STREAM.Settings.TransportSettings as Transport
 
 tMax_initial = 1e-4  # simulation time in seconds
 Nt_initial   = 4000   # number of time steps
-tMax_final   = 5e-1  # simulation time in seconds
+tMax_final   = 1e-1  # simulation time in seconds
 Nt_final     = 1e4*tMax_final   # number of time steps
 
 pgp_list = np.linspace(5,7.0,2)
