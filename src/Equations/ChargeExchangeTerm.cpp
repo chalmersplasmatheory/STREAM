@@ -102,7 +102,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
                 R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
                 dR_icxdT = adas->GetCCD(Z)->Eval_deriv_T(0, n_cold, T_cold);
             }
-            diffWeights[iIon] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i-T_0) * dR_icxdT * n_i; 
+            diffWeights[iIon] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i - DREAM::Constants::ec*T_0) * dR_icxdT * n_i; 
         }
     } else if(derivId == id_ncold) {
         for(len_t iz=0; iz<nZ; iz++) {
@@ -116,7 +116,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
                 R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
                 dR_icxdn = adas->GetCCD(Z)->Eval_deriv_n(0, n_cold, T_cold);
             }
-            diffWeights[iIon] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i-T_0) * dR_icxdn * n_i; 
+            diffWeights[iIon] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i - DREAM::Constants::ec*T_0) * dR_icxdn * n_i; 
         }
     } else if(derivId == id_Wi) {
         for(len_t iz=0; iz<nZ; iz++) {
@@ -149,7 +149,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
                 len_t Z = ions->GetZ(iz);
                 R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
             }
-            diffWeights[iIon*nZ+n] -= dV_nidlambdai/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i - T_0) * R_icx * n_i; 
+            diffWeights[iIon*nZ+n] -= dV_nidlambdai/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i - DREAM::Constants::ec*T_0) * R_icx * n_i; 
         }
     } else if(derivId == id_ni) {
         for(len_t iz=0; iz<nZ; iz++) {
@@ -160,7 +160,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
                 len_t Z = ions->GetZ(iz);
                 R_icx = adas->GetCCD(Z)->Eval(0, n_cold, T_cold);
             }
-            diffWeights[iIon*nMultiples+n_iz] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i - T_0) * R_icx;  //fel?
+            diffWeights[iIon*nMultiples+n_iz] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i - DREAM::Constants::ec*T_0) * R_icx;  //fel?
         }
     } 
 }
