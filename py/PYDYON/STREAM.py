@@ -17,17 +17,17 @@ from . import ConfinementTime, IonHandler, PlasmaVolume, UnknownQuantityHandler,
 #   eval:     Function to call to evaluate the PYDYON object. If not defined, called as 'obj(t,x)'.
 #   
 TERMS = {
-    'Radiated power': { 'pydyon': RadiatedPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_radiation[:,0] },
+    #'Radiated power': { 'pydyon': RadiatedPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_radiation[:,0] },
     #'Ohmic power': { 'pydyon': OhmicPowerTerm, 'stream': lambda so : -so.other.fluid.Tcold_ohmic[:,0] },
     #'e-i equilibration': { 'pydyon': EquilibrationPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_ion_coll[:,0] },
     #'i-e equilibration': { 'pydyon': EquilibrationPowerTerm, 'stream': lambda so : so.other.stream.Wi_e_coll[:,0] },
     ##'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.scalar.energyloss_T_cold[:,0] },
     #'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.stream.Tcold_transport[:,0] },
     #'i heat convection': { 'pydyon': IonConvectivePowerTerm, 'stream': lambda so : -so.other.stream.Wi_iontransport[:,0] },
-    'Charge-exchange heat loss': { 'pydyon': ChargeExchangePowerTerm, 'stream': lambda so : -so.other.stream.Wi_chargeexchange[:,0] },
+    #'Charge-exchange heat loss': { 'pydyon': ChargeExchangePowerTerm, 'stream': lambda so : -so.other.stream.Wi_chargeexchange[:,0] },
     #'i particle transport': { 'pydyon': IonTransport, 'eval': lambda ce, t, x: ce(t, x, 'D', Z0=1), 'stream': lambda so : -so.other.stream.ni_iontransport[:,1,0] },
     #'Confinement time': { 'pydyon': ConfinementTime, 'stream': lambda so : so.other.stream.tau_D[:,0] },
-    #r'dI\_p / dt': { 'pydyon': CircuitEquation, 'eval': lambda ce, t, x : ce.dIp_dt(t,x), 'stream': lambda so : np.diff(so.eqsys.I_p[:,0]) / np.diff(so.grid.t[:]) , 'atol': 1 },
+    r'dI\_p / dt': { 'pydyon': CircuitEquation, 'eval': lambda ce, t, x : ce.dIp_dt(t,x), 'stream': lambda so : np.diff(so.eqsys.I_p[:,0]) / np.diff(so.grid.t[:]) , 'atol': 1 },
     #r'dI\_w / dt': { 'pydyon': CircuitEquation, 'eval': lambda ce, t, x : ce.dIMK2_dt(t,x), 'stream': lambda so : np.diff(so.eqsys.I_wall[:,0]) / np.diff(so.grid.t[:]), 'atol': 1 },
 
     # Specialized deuterium ionization

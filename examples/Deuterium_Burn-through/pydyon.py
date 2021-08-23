@@ -16,7 +16,7 @@ gamma_i = 2e-3      # Ionization fraction
 nD0 = 3.22e22 * prefill
 nD = nD0 * np.array([1-gamma_i, gamma_i])
 
-sim = Simulation(RMK2=np.inf)
+sim = Simulation(RMK2=np.inf, a=0.5)
 
 sim.addIon('D', 1)
 sim.initialize(Te=1, Ti=0.03, Ip=450, IMK2=0, niD=nD)
