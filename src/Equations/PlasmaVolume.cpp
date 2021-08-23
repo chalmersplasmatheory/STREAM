@@ -30,8 +30,8 @@ using namespace DREAM;
             real_t kappa = radials->GetElongation(); 
             real_t delta = radials->GetTriangularity();  
             
-            return  2*M_PI*M_PI*R0*kappa*(a*a-(a-lambda_i)*(a-lambda_i)) +
-                    2*(8-3*M_PI*M_PI) *kappa *delta*(a*a*a - (a-lambda_i)*(a-lambda_i)*(a-lambda_i))/3;
+            return  2.0*M_PI*M_PI*R0*kappa*(a*a-(a-lambda_i)*(a-lambda_i)) +
+                    2.0*(8.0-3.0*M_PI*M_PI) *kappa *delta*(a*a*a - (a-lambda_i)*(a-lambda_i)*(a-lambda_i))/3.0;
         } else {
             return GetPlasmaVolume();
         }
@@ -69,9 +69,9 @@ using namespace DREAM;
 
             real_t v_i = 0;
             if(n_i != 0) 
-                v_i = sqrt(4 * W_i/(3 * n_i * ions->GetIonSpeciesMass(iz)));
+                v_i = sqrt(4.0 * W_i/(3.0 * n_i * ions->GetIonSpeciesMass(iz)));
             
-            return  (4*M_PI*M_PI*R0*kappa*(a-lambda_i)+2*(8-3*M_PI*M_PI)*kappa*delta*(a-lambda_i)*(a-lambda_i)) * -v_i/(n_cold*I_i*I_i) * dIdT; 
+            return  (4.0*M_PI*M_PI*R0*kappa*(a-lambda_i)+2.0*(8.0-3.0*M_PI*M_PI)*kappa*delta*(a-lambda_i)*(a-lambda_i)) * -v_i/(n_cold*I_i*I_i) * dIdT; 
         } else {
             return 0;
         }
@@ -96,9 +96,9 @@ using namespace DREAM;
             
             real_t v_i = 0;
             if(n_i != 0)
-                v_i = sqrt(4 * W_i/(3 * n_i * ions->GetIonSpeciesMass(iz)));
+                v_i = sqrt(4.0 * W_i/(3.0 * n_i * ions->GetIonSpeciesMass(iz)));
         
-            return  (4*M_PI*M_PI*R0*kappa*(a-lambda_i)+2*(8-3*M_PI*M_PI)*kappa*delta*(a-lambda_i)*(a-lambda_i)) * -v_i/(n_cold*I_i) * (1/n_cold + dIdn/I_i); 
+            return  (4.0*M_PI*M_PI*R0*kappa*(a-lambda_i)+2.0*(8.0-3.0*M_PI*M_PI)*kappa*delta*(a-lambda_i)*(a-lambda_i)) * -v_i/(n_cold*I_i) * (1.0/n_cold + dIdn/I_i); 
         } else {
             return 0;
         }
@@ -115,7 +115,7 @@ using namespace DREAM;
 
             real_t a_l = a-lambda_i;
 
-            return (4*M_PI*M_PI*R0*kappa*a_l + 2*kappa*delta*(8-3*M_PI*M_PI)*a_l*a_l);
+            return (4.0*M_PI*M_PI*R0*kappa*a_l + 2.0*kappa*delta*(8.0-3.0*M_PI*M_PI)*a_l*a_l);
         } else
             return 0;
     }
