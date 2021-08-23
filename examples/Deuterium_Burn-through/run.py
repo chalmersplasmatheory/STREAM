@@ -202,6 +202,44 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
         ax.set_ylim(ylim)
 
 
+def makeplots(so11, so12, so21, so22):
+    fig1, axs1 = plt.subplots(2, 1, figsize=(7,5), sharex=True)
+
+    drawplot1(axs1, so11, color='b')
+    drawplot1(axs1, so12, color='b', toffset=so11.grid.t[-1])
+    drawplot1(axs1, so21, color='r')
+    drawplot1(axs1, so22, color='r', toffset=so21.grid.t[-1])
+
+    fig2, axs2 = plt.subplots(4, 1, figsize=(7, 10))
+    drawplot2(axs2, so11, color='b')
+    drawplot2(axs2, so12, color='b', toffset=so11.grid.t[-1])
+    drawplot2(axs2, so21, color='r')
+    drawplot2(axs2, so22, color='r', toffset=so21.grid.t[-1])
+
+    axs2[0].legend([r'$p = 5\times 10^{-5}\,\mathrm{Torr}$', r'$p = 7\times 10^{-5}\,\mathrm{Torr}$'])
+
+    fig3, axs3 = plt.subplots(3, 1, figsize=(7, 10))
+    fig4, axs4 = plt.subplots(3, 1, figsize=(7, 10))
+
+    drawplot3(axs3, so11)
+    drawplot3(axs3, so12, toffset=so11.grid.t[-1], showlabel=False)
+
+    drawplot3(axs4, so21)
+    drawplot3(axs4, so22, toffset=so21.grid.t[-1], showlabel=False)
+
+    fig5, axs5 = plt.subplots(2, 2, figsize=(7,10))
+    drawplot4(axs5[:,0], so11)
+    drawplot4(axs5[:,0], so12, toffset=so11.grid.t[-1], showlabel=False)
+    drawplot4(axs5[:,1], so21)
+    drawplot4(axs5[:,1], so22, toffset=so21.grid.t[-1], showlabel=False)
+
+    axs5[0,0].set_title(r'$p = 5\times 10^{-5}\,\mathrm{Torr}$')
+    axs5[0,1].set_title(r'$p = 7\times 10^{-5}\,\mathrm{Torr}$')
+
+    plt.tight_layout()
+    plt.show()
+
+
 def main(argv):
     FONTSIZE = 16
     plt.rcParams.update({'font.size': FONTSIZE})
@@ -252,41 +290,7 @@ def main(argv):
         so22 = STREAMOutput(f'output22{ext}.h5')
 
     if settings.plot:
-        fig1, axs1 = plt.subplots(2, 1, figsize=(7,5), sharex=True)
-
-        drawplot1(axs1, so11, color='b')
-        drawplot1(axs1, so12, color='b', toffset=so11.grid.t[-1])
-        drawplot1(axs1, so21, color='r')
-        drawplot1(axs1, so22, color='r', toffset=so21.grid.t[-1])
-
-        fig2, axs2 = plt.subplots(4, 1, figsize=(7, 10))
-        drawplot2(axs2, so11, color='b')
-        drawplot2(axs2, so12, color='b', toffset=so11.grid.t[-1])
-        drawplot2(axs2, so21, color='r')
-        drawplot2(axs2, so22, color='r', toffset=so21.grid.t[-1])
-
-        axs2[0].legend([r'$p = 5\times 10^{-5}\,\mathrm{Torr}$', r'$p = 7\times 10^{-5}\,\mathrm{Torr}$'])
-
-        fig3, axs3 = plt.subplots(3, 1, figsize=(7, 10))
-        fig4, axs4 = plt.subplots(3, 1, figsize=(7, 10))
-
-        drawplot3(axs3, so11)
-        drawplot3(axs3, so12, toffset=so11.grid.t[-1], showlabel=False)
-
-        drawplot3(axs4, so21)
-        drawplot3(axs4, so22, toffset=so21.grid.t[-1], showlabel=False)
-
-        fig5, axs5 = plt.subplots(2, 2, figsize=(7,10))
-        drawplot4(axs5[:,0], so11)
-        drawplot4(axs5[:,0], so12, toffset=so11.grid.t[-1], showlabel=False)
-        drawplot4(axs5[:,1], so21)
-        drawplot4(axs5[:,1], so22, toffset=so21.grid.t[-1], showlabel=False)
-
-        axs5[0,0].set_title(r'$p = 5\times 10^{-5}\,\mathrm{Torr}$')
-        axs5[0,1].set_title(r'$p = 7\times 10^{-5}\,\mathrm{Torr}$')
-
-        plt.tight_layout()
-        plt.show()
+        makeplots(so11, so12, so21, so22)
 
     return 0
 

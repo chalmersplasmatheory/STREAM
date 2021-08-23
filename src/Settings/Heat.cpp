@@ -117,7 +117,7 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     op_n_cold->AddTerm(oqty_terms->T_cold_radiation);
 
     // Add transport
-    /*bool hasTransport = true;      // TODO Load from settings...
+    bool hasTransport = true;      // TODO Load from settings...
     ElectronHeatTransportDiffusion *ht = new ElectronHeatTransportDiffusion(
         eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(),
         eqsys->GetConfinementTime(), eqsys->GetUnknownHandler()
@@ -138,8 +138,8 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
         oqty_terms->T_cold_diffusive_bc = bc;
         eqsys->SetOperator(id_T_cold, id_W_cold, op_W_cold);
         desc += " - transport";
-    }*/
-    ElectronHeatTransport *ht = new ElectronHeatTransport(
+    }
+    /*ElectronHeatTransport *ht = new ElectronHeatTransport(
         eqsys->GetFluidGrid(), eqsys->GetConfinementTime(),
         eqsys->GetEllipticalRadialGridGenerator(),
         eqsys->GetUnknownHandler()
@@ -149,7 +149,7 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
 
     eqsys->SetOperator(id_T_cold, id_E_field, op_E_field);
     eqsys->SetOperator(id_T_cold, id_n_cold, op_n_cold);
-    string desc = "dWc/dt = j_ohm*E - radiation - transport";
+    string desc = "dWc/dt = j_ohm*E - radiation - transport";*/
 
     // Energy transfer from runaways to cold electrons.
     // If the kinetic runaway grid is enabled and we do not resolve the cold

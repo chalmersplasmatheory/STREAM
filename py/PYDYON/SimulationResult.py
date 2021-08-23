@@ -74,13 +74,13 @@ class SimulationResult:
         Ip = self.x['Ip']
 
         self.plotQuantity(self.x['Ip']/1e4, axs[0], title='Plasma current')
-        axs[0].set_xlim([0, 0.05])
+        axs[0].set_xlim([0, self.t[-1]])
         axs[0].set_ylim([0, 10])
 
         nD = self.x['niD']
         gamma_i = self.x['ne'] / (nD[0] + self.x['ne'])
         self.plotQuantity(gamma_i*100, axs[1], title='Ionization fraction')
-        axs[1].set_xlim([0, 0.05])
+        axs[1].set_xlim([0, self.t[-1]])
         axs[1].set_ylim([0, 105])
 
         sim = self.simulation
@@ -93,6 +93,7 @@ class SimulationResult:
         Pconve = ElectronConvectivePowerTerm(sim.unknowns, sim.ions, **tausettings)
 
         Vp = sim.unknowns.getV_p()
+        print('Plasma volume Vp = {} m^3'.format(Vp))
         vPoh = self.evaluateTerm(Poh) * Vp
         vPrad = self.evaluateTerm(Prad) * Vp
         vPequi = self.evaluateTerm(Pequi) * Vp
@@ -100,16 +101,66 @@ class SimulationResult:
         vPtot = vPrad+vPequi+vPconve
         vPnet = vPoh - vPtot
 
-        axs[2].plot(self.t, vPtot, 'r--', label='Total electron power loss')
-        axs[2].plot(self.t, vPrad, 'b.-', label='Radiation+ionization')
-        axs[2].plot(self.t, vPequi, 'g--', label='Equilibration')
-        axs[2].plot(self.t, vPconve, 'm:', label='Electron transport')
-        axs[2].plot(self.t, vPnet, 'k-', label='Net electron heating power')
+        axs[2].plot(self.t, vPtot/1e6, 'r--', label='Total electron power loss')
+        axs[2].plot(self.t, vPrad/1e6, 'b.-', label='Radiation+ionization')
+        axs[2].plot(self.t, vPequi/1e6, 'g--', label='Equilibration')
+        axs[2].plot(self.t, vPconve/1e6, 'm:', label='Electron transport')
+        axs[2].plot(self.t, vPnet/1e6, 'k-', label='Net electron heating power')
         axs[2].set_title('Power balance')
         axs[2].legend(frameon=False)
 
-        axs[2].set_xlim([0, 0.05])
-        axs[2].set_ylim([0, 2e5])
+        axs[2].set_xlim([0, self.t[-1]])
+        axs[2].set_ylim([0, 0.5])
+
+        fig.tight_layout()
+        plt.show()
+
+
+    def plotKim2020(self):
+        fig, axs = plt.subplots(1, 2, figsize=(8, 5))
+
+        sim = self.simulation
+        s = sim.settings
+
+        tausettings = {'Bphi': s['Bphi'], 'Bv': s['Bv'], 'l_MK2': s['l_MK2']}
+        Poh    = OhmicPowerTerm(sim.unknowns, sim.ions)
+        Prad   = RadiatedPowerTerm(sim.unknowns, sim.ions)
+        Pequi  = EquilibrationPowerTerm(sim.unknowns, sim.ions)
+        Pconve = ElectronConvectivePowerTerm(sim.unknowns, sim.ions, **tausettings)
+        Pcx    = ChargeExchangePowerTerm(sim.unknowns, sim.ions)
+        Pconvi = IonConvectivePowerTerm(sim.unknowns, sim.ions, **tausettings)
+
+        Vp = sim.unknowns.getV_p()
+        vPoh = self.evaluateTerm(Poh) * Vp
+        vPrad = self.evaluateTerm(Prad) * Vp
+        vPequi = self.evaluateTerm(Pequi) * Vp
+        vPconve = self.evaluateTerm(Pconve) * Vp
+        vPtot = vPrad+vPequi+vPconve
+        vPnet = vPoh - vPtot
+
+        vPcx = self.evaluateTerm(Pcx) * Vp
+        vPconvi = self.evaluateTerm(Pconvi) * Vp
+
+        #axs[0].plot(self.t, vPtot/1e6, 'r--', label='Total electron power loss')
+        axs[0].plot(self.t, vPrad/1e6, 'm--', label='Radiation+ionization')
+        axs[0].plot(self.t, vPequi/1e6, 'b--', label='Equilibration')
+        axs[0].plot(self.t, vPconve/1e6, 'k--', label='Electron transport')
+        axs[0].plot(self.t, vPoh/1e6, 'r--', label='Ohmic heating')
+        #axs[0].plot(self.t, vPnet/1e6, 'k-', label='Net electron heating power')
+        axs[0].set_title('Electron energy balance')
+        axs[0].legend(frameon=False)
+
+        axs[0].set_xlim([0, self.t[-1]])
+        axs[0].set_ylim([0, 0.5])
+
+        axs[1].plot(self.t, vPequi/1e6, 'b--', label='Equilibration')
+        axs[1].plot(self.t, vPcx/1e6, 'r--', label='Charge exchange')
+        axs[1].plot(self.t, vPconvi/1e6, 'k--', label='Transport')
+        axs[1].set_title('Ion energy balance')
+        axs[1].legend(frameon=False)
+
+        axs[1].set_xlim([0, self.t[-1]])
+        axs[1].set_ylim([0, 0.5])
 
         fig.tight_layout()
         plt.show()
