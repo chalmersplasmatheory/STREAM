@@ -30,6 +30,7 @@ class IonParticleBalance:
 
         ne = self.quantities['ne']
         Te = self.quantities['Te']
+        Ti = self.quantities['Ti']
 
         dndt = 0
         if Z0 == 0:  # Neutral
@@ -46,8 +47,8 @@ class IonParticleBalance:
             Riz01  = self.adas.SCD(ionname, Z0-1, n=ne, T=Te)
             Rrec10 = self.adas.ACD(ionname, Z0,   n=ne, T=Te)
             Rrec21 = self.adas.ACD(ionname, Z0+1, n=ne, T=Te)
-            Rcx10  = self.adas.CCD(ionname, Z0,   n=ne, T=Te)
-            Rcx21  = self.adas.CCD(ionname, Z0+1, n=ne, T=Te)
+            Rcx10  = self.adas.CCD(ionname, Z0,   n=ni[Z0], T=Ti)
+            Rcx21  = self.adas.CCD(ionname, Z0+1, n=ni[Z0], T=Ti)
 
             Vfac = Vn/Vp if Z0==1 else 1.0
 

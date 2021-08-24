@@ -1,6 +1,6 @@
 # Charge exchange power loss term
 
-
+import numpy as np
 import scipy.constants
 from .. ADAS import ADAS
 
@@ -32,7 +32,6 @@ class ChargeExchangePowerTerm:
         nD0 = self.quantities['niD'][0]
         Ti  = self.quantities['Ti']
         ne  = self.quantities['ne']
-        Te  = self.quantities['Te']
         T0  = 0.026
 
         rad = 0
@@ -40,7 +39,8 @@ class ChargeExchangePowerTerm:
             A = ion['name']
             ni1 = self.quantities.getIonData(A)[1]
 
-            rad += self.adas.CCD(A, 1, n=ne, T=Te) * ni1
+            rad += self.adas.CCD(A, 1, n=ni1, T=Ti) * ni1
+            #rad += 1.066e-14*(Ti**.327) * ni1
 
         Pcx = Vn/Vp * (3/2) * nD0*e*(Ti-T0) * rad
 
