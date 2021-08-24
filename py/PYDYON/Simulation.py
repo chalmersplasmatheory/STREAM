@@ -157,24 +157,9 @@ class Simulation:
             self.unknowns.update(x)
             return [f(t,x) for f in equations]
 
-        """
-        print('INITIAL RATES')
-        for i in range(len(equations)):
-            print('d/dt {} = {}'.format(self.unknowns.getNameByIndex(i), equations[i](0, self.unknowns.x)))
-        for t in self._terms:
-            try:
-                print('{} = {}'.format(type(t).__name__, t(0, self.unknowns.x)))
-            except TypeError:
-                try:
-                    print('{} = {}'.format(type(t).__name__, t(self.unknowns.x)))
-                except Exception as e:
-                    print(f'ERROR: {e}')
-        print('-----------------------')
-        """
-
-        sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x)
+        sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x, method='Radau')
         
-        return SimulationResult(sol.t, self.unknowns.getdict(x=sol.y))
+        return SimulationResult(sol.t, self.unknowns.getdict(x=sol.y), simulation=self)
 
 
     def updateSettings(self, set1, set2):

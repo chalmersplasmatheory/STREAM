@@ -32,7 +32,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=20, Vloop_t=0, j0=405.8, tmax=0.003
     :param j0:      Initial plasma current density [A/m^2]
     :param tmax:    Simulation time [s]
     """
-    n0 = 3.22e22 * prefill  # Initial total deuterium density
+    #n0 = 3.22e22 * prefill  # Initial total deuterium density
+    n0 = 2.78e22 * prefill  # Initial total deuterium density
     nD = n0 * np.array([[1-gamma], [gamma]])
 
     Btor = 2.3      # Toroidal magnetic field [T]
@@ -159,6 +160,30 @@ def drawplot3(axs, so, toffset=0, showlabel=True):
     axs[2].legend(frameon=False)
 
 
+def drawplot4(axs, so, toffset=0, showlabel=True):
+    t = so.grid.t[:] + toffset
+
+    V_p = so.other.stream.V_p[:,0]
+    
+    Ti = so.eqsys.W_i.getTemperature()
+    Pequi = so.other.stream.Wi_e_coll[:,0] * V_p
+    PCX = -so.other.stream.Wi_chargeexchange[:,0] * V_p
+    Pconv = -so.other.stream.Wi_iontransport[:,0] * V_p
+    Pnet = Pequi - PCX - Pconv
+
+    plotInternal(axs[0], t, Ti['D'][:,0], 'Ion temperature')
+
+    ylbl = r'Power balance'
+    plotInternal(axs[1], t[1:], Pequi, ylbl, label='Equilibration', showlabel=showlabel, color='g', linestyle='--')
+    plotInternal(axs[1], t[1:], PCX, ylbl, label='Charge exchange', showlabel=showlabel, color='b', linestyle='-.')
+    plotInternal(axs[1], t[1:], Pconv, ylbl, label='Transport', showlabel=showlabel, color='m', linestyle=':')
+    plotInternal(axs[1], t[1:], Pnet, ylbl, label='Net heating power', showlabel=showlabel, color='k', linestyle='-')
+
+    axs[0].set_xlim([0, t[-1]])
+    axs[1].set_xlim([0, t[-1]])
+    axs[1].legend(frameon=False)
+
+
 def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, *args, **kwargs):
     if label is not None and showlabel == False:
         label = None
@@ -175,6 +200,44 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
 
     if ylim is not None:
         ax.set_ylim(ylim)
+
+
+def makeplots(so11, so12, so21, so22):
+    fig1, axs1 = plt.subplots(2, 1, figsize=(7,5), sharex=True)
+
+    drawplot1(axs1, so11, color='b')
+    drawplot1(axs1, so12, color='b', toffset=so11.grid.t[-1])
+    drawplot1(axs1, so21, color='r')
+    drawplot1(axs1, so22, color='r', toffset=so21.grid.t[-1])
+
+    fig2, axs2 = plt.subplots(4, 1, figsize=(7, 10))
+    drawplot2(axs2, so11, color='b')
+    drawplot2(axs2, so12, color='b', toffset=so11.grid.t[-1])
+    drawplot2(axs2, so21, color='r')
+    drawplot2(axs2, so22, color='r', toffset=so21.grid.t[-1])
+
+    axs2[0].legend([r'$p = 5\times 10^{-5}\,\mathrm{Torr}$', r'$p = 7\times 10^{-5}\,\mathrm{Torr}$'])
+
+    fig3, axs3 = plt.subplots(3, 1, figsize=(7, 10))
+    fig4, axs4 = plt.subplots(3, 1, figsize=(7, 10))
+
+    drawplot3(axs3, so11)
+    drawplot3(axs3, so12, toffset=so11.grid.t[-1], showlabel=False)
+
+    drawplot3(axs4, so21)
+    drawplot3(axs4, so22, toffset=so21.grid.t[-1], showlabel=False)
+
+    fig5, axs5 = plt.subplots(2, 2, figsize=(7,10))
+    drawplot4(axs5[:,0], so11)
+    drawplot4(axs5[:,0], so12, toffset=so11.grid.t[-1], showlabel=False)
+    drawplot4(axs5[:,1], so21)
+    drawplot4(axs5[:,1], so22, toffset=so21.grid.t[-1], showlabel=False)
+
+    axs5[0,0].set_title(r'$p = 5\times 10^{-5}\,\mathrm{Torr}$')
+    axs5[0,1].set_title(r'$p = 7\times 10^{-5}\,\mathrm{Torr}$')
+
+    plt.tight_layout()
+    plt.show()
 
 
 def main(argv):
@@ -212,45 +275,22 @@ def main(argv):
     if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
         print('RUN 2')
         ss21 = generate(prefill=7e-5, nt=10000)
+        ss21.save(f'settings21{ext}.h5')
         so21 = runiface(ss21, f'output21{ext}.h5', quiet=False)
 
         ss22 = STREAMSettings(ss21)
         ss22.fromOutput(f'output21{ext}.h5')
         ss22.timestep.setTmax(0.1 - ss21.timestep.tmax)
         ss22.timestep.setNumberOfSaveSteps(0)
-        ss22.timestep.setNt(1000)
+        ss22.timestep.setNt(10000)
+        ss22.save(f'settings22{ext}.h5')
         so22 = runiface(ss22, f'output22{ext}.h5', quiet=False)
     else:
         so21 = STREAMOutput(f'output21{ext}.h5')
         so22 = STREAMOutput(f'output22{ext}.h5')
 
     if settings.plot:
-        fig1, axs1 = plt.subplots(2, 1, figsize=(7,5), sharex=True)
-
-        drawplot1(axs1, so11, color='b')
-        drawplot1(axs1, so12, color='b', toffset=so11.grid.t[-1])
-        drawplot1(axs1, so21, color='r')
-        drawplot1(axs1, so22, color='r', toffset=so21.grid.t[-1])
-
-        fig2, axs2 = plt.subplots(4, 1, figsize=(7, 10))
-        drawplot2(axs2, so11, color='b')
-        drawplot2(axs2, so12, color='b', toffset=so11.grid.t[-1])
-        drawplot2(axs2, so21, color='r')
-        drawplot2(axs2, so22, color='r', toffset=so21.grid.t[-1])
-
-        axs2[0].legend([r'$p = 5\times 10^{-5}\,\mathrm{Torr}$', r'$p = 7\times 10^{-5}\,\mathrm{Torr}$'])
-
-        fig3, axs3 = plt.subplots(3, 1, figsize=(7, 10))
-        fig4, axs4 = plt.subplots(3, 1, figsize=(7, 10))
-
-        drawplot3(axs3, so11)
-        drawplot3(axs3, so12, toffset=so11.grid.t[-1], showlabel=False)
-
-        drawplot3(axs4, so21)
-        drawplot3(axs4, so22, toffset=so21.grid.t[-1], showlabel=False)
-
-        plt.tight_layout()
-        plt.show()
+        makeplots(so11, so12, so21, so22)
 
     return 0
 
