@@ -27,7 +27,7 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
         }
     }
     
-    delete [] this->dn_kj;
+    //delete [] this->dn_kj;
     len_t Z_i = ions->GetZ(iIon);
     if(Z_i==1 && !ions->IsTritium(iIon)){
         this->dn_kj = new real_t[1];

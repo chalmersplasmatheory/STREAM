@@ -51,7 +51,13 @@ void IonHeatTransport::Rebuild(
     len_t nr = radials->GetNr();
 
     this->W_i     = unknowns->GetUnknownData(id_Wi)[iIon*nr];
-    this->T_i_J   = 2.0/3.0 * W_i / unknowns->GetUnknownData(id_Ni)[iIon*nr];
+    real_t N_i    = unknowns->GetUnknownData(id_Ni)[iIon*nr];
+    if(N_i==0){
+        this->T_i_J = 0;
+    } else {
+        this->T_i_J   = 2.0/3.0 * W_i / N_i;
+    }    
+    //this->T_i_J   = 2.0/3.0 * W_i / N_i;
     this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
     this->dI_p    = - dtauinvdIp * W_i;
     this->dI_wall = - dtauinvdIwall * W_i;
@@ -65,19 +71,19 @@ bool IonHeatTransport::SetCSJacobianBlock(
     const len_t iIon, const len_t Z0, const len_t rOffset
 ) { 
     if(derivId==id_Ip){
-		jac->SetElement(rOffset, 0,this->dI_p);
+		jac->SetElement(iIon, 0,this->dI_p);
 		return true;
 	} else if(derivId==id_Iwall){
-		jac->SetElement(rOffset, 0,this->dI_wall);
+		jac->SetElement(iIon, 0,this->dI_wall);
 		return true;
 	} else if(derivId==id_Tcold){
-		jac->SetElement(rOffset, 0,this->dT_cold);
+		jac->SetElement(iIon, 0,this->dT_cold);
 		return true;
 	} else if(derivId==id_Wi){
-		jac->SetElement(rOffset, iIon,this->dW_i);
+		jac->SetElement(iIon, iIon,this->dW_i);
 		return true;
 	} else if(derivId==id_Ni){
-		jac->SetElement(rOffset, iIon,this->dN_i);
+		jac->SetElement(iIon, iIon,this->dN_i);
 		return true;
 	}
 	else {
@@ -87,13 +93,13 @@ bool IonHeatTransport::SetCSJacobianBlock(
 void IonHeatTransport::SetCSMatrixElements(
     FVM::Matrix *mat, real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
-    mat->SetElement(rOffset, rOffset, -3.0/2.0 * T_i_J * tauinv);
+    mat->SetElement(iIon, iIon, -3.0/2.0 * T_i_J * tauinv);
 } 
 
 
 void IonHeatTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
-    vec[rOffset]-= W_i * tauinv;
+    vec[iIon]-= W_i * tauinv;
 }
 
