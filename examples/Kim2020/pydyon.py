@@ -11,7 +11,7 @@ sys.path.append('../../py')
 from PYDYON import Simulation
 
 
-prefill = 0.8e-3 / 133.32
+prefill = 2 * 1.2e-3 / 133.32
 print('Prefill pressure: {:.2e} Torr'.format(prefill))
 gamma_i = 2e-3      # Ionization fraction
 #nD0 = 3.22e22 * prefill

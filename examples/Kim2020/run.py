@@ -31,8 +31,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     :param j0:      Initial plasma current density [A/m^2]
     :param tmax:    Simulation time [s]
     """
-    #n0 = 3.22e22 * prefill  # Initial total deuterium density
-    n0 = 2.78e22 * prefill  # Initial total deuterium density
+    n0 = 3.22e22 * prefill  # Initial total deuterium density
+    #n0 = 2.78e22 * prefill  # Initial total deuterium density
     nD = n0 * np.array([[1-gamma], [gamma]])
 
     Btor = 2.65     # Toroidal magnetic field [T]
@@ -123,12 +123,19 @@ def drawplot1(axs, so, toffset=0):
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
             axs[i,j].set_xlim([0, 0.3])
+            axs[i,j].grid(True)
 
     axs[0,0].set_ylim([0, 230])
     axs[0,1].set_ylim([0, 15])
     axs[1,0].set_ylim([0, 80])
     axs[2,0].set_ylim([0, 80])
     axs[2,1].set_ylim([0, 0.5])
+
+    axs[0,0].set_yticks([0, 50, 100, 150, 200])
+    axs[0,1].set_yticks([0, 5, 10, 15])
+    axs[1,0].set_yticks([0, 20, 40, 60, 80])
+    axs[2,0].set_yticks([0, 20, 40, 60, 80])
+    axs[2,1].set_yticks([0, 0.1, 0.2, 0.3, 0.4])
 
 
 def drawplot2(axs, so, toffset=0):
@@ -151,19 +158,19 @@ def drawplot2(axs, so, toffset=0):
     plotInternal(axs[0], t[1:], Pconve, ylabel=ylbl, color='k', linestyle='--', label='Transport', showlabel=showlabel)
     plotInternal(axs[0], t[1:], Prad, ylabel=ylbl, color='m', linestyle='--', label='Radiation + ionization', showlabel=showlabel)
 
-    axs[0].set_title('Electron energy balance')
-    axs[0].legend(frameon=False)
-    axs[0].set_xlim([0, 0.3])
-    axs[0].set_ylim([0, 0.5])
-
     plotInternal(axs[1], t[1:], PequiI, color='b', linestyle='--', ylabel=ylbl, label='Equilibration', showlabel=showlabel)
     plotInternal(axs[1], t[1:], Pcx, color='r', linestyle='--', ylabel=ylbl, label='Charge exchange', showlabel=showlabel)
     plotInternal(axs[1], t[1:], Pconvi, ylabel=ylbl, color='k', linestyle='--', label='Transport', showlabel=showlabel)
 
+    axs[0].set_title('Electron energy balance')
     axs[1].set_title('Ion energy balance')
-    axs[1].set_xlim([0, 0.3])
-    axs[1].set_ylim([0, 0.5])
-    axs[1].legend(frameon=False)
+    for ax in axs:
+        ax.set_xlim([0, 0.3])
+        ax.set_ylim([0, 0.5])
+        ax.legend(frameon=False)
+        ax.grid(True)
+        ax.set_xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25])
+        ax.set_yticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5])
 
 
 def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, *args, **kwargs):
@@ -215,7 +222,7 @@ def main(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if not settings.skip:
-        prefill = 1.6e-3 / 133.32   # Pa -> Torr
+        prefill = 2 * 0.8e-3 / 133.32   # Pa -> Torr
         ss1 = generate(prefill=prefill, nt=40000)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)

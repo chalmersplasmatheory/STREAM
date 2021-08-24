@@ -257,7 +257,7 @@ def main(argv):
 
     if settings.skip is None or (len(settings.skip) > 0 and 1 not in settings.skip):
         print('RUN 1')
-        ss11 = generate(prefill=3e-5, nt=10000)
+        ss11 = generate(prefill=5e-5, nt=10000)
         ss11.save(f'settings11{ext}.h5')
         so11 = runiface(ss11, f'output11{ext}.h5', quiet=False)
 
