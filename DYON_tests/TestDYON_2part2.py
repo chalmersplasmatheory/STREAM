@@ -6,6 +6,7 @@ import sys
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from matplotlib.font_manager import FontProperties
+from PlasmaParameters import evaluateSpitzerConductivity
 
 sys.path.append('../extern/DREAM/py/')
 import DREAM.Settings.Equations.RunawayElectrons as Runaways
@@ -37,53 +38,47 @@ Nt_initial   = 4000   # number of time steps
 tMax_final   = 5e-1  # simulation time in seconds
 Nt_final     = 1e4*tMax_final   # number of time steps
 
-pgp = 4.3135e-5
-n_D_0 = 3.22e22 * pgp
-n_D_1 = 5.56e19 * pgp
-n_D = np.zeros((2,1))
+pgp = 2.7e-3          #check
+n_D_0 = 4.8e20 * pgp  #check
+n_D_1 = 0.002*n_D_0   #check
+n_D = np.zeros((2,1)) #check
 #print(str(n_D))
-n_D[0]=n_D_0
-n_D[1]=n_D_1
+n_D[0]=n_D_0          #check
+n_D[1]=n_D_1          #check
 
-n_C = 0
-n_O = 0.01 * n_D_0
+n_C = 0               #check
+n_O = 0.001 * n_D_0   #check
 
-V_vessel = 100
-B        = 2.7
-a        = 0.9 # Instead of EFIT-data 0.08519 (think there's a typo should be 0.8519)
-r_0      = 3   # Instead of EFIT-data 3.0381 (Should use 2.96?)
-r_wall   = 1.05 # approx 1.5-2.0 m
+V_vessel = 100        #check
+B        = 2.4        #check
+a        = 0.93       #check?
+r_0      = 2.96       #check
+r_wall   = 1          #check
 
-kappa    = 1
-c1       = 1.1
-c2       = 0.09
-c3       = 0.1
+kappa    = 1          #check
+c1       = 1.1        #check
+c2       = 0.05       #check
+c3       = 0.1        #check
 
-R = 7.5e-4  # Ohm, i MK2 struktur
-L = 9.1e-6  # H, i MK2 struktur
+R = 7.5e-4  # Ohm, i MK2 struktur  #check
+L = 9.1e-6  # H, i MK2 struktur    #check
 
 r=np.array([0])
-#print(str(n_D))
 
-#t_1   = np.linspace(0, tMax_initial, 100)
-#t_2   = np.linspace(tMax_initial, 0.5, 100)
 t   = np.linspace(0, 0.5, 100)
 t_d = np.array([0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
 V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
 V_s = interp1d(t_d, V_d, kind='linear')
-#V_loop_wall_1 = V_s(t_1)
-#V_loop_wall_2 = V_s(t_2)
 V_loop_wall = V_s(t)
 
-#plt.plot(t,V_loop_wall)
-#plt.show()
-
-E_initial = V_loop_wall[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
-E = V_loop_wall/(2*np.pi*r_0)
-T_e_initial = 1 # eV
-T_i_initial = 0.03
+T_e_initial = 1       #check
+T_i_initial = 0.026   #check
 t_e=np.array([0, 0.01, 0.02,  0.03,  0.05,   0.1,   0.15,   0.2,   0.25,   0.3,   0.35,   0.4,   0.45,   0.5])
 T_e=np.array([1, 2   , 7   , 10   , 42   , 152  , 206   , 250  , 277   , 294  , 312   , 320  , 330   , 335])
+
+sigma = evaluateSpitzerConductivity(n=n_D[1], T=T_e_initial, Z=1)
+J = 883.3 # 943?
+E_initial = J/sigma
 
 sts_initial = STREAMSettings()
 
@@ -138,11 +133,11 @@ sts_initial.runawaygrid.setEnabled(False)
 
 sts_initial.solver.preconditioner.setEnabled(False)
 
-#sts_initial.solver.setVerbose(True)
+sts_initial.solver.setVerbose(True)
 
 sts_initial.other.include('fluid', 'stream', 'scalar')
 
-#sts_initial.save('STREAMSettings_initial.h5')
+sts_initial.save('STREAMSettings_initial.h5')
 
 
 

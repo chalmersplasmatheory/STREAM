@@ -151,7 +151,7 @@ void SimulationGenerator::ConstructEquations(
     DREAM::SimulationGenerator::ConstructEquation_j_re(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_n_cold(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_n_hot(eqsys, s);
-    ConstructEquation_T_cold(eqsys, s, adas, amjuel, nist, oqty_terms);
+    ConstructEquation_T_cold(eqsys, s, adas, amjuel, nist, oqty_terms, stream_terms);
     ConstructEquation_lambda_i(eqsys, s, adas); 
 
     enum DREAM::OptionConstants::uqty_T_i_eqn typeTi =

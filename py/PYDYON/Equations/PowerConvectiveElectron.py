@@ -25,9 +25,7 @@ class ElectronConvectivePowerTerm:
         """
         Evaluate this ElectronConvectivePowerTerm.
         """
-        ne = self.quantities['ne']
-        Te = self.quantities['Te']
-        e  = scipy.constants.e
+        We = self.quantities['We']
 
-        return 3/2 * ne*e*Te / self.tau(t, x)
+        return We / self.tau(t,x)
 

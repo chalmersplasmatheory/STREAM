@@ -60,12 +60,14 @@ namespace STREAM {
         static void ConstructEquation_T_cold(
             EquationSystem*, DREAM::Settings*,
             DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
-            struct DREAM::OtherQuantityHandler::eqn_terms*
+            struct DREAM::OtherQuantityHandler::eqn_terms*,
+            struct OtherQuantityHandler::eqn_terms*
         );
         static void ConstructEquation_T_cold_selfconsistent(
             EquationSystem*, DREAM::Settings*,
             DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
-            struct DREAM::OtherQuantityHandler::eqn_terms*
+            struct DREAM::OtherQuantityHandler::eqn_terms*,
+            struct OtherQuantityHandler::eqn_terms*
         );
         static void ConstructEquation_T_i(
             EquationSystem *eqsys, DREAM::Settings*, DREAM::ADAS*,

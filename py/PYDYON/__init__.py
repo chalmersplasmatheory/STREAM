@@ -9,5 +9,5 @@ from . SimulationResult import SimulationResult
 from . UnknownQuantityHandler import UnknownQuantityHandler
 
 # Functions
-from . STREAM import compareToSTREAM, fromSTREAM
+from . STREAM import compareToSTREAM, compareToSTREAMdt, fromSTREAM
 
