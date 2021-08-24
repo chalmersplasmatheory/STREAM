@@ -34,7 +34,7 @@ import numpy as np
 #Nxi  = 20   # number of pitch grid points
 tMax_initial = 1e-4  # simulation time in seconds
 Nt_initial   = 4000   # number of time steps
-tMax_final   = 1e-1  # simulation time in seconds
+tMax_final   = 5-1  # simulation time in seconds
 Nt_final     = 1e4*tMax_final   # number of time steps
 
 pgp = 4.3135e-5
@@ -163,7 +163,48 @@ sts_final.save('STREAMSettings_final.h5')
 sto_final = runiface(sts_final, 'output_final.h5',
                         quiet=False)
 #'''
-'''
+
+# Plasma current
+sto_final.eqsys.I_p.plot()
+plt.xlim(0,0.5)
+#plt.ylim(0,12e5)
+plt.xlabel('Time [s]')
+plt.ylabel('Plasma current [A]')
+plt.show()
+
+# Total radiation power loss electron
+plt.plot(t[1:], np.diff(sto_final.other.stream.V_p[:] *sto_final.eqsys.W_cold[:,0]) / np.diff(sto_final.grid.t[:]))
+plt.xlim(0,0.5)
+#plt.ylim(0,12e5)
+plt.xlabel('Time [s]')
+plt.ylabel('Total radiation power loss [A]')
+plt.show()
+
+# Total radiation power loss ion
+plt.plot(t[1:], np.diff(sto_final.other.stream.V_p[:] *sto_final.eqsys.W_i[:,0]) / np.diff(sto_final.grid.t[:]))
+plt.xlim(0,0.5)
+#plt.ylim(0,12e5)
+plt.xlabel('Time [s]')
+plt.ylabel('Total radiation power loss [A]')
+plt.show()
+
+# Electron temperature
+sto_final.eqsys.T_cold.plot()
+plt.xlim(0,0.5)
+#plt.ylim(0,12e5)
+plt.xlabel('Time [s]')
+plt.ylabel('Electron temperature [A]')
+plt.show()
+
+# Electron density
+sto_final.eqsys.n_cold.plot()
+plt.xlim(0,0.5)
+#plt.ylim(0,12e5)
+plt.xlabel('Time [s]')
+plt.ylabel('Electron density [A]')
+plt.show()
+
+# Confinement time
 plt.plot(sto_final.grid.t[1:],sto_final.other.stream.tau_D[:],'k')
 plt.plot(sto_final.grid.t[1:],sto_final.other.stream.tau_D_par[:],'r--')
 plt.plot(sto_final.grid.t[1:],sto_final.other.stream.tau_D_perp[:],'b-.')
@@ -192,7 +233,7 @@ plt.xlim(0,0.5)
 plt.xlabel('Time [s]')
 plt.ylabel('Electron density [m$^{-3}$]')
 plt.show()
-'''
+
 # Ion density
 legend = []
 n_D_0=sto_final.eqsys.n_i['D'][0][:]
@@ -231,38 +272,6 @@ fontP.set_size('x-small')
 plt.legend(legend,prop=fontP)
 #plt.xlim(0,0.12)
 plt.show()
-
-n_D_0 = np.array(n_D_0).flatten()
-dnD0_idt = np.gradient(n_D_0)
-'''
-n_O_0 = np.array(n_O_0).flatten()
-dnO0_idt = np.gradient(n_O_0)
-n_C_0 = np.array(n_C_0).flatten()
-dnC0_idt = np.gradient(n_C_0)
-#'''
-plt.plot(sto_final.grid.t[:], dnD0_idt)
-#plt.plot(sto_final.grid.t[:], dnO0_idt)
-#plt.plot(sto_final.grid.t[:], dnC0_idt)
-#plt.plot(np.linspace(0,tMax_final,2),np.linspace(0,0,2),'k')
-plt.xlabel('Time [s]')
-plt.ylabel('Derivative of ion density [m$^{-3}$]')
-#fontP = FontProperties()
-#fontP.set_size('x-small')
-#plt.legend(['dn_D_0/dt','dn_O_0/dt','dn_C_0/dt'],prop=fontP)
-#plt.xlim(0,0.12)
-dndt = sto_final.other.stream.ionrateequation_posIonization[:,0,0]\
-         + sto_final.other.stream.ionrateequation_negIonization[:,0,0]\
-         + sto_final.other.stream.ionrateequation_posRecombination[:,0,0]\
-         + sto_final.other.stream.ionrateequation_negRecombination[:,0,0] \
-         + sto_final.other.stream.ionrateequation_posChargeExchange[:,0,0]\
-         + sto_final.other.stream.ionrateequation_negChargeExchange[:,0,0]\
-         + sto_final.other.stream.neutralinflux['D'][:,0]/sto_final.other.stream.V_n_tot['D'][:,0]*2
-plt.plot(sto_final.grid.t[1:],dndt/2e4)
-plt.legend(['gradient','sum'])
-plt.show()
-
-
-
 
 # Total amount of deuterium ions
 legend = []
