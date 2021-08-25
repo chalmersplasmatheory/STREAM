@@ -6,6 +6,7 @@ import sys
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from matplotlib.font_manager import FontProperties
+from PlasmaParameters import evaluateSpitzerConductivity
 
 sys.path.append('../extern/DREAM/py/')
 import DREAM.Settings.Equations.RunawayElectrons as Runaways
@@ -78,12 +79,19 @@ V_loop_wall = V_s(t)
 #plt.plot(t,V_loop_wall)
 #plt.show()
 
-E_initial = V_loop_wall[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
-E = V_loop_wall/(2*np.pi*r_0)
+#E_initial = V_loop_wall[0]/(2*np.pi*r_0) # Variera från 0 till V_d[0]/(2*np.pi*r_0) och se om simulering är känsligt för denna
+#E = V_loop_wall/(2*np.pi*r_0)
+
+
+
 T_e_initial = 1 # eV
 T_i_initial = 0.03
 t_e=np.array([0, 0.01, 0.02,  0.03,  0.05,   0.1,   0.15,   0.2,   0.25,   0.3,   0.35,   0.4,   0.45,   0.5])
 T_e=np.array([1, 2   , 7   , 10   , 42   , 152  , 206   , 250  , 277   , 294  , 312   , 320  , 330   , 335])
+
+sigma = evaluateSpitzerConductivity(n=n_D[1], T=T_e_initial, Z=1)
+J = 883.3 # 943?
+E_initial = J/sigma
 
 sts_initial = STREAMSettings()
 
