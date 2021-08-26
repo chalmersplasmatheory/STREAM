@@ -211,6 +211,17 @@ sto_final = runiface(sts_final, 'output_final_DT.h5',
 sto_list.append(sto_final)
 
 color = ['-r','--b']
+
+# Plasma current
+for sto, c in zip(sto_list,color):
+    plt.plot(sto.grid.t[1:],sto.other.stream.Wi_chargeexchange[:,0],c)
+
+#plt.ylim(0,12e5)
+plt.xlabel('Time [s]')
+plt.ylabel('Charge Exchange Term')
+plt.legend(['D','DT'])
+plt.show()
+
 for sto, c in zip(sto_list,color):
     V_p = sto.other.stream.V_p[:, 0]
 

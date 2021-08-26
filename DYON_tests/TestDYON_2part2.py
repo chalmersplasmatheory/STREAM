@@ -38,8 +38,8 @@ Nt_initial   = 4000   # number of time steps
 tMax_final   = 3e-1  # simulation time in seconds
 Nt_final     = 1e4*tMax_final   # number of time steps
 
-pgp = 2.7e-3
-n_D_0 = 4.8e20 * pgp
+pgp = 2.7e-3*0.00750062
+n_D_0 = 3.22e22 * pgp
 n_D_1 = 0.002*n_D_0
 n_D = np.zeros((2,1))
 #print(str(n_D))
@@ -52,7 +52,7 @@ n_O = 0.001 * n_D_0
 V_vessel = 100
 B        = 2.4
 r_0      = 2.96
-r_wall   = 1*1.2
+r_wall   = 1
 
 t   = np.linspace(0, tMax_final, 100)
 t_a   = np.array([0  ,  0.017,  0.05,  0.085,  0.14,  0.19,  0.25,  0.3])
@@ -72,7 +72,7 @@ L = 9.1e-6  # H, i MK2 struktur
 r=np.array([0])
 
 t_d = np.array([0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
-V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])*1.2
+V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
 V_s = interp1d(t_d, V_d, kind='linear')
 V_loop_wall = V_s(t)
 
