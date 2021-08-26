@@ -1,6 +1,8 @@
 # Particle balance equation for ionized deuterium 
 
 from .. ADAS import ADAS
+import numpy as np
+import sys
 
 
 class IonParticleBalance:
@@ -34,8 +36,10 @@ class IonParticleBalance:
 
         dndt = 0
         if Z0 == 0:  # Neutral
+            #print(f'A={ionname}-{Z0}: ne={ne}, Te={Te}')
             Rrec = self.adas.ACD(ionname, 1, n=ne, T=Te)
             Riz  = self.adas.SCD(ionname, 0, n=ne, T=Te)
+            #print(f'    Rrec={Rrec}, Riz={Riz}')
 
             ni = self.quantities.getIonData(ionname)
 

@@ -1,5 +1,6 @@
 # Particle balance equation for neutral deuterium 
 
+import numpy as np
 from .. ADAS import ADAS
 
 
@@ -58,6 +59,11 @@ class DeuteriumAtomBalance:
             for Z0 in range(1,Z+1):
                 Rcx = self.adas.CCD(A, Z0, n=ni[Z0], T=Ti)
                 cx += Rcx*nD[0] * ni[Z0]
+
+                if np.isnan(cx):
+                    print(f'Rcx  = {Rcx}')
+                    print(f'Ti   = {Ti}')
+                    print(f'niZ0 = {ni[Z0]}')
 
         negCX = -Vn*cx
         posCX = 0

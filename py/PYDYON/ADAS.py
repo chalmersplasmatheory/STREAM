@@ -88,6 +88,9 @@ class ADASRate:
         """
         Evaluate this rate for the named element and charge state.
         """
+        if n <= 0:
+            return 0
+
         r = self.elements[name]['rates'][Z0]
 
         if r is None:

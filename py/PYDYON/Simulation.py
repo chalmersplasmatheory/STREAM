@@ -1,6 +1,8 @@
 # Main equation solver of PYDYON
 
 
+import numpy as np
+import sys
 from scipy.integrate import solve_ivp
 from . IonHandler import IonHandler
 from . PlasmaVolume import PlasmaVolume
@@ -118,9 +120,9 @@ class Simulation:
                 # Add neutral equations
                 for Z0 in range(0, Z+1):
                     if Z0 == 0:
-                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(t, x, A, Z0) + Iin(t, x, A)
+                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x, A=A, Z0=Z0 : Iizcx(t, x, A, Z0) + Iin(t, x, A)
                     else:
-                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(t, x, A, Z0) - Itransp(t, x, A, Z0=Z0)
+                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x, A=A, Z0=Z0 : Iizcx(t, x, A, Z0) - Itransp(t, x, A, Z0=Z0)
 
         atol = [0.0] * len(eqsys)
 
@@ -157,6 +159,7 @@ class Simulation:
             self.unknowns.update(t, x)
             return [f(t,x) for f in equations]
 
+        #sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x)
         sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x, method='Radau')
         
         return SimulationResult(sol.t, self.unknowns.getdict(x=sol.y), simulation=self)
