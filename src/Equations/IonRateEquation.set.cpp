@@ -7,11 +7,15 @@
     const len_t Nr = this->grid->GetNr();
     const len_t Z  = this->ions->GetZ(iIon);
     const real_t *n_cold = this->unknowns->GetUnknownData(id_n_cold);
-    const real_t *T_cold = this->unknowns->GetUnknownData(id_T_cold);
+    //const real_t *T_cold = this->unknowns->GetUnknownData(id_T_cold);
     const real_t V_p = this->volumes->GetPlasmaVolume();
     const real_t V_n = this->volumes->GetNeutralVolume(iIon); 
     const real_t V_n_tot = this->volumes->GetTotalNeutralVolume(iIon);
     const len_t NZ = this->ions->GetNZ();
+    const real_t *W_i = this->unknowns->GetUnknownData(id_Wi);
+    const real_t *N_i = this->unknowns->GetUnknownData(id_Ni);
+    const real_t ec = DREAM::Constants::ec;  
+    real_t Ti;
     
     for (len_t ir = 0; ir < Nr; ir++) {
         if(setIonization){
@@ -54,7 +58,13 @@
                         const len_t IonOffset = ions->GetIndex(iz,0); //Get index of neutral state of other ion
                         ADASRateInterpolator *ccd = adas->GetCCD(Zi); //Get cx-coeff. for the other ion
                         for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ //Loop over all charge states of other ion
-                            real_t Rcx = ccd->Eval(Z0i-1, n_cold[ir], T_cold[ir]); //Evaluate cx-coeff. for the charge state
+                            real_t ni = ions->GetIonDensity(ir, iz, Z0i);
+                            real_t N_i_temp = N_i[iz*Nr+ir];
+                            if (N_i_temp == 0)
+                                Ti = 0;
+                            else
+                                Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
+                            real_t Rcx = ccd->Eval(Z0i-1, ni, Ti); //Evaluate cx-coeff. for the charge state
 
                             if (Z0 == 0)
                                 // Apply to neutral deuterium (Z0=0)
@@ -71,7 +81,14 @@
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); //Get index of neutral state of D
                     ADASRateInterpolator *ccd = adas->GetCCD(Z); //Get cx-coeff. for the ion that is not D/T (or should this be 1, 2+IsTritium(iz)?)
-                    real_t Rcx = ccd->Eval(Z0+1-1, n_cold[ir], T_cold[ir]); //Evaluate cx-coeff. for charge state 
+                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
+                    real_t N_i_temp = N_i[iIon*Nr+ir];
+                    if (N_i_temp == 0)
+                        Ti = 0;
+                    else
+                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
+                        
+                    real_t Rcx = ccd->Eval(Z0+1-1, ni, Ti); //Evaluate cx-coeff. for charge state 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                     if (Z0 == 0){
                         NI(+1, Rcx * V_n_D/V_n_tot * nions[Doffset*Nr + ir], posCX); 
@@ -88,7 +105,13 @@
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); //Get index of neutral state of D
                     ADASRateInterpolator *ccd = adas->GetCCD(Z); //Get cx-coeff. for the ion that is not D/T (or should this be 1, 2+IsTritium(iz)?)
-                    real_t Rcx = ccd->Eval(Z0-1, n_cold[ir], T_cold[ir]); //Evaluate cx-coeff. for charge state 
+                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
+                    real_t N_i_temp = N_i[iIon*Nr+ir];
+                    if (N_i_temp == 0)
+                        Ti = 0;
+                    else
+                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
+                    real_t Rcx = ccd->Eval(Z0-1, ni, Ti); //Evaluate cx-coeff. for charge state 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                     NI(0, -Rcx * V_n_D/V_p * nions[Doffset*Nr + ir], negCX); 
                     

@@ -19,6 +19,7 @@
  */
 
 #include "DREAM/ADAS.hpp"
+#include "DREAM/Constants.hpp"
 #include "STREAM/Equations/IonRateEquation.hpp"
 #include "DREAM/IonHandler.hpp"
 #include "DREAM/NotImplementedException.hpp"
@@ -52,6 +53,8 @@ IonRateEquation::IonRateEquation(
     this->id_n_cold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD);
     this->id_T_cold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
     this->id_lambda_i = unknowns->GetUnknownID(OptionConstants::UQTY_LAMBDA_I);
+    this->id_Wi      = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
+    this->id_Ni      = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS);
 
     AllocateRateCoefficients();
 }
@@ -248,7 +251,10 @@ bool IonRateEquation::SetCSJacobianBlock(
     } else if(derivId == id_n_cold){
         contributes = true;
         #include "IonRateEquation.setDN.cpp"        
-    } else if (derivId == id_lambda_i) {
+    } else if(derivId == id_Wi){
+        contributes = true;
+        #include "IonRateEquation.setDWI.cpp"        
+    }else if (derivId == id_lambda_i) {
         #undef NI
         #define NI(J,V) NI_Z(iIon,(J),(V))
 
