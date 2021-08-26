@@ -47,7 +47,8 @@ void SimulationGenerator::DefineOptions_T_cold(DREAM::Settings *s) {
 void SimulationGenerator::ConstructEquation_T_cold(
     EquationSystem *eqsys, DREAM::Settings *s,
     DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
-    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
+    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms,
+    struct OtherQuantityHandler::eqn_terms *stream_terms
 ) {
     enum DREAM::OptionConstants::uqty_T_cold_eqn type =
         (enum DREAM::OptionConstants::uqty_T_cold_eqn)s->GetInteger(MODULENAME "/type");
@@ -58,7 +59,7 @@ void SimulationGenerator::ConstructEquation_T_cold(
             break;
 
         case DREAM::OptionConstants::UQTY_T_COLD_SELF_CONSISTENT:
-            ConstructEquation_T_cold_selfconsistent(eqsys, s, adas, amjuel, nist, oqty_terms);
+            ConstructEquation_T_cold_selfconsistent(eqsys, s, adas, amjuel, nist, oqty_terms, stream_terms);
             break;
 
         default:
@@ -75,7 +76,8 @@ void SimulationGenerator::ConstructEquation_T_cold(
 void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     EquationSystem *eqsys, DREAM::Settings *s,
     DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
-    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
+    struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms,
+    struct OtherQuantityHandler::eqn_terms *stream_terms
 ) {
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
     DREAM::IonHandler *ionHandler = eqsys->GetIonHandler();
@@ -142,6 +144,7 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
         eqsys->GetEllipticalRadialGridGenerator(),
         eqsys->GetUnknownHandler()
     );
+    stream_terms->Tcold_transport = ht;
     op_W_cold->AddTerm(ht);
 
     eqsys->SetOperator(id_T_cold, id_E_field, op_E_field);
@@ -262,8 +265,9 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
     DREAM::FVM::Operator *Op_Wie = new DREAM::FVM::Operator(fluidGrid);
     DREAM::FVM::Operator *Op_ni = new DREAM::FVM::Operator(fluidGrid);
 
-    stream_terms->Wi_iontransport = new IonHeatTransport*[nZ];
     stream_terms->Wi_chargeexchange = new ChargeExchangeTerm*[nZ];
+    stream_terms->Wi_e_coll = new DREAM::MaxwellianCollisionalEnergyTransferTerm*[nZ];
+    stream_terms->Wi_iontransport = new IonHeatTransport*[nZ];
 
     // Locate deuterium
     len_t D_index;
@@ -284,6 +288,8 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
         Op_Wij->AddTerm( 
             new DREAM::IonSpeciesTransientTerm(fluidGrid, iz, id_Wi, -1.0)
         );
+
+        // i-i collisions
         for(len_t jz=0; jz<nZ; jz++){
             if(jz==iz) // the term is trivial =0 for self collisions and can be skipped
                 continue;
@@ -295,15 +301,21 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
                     unknowns, lnLambda, ionHandler)
             );
         }
-        Op_Wie->AddTerm(
-            new DREAM::MaxwellianCollisionalEnergyTransferTerm(
-                    fluidGrid,
-                    iz, true,
-                    0, false,
-                    unknowns, lnLambda, ionHandler)
+
+        // i-e collisions
+        stream_terms->Wi_e_coll[iz] = new DREAM::MaxwellianCollisionalEnergyTransferTerm(
+            fluidGrid,
+            iz, true,
+            0, false,
+            unknowns, lnLambda, ionHandler
         );
+        Op_Wie->AddTerm(stream_terms->Wi_e_coll[iz]);
+
+        // Heat transport
         stream_terms->Wi_iontransport[iz] = new IonHeatTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iz, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator());
         Op_ni->AddTerm(stream_terms->Wi_iontransport[iz]);
+
+        // Charge exchange
         if (iz == D_index){
             stream_terms->Wi_chargeexchange[iz] = new ChargeExchangeTerm(eqsys->GetFluidGrid(), eqsys->GetUnknownHandler(), eqsys->GetIonHandler(), iz, adas, eqsys->GetPlasmaVolume(), eqsys->GetEllipticalRadialGridGenerator(), fluidGrid, D_index);
             Op_ni->AddTerm(stream_terms->Wi_chargeexchange[iz]);

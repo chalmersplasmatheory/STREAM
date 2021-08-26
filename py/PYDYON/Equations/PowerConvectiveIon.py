@@ -33,7 +33,7 @@ class IonConvectivePowerTerm:
             A = ion['name']
             Z = ion['Z']
 
-            for Z0 in range(1, Z+1):
+            for Z0 in range(0, Z+1):
                 ni = self.quantities.getIonData(A)
 
                 N += ni[Z0]

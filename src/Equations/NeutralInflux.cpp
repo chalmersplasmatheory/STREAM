@@ -2,7 +2,7 @@
 
 using namespace STREAM;
 using namespace DREAM;
-using namespace std;
+//using namespace std;
 
 /**
  * Constructor
@@ -11,7 +11,7 @@ NeutralInflux::NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficie
 } 
 
 real_t NeutralInflux::DeuteriumRecyclingCoefficient(real_t t){
-    return c1-c2*(1-exp(-t/c3));
+    return c1-c2*(1-std::exp(-t/c3));
 }
 
 /**

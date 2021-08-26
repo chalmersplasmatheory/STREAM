@@ -31,6 +31,7 @@ class DeuteriumAtomBalance:
 
         ne = self.quantities['ne']
         Te = self.quantities['Te']
+        Ti = self.quantities['Ti']
         nD = self.quantities['niD']
 
         Rrec = self.adas.ACD('D', 1, n=ne, T=Te)
@@ -55,8 +56,8 @@ class DeuteriumAtomBalance:
             ni = self.quantities.getIonData(A)
 
             for Z0 in range(1,Z+1):
-                Rcx = self.adas.CCD(A, Z0, n=ne, T=Te)
-                cx += Rcx*nD[0] * ni
+                Rcx = self.adas.CCD(A, Z0, n=ni[Z0], T=Ti)
+                cx += Rcx*nD[0] * ni[Z0]
 
         negCX = -Vn*cx
         posCX = 0

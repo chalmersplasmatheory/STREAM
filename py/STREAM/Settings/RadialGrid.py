@@ -195,7 +195,5 @@ class RadialGrid(PrescribedScalarParameter):
             raise TypeError('The prescribed recycle coefficient 3 must be of type float')
         if self.R0 is None or self.R0 <= 0:
             raise DREAMException("RadialGrid: Invalid value assigned to tokamak major radius 'R0': {}".format(self.R0))
-        if self.b is None or self.b < self.a:
-            raise DREAMException("RadialGrid: Invalid value assigned to wall radius 'b' (must be explicitly set to >= 'a' using 'setWallRadius'): ".format(self.b))
         if not np.isscalar(self.b):
             raise DREAMException("RadialGrid: The specified wall radius is not a scalar: {}.".format(self.b))
