@@ -29,9 +29,9 @@
                             real_t ni = ions->GetIonDensity(ir, iz, Z0i);
                             real_t N_i_temp = N_i[iz*Nr+ir];
                             if (N_i_temp == 0)
-                                Ti = 0;
-                            else
-                                Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
+                                continue;
+
+                            Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
                             real_t PartialTRcx = ccd->Eval_deriv_T(Z0i-1, ni, Ti); //Evaluate cx-coeff. for the charge state
 
                             if (Z0 == 0)
@@ -52,9 +52,9 @@
                     real_t ni = ions->GetIonDensity(ir, iIon, Z0);
                     real_t N_i_temp = N_i[iIon*Nr+ir];
                     if (N_i_temp == 0)
-                        Ti = 0;
-                    else
-                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
+                        continue;
+
+                    Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
                     real_t PartialTRcx = ccd->Eval_deriv_T(Z0+1-1, ni, Ti); //Evaluate cx-coeff. for charge state 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                     if (Z0 == 0){
@@ -75,9 +75,9 @@
                     real_t ni = ions->GetIonDensity(ir, iIon, Z0);
                     real_t N_i_temp = N_i[iIon*Nr+ir];
                     if (N_i_temp == 0)
-                        Ti = 0;
-                    else
-                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
+                        continue;
+
+                    Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
                     real_t PartialTRcx = ccd->Eval_deriv_T(Z0-1, ni, Ti); //Evaluate cx-coeff. for charge state 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                     NI(0, -PartialTRcx * 2.0/(3.0*ec*N_i[iz*Nr+ir]) * V_n_D/V_p * nions[Doffset*Nr + ir]); 
