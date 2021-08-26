@@ -51,10 +51,15 @@ n_O = 0.001 * n_D_0
 
 V_vessel = 100
 B        = 2.4
-a        = [1.3, 0.93, 0.93]
-t_a      = [0, 0.08, 100]
 r_0      = 2.96
 r_wall   = 1*1.2
+
+t   = np.linspace(0, tMax_final, 100)
+t_a   = np.array([0  ,  0.017,  0.05,  0.085,  0.14,  0.19,  0.25,  0.3])
+V_p   = np.array([100, 80    , 56   , 48    , 52   , 51.75, 54.25, 56  ])
+a_vec = np.sqrt(V_p/(2*np.pi**2*r_0))
+a_fun = interp1d(t_a, a_vec, kind='cubic')
+a = a_fun(t)
 
 kappa    = 1
 c1       = 1.1
@@ -66,7 +71,6 @@ L = 9.1e-6  # H, i MK2 struktur
 
 r=np.array([0])
 
-t   = np.linspace(0, 0.5, 100)
 t_d = np.array([0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
 V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])*1.2
 V_s = interp1d(t_d, V_d, kind='linear')
@@ -109,7 +113,7 @@ sts_initial.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_DISABLED)
 sts_initial.eqsys.n_i.setJET_CWrecycling()
 
 sts_initial.radialgrid.setB0(B)
-sts_initial.radialgrid.setMinorRadius(a, t=t_a)
+sts_initial.radialgrid.setMinorRadius(a, t=t)
 sts_initial.radialgrid.setMajorRadius(r_0)
 sts_initial.radialgrid.setWallRadius(r_wall)
 sts_initial.radialgrid.setVesselVolume(V_vessel)

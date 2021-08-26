@@ -36,7 +36,7 @@ import numpy as np
 tMax_initial = 1e-4  # simulation time in seconds
 Nt_initial   = 4000   # number of time steps
 tMax_final   = 3e-2  # simulation time in seconds
-Nt_final     = 1e4*tMax_final   # number of time steps
+Nt_final     = 1e5*tMax_final   # number of time steps
 
 gamma=2e-3
 prefill=5e-5
@@ -115,13 +115,13 @@ sts_initial.solver.preconditioner.setEnabled(False)
 
 sts_initial.other.include('fluid', 'stream', 'scalar')
 
-sts_initial.save('STREAMSettings_initial.h5')
+sts_initial.save('STREAMSettings_initial_D.h5')
 
 
 
 #sts_initial.radialgrid.setWallRadius(r_wall)
 
-sto_initial = runiface(sts_initial, 'output_initial.h5',
+sto_initial = runiface(sts_initial, 'output_initial_D.h5',
                        quiet=False)
 sts_final = STREAMSettings(sts_initial)
 #sts_final.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
@@ -129,14 +129,16 @@ sts_final.timestep.setTmax(tMax_final)
 sts_final.timestep.setNt(Nt_final)
 #sts_final.solver.setDebug(saveresidual=True, timestep=0, iteration=0)
 
-sts_final.fromOutput('output_initial.h5')
-sts_final.output.setFilename('output_final.h5')
-sts_final.save('STREAMSettings_final.h5')
+sts_final.fromOutput('output_initial_D.h5')
+sts_final.output.setFilename('output_final_D.h5')
+sts_final.save('STREAMSettings_final_D.h5')
 
-sto_final = runiface(sts_final, 'output_final.h5',
+sto_final = runiface(sts_final, 'output_final_D.h5',
                         quiet=False)
 
 sto_list.append(sto_final)
+
+sts_initial = STREAMSettings()
 
 sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
@@ -185,13 +187,13 @@ sts_initial.solver.preconditioner.setEnabled(False)
 
 sts_initial.other.include('fluid', 'stream', 'scalar')
 
-sts_initial.save('STREAMSettings_initial.h5')
+sts_initial.save('STREAMSettings_initial_DT.h5')
 
 
 
 #sts_initial.radialgrid.setWallRadius(r_wall)
 
-sto_initial = runiface(sts_initial, 'output_initial.h5',
+sto_initial = runiface(sts_initial, 'output_initial_DT.h5',
                        quiet=False)
 sts_final = STREAMSettings(sts_initial)
 #sts_final.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
@@ -199,28 +201,17 @@ sts_final.timestep.setTmax(tMax_final)
 sts_final.timestep.setNt(Nt_final)
 #sts_final.solver.setDebug(saveresidual=True, timestep=0, iteration=0)
 
-sts_final.fromOutput('output_initial.h5')
-sts_final.output.setFilename('output_final.h5')
-sts_final.save('STREAMSettings_final.h5')
+sts_final.fromOutput('output_initial_DT.h5')
+sts_final.output.setFilename('output_final_DT.h5')
+sts_final.save('STREAMSettings_final_DT.h5')
 
-sto_final = runiface(sts_final, 'output_final.h5',
+sto_final = runiface(sts_final, 'output_final_DT.h5',
                         quiet=False)
 
 sto_list.append(sto_final)
 
-for sto in sto_list:
-    V_p = sto.other.stream.V_p[:, 0]
-
-    P_net = P_tot + sto.other.fluid.Tcold_ohmic[:, 0] * V_p
-
-    t = sto.grid.t[:]
-    plt.plot(t[1:], P_net, label='Net electron heating power', color='k',linestyle='-')
-plt.xlabel('Time [s]')
-plt.ylabel('P_net')
-plt.legend('D','DT')
-plt.show()
-
-for sto in sto_list:
+color = ['-r','--b']
+for sto, c in zip(sto_list,color):
     V_p = sto.other.stream.V_p[:, 0]
 
     Prad = sto.other.fluid.Tcold_radiation[:, 0] * V_p
@@ -230,46 +221,62 @@ for sto in sto_list:
     P_net = P_tot + sto.other.fluid.Tcold_ohmic[:, 0] * V_p
 
     t = sto.grid.t[:]
-    plt.plot(t[1:], P_tot, color='r', linestyle='--')
+    plt.plot(t[1:], P_net,c)
 plt.xlabel('Time [s]')
-plt.ylabel('P_tot')
-plt.legend('D','DT')
+plt.ylabel('P_net')
+plt.legend(['D','DT'])
 plt.show()
 
-for sto in sto_list:
+for sto, c in zip(sto_list,color):
+    V_p = sto.other.stream.V_p[:, 0]
+
+    Prad = sto.other.fluid.Tcold_radiation[:, 0] * V_p
+    Pequi = sto.other.fluid.Tcold_ion_coll[:, 0] * V_p
+    Ptransp = sto.other.scalar.energyloss_T_cold[:, 0] * V_p
+    P_tot = Prad + Pequi + Ptransp
+    P_net = P_tot + sto.other.fluid.Tcold_ohmic[:, 0] * V_p
+
+    t = sto.grid.t[:]
+    plt.plot(t[1:], P_tot,c)
+plt.xlabel('Time [s]')
+plt.ylabel('P_tot')
+plt.legend(['D','DT'])
+plt.show()
+
+for sto, c in zip(sto_list,color):
     V_p = sto.other.stream.V_p[:, 0]
 
     Prad = sto.other.fluid.Tcold_radiation[:, 0] * V_p
 
     t = sto.grid.t[:]
-    plt.plot(t[1:], Prad,  label='Radiation + ionization', color='b', linestyle='-.')
+    plt.plot(t[1:], Prad,c)
 plt.xlabel('Time [s]')
 plt.ylabel('P_rad')
-plt.legend('D','DT')
+plt.legend(['D','DT'])
 plt.show()
 
-for sto in sto_list:
+for sto, c in zip(sto_list,color):
     V_p = sto.other.stream.V_p[:, 0]
 
     Pequi = sto.other.fluid.Tcold_ion_coll[:, 0] * V_p
 
     t = sto.grid.t[:]
-    plt.plot(t[1:], Pequi, label='Equilibration', color='g', linestyle='--')
+    plt.plot(t[1:], Pequi,c)
 plt.xlabel('Time [s]')
 plt.ylabel('P_equi')
-plt.legend('D','DT')
+plt.legend(['D','DT'])
 plt.show()
 
-for sto in sto_list:
+for sto, c in zip(sto_list,color):
     V_p = sto.other.stream.V_p[:, 0]
 
     Ptransp = sto.other.scalar.energyloss_T_cold[:, 0] * V_p
 
     t = sto.grid.t[:]
-    plt.plot(t[1:], Ptransp, label='Electron transport', color='m', linestyle=':')
+    plt.plot(t[1:], Ptransp,c)
 plt.xlabel('Time [s]')
 plt.ylabel('P_transp')
-plt.legend('D','DT')
+plt.legend(['D','DT'])
 plt.show()
 
 '''
@@ -301,13 +308,13 @@ plt.ylabel('Total radiation power loss [A]')
 plt.show()
 '''
 # Plasma current
-for sto in sto_list:
-    sto.eqsys.I_p.plot()
+for sto, c in zip(sto_list,color):
+    plt.plot(sto.grid.t[:],sto.eqsys.I_p[:],c)
 
 #plt.ylim(0,12e5)
 plt.xlabel('Time [s]')
 plt.ylabel('Plasma current [A]')
-plt.legend('D','DT')
+plt.legend(['D','DT'])
 plt.show()
 
 
@@ -343,22 +350,22 @@ plt.show()
 '''
 
 # Electron temperature
-for sto in sto_list:
-    sto_final.eqsys.T_cold.plot()
+for sto, c in zip(sto_list,color):
+    plt.plot(sto.grid.t[:],sto.eqsys.T_cold[:])
 #plt.ylim(0,12e5)
 plt.xlabel('Time [s]')
 plt.ylabel('Electron temperature [eV]')
-plt.legend('D','DT')
+plt.legend(['D','DT'])
 plt.show()
 
 
 # Electron density
-for sto in sto_list:
-    sto_final.eqsys.n_cold.plot()
+for sto, c in zip(sto_list,color):
+    plt.plot(sto.grid.t[:],sto.eqsys.n_cold[:])
 #plt.ylim(0,12e5)
 plt.xlabel('Time [s]')
 plt.ylabel('Electron density [m^-3]')
-plt.legend('D','DT')
+plt.legend(['D','DT'])
 plt.show()
 
 '''
