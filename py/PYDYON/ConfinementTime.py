@@ -48,7 +48,7 @@ class ConfinementTime:
         Te = self.quantities['Te']
         Ti = self.quantities['Ti']
 
-        a    = self.quantities.plasmavolume.a
+        a    = self.quantities.plasmavolume.a(t)
         Bphi = self.Bphi
         Iref = 100e3
         e    = scipy.constants.e
@@ -70,7 +70,7 @@ class ConfinementTime:
         """
         Te = self.quantities['Te']
 
-        a = self.quantities.plasmavolume.a
+        a = self.quantities.plasmavolume.a(t)
         DBohm = 1/16 * Te/self.Bphi
         vBohm = 2*DBohm / a
 

@@ -91,7 +91,7 @@ class ADASRate:
         r = self.elements[name]['rates'][Z0]
 
         if r is None:
-            raise ValueError(f"Cannot evaluate ADAS rate {self.name} for Z0 = {Z0}.")
+            raise ValueError(f"Cannot evaluate ADAS rate {self.name} for '{name}' with Z0 = {Z0}.")
 
         ln, lT = np.log10(n), np.log10(T)
         exp = r(ln, lT)

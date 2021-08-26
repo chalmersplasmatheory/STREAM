@@ -40,11 +40,13 @@ class IonInflux:
                 Y = self.evaluateRecyclingCoefficient(ionname, A)
                 Gamma += Y*ni[Z0]
 
+        #print(f'{ionname}:  Gamma = {Gamma}')
         Gamma *= Vp/(Vn_tot*self.tau(t, x))
+
         return Gamma
 
 
-    def evaluateRecyclingCoefficient(I, A):
+    def evaluateRecyclingCoefficient(self, I, A):
         """
         Evaluate the sputtering/recycling coefficient.
         """
@@ -53,7 +55,8 @@ class IonInflux:
             elif A == 'C': return 0
             elif A == 'O': return 0
         elif I == 'C':
-            if A == 'D': return 0.03
+            #if A == 'D': return 0.03
+            if A == 'D': return 0.015
             elif A == 'C': return 0
             elif A == 'O': return 1
         elif I == 'O':
