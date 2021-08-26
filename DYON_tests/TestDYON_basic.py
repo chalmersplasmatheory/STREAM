@@ -30,20 +30,20 @@ import STREAM.Settings.TransportSettings as Transport
 
 tMax_initial = 1e-4  # simulation time in seconds
 Nt_initial   = 4000   # number of time steps
-tMax_final   = 1e-1  # simulation time in seconds
-Nt_final     = 1000   # number of time steps
+tMax_final   = 5e-1  # simulation time in seconds
+Nt_final     = 1e4*tMax_final   # number of time steps
 
-pgp_list = np.linspace(5,7,2)
+pgp_list = np.linspace(1,7.0,4)
 sto_list = []
 
 for pgp in pgp_list:
     gamma = 2e-3
-    n_D_0 = 3.22e22 * pgp * 1e-5
+    n_D_0 = 2.78e22 * pgp * 1e-5
     n_D = n_D_0 * np.array([[1-gamma],[gamma]])
 
     V_vessel = 100
     B        = 2.3
-    a        = 0.5
+    a        = 0.9
     r_0      = 3
     r_wall   = 1
 
@@ -103,22 +103,22 @@ for pgp in pgp_list:
 
     sts_initial.other.include('fluid', 'stream', 'scalar')
 
-    sto_initial = runiface(sts_initial, 'STOs/output_STREAM_i_'+str(pgp)+'.h5',
+    sto_initial = runiface(sts_initial, 'STOs/output_STREAM_i'+str(pgp)+'.h5',
                            quiet=False)
 
     sts_final = STREAMSettings(sts_initial)
     sts_final.timestep.setTmax(tMax_final)
     sts_final.timestep.setNt(Nt_final)
-    sts_final.fromOutput('STOs/output_STREAM_i_'+str(pgp)+'.h5')
-    sts_final.output.setFilename('STOs/output_STREAM_f_'+str(pgp)+'.h5')
-    sto_final = runiface(sts_final, 'STOs/output_STREAM_f_'+str(pgp)+'.h5',
+    sts_final.fromOutput('STOs/output_STREAM_i'+str(pgp)+'.h5')
+    sts_final.output.setFilename('STOs/output_STREAM_f'+str(pgp)+'.h5')
+    sto_final = runiface(sts_final, 'STOs/output_STREAM_f'+str(pgp)+'.h5',
                             quiet=False)
 
     sto_list.append(sto_final)
 #'''
 for pgp in pgp_list:
     gamma = 2e-3
-    n_D_0 = 3.22e22 * pgp * 1e-5
+    n_D_0 = 2.78e22 * pgp * 1e-5
     n_D = n_D_0 * np.array([[1-gamma],[gamma]])
 
     V_vessel = 100
@@ -198,7 +198,7 @@ for pgp in pgp_list:
     sto_list.append(sto_final)
 #'''
 # Power consumption
-'''
+
 legend = []
 colour=['b--','r--','b-','r-']
 for sto, c in zip(sto_list,colour):
@@ -209,6 +209,8 @@ plt.xlabel('Time [s]')
 plt.ylabel('Power Consumption [W/m^3]')
 plt.legend([])
 #plt.legend(legend)
+plt.xlim(0,0.1)
+plt.ylim(0,3000)
 plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
 plt.show()
 
@@ -220,8 +222,10 @@ for sto, c in zip(sto_list,colour):
     plt.plot(t[:], sto.eqsys.I_p[:], c)
 plt.xlabel('Time [s]')
 plt.ylabel('Plasma current [A]')
-plt.yscale('log')
+#plt.yscale('log')
 #plt.legend(legend)
+plt.xlim(0,0.05)
+plt.ylim(0,1e5)
 plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
 plt.show()
 
@@ -229,27 +233,30 @@ plt.show()
 # Degree of ionization
 for sto, c in zip(sto_list,colour):
     gamma = sto.eqsys.n_cold[:]/(sto.eqsys.n_cold[:]+sto.eqsys.n_i['D'][0][:])
-    plt.plot(sto.grid.t[:],gamma,c)
+    plt.plot(sto.grid.t[:],gamma*100,c)
 plt.xlabel('Time [s]')
-plt.xlim(0,0.03)
+plt.xlim(0,0.05)
+plt.ylim(0, 105)
 plt.ylabel('Degree of ionization [%]')
 #plt.legend(legend)
 plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
 plt.show()
 #'''
-'''
+
 # Electron temperature
 for sto, c in zip(sto_list,colour):
     t = sto.grid.t[:]
     #sto.eqsys.T_cold.plot()
     plt.plot(t[:], sto.eqsys.T_cold[:], c)
 plt.xlabel('Time [s]')
-#plt.xlim(0,0.03)
+plt.xlim(0,0.03)
+plt.ylim(0,15)
 plt.ylabel('Electron temperature [eV]')
 #plt.legend(legend)
 plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
 plt.show()
 
+'''
 # Electric field
 for sto, c in zip(sto_list,colour):
     t = sto.grid.t[:]
@@ -260,7 +267,7 @@ plt.ylabel('Electric field [V/m]')
 #plt.legend(legend)
 plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
 plt.show()
-
+'''
 # Electron density
 for sto, c in zip(sto_list,colour):
     t = sto.grid.t[:]
@@ -268,38 +275,82 @@ for sto, c in zip(sto_list,colour):
     plt.plot(t[:], sto.eqsys.n_cold[:], c)
 plt.xlabel('Time [s]')
 plt.xlim(0,0.03)
+plt.ylim(0,10e18)
 plt.ylabel('Electron density [m^-3]')
 #plt.legend(legend)
 plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
 plt.show()
 
-for sto, c in zip(sto_list,colour):
+# Ohmic heating
+for sto, c in zip(sto_list, colour):
     t = sto.grid.t[:]
     #sto.other.fluid.Tcold_ohmic.plot()
-    plt.plot(t[1:], sto.eqsys.sto.other.fluid.Tcold_ohmic[:], c)
+    V_p = np.transpose(np.array(sto.other.stream.V_p[:, 0])[np.newaxis])
+    plt.plot(t[1:], -sto.other.fluid.Tcold_ohmic[:]*V_p,c)
 plt.xlabel('Time [s]')
+#plt.xlim(0, 0.03)
+plt.xlim(0,0.5)
+plt.ylim(0,16e5)
+#plt.ylabel('Ohmic heating [eV]')
+# plt.legend(legend)
+plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
+plt.show()
+
+# Ohmic heating
+for sto, c in zip(sto_list, colour):
+    t = sto.grid.t[:]
+    #sto.other.fluid.Tcold_ohmic.plot()
+    V_p = np.transpose(np.array(sto.other.stream.V_p[:, 0])[np.newaxis])
+    plt.plot(t[1:], -sto.other.fluid.Tcold_ohmic[:]*V_p,c)
+plt.xlabel('Time [s]')
+#plt.xlim(0, 0.03)
+plt.xlim(0,0.03)
+plt.ylim(1e5,1.8e5)
+#plt.ylabel('Ohmic heating [eV]')
+# plt.legend(legend)
+plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
+plt.show()
+
+for sto, c in zip(sto_list, colour):
+    t = sto.grid.t[:]
+    #sto.other.fluid.Tcold_ohmic.plot()
+    V_p = np.transpose(np.array(sto.other.stream.V_p[:, 0])[np.newaxis])
+    plt.plot(t[1:], -sto.other.fluid.Tcold_ohmic[:]*V_p,c)
+    I_p = sto.eqsys.I_p[1:]
+    R_p = 5e-5 * sto.other.fluid.lnLambdaT[:] * sto.other.fluid.Zeff[:] * 2*3/0.5**2 * sto.eqsys.T_cold[1:]**(-3/2)
+    P_ohm_DYON = I_p**2*R_p#/V_p
+    plt.plot(t[1:],P_ohm_DYON,'k')
+    plt.xlabel('Time [s]')
+    #plt.xlim(0, 0.05)
+    #plt.ylim(0,1.8e5)
+    plt.ylabel('Ohmic heating [eV]')
+    # plt.legend(legend)
+    plt.legend(['STREAM','Avhandling'])
+    plt.show()
+#plt.xlabel('Time [s]')
 #plt.xlim(0,0.03)
 #plt.ylabel('Electron temperature [eV]')
 #plt.legend(legend)
-plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
-plt.show()
 
+#plt.show()
+'''
+# Confinement time
 for sto in sto_list:
-    sto_final.other.stream.tau_D.plot()
-plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
-plt.xlabel('Time [s]')
-plt.ylabel('Confinement time [s]')
-plt.show()
-
-for sto in sto_list:
-    sto_final.other.stream.tau_D_par.plot()
+    sto.other.stream.tau_D.plot()
 plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
 plt.xlabel('Time [s]')
 plt.ylabel('Confinement time [s]')
 plt.show()
 
 for sto in sto_list:
-    sto_final.other.stream.tau_D_perp.plot()
+    sto.other.stream.tau_D_par.plot()
+plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
+plt.xlabel('Time [s]')
+plt.ylabel('Confinement time [s]')
+plt.show()
+
+for sto in sto_list:
+    sto.other.stream.tau_D_perp.plot()
 plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
 plt.xlabel('Time [s]')
 plt.ylabel('Confinement time [s]')
@@ -313,7 +364,31 @@ for sto, i in zip(sto_list,pgp_list):
     #plt.legend(legend)
     #plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
     plt.show()
-'''
+#'''
+
+# Power balance
+for sto, i in zip(sto_list,pgp_list):
+    V_p = sto.other.stream.V_p[:, 0]
+
+    Prad = sto.other.fluid.Tcold_radiation[:, 0] * V_p
+    Pequi = sto.other.fluid.Tcold_ion_coll[:, 0] * V_p
+    Ptransp = sto.other.scalar.energyloss_T_cold[:, 0] * V_p
+    P_tot = Prad + Pequi + Ptransp
+    P_net = P_tot + sto.other.fluid.Tcold_ohmic[:, 0] * V_p
+
+    t = sto.grid.t[:]
+    plt.plot(t[1:], P_tot, label='Total electron power loss', color='r', linestyle='--')
+    plt.plot(t[1:], Prad,  label='Radiation + ionization', color='b', linestyle='-.')
+    plt.plot(t[1:], Pequi, label='Equilibration', color='g', linestyle='--')
+    plt.plot(t[1:], Ptransp, label='Electron transport', color='m', linestyle=':')
+    plt.plot(t[1:], P_net, label='Net electron heating power', color='k',linestyle='-')
+    plt.xlabel('Time [s]')
+    plt.ylabel('Power balance')
+    plt.xlim(0, 0.05)
+    plt.ylim(0,2e5)
+    plt.legend()
+    plt.show()
+
 # Total amount of deuterium ions
 legend = []
 colour=['b-','r-','b-','r-']
@@ -329,9 +404,25 @@ for sto, c in zip(sto_list, colour):
 
 plt.xlabel('Time [s]')
 plt.ylabel('Total amount of deuterium ions')
-plt.legend(legend)
 plt.legend(['STREAM 5 N_D_0', 'STREAM 7 N_D_0', 'DYON 5 N_D_0', 'DYON 7 N_D_0', 'STREAM 5 N_D_1', 'STREAM 7 N_D_1', 'DYON 5 N_D_1', 'DYON 7 N_D_1'])
+plt.legend(legend)
 plt.show()
+'''
+# Total amount of deuterium ions
+legend = []
+colour=['b-','r-','b--','r--']
+for sto, c in zip(sto_list, colour):
+    n_D_0=np.array(sto.eqsys.n_i['D'][0][1:])
+    n_D_0 = np.array(n_D_0).flatten()
+    dnD0dt = np.gradient(n_D_0)
+    #legend.append('PGP='+str(i)+', N_D_0')
+    plt.plot(sto.grid.t[1:],dnD0dt,c)
+plt.plot(np.linspace(0,tMax_final,2),np.linspace(0,0,2),'k')
+plt.xlabel('Time [s]')
+plt.ylabel('Derivative of ion density [m$^{-3}$]')
+plt.legend(['STREAM 5 N_D_0', 'STREAM 7 N_D_0', 'DYON 5 N_D_0', 'DYON 7 N_D_0'])
+plt.show()
+'''
 
 # Total amount of deuterium ions
 legend = []
@@ -352,5 +443,21 @@ plt.legend(legend)
 plt.legend(['STREAM 5 N_D_0', 'STREAM 7 N_D_0', 'DYON 5 N_D_0', 'DYON 7 N_D_0', 'STREAM 5 N_D_1', 'STREAM 7 N_D_1', 'DYON 5 N_D_1', 'DYON 7 N_D_1'])
 plt.show()
 
+# Total amount
+legend = []
+colour=['b--','r--','b-','r-']
+for sto, c in zip(sto_list, colour):
+    N_D_0=sto.eqsys.n_i['D'][0][1:]*np.transpose(np.array(sto.other.stream.V_n_tot['D'][:][np.newaxis]))
+    N_D_1=sto.eqsys.n_i['D'][1][1:]*sto.other.stream.V_p[:]
+    N_D=N_D_0+N_D_1
+    plt.plot(sto.grid.t[1:],N_D,c)
 
-#'''
+plt.xlabel('Time [s]')
+plt.ylabel('Total amount of particles')
+#fontP = FontProperties()
+#fontP.set_size('x-small')
+plt.legend(['STREAM 5','STREAM 7', 'DYON 5', 'DYON 7'])
+plt.legend(legend)#,prop=fontP)
+#plt.xlim(0,0.12)
+plt.show()
+

@@ -104,9 +104,9 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             for (len_t i = 0; i < nZs; i++)
                 v[i] = 0;
 
-            for (len_t iZ = 0, offset = 0; iZ < nZ; iZ++, offset += this->ions->GetZ(iZ)+1) {
+            for (len_t iZ = 0; iZ < nZ; iZ++) {
                 if (this->stream_terms->iontransport[iZ] != nullptr)
-                    this->stream_terms->iontransport[iZ]->SetVectorElements(v+offset, nullptr);
+                    this->stream_terms->iontransport[iZ]->SetVectorElements(v, nullptr);
             }
         );
     }
@@ -131,7 +131,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
 
             for (len_t iZ = 0; iZ < nZ; iZ++) {
                 if (this->stream_terms->Wi_e_coll[iZ] != nullptr)
-                    this->stream_terms->Wi_e_coll[iZ]->SetVectorElements(v+iZ, nions);
+                    this->stream_terms->Wi_e_coll[iZ]->SetVectorElements(v, nions);
             }
         );
     }
@@ -147,7 +147,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
 
             for (len_t iZ = 0; iZ < nZ; iZ++) {
                 if (this->stream_terms->Wi_iontransport[iZ] != nullptr)
-                    this->stream_terms->Wi_iontransport[iZ]->SetVectorElements(v+iZ, nions);
+                    this->stream_terms->Wi_iontransport[iZ]->SetVectorElements(v, nions);
             }
         );
     }
@@ -163,7 +163,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
 
             for (len_t iZ = 0; iZ < nZ; iZ++) { 
                 if (this->stream_terms->Wi_chargeexchange[iZ] != nullptr)
-                    this->stream_terms->Wi_chargeexchange[iZ]->SetVectorElements(v+iZ, nions);
+                    this->stream_terms->Wi_chargeexchange[iZ]->SetVectorElements(v, nions);
             }
         );
     }
