@@ -14,29 +14,30 @@
  */
 
 namespace STREAM{
-        class RunawayElectronConfinementTime {
+    class RunawayElectronConfinementTime {
+        protected:
+            DREAM::FVM::UnknownQuantityHandler *unknowns; 
+            
+            EllipticalRadialGridGenerator *radials;
+            
+            len_t id_Ip, id_Iwall, id_Efield;
 
-                protected:
-                        DREAM::FVM::UnknownQuantityHandler *unknowns; 
-                        
-                        EllipticalRadialGridGenerator *radials;
-                        
-                        len_t id_Ip, id_Iwall; 
+        public:
+            real_t l_MK2;
+            real_t I_ref = 100.e3;
+            real_t B_v   = 1e-3;
+    
+            RunawayElectronConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2);
+            
+            real_t EvaluateRunawayElectronConfinementTime(len_t ir);
+            real_t EvaluateRunawayElectronConfinementTime1(len_t ir);
+            real_t EvaluateRunawayElectronConfinementTime2(len_t ir);
 
-                public:
-                        real_t l_MK2;
-                        real_t I_ref = 100000;
-                        real_t B_v   = 1e-3;
-                
-                        RunawayElectronConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2);
-                        
-                        real_t EvaluateRunawayElectronConfinementTime(len_t ir);
-
-                        real_t EvaluateRunawayElectronConfinementTime_dIp(len_t ir);
-
-                        real_t EvaluateRunawayElectronConfinementTime_dIwall(len_t ir);
-                        
-                        void Initialize();
+            real_t EvaluateRunawayElectronConfinementTime_dIp(len_t ir);
+            real_t EvaluateRunawayElectronConfinementTime_dIwall(len_t ir);
+            real_t EvaluateRunawayElectronConfinementTime_dE(len_t ir);
+            
+            void Initialize();
     };
 }
 
