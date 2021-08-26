@@ -15,7 +15,7 @@ namespace STREAM {
         DREAM::ADAS *adas;
         DREAM::FVM::UnknownQuantityHandler *unknowns;
         PlasmaVolume *volumes;
-        len_t id_ions, id_n_cold, id_n_tot, id_T_cold, id_lambda_i;
+        len_t id_ions, id_n_cold, id_n_tot, id_T_cold, id_lambda_i, id_Wi, id_Ni;
         bool addFluidIonization; // the full ADAS ionization rate is added in this equation term
         bool addFluidJacobian;   // only the jacobian of the ionization is set with this term
         real_t

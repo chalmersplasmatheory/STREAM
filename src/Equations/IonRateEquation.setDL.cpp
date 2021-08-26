@@ -6,13 +6,17 @@
 
     const len_t Z  = this->ions->GetZ(iIon);
     const real_t *n_cold = this->unknowns->GetUnknownData(id_n_cold);
-    const real_t *T_cold = this->unknowns->GetUnknownData(id_T_cold);
+    //const real_t *T_cold = this->unknowns->GetUnknownData(id_T_cold);
     const real_t V_p = this->volumes->GetPlasmaVolume();
     const real_t V_n = this->volumes->GetNeutralVolume(iIon); 
     const real_t V_n_tot = this->volumes->GetTotalNeutralVolume(iIon);
     const real_t dV_n = this->volumes->GetNeutralVolume_dLambdai(iIon); 
     const real_t dV_n_tot = this->volumes->GetTotalNeutralVolume_dLambdai(iIon);
     const len_t NZ = this->ions->GetNZ();
+    const real_t *W_i = this->unknowns->GetUnknownData(id_Wi);
+    const real_t *N_i = this->unknowns->GetUnknownData(id_Ni); 
+    const real_t ec = DREAM::Constants::ec;  
+    real_t Ti;
 
     if (V_n > 0) {
         for (len_t ir = 0; ir < Nr; ir++) {
@@ -44,14 +48,26 @@
                             const len_t IonOffset = ions->GetIndex(iz,0); 
                             ADASRateInterpolator *ccd = adas->GetCCD(Zi); 
                             for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ 
-                                real_t Rcx = ccd->Eval(Z0i-1, n_cold[ir], T_cold[ir]); 
+                                real_t ni = ions->GetIonDensity(ir, iz, Z0i);
+                                real_t N_i_temp = N_i[iz*Nr+ir];
+                                if (N_i_temp == 0)
+                                    Ti = 0;
+                                else
+                                    Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
+                                real_t Rcx = ccd->Eval(Z0i-1, ni, Ti); 
                                 NI_Z(iIon, -1, Rcx * dV_n/V_p * nions[IonOffset+Z0i*Nr+ir]); 
                             }
                         }
                     }
                 }else if (Z0 < Z){  
                     ADASRateInterpolator *ccd = adas->GetCCD(Z); 
-                    real_t Rcx = ccd->Eval(Z0, n_cold[ir], T_cold[ir]); 
+                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
+                    real_t N_i_temp = N_i[iIon*Nr+ir];
+                    if (N_i_temp == 0)
+                        Ti = 0;
+                    else
+                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
+                    real_t Rcx = ccd->Eval(Z0, ni, Ti); 
                     for (len_t iz=0; iz<NZ; iz++){ 
                         if(ions->GetZ(iz)!=1) 
                             continue;
@@ -76,14 +92,26 @@
                             const len_t IonOffset = ions->GetIndex(iz,0);
                             ADASRateInterpolator *ccd = adas->GetCCD(Zi);
                             for(len_t Z0i=1; Z0i<Zi+1; Z0i++){
-                                real_t Rcx = ccd->Eval(Z0i-1, n_cold[ir], T_cold[ir]);
+                                real_t ni = ions->GetIonDensity(ir, iz, Z0i);
+                                real_t N_i_temp = N_i[iz*Nr+ir];
+                                if (N_i_temp == 0)
+                                    Ti = 0;
+                                else
+                                    Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
+                                real_t Rcx = ccd->Eval(Z0i-1, ni, Ti);
                                 NI_Z(iIon, 0, -Rcx * (dV_n/V_n_tot - V_n * dV_n_tot/(V_n_tot*V_n_tot)) * nions[(IonOffset+Z0i)*Nr+ir]); 
                             }
                         }
                     }
                 } else if (Z0 >= 1){  
                     ADASRateInterpolator *ccd = adas->GetCCD(Z); 
-                    real_t Rcx = ccd->Eval(Z0-1, n_cold[ir], T_cold[ir]); 
+                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
+                    real_t N_i_temp = N_i[iIon*Nr+ir];
+                    if (N_i_temp == 0)
+                        Ti = 0;
+                    else
+                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
+                    real_t Rcx = ccd->Eval(Z0-1, ni, Ti); 
                     for (len_t iz=0; iz<NZ; iz++){ 
                         if(ions->GetZ(iz)!=1) 
                             continue;

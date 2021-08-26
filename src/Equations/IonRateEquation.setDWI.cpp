@@ -1,10 +1,7 @@
 /**
- * Implementation of derivate w.r.t. ion densities in the charge-exchange
- * term. These derivates are NOT w.r.t. the density of the ion to which
- * the term is applied, but w.r.t. to the other ion density which is being
- * multiplied with.
- */
-    
+ * Implementation of derivate w.r.t. ion heat in the charge-exchange term.
+ */    
+    const len_t Nr = this->grid->GetNr();
     const len_t Z  = this->ions->GetZ(iIon);
     //const real_t *n_cold = this->unknowns->GetUnknownData(id_n_cold);
     //const real_t *T_cold = this->unknowns->GetUnknownData(id_T_cold);
@@ -14,12 +11,12 @@
     const len_t NZ = this->ions->GetNZ();
     const real_t *W_i = this->unknowns->GetUnknownData(id_Wi);
     const real_t *N_i = this->unknowns->GetUnknownData(id_Ni);
-    const real_t ec = DREAM::Constants::ec;
+    const real_t ec = DREAM::Constants::ec;  
     real_t Ti;
-
-    if (this->includeChargeExchange) {
-        for (len_t ir = 0; ir < Nr; ir++) {
-            // Positive charge-exchange term
+    
+    for (len_t ir = 0; ir < Nr; ir++) {
+    // Positive charge-exchange term
+        if (this->includeChargeExchange) {
             if (Z == 1){ //Deuterium or Tritium
                 //if (Z0 == 1){
                     for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
@@ -35,15 +32,14 @@
                                 Ti = 0;
                             else
                                 Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
-                            real_t Rcx = ccd->Eval(Z0i-1, ni, Ti); //Evaluate cx-coeff. for the charge state
-                            real_t PartialnRcx = ccd->Eval_deriv_n(Z0i-1, ni, Ti);
+                            real_t PartialTRcx = ccd->Eval_deriv_T(Z0i-1, ni, Ti); //Evaluate cx-coeff. for the charge state
 
                             if (Z0 == 0)
                                 // Apply to neutral deuterium (Z0=0)
-                                NI_Z(IonOffset+Z0i, 0, -Rcx * V_n/V_n_tot - PartialnRcx * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir]); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
+                                NI(0, -PartialTRcx * 2.0/(3.0*ec*N_i[iz*Nr+ir]) * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir]); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
                             else if (Z0 == 1)
                                 // Apply to neutral deuterium (Z0-1 = 0)
-                                NI_Z(IonOffset+Z0i, -1, Rcx * V_n/V_p + PartialnRcx * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir]); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
+                                NI(-1, PartialTRcx * 2.0/(3.0*ec*N_i[iz*Nr+ir]) * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir]); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
                         }
                     }
                 //}
@@ -59,12 +55,12 @@
                         Ti = 0;
                     else
                         Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
-                    real_t Rcx = ccd->Eval(Z0+1-1, ni, Ti); //Evaluate cx-coeff. for charge state 
+                    real_t PartialTRcx = ccd->Eval_deriv_T(Z0+1-1, ni, Ti); //Evaluate cx-coeff. for charge state 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                     if (Z0 == 0){
-                        NI_Z(Doffset, +1, Rcx * V_n_D/V_n_tot); 
+                        NI(+1, PartialTRcx * 2.0/(3.0*ec*N_i[iz*Nr+ir]) * V_n_D/V_n_tot * nions[Doffset*Nr + ir]); 
                     }else{
-                        NI_Z(Doffset, +1, Rcx * V_n_D/V_p);
+                        NI(+1, PartialTRcx * 2.0/(3.0*ec*N_i[iz*Nr+ir]) * V_n_D/V_p * nions[Doffset*Nr + ir]);
                     }
                 }
             }
@@ -82,9 +78,9 @@
                         Ti = 0;
                     else
                         Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
-                    real_t Rcx = ccd->Eval(Z0-1, ni, Ti); //Evaluate cx-coeff. for charge state 
+                    real_t PartialTRcx = ccd->Eval_deriv_T(Z0-1, ni, Ti); //Evaluate cx-coeff. for charge state 
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
-                    NI_Z(Doffset, 0, -Rcx * V_n_D/V_p); 
+                    NI(0, -PartialTRcx * 2.0/(3.0*ec*N_i[iz*Nr+ir]) * V_n_D/V_p * nions[Doffset*Nr + ir]); 
                     
                 }
             }
