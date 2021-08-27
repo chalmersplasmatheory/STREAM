@@ -36,7 +36,7 @@ real_t RunawayElectronConfinementTime::EvaluateInverse(len_t ir){
 real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime1(len_t ir) {
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
-    real_t E      = unknowns->GetUnknownData(id_Efield)[ir];
+    real_t E      = std::abs(unknowns->GetUnknownData(id_Efield)[ir]);
 
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField();
@@ -55,7 +55,7 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime1(l
  */
 real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime2(len_t ir) {
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
-    real_t E      = unknowns->GetUnknownData(id_Efield)[ir];
+    real_t E      = std::abs(unknowns->GetUnknownData(id_Efield)[ir]);
     real_t a      = radials->GetMinorRadius();
     real_t R0     = radials->GetMajorRadius();
 
@@ -92,7 +92,7 @@ real_t RunawayElectronConfinementTime::Evaluate_dIwall(len_t ir){
 }
 
 real_t RunawayElectronConfinementTime::Evaluate_dE(len_t ir) {
-    real_t E      = unknowns->GetUnknownData(id_Efield)[ir];
+    real_t E      = std::abs(unknowns->GetUnknownData(id_Efield)[ir]);
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
 
     real_t tau1   = EvaluateRunawayElectronConfinementTime1(ir);

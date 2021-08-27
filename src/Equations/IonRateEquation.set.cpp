@@ -50,12 +50,26 @@
         // Positive charge-exchange term
         if (this->includeChargeExchange) {
             if (Z == 1){ //Deuterium or Tritium
+                ADASRateInterpolator *ccdIon = adas->GetCCD(Z);
+
+                // Deuterium/Tritium density and temperature
+                real_t nD1 = ions->GetIonDensity(ir, iIon, 1);
+                real_t WD = this->unknowns->GetUnknownData(id_Wi)[iIon*Nr+ir];
+                real_t ND = this->unknowns->GetUnknownData(id_Ni)[iIon*Nr+ir];
+                real_t TD;
+                if (ND <= 0) TD = 0;
+                else TD = 2.0/3.0 * WD / (DREAM::Constants::ec*ND);
+
+                real_t Rcx_ion = ccdIon->Eval(0, nD1, TD);
+
                 //if (Z0 == 1){
                     for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
                         if(iz==iIon) //Skip if Deuterium/Tritium with itself
                             continue;
                         len_t Zi = ions->GetZ(iz); //Get Z for other ion
                         const len_t IonOffset = ions->GetIndex(iz,0); //Get index of neutral state of other ion
+                        real_t V_n_iz = this->volumes->GetNeutralVolume(iz);
+
                         ADASRateInterpolator *ccd = adas->GetCCD(Zi); //Get cx-coeff. for the other ion
                         for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ //Loop over all charge states of other ion
                             real_t ni = ions->GetIonDensity(ir, iz, Z0i);
@@ -66,12 +80,19 @@
                                 Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
                             real_t Rcx = ccd->Eval(Z0i-1, ni, Ti); //Evaluate cx-coeff. for the charge state
 
-                            if (Z0 == 0)
+                            if (Z0 == 0) {
                                 // Apply to neutral deuterium (Z0=0)
                                 NI(0, -Rcx * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir], negCX); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
-                            else if (Z0 == 1)
+                                // D-T term (absent in DYON)
+                                if (Zi == 1)
+                                    NI(1, +Rcx_ion * V_n_iz/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir], posCX);
+                            } else if (Z0 == 1) {
                                 // Apply to neutral deuterium (Z0-1 = 0)
                                 NI(-1, Rcx * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir], posCX); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
+                                // D-T term (absent in DYON)
+                                if (Zi == 1)
+                                    NI(0, -Rcx_ion * V_n_iz/V_p * nions[(IonOffset+Z0i)*Nr+ir], negCX);
+                            }
                         }
                     }
                 //}
