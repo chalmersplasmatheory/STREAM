@@ -107,4 +107,3 @@ void RunawayElectronConfinementTime::Initialize() {
     id_Iwall  = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
     id_Efield = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_E_FIELD);
 }
-

@@ -23,7 +23,7 @@ from STREAM.STREAMOutput import STREAMOutput
 from STREAM import runiface
 import STREAM.Settings.Equations.IonSpecies as Ions
 import STREAM.Settings.TransportSettings as Transport
-import STREAM.Settings.Equations.ElectricField as ElectricField
+#import STREAM.Settings.Equations.ElectricField as ElectricField
 #'''
 
 # Grid parameters
@@ -69,10 +69,19 @@ sto_list=[]
 
 sts_initial = STREAMSettings()
 
-sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+R=1e6
+L=9.1e-6
+wall_time = L/R
+print('wall_time = {} s'.format(wall_time))
+
+print(str(r_wall))
+sts_initial.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
-sts_initial.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
-sts_initial.eqsys.E_field.setCircuitVloop(Vloop)
+sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=Vloop/r_0, times=0, inverse_wall_time=1/wall_time, R0=r_0)
+#sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+#sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
+#sts_initial.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
+#sts_initial.eqsys.E_field.setCircuitVloop(Vloop)
 
 sts_initial.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
 sts_initial.eqsys.T_cold.setInitialProfile(T_e_initial)
@@ -140,10 +149,13 @@ sto_list.append(sto_final)
 
 sts_initial = STREAMSettings()
 
-sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+sts_initial.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
-sts_initial.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
-sts_initial.eqsys.E_field.setCircuitVloop(Vloop)
+sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=Vloop/r_0, times=0, inverse_wall_time=1/wall_time, R0=r_0)
+#sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+#sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
+#sts_initial.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
+#sts_initial.eqsys.E_field.setCircuitVloop(Vloop)
 
 sts_initial.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
 sts_initial.eqsys.T_cold.setInitialProfile(T_e_initial)
@@ -210,9 +222,16 @@ sto_final = runiface(sts_final, 'output_final_DT.h5',
 
 sto_list.append(sto_final)
 
+
+
+
 color = ['-r','--b']
 
-# Plasma current
+for sto, c in zip(sto_list,color):
+    plt.plot(sto.grid.t[1:],sto.other.stream.V_n_tot['D'][:],c)
+plt.show()
+
+
 for sto, c in zip(sto_list,color):
     plt.plot(sto.grid.t[1:],sto.other.stream.Wi_chargeexchange[:,0],c)
 
@@ -321,14 +340,34 @@ plt.show()
 # Plasma current
 for sto, c in zip(sto_list,color):
     plt.plot(sto.grid.t[:],sto.eqsys.I_p[:],c)
-
 #plt.ylim(0,12e5)
 plt.xlabel('Time [s]')
 plt.ylabel('Plasma current [A]')
 plt.legend(['D','DT'])
 plt.show()
 
+color = [['-r','--r'], ['-b','--b']]
+for sto, c in zip(sto_list,color):
+    plt.plot(sto.grid.t[:],sto.eqsys.n_i['D'][0][:],c[0])
+    plt.plot(sto.grid.t[:], sto.eqsys.n_i['D'][1][:], c[1])
+#plt.ylim(0,12e5)
+plt.xlabel('Time [s]')
+plt.ylabel('Deuterium density [m^-3]')
+plt.legend(['D','D +1','DT','DT +1'])
+plt.show()
 
+color = [['-r','--r'], ['-b','--b']]
+for sto, c in zip(sto_list,color):
+    if c == color[0]:
+        plt.plot(sto.grid.t[1:],sto.eqsys.n_i['D'][0][1:]*np.transpose(np.array(sto.other.stream.V_n_tot['D'][:])[np.newaxis]),c[0])
+    else:
+        plt.plot(sto.grid.t[1:],sto.eqsys.n_i['D'][0][1:] * sto.other.stream.V_n_tot['D'][:], c[0])
+    plt.plot(sto.grid.t[1:], sto.eqsys.n_i['D'][1][1:]*sto.other.stream.V_p[:], c[1])
+#plt.ylim(0,12e5)
+plt.xlabel('Time [s]')
+plt.ylabel('Deuterium density [m^-3]')
+plt.legend(['D','D +1','DT','DT +1'])
+plt.show()
 
 '''
 # Total radiation power loss electron

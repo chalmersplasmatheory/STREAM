@@ -38,8 +38,8 @@ Nt_initial   = 4000   # number of time steps
 tMax_final   = 3e-1  # simulation time in seconds
 Nt_final     = 1e4*tMax_final   # number of time steps
 
-pgp = 2.7e-3*0.00750062
-n_D_0 = 3.22e22 * pgp
+pgp = 2.7e-3
+n_D_0 = 4.8e20 * pgp
 n_D_1 = 0.002*n_D_0
 n_D = np.zeros((2,1))
 #print(str(n_D))
@@ -82,7 +82,8 @@ t_e=np.array([0, 0.01, 0.02,  0.03,  0.05,   0.1,   0.15,   0.2,   0.25,   0.3, 
 T_e=np.array([1, 2   , 7   , 10   , 42   , 152  , 206   , 250  , 277   , 294  , 312   , 320  , 330   , 335])
 
 sigma = evaluateSpitzerConductivity(n=n_D[1], T=T_e_initial, Z=1)
-J = 883.3 # 943?
+I_p= 2.4e3
+J = I_p/(a_vec[0]**2 *np.pi) # 943?
 E_initial = J/sigma
 
 sts_initial = STREAMSettings()
@@ -164,7 +165,7 @@ sto_final = runiface(sts_final, 'output_final.h5',
                         quiet=False)
 #'''
 
-
+print(str(sto_initial.eqsys.I_p[:]))
 fig, axs = plt.subplots(3,2)
 
 # Plasma current
@@ -204,7 +205,7 @@ axs[2,1].set_ylabel('Confinement time [s]')
 
 plt.show()
 
-
+'''
 '''
 # Total radiation power loss electron
 plt.plot(sto_final.grid.t[1:], sto_final.other.stream.V_p[:]*np.transpose(np.array(np.diff(sto_final.eqsys.W_cold[:,0]) / np.diff(sto_final.grid.t[:]))[np.newaxis]))
