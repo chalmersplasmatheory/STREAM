@@ -9,6 +9,7 @@
 #include "STREAM/Equations/PlasmaVolume.hpp" 
 #include "STREAM/Equations/NeutralInflux.hpp"
 #include "STREAM/Equations/IonRateEquation.hpp"
+#include "STREAM/Equations/RunawayElectronConfinementTime.hpp"
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 
 namespace STREAM {
@@ -19,21 +20,28 @@ namespace STREAM {
             PlasmaVolume *PV;
             EllipticalRadialGridGenerator *r;
             std::vector<IonRateEquation*> ire;
+            RunawayElectronConfinementTime *rect;
             
-            EquationSystem(DREAM::FVM::Grid*, DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*, enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*, 
-            ConfinementTime*, PlasmaVolume*, EllipticalRadialGridGenerator*);
+            EquationSystem(
+                DREAM::FVM::Grid*, DREAM::FVM::Grid*,
+                enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*,
+                enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*, 
+                EllipticalRadialGridGenerator*
+            );
             
             void SetConfinementTime(ConfinementTime *CT);
             void SetPlasmaVolume(PlasmaVolume *PV);
             void SetEllipticalRadialGridGenerator(EllipticalRadialGridGenerator *r);
             void SetNeutralInflux(NeutralInflux *NI);
             void AddIonRateEquation(IonRateEquation*);
+            void SetRunawayElectronConfinementTime(RunawayElectronConfinementTime*);
             
             PlasmaVolume *GetPlasmaVolume();
             ConfinementTime *GetConfinementTime();
             EllipticalRadialGridGenerator *GetEllipticalRadialGridGenerator();
             NeutralInflux *GetNeutralInflux();
             std::vector<IonRateEquation*> GetIonRateEquations();
+            RunawayElectronConfinementTime *GetRunawayElectronConfinementTime();
             
     };
 }

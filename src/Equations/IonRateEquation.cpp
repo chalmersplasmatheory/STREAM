@@ -153,6 +153,17 @@ void IonRateEquation::DeallocateRateCoefficients() {
 }
 
 /**
+ * Returns an ADAS rate interpolator in the CCD (charge-exchange)
+ * coefficient for the ion species with the given ID.
+ */
+ADASRateInterpolator *IonRateEquation::GetCCD(const len_t iIon) {
+    if (this->ions->IsTritium(iIon))
+        return this->adas->GetCCD(1, 3);
+    else
+        return this->adas->GetCCD(this->ions->GetZ(iIon));
+}
+
+/**
  * Method called whenever the grid is rebuilt.
  */
 bool IonRateEquation::GridRebuilt() {
@@ -252,6 +263,9 @@ bool IonRateEquation::SetCSJacobianBlock(
         contributes = true;
         #include "IonRateEquation.setDN.cpp"        
     } else if(derivId == id_Wi){
+        #undef NI
+        #define NI(J,V) NI_Z(iIon,(J),(V))
+
         contributes = true;
         #include "IonRateEquation.setDWI.cpp"        
     }else if (derivId == id_lambda_i) {

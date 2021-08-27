@@ -10,9 +10,9 @@ EquationSystem::EquationSystem(
     DREAM::FVM::Grid *emptygrid, DREAM::FVM::Grid *rgrid,
     enum DREAM::OptionConstants::momentumgrid_type ht_type, DREAM::FVM::Grid *hottailGrid,
     enum DREAM::OptionConstants::momentumgrid_type re_type, DREAM::FVM::Grid *runawayGrid,
-    ConfinementTime *CT, PlasmaVolume *PV, EllipticalRadialGridGenerator *r
-) : DREAM::EquationSystem(emptygrid, rgrid, ht_type, hottailGrid, re_type, runawayGrid),
-    CT(CT), PV(PV), r(r) {}
+    EllipticalRadialGridGenerator *r
+) : DREAM::EquationSystem(emptygrid, rgrid, ht_type, hottailGrid, re_type, runawayGrid), r(r)
+    {}
     
 EllipticalRadialGridGenerator* EquationSystem::GetEllipticalRadialGridGenerator()
     {return this->r;}
@@ -24,6 +24,8 @@ NeutralInflux *EquationSystem::GetNeutralInflux()
     {return this->NI;}
 vector<IonRateEquation*> EquationSystem::GetIonRateEquations()
     { return ire; }
+RunawayElectronConfinementTime *EquationSystem::GetRunawayElectronConfinementTime()
+    { return rect; }
     
 void EquationSystem::SetConfinementTime(ConfinementTime *CT)
     { this->CT = CT; }
@@ -43,5 +45,8 @@ void EquationSystem::SetPlasmaVolume(PlasmaVolume *PV){
 void EquationSystem::AddIonRateEquation(IonRateEquation *IRE) {
     this->ire.push_back(IRE);
 }
-    
+
+void EquationSystem::SetRunawayElectronConfinementTime(RunawayElectronConfinementTime *r) {
+    this->rect = r;
+}
 
