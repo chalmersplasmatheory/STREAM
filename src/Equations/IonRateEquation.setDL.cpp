@@ -42,9 +42,9 @@
                 if (Z == 1){
                     if (Z0 == 1){
                         for (len_t iz=0; iz<NZ; iz++){ 
-                            if(iz==iIon) 
+                            len_t Zi = ions->GetZ(iz); //Get Z for other ion
+                            if(Z==Zi) //Skip if Deuterium/Tritium with itself or Tritium/Deuterium
                                 continue;
-                            len_t Zi = ions->GetZ(iz); 
                             const len_t IonOffset = ions->GetIndex(iz,0); 
                             ADASRateInterpolator *ccd = adas->GetCCD(Zi); 
                             for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ 
