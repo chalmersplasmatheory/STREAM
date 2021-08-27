@@ -28,7 +28,7 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
         scalarGrid, fluidGrid,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr, 
-        nullptr, nullptr, nullptr
+        ergg
     );
     eqsys->SetEllipticalRadialGridGenerator(ergg);
 
@@ -180,6 +180,7 @@ void SimulationGenerator::ConstructEquations(
         DREAM::SimulationGenerator::ConstructEquation_tau_coll(eqsys);
         
     eqsys->GetConfinementTime()->Initialize();
+    eqsys->GetRunawayElectronConfinementTime()->Initialize();
 }
 
 /**

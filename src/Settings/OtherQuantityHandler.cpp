@@ -27,8 +27,8 @@ void SimulationGenerator::ConstructOtherQuantityHandler(
 ) {
     OtherQuantityHandler *oqh = new OtherQuantityHandler(
         eqsys->GetConfinementTime(), eqsys->GetNeutralInflux(),
-        eqsys->GetPlasmaVolume(), eqsys->GetIonRateEquations(),
-        stream_terms,
+        eqsys->GetPlasmaVolume(), eqsys->GetRunawayElectronConfinementTime(),
+        eqsys->GetIonRateEquations(), stream_terms,
         eqsys->GetHotTailCollisionHandler(), eqsys->GetRunawayCollisionHandler(),
         eqsys->GetPostProcessor(), eqsys->GetREFluid(), eqsys->GetUnknownHandler(),
         eqsys->GetEquations(), eqsys->GetIonHandler(), eqsys->GetFluidGrid(),

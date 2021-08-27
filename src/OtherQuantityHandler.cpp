@@ -13,8 +13,8 @@ using namespace STREAM;
  */
 OtherQuantityHandler::OtherQuantityHandler(
     ConfinementTime *confinementTime, NeutralInflux *neutralInflux,
-    PlasmaVolume *plasmaVolume, std::vector<IonRateEquation*> ionRateEquations,
-    struct eqn_terms *stream_terms,
+    PlasmaVolume *plasmaVolume, RunawayElectronConfinementTime *rect, 
+    std::vector<IonRateEquation*> ionRateEquations, struct eqn_terms *stream_terms,
     // Carried over from DREAM...
     DREAM::CollisionQuantityHandler *cqtyHottail, DREAM::CollisionQuantityHandler *cqtyRunaway,
     DREAM::PostProcessor *postProcessor, DREAM::RunawayFluid *REFluid, DREAM::FVM::UnknownQuantityHandler *unknowns,
@@ -25,7 +25,7 @@ OtherQuantityHandler::OtherQuantityHandler(
         unknowns, unknown_equations, ions, fluidGrid, hottailGrid, runawayGrid,
         scalarGrid, oqty_terms),
     confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume),
-    ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
+    reConfinementTime(rect), ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
 
     this->id_ni = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
 
@@ -189,6 +189,12 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         real_t *v = qd->StoreEmpty();
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = 1/this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
+    );
+
+    DEF_FL("stream/tau_RE", "Runaway electron confinement time",
+        real_t *v = qd->StoreEmpty();
+        for (len_t ir = 0; ir < nr; ir++)
+            v[ir] = 1/this->reConfinementTime->EvaluateInverse(ir);
     );
 
     DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals",
