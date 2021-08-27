@@ -21,7 +21,7 @@ RunawayElectronConfinementTime::RunawayElectronConfinementTime(FVM::UnknownQuant
 /**
  * Evaluates the inverted confinement time
  */
-real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime(len_t ir){
+real_t RunawayElectronConfinementTime::EvaluateInverse(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t tau1 = EvaluateRunawayElectronConfinementTime1(ir);
     real_t tau2 = EvaluateRunawayElectronConfinementTime2(ir);
@@ -65,7 +65,7 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime2(l
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the plasma current
  */
-real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dIp(len_t ir){
+real_t RunawayElectronConfinementTime::Evaluate_dIp(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     
     real_t tau1   = EvaluateRunawayElectronConfinementTime1(ir);
@@ -78,7 +78,7 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dI
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the wall current
  */
-real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dIwall(len_t ir){
+real_t RunawayElectronConfinementTime::Evaluate_dIwall(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
 
@@ -91,7 +91,7 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dI
     return e/tau1 * Constants::mu0 * Beddy*Beddy/(I_wall*Bz*Bz);
 }
 
-real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime_dE(len_t ir) {
+real_t RunawayElectronConfinementTime::Evaluate_dE(len_t ir) {
     real_t E      = unknowns->GetUnknownData(id_Efield)[ir];
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
 

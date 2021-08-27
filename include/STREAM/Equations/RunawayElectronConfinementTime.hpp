@@ -27,15 +27,18 @@ namespace STREAM{
             real_t I_ref = 100.e3;
             real_t B_v   = 1e-3;
     
-            RunawayElectronConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2);
+            RunawayElectronConfinementTime(
+                DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
+                real_t l_MK2
+            );
             
-            real_t EvaluateRunawayElectronConfinementTime(len_t ir);
+            real_t EvaluateInverse(len_t ir);
             real_t EvaluateRunawayElectronConfinementTime1(len_t ir);
             real_t EvaluateRunawayElectronConfinementTime2(len_t ir);
 
-            real_t EvaluateRunawayElectronConfinementTime_dIp(len_t ir);
-            real_t EvaluateRunawayElectronConfinementTime_dIwall(len_t ir);
-            real_t EvaluateRunawayElectronConfinementTime_dE(len_t ir);
+            real_t Evaluate_dIp(len_t ir);
+            real_t Evaluate_dIwall(len_t ir);
+            real_t Evaluate_dE(len_t ir);
             
             void Initialize();
     };
