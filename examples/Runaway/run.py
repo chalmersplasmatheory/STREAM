@@ -149,6 +149,7 @@ def drawplot2(axs, so, toffset=0):
     Pequi = so.other.fluid.Tcold_ion_coll[:,0] * Vp
     Pconve = so.other.scalar.energyloss_T_cold[:,0] / 1e6
     Prad = so.other.fluid.Tcold_radiation[:,0] * Vp
+    Pre = so.other.fluid.Tcold_nre_coll[:,0] * Vp
 
     PequiI = so.other.stream.Wi_e_coll[:,0] * Vp
     Pcx = -so.other.stream.Wi_chargeexchange[:,0] * Vp
@@ -159,6 +160,7 @@ def drawplot2(axs, so, toffset=0):
     plotInternal(axs[0], t[1:], Pequi, ylabel=ylbl, color='b', linestyle='--', label='Equilibration', showlabel=showlabel)
     plotInternal(axs[0], t[1:], Pconve, ylabel=ylbl, color='k', linestyle='--', label='Transport', showlabel=showlabel)
     plotInternal(axs[0], t[1:], Prad, ylabel=ylbl, color='m', linestyle='--', label='Radiation + ionization', showlabel=showlabel)
+    plotInternal(axs[0], t[1:], Pre, ylabel=ylbl, color='y', linestyle='--', label='Runaway collisions', showlabel=showlabel)
 
     plotInternal(axs[1], t[1:], PequiI, color='b', linestyle='--', ylabel=ylbl, label='Equilibration', showlabel=showlabel)
     plotInternal(axs[1], t[1:], Pcx, color='r', linestyle='--', ylabel=ylbl, label='Charge exchange', showlabel=showlabel)
@@ -173,6 +175,46 @@ def drawplot2(axs, so, toffset=0):
         ax.grid(True)
         ax.set_xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25])
         ax.set_yticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5])
+
+
+def drawplot3(axs, so, toffset=0):
+    t = so.grid.t[:] + toffset
+    showlabel = (toffset==0)
+
+    axs[0,0].set_title('Plasma current')
+    plotInternal(axs[0,0], t, so.eqsys.I_p[:,0]/1e3, ylabel='kA', color='k', linestyle='-', label='Total', showlabel=showlabel)
+    plotInternal(axs[0,0], t, so.eqsys.j_re.current()/1e3, ylabel='kA', color='r', linestyle='--', label='Runaway', showlabel=showlabel)
+    plotInternal(axs[0,0], t, so.eqsys.j_ohm.current()/1e3, ylabel='kA', color='b', linestyle=':', label='Ohmic', showlabel=showlabel)
+
+    ylbl = r's$^{-1}$'
+    rrNet = so.other.fluid.runawayRate[:,0]
+    rrDreicer = so.other.fluid.gammaDreicer[:,0]
+    rrAva = so.other.fluid.GammaAva[:,0]*so.eqsys.n_re[1:,0]
+    rrTransp = rrDreicer + rrAva - rrNet
+
+    axs[0,1].set_title('Runaway rate')
+    plotInternal(axs[0,1], t[1:], rrNet, ylabel=ylbl, color='k', linestyle='-', label='Net', showlabel=showlabel)
+    plotInternal(axs[0,1], t[1:], rrDreicer, ylabel=ylbl, color='b', linestyle=':', label='Dreicer', showlabel=showlabel)
+    plotInternal(axs[0,1], t[1:], rrAva, ylabel=ylbl, color='r', linestyle='--', label='Avalanche', showlabel=showlabel)
+    plotInternal(axs[0,1], t[1:], rrTransp, ylabel=ylbl, color='g', linestyle='-.', label='Avalanche', showlabel=showlabel)
+
+    axs[1,0].set_title('Electric field')
+    ylbl = r'$E_{\rm D}$ (\%)'
+    plotInternal(axs[1,0], t[1:], so.eqsys.E_field.norm('ED')[1:,0] * 100, ylabel=ylbl, color='k', linestyle='-', label=r'$E/E_{\rm D}$', showlabel=showlabel)
+    plotInternal(axs[1,0], t[1:], so.other.fluid.Eceff[:,0] / so.other.fluid.EDreic[:,0] * 100, ylabel=ylbl, color='r', linestyle='--', label=r'$E_{\rm c,eff}$', showlabel=showlabel)
+    axs[1,0].set_ylim([0, 10])
+
+    axs[1,1].set_title('Confinement time')
+    ylbl = r's'
+    plotInternal(axs[1,1], t[1:], so.other.stream.tau_RE[:,0], ylabel=ylbl, color='k', linestyle='-', label=r'$\tau_{\rm RE}$', showlabel=showlabel)
+    plotInternal(axs[1,1], t[1:], so.other.stream.tau_RE1[:,0], ylabel=ylbl, color='r', linestyle='--', label=r'$\tau_{\rm RE,1}$', showlabel=showlabel)
+    plotInternal(axs[1,1], t[1:], so.other.stream.tau_RE2[:,0], ylabel=ylbl, color='b', linestyle=':', label=r'$\tau_{\rm RE,2}$', showlabel=showlabel)
+    axs[1,1].set_ylim([0, 0.1])
+
+    for ax in axs.flatten():
+        ax.set_xlim([0, t[-1]])
+        ax.legend(frameon=False)
+        ax.grid(True)
 
 
 def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, *args, **kwargs):
@@ -204,8 +246,14 @@ def makeplots(so1, so2):
     drawplot2(axs2, so1)
     drawplot2(axs2, so2, toffset=so1.grid.t[-1])
 
+    fig3, axs3 = plt.subplots(2, 2, figsize=(10, 8))
+
+    drawplot3(axs3, so1)
+    drawplot3(axs3, so2, toffset=so1.grid.t[-1])
+
     fig1.tight_layout()
     fig2.tight_layout()
+    fig3.tight_layout()
     plt.show()
 
 
@@ -224,8 +272,8 @@ def main(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if not settings.skip:
-        prefill = 2 * 0.8e-3 / 133.32   # Pa -> Torr
-        ss1 = generate(prefill=prefill, nt=40000)
+        prefill = 2 * 0.2e-3 / 133.32   # Pa -> Torr
+        ss1 = generate(prefill=prefill, nt=60000)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
 

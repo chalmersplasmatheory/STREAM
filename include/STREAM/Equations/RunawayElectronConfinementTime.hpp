@@ -39,6 +39,8 @@ namespace STREAM{
             real_t Evaluate_dIp(len_t ir);
             real_t Evaluate_dIwall(len_t ir);
             real_t Evaluate_dE(len_t ir);
+
+            real_t GetIref() const { return I_ref; }
             
             void Initialize();
     };

@@ -191,10 +191,24 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             v[ir] = 1/this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
     );
 
-    DEF_FL("stream/tau_RE", "Runaway electron confinement time",
+    DEF_FL("stream/tau_RE", "Runaway electron confinement time [s]",
         real_t *v = qd->StoreEmpty();
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = 1/this->reConfinementTime->EvaluateInverse(ir);
+    );
+    DEF_FL("stream/tau_RE1", "Runaway electron confinement time (component dominating at low I_p) [s]",
+        real_t *v = qd->StoreEmpty();
+        const real_t I_p = this->unknowns->GetUnknownData(id_Ip)[0];
+        const real_t I_ref = this->reConfinementTime->GetIref();
+        for (len_t ir = 0; ir < nr; ir++)
+            v[ir] = exp(I_p/I_ref) * this->reConfinementTime->EvaluateRunawayElectronConfinementTime1(ir);
+    );
+    DEF_FL("stream/tau_RE2", "Runaway electron confinement time (component dominating at high I_p) [s]",
+        real_t *v = qd->StoreEmpty();
+        const real_t I_p = this->unknowns->GetUnknownData(id_Ip)[0];
+        const real_t I_ref = this->reConfinementTime->GetIref();
+        for (len_t ir = 0; ir < nr; ir++)
+            v[ir] = 1/(1-exp(-I_p/I_ref)) * this->reConfinementTime->EvaluateRunawayElectronConfinementTime2(ir);
     );
 
     DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals",

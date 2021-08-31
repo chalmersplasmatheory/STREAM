@@ -52,11 +52,11 @@ bool RunawayElectronTransport::SetJacobianBlock(
     if (uqtyId == derivId)
         this->SetMatrixElements(jac, nullptr);
     else if (derivId == id_Ip)
-        jac->SetElement(0, 0, -nre[0]*this->dI_p);
+        jac->SetElement(0, 0, nre[0]*this->dI_p);
     else if (derivId == id_Iwall)
-        jac->SetElement(0, 0, -nre[0]*this->dI_wall);
+        jac->SetElement(0, 0, nre[0]*this->dI_wall);
     else if (derivId == id_Efield)
-        jac->SetElement(0, 0, -nre[0]*this->dE_field);
+        jac->SetElement(0, 0, nre[0]*this->dE_field);
     else
         return false;
 
@@ -70,7 +70,7 @@ bool RunawayElectronTransport::SetJacobianBlock(
 void RunawayElectronTransport::SetMatrixElements(
     DREAM::FVM::Matrix *mat, real_t*
 ) {
-    mat->SetElement(0, 0, -this->invtau);
+    mat->SetElement(0, 0, this->invtau);
 }
 
 /**
@@ -79,6 +79,6 @@ void RunawayElectronTransport::SetMatrixElements(
 void RunawayElectronTransport::SetVectorElements(
     real_t *vec, const real_t *nre
 ) {
-    vec[0] += -nre[0] * this->invtau;
+    vec[0] += nre[0] * this->invtau;
 }
 
