@@ -57,6 +57,8 @@ namespace STREAM {
         virtual bool GridRebuilt() override;
         virtual void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*) override;
 
+        DREAM::ADASRateInterpolator *GetCCD(const len_t);
+
         virtual bool SetCSJacobianBlock(
             const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*,
             const len_t iIon, const len_t Z0, const len_t rOffset

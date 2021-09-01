@@ -44,6 +44,18 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
         "The vacuum vessel volume",
         (real_t)0
     );
+
+    s->DefineSetting(
+        "radialgrid/Iref",
+        "Reference plasma current at which flux surfaces form [A]",
+        (real_t)100e3
+    );
+
+    s->DefineSetting(
+        "radialgrid/Bv",
+        "Stray vertical magnetic field [T]",
+        (real_t)1e-3
+    );
     
     DREAM::SimulationGenerator::DefineOptions_f_ripple(MODULENAME, s);
 }

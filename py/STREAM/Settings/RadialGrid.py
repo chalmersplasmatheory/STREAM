@@ -23,6 +23,8 @@ class RadialGrid(PrescribedScalarParameter):
         self.c3 = None
         self.b = 0.0
         self.R0 = 2.0
+        self.Iref = 100.0e3
+        self.Bv = 1.0e-3
 
         self.setElongation(1)
         self.setTriangularity(0)
@@ -37,6 +39,21 @@ class RadialGrid(PrescribedScalarParameter):
         :param t:  Time vector (if ``B0`` varies with time).
         """
         self.B0, self.tB0 = self._setScalarData(data=B0, times=t)
+
+
+    def setBv(self, Bv):
+        """
+        Sets the value of the stray magnetic field.
+        """
+        self.Bv = float(Bv)
+
+
+    def setIref(self, Iref):
+        """
+        Set the value of the reference plasma current at which
+        closed flux surfaces are assumed to form.
+        """
+        self.Iref = float(Iref)
 
 
     def setMinorRadius(self, a, t=0):
@@ -58,6 +75,7 @@ class RadialGrid(PrescribedScalarParameter):
             raise DREAMException("RadialGrid: Invalid value assigned to major radius 'R0': {}".format(R0))
 
         self.R0 = float(R0)
+
 
     def setWallRadius(self, wall_radius):
         """
@@ -180,11 +198,11 @@ class RadialGrid(PrescribedScalarParameter):
         """
         Verify that the RadialGrid settings are consistent.
         """
-
         self._verifySettingsPrescribedScalarData('a', self.a, self.ta)
         self._verifySettingsPrescribedScalarData('B0', self.B0, self.tB0)
         self._verifySettingsPrescribedScalarData('kappa', self.kappa, self.tkappa)
         self._verifySettingsPrescribedScalarData('delta', self.delta, self.tdelta)
+
         if type(self.vessel_volume) != float:
             raise TypeError('The prescribed vessel volume must be of type float')
         if type(self.c1) != float:
@@ -193,7 +211,14 @@ class RadialGrid(PrescribedScalarParameter):
             raise TypeError('The prescribed recycle coefficient 2 must be of type float')
         if type(self.c3) != float:
             raise TypeError('The prescribed recycle coefficient 3 must be of type float')
+        if type(self.Bv) != float:
+            raise TypeError('The prescribed stray magnetic field must be of type float')
+        if type(self.Iref) != float:
+            raise TypeError('The prescribed reference plasma current must be of type float')
+            
         if self.R0 is None or self.R0 <= 0:
             raise DREAMException("RadialGrid: Invalid value assigned to tokamak major radius 'R0': {}".format(self.R0))
         if not np.isscalar(self.b):
             raise DREAMException("RadialGrid: The specified wall radius is not a scalar: {}.".format(self.b))
+
+
