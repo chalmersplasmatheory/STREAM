@@ -68,7 +68,6 @@
             }else if (Z0 < Z){  //Not Deuterium/Tritium
                 real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
                 
-                real_t Rcx_ion = ccdIon->Eval(Z0, nZ0, TA);
                 real_t PartialTRcx_ion = ccdIon->Eval_deriv_T(Z0, nZ0, TA);
                 
                 for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
@@ -89,7 +88,6 @@
             if (Z != 1 && Z0 >= 1){  //Not Deuterium/Tritium. Z0>1 since this term not present if Z0=0
                 real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
                 
-                real_t Rcx_ion = ccdIon->Eval(Z0, nZ0, TA);
                 real_t PartialTRcx_ion = ccdIon->Eval_deriv_T(Z0, nZ0, TA);
                 
                 for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species

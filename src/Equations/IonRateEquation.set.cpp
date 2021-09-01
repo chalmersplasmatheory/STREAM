@@ -70,7 +70,7 @@
                         const len_t IonOffset = ions->GetIndex(iz,0); //Get index of neutral state of other ion
                         real_t V_n_iz = this->volumes->GetNeutralVolume(iz);
 
-                        ADASRateInterpolator *ccd = adas->GetCCD(iz); //Get cx-coeff. for the other ion
+                        ADASRateInterpolator *ccd = GetCCD(iz); //Get cx-coeff. for the other ion
                         for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ //Loop over all charge states of other ion
                             real_t ni = ions->GetIonDensity(ir, iz, Z0i);
                             real_t N_i_temp = N_i[iz*Nr+ir];
