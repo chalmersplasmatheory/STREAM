@@ -64,9 +64,9 @@
 
                 //if (Z0 == 1){
                     for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
-                    len_t Zi = ions->GetZ(iz); //Get Z for other ion
-                        if(Z==Zi) //Skip if Deuterium/Tritium with itself or Tritium/Deuterium
+                        if(iz==iIon) //Skip if Deuterium/Tritium with itself
                             continue;
+                        len_t Zi = ions->GetZ(iz); //Get Z for other ion
                         const len_t IonOffset = ions->GetIndex(iz,0); //Get index of neutral state of other ion
                         real_t V_n_iz = this->volumes->GetNeutralVolume(iz);
 
@@ -85,13 +85,13 @@
                                 NI(0, -Rcx * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir], negCX); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
                                 // D-T term (absent in DYON)
                                 if (Zi == 1)
-                                    NI(1, +Rcx_ion * V_n_iz/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir], posCX);
+                                    NI(1, +Rcx_ion * V_n_iz/V_n_tot * nions[(IonOffset+0)*Nr+ir], posCX);
                             } else if (Z0 == 1) {
                                 // Apply to neutral deuterium (Z0-1 = 0)
                                 NI(-1, Rcx * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir], posCX); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
                                 // D-T term (absent in DYON)
                                 if (Zi == 1)
-                                    NI(0, -Rcx_ion * V_n_iz/V_p * nions[(IonOffset+Z0i)*Nr+ir], negCX);
+                                    NI(0, -Rcx_ion * V_n_iz/V_p * nions[(IonOffset+0)*Nr+ir], negCX);
                             }
                         }
                     }

@@ -227,9 +227,9 @@ sto_list.append(sto_final)
 
 color = ['-r','--b']
 
-for sto, c in zip(sto_list,color):
-    plt.plot(sto.grid.t[1:],sto.other.stream.V_n_tot['D'][:],c)
-plt.show()
+#for sto, c in zip(sto_list,color):
+#    plt.plot(sto.grid.t[1:],sto.other.stream.V_n_tot['D'][:],c)
+#plt.show()
 
 
 for sto, c in zip(sto_list,color):

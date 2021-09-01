@@ -54,9 +54,9 @@
                         real_t Rcx_ion = ccdIon->Eval(0, nD1, TD);
 
                         for (len_t iz=0; iz<NZ; iz++){ 
-                            len_t Zi = ions->GetZ(iz); //Get Z for other ion
-                            if(Z==Zi) //Skip if Deuterium/Tritium with itself or Tritium/Deuterium
+                            if(iz==iIon) 
                                 continue;
+                            len_t Zi = ions->GetZ(iz); 
                             const len_t IonOffset = ions->GetIndex(iz,0); 
                             ADASRateInterpolator *ccd = GetCCD(iz); 
                             for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ 
@@ -72,7 +72,7 @@
 
                                 // D-T term (absent in DYON)
                                 if (Zi == 1)
-                                    NI_Z(DOffset+Z0, 0, Rcx_ion * dV_n/V_p * nions[(IonOffset+Z0i)*Nr+ir]);
+                                    NI_Z(DOffset+Z0, 0, Rcx_ion * dV_n/V_p * nions[(IonOffset+0)*Nr+ir]);
                             }
                         }
                     }
