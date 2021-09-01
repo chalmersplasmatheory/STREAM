@@ -49,18 +49,18 @@
         
         // Positive charge-exchange term
         if (this->includeChargeExchange) {
+            ADASRateInterpolator *ccdIon = GetCCD(iIon);
+            real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*nr+ir];
+            real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*nr+ir];
+            real_t TA;
+            if (NA <= 0) TA = 0;
+            else TA = 2.0/3.0 * WA / (DREAM::Constants::ec*NA);
+            
             if (Z == 1){ //Deuterium or Tritium
-                ADASRateInterpolator *ccdIon = adas->GetCCD(Z);
-
                 // Deuterium/Tritium density and temperature
                 real_t nD1 = ions->GetIonDensity(ir, iIon, 1);
-                real_t WD = this->unknowns->GetUnknownData(id_Wi)[iIon*Nr+ir];
-                real_t ND = this->unknowns->GetUnknownData(id_Ni)[iIon*Nr+ir];
-                real_t TD;
-                if (ND <= 0) TD = 0;
-                else TD = 2.0/3.0 * WD / (DREAM::Constants::ec*ND);
-
-                real_t Rcx_ion = ccdIon->Eval(0, nD1, TD);
+                
+                real_t Rcx_ion = ccdIon->Eval(0, nD1, TA);
 
                 //if (Z0 == 1){
                     for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
@@ -70,7 +70,7 @@
                         const len_t IonOffset = ions->GetIndex(iz,0); //Get index of neutral state of other ion
                         real_t V_n_iz = this->volumes->GetNeutralVolume(iz);
 
-                        ADASRateInterpolator *ccd = adas->GetCCD(Zi); //Get cx-coeff. for the other ion
+                        ADASRateInterpolator *ccd = adas->GetCCD(iz); //Get cx-coeff. for the other ion
                         for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ //Loop over all charge states of other ion
                             real_t ni = ions->GetIonDensity(ir, iz, Z0i);
                             real_t N_i_temp = N_i[iz*Nr+ir];
@@ -97,44 +97,36 @@
                     }
                 //}
             }else if (Z0 < Z){  //Not Deuterium/Tritium
+                real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
+                
+                real_t Rcx_ion = ccdIon->Eval(Z0, nZ0, TA);
+                
                 for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
                     if(ions->GetZ(iz)!=1) //Don't add anything if the other ion is not D/T
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); //Get index of neutral state of D
-                    ADASRateInterpolator *ccd = adas->GetCCD(Z); //Get cx-coeff. for the ion that is not D/T (or should this be 1, 2+IsTritium(iz)?)
-                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
-                    real_t N_i_temp = N_i[iIon*Nr+ir];
-                    if (N_i_temp == 0)
-                        Ti = 0;
-                    else
-                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
-                        
-                    real_t Rcx = ccd->Eval(Z0+1-1, ni, Ti); //Evaluate cx-coeff. for charge state 
+                    
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                     if (Z0 == 0){
-                        NI(+1, Rcx * V_n_D/V_n_tot * nions[Doffset*Nr + ir], posCX); 
+                        NI(+1, Rcx_ion * V_n_D/V_n_tot * nions[Doffset*Nr + ir], posCX); 
                     }else{
-                        NI(+1, Rcx * V_n_D/V_p * nions[Doffset*Nr + ir], posCX);
+                        NI(+1, Rcx_ion * V_n_D/V_p * nions[Doffset*Nr + ir], posCX);
                     }
                 }
             }
             
             // Negative charge-exchange term
             if (Z != 1 && Z0 >= 1){  //Not Deuterium/Tritium. Z0>1 since this term not present if Z0=0
+                real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
+                
+                real_t Rcx_ion = ccdIon->Eval(Z0, nZ0, TA);
                 for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
                     if(ions->GetZ(iz)!=1) //Don't add anything if the other ion is not D/T
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); //Get index of neutral state of D
-                    ADASRateInterpolator *ccd = adas->GetCCD(Z); //Get cx-coeff. for the ion that is not D/T (or should this be 1, 2+IsTritium(iz)?)
-                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
-                    real_t N_i_temp = N_i[iIon*Nr+ir];
-                    if (N_i_temp == 0)
-                        Ti = 0;
-                    else
-                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
-                    real_t Rcx = ccd->Eval(Z0-1, ni, Ti); //Evaluate cx-coeff. for charge state 
+                    
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
-                    NI(0, -Rcx * V_n_D/V_p * nions[Doffset*Nr + ir], negCX); 
+                    NI(0, -Rcx_ion * V_n_D/V_p * nions[Doffset*Nr + ir], negCX); 
                     
                 }
             }

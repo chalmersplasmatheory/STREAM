@@ -144,7 +144,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
                     dR_icxdT = adas->GetCCD(Z)->Eval_deriv_T(0, n_i, T_i /DREAM::Constants::ec);
                 }
                 diffWeights[iIon*nZ+n] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * 1 / N_i) * R_icx * n_i 
-                                        + V_ni/V_p * 3.0/2.0 * (T_i - DREAM::Constants::ec*T_0) * dR_icxdT * 2.0/3.0 * 1 / N_i /DREAM::Constants::ec* n_i;
+                                        + V_ni/V_p * 3.0/2.0 * (T_i - DREAM::Constants::ec*T_0) * dR_icxdT * 2.0/3.0 * 1 / N_i/* /DREAM::Constants::ec*/ * n_i;
             }
         }
     } else if(derivId == id_Ni) {
@@ -166,7 +166,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
                     dR_icxdT = adas->GetCCD(Z)->Eval_deriv_T(0, n_i, T_i /DREAM::Constants::ec);
                 }
                 diffWeights[iIon*nZ+n] -= V_ni/V_p * 3.0/2.0 * (-2.0/3.0 * W_i / (N_i*N_i)) * R_icx * n_i
-                                        +V_ni/V_p * 3.0/2.0 * (T_i - DREAM::Constants::ec*T_0) * (-2.0/3.0 * W_i / (N_i*N_i) /DREAM::Constants::ec) * dR_icxdT * n_i; 
+                                        +V_ni/V_p * 3.0/2.0 * (T_i - DREAM::Constants::ec*T_0) * (-2.0/3.0 * W_i / (N_i*N_i) /* /DREAM::Constants::ec*/) * dR_icxdT * n_i; 
             }
         }
     } else if(derivId == id_lambdai) {

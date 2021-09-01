@@ -39,19 +39,18 @@
 
             // d/dlambda_i(Positive charge-exchange term)
             if (this->includeChargeExchange) {
+                ADASRateInterpolator *ccdIon = GetCCD(iIon);
+                real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*nr+ir];
+                real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*nr+ir];
+                real_t TA;
+                if (NA <= 0) TA = 0;
+                else TA = 2.0/3.0 * WA / (DREAM::Constants::ec*NA);
                 if (Z == 1){
                     if (Z0 == 1){
-                        ADASRateInterpolator *ccdIon = GetCCD(iIon);
-
                         const len_t DOffset = ions->GetIndex(iIon, 0);
                         real_t nD1 = ions->GetIonDensity(ir, iIon, 1);
-                        real_t WD  = this->unknowns->GetUnknownData(id_Wi)[iIon*Nr+ir];
-                        real_t ND  = this->unknowns->GetUnknownData(id_Ni)[iIon*Nr+ir];
-                        real_t TD;
-                        if (ND <= 0) TD = 0;
-                        else TD = 2.0/3.0 * WD / (DREAM::Constants::ec*ND);
 
-                        real_t Rcx_ion = ccdIon->Eval(0, nD1, TD);
+                        real_t Rcx_ion = ccdIon->Eval(0, nD1, TA);
 
                         for (len_t iz=0; iz<NZ; iz++){ 
                             if(iz==iIon) 
@@ -77,14 +76,9 @@
                         }
                     }
                 }else if (Z0 < Z){  
-                    ADASRateInterpolator *ccd = GetCCD(iIon); 
-                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
-                    real_t N_i_temp = N_i[iIon*Nr+ir];
-                    if (N_i_temp == 0)
-                        Ti = 0;
-                    else
-                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
-                    real_t Rcx = ccd->Eval(Z0, ni, Ti); 
+                    real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
+                
+                    real_t Rcx_ion = ccdIon->Eval(Z0, nZ0, TA);
                     for (len_t iz=0; iz<NZ; iz++){ 
                         if(ions->GetZ(iz)!=1) 
                             continue;
@@ -92,9 +86,9 @@
                         const real_t V_n_D = this->volumes->GetNeutralVolume(iz);
                         const real_t dV_n_D = this->volumes->GetNeutralVolume_dLambdai(iz);
                         if (Z0 == 0){
-                            NI_Z(iz, +1, Rcx * (dV_n_D/V_n_tot - V_n_D * dV_n_tot /(V_n_tot * V_n_tot)) * nions[Doffset*Nr + ir]); 
+                            NI_Z(iz, +1, Rcx_ion * (dV_n_D/V_n_tot - V_n_D * dV_n_tot /(V_n_tot * V_n_tot)) * nions[Doffset*Nr + ir]); 
                         }else{
-                            NI_Z(iz, +1, Rcx * dV_n_D/V_p * nions[Doffset*Nr + ir]);
+                            NI_Z(iz, +1, Rcx_ion * dV_n_D/V_p * nions[Doffset*Nr + ir]);
                         }
                     }
                 }
@@ -102,17 +96,10 @@
                 // d/dlambda_i(Negative charge-exchange term)
                 if (Z == 1){
                     if(Z0 == 0){
-                        ADASRateInterpolator *ccdIon = GetCCD(iIon);
-
                         const len_t DOffset = ions->GetIndex(iIon, 0);
                         real_t nD1 = ions->GetIonDensity(ir, iIon, 1);
-                        real_t WD  = this->unknowns->GetUnknownData(id_Wi)[iIon*Nr+ir];
-                        real_t ND  = this->unknowns->GetUnknownData(id_Ni)[iIon*Nr+ir];
-                        real_t TD;
-                        if (ND <= 0) TD = 0;
-                        else TD = 2.0/3.0 * WD / (DREAM::Constants::ec*ND);
 
-                        real_t Rcx_ion = ccdIon->Eval(0, nD1, TD);
+                        real_t Rcx_ion = ccdIon->Eval(0, nD1, TA);
 
                         for (len_t iz=0; iz<NZ; iz++){
                             if(iz==iIon)
@@ -143,14 +130,9 @@
                         }
                     }
                 } else if (Z0 >= 1){  
-                    ADASRateInterpolator *ccd = GetCCD(iIon); 
-                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
-                    real_t N_i_temp = N_i[iIon*Nr+ir];
-                    if (N_i_temp == 0)
-                        Ti = 0;
-                    else
-                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
-                    real_t Rcx = ccd->Eval(Z0-1, ni, Ti); 
+                    real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
+                    
+                    real_t Rcx = ccdIon->Eval(Z0-1, nZ0, TA); 
                     for (len_t iz=0; iz<NZ; iz++){ 
                         if(ions->GetZ(iz)!=1) 
                             continue;

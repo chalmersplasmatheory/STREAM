@@ -18,21 +18,20 @@
     real_t Ti;
 
     if (this->includeChargeExchange) {
+        ADASRateInterpolator *ccdIon = GetCCD(iIon);
         for (len_t ir = 0; ir < Nr; ir++) {
             // Positive charge-exchange term
+            real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*nr+ir];
+            real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*nr+ir];
+            real_t TA;
+            if (NA <= 0) TA = 0;
+            else TA = 2.0/3.0 * WA / (DREAM::Constants::ec*NA);
             if (Z == 1){ //Deuterium or Tritium
-                ADASRateInterpolator *ccdIon = GetCCD(iIon);
-
                 const len_t DOffset = ions->GetIndex(iIon, 0);
                 real_t nD1 = ions->GetIonDensity(ir, iIon, 1);
-                real_t WD = this->unknowns->GetUnknownData(id_Wi)[iIon*nr+ir];
-                real_t ND = this->unknowns->GetUnknownData(id_Ni)[iIon*nr+ir];
-                real_t TD;
-                if (ND <= 0) TD = 0;
-                else TD = 2.0/3.0 * WD / (DREAM::Constants::ec*ND);
                 
-                real_t Rcx_ion = ccdIon->Eval(0, nD1, TD);
-                real_t PartialnRcx_ion = ccdIon->Eval_deriv_n(0, nD1, TD);
+                real_t Rcx_ion = ccdIon->Eval(0, nD1, TA);
+                real_t PartialnRcx_ion = ccdIon->Eval_deriv_n(0, nD1, TA);
 
                 //if (Z0 == 1){
                     for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
@@ -76,45 +75,79 @@
                     }
                 //}
             }else if (Z0 < Z){  //Not Deuterium/Tritium
+                //const len_t DOffset = ions->GetIndex(iIon, 0);
+                real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
+                
+                real_t Rcx_ion = ccdIon->Eval(Z0, nZ0, TA);
+                real_t PartialnRcx_ion = ccdIon->Eval_deriv_n(0, nZ0, TA);
                 for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
                     if(ions->GetZ(iz)!=1) //Don't add anything if the other ion is not D/T
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); //Get index of neutral state of D
-                    ADASRateInterpolator *ccd = GetCCD(iz); //Get cx-coeff. for the ion that is not D/T (or should this be 1, 2+IsTritium(iz)?)
-                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
-                    real_t N_i_temp = N_i[iIon*Nr+ir];
-                    if (N_i_temp == 0)
-                        Ti = 0;
-                    else
-                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
-                    real_t Rcx = ccd->Eval(Z0+1-1, ni, Ti); //Evaluate cx-coeff. for charge state 
+
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                     if (Z0 == 0){
-                        NI_Z(Doffset, +1, Rcx * V_n_D/V_n_tot); 
+                        NI_Z(Doffset, +1, Rcx_ion * V_n_D/V_n_tot); 
                     }else{
-                        NI_Z(Doffset, +1, Rcx * V_n_D/V_p);
+                        NI_Z(Doffset, +1, Rcx_ion * V_n_D/V_p);
                     }
                 }
             }
             
             // Negative charge-exchange term
             if (Z != 1 && Z0 >= 1){  //Not Deuterium/Tritium. Z0>1 since this term not present if Z0=0
+                real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
+                
+                real_t Rcx_ion = ccdIon->Eval(Z0, nZ0, TA);
                 for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
                     if(ions->GetZ(iz)!=1) //Don't add anything if the other ion is not D/T
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); //Get index of neutral state of D
-                    ADASRateInterpolator *ccd = GetCCD(iz); //Get cx-coeff. for the ion that is not D/T (or should this be 1, 2+IsTritium(iz)?)
-                    real_t ni = ions->GetIonDensity(ir, iIon, Z0);
-                    real_t N_i_temp = N_i[iIon*Nr+ir];
-                    if (N_i_temp == 0)
-                        Ti = 0;
-                    else
-                        Ti = 2.0/3.0*W_i[iIon*Nr+ir]/(ec*N_i_temp);
-                    real_t Rcx = ccd->Eval(Z0-1, ni, Ti); //Evaluate cx-coeff. for charge state 
+                    
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
-                    NI_Z(Doffset, 0, -Rcx * V_n_D/V_p); 
+                    NI_Z(Doffset, 0, -Rcx_ion * V_n_D/V_p); 
                     
                 }
             }
         }
     }
+    /*
+    }else if (Z0 < Z){  //Not Deuterium/Tritium
+                //const len_t DOffset = ions->GetIndex(iIon, 0);
+                real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
+                
+                real_t Rcx_ion = ccdIon->Eval(Z0, nZ0, TA);
+                real_t PartialnRcx_ion = ccdIon->Eval_deriv_n(0, nZ0, TA);
+                for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
+                    if(ions->GetZ(iz)!=1) //Don't add anything if the other ion is not D/T
+                        continue;
+                    const len_t Doffset = ions->GetIndex(iz,0); //Get index of neutral state of D
+
+                    const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
+                    if (Z0 == 0){
+                        NI_Z(Doffset, +1, PartialnRcx_ion * V_n_D/V_n_tot* nions[(Doffset+0)*Nr+ir]); 
+                    }else{
+                        NI_Z(Doffset, +1, PartialnRcx_ion * V_n_D/V_p* nions[(Doffset+0)*Nr+ir]);
+                    }
+                }
+            }
+            
+            // Negative charge-exchange term
+            if (Z != 1 && Z0 >= 1){  //Not Deuterium/Tritium. Z0>1 since this term not present if Z0=0
+                real_t nZ0 = ions->GetIonDensity(ir, iIon, Z0);
+                
+                real_t Rcx_ion = ccdIon->Eval(Z0, nZ0, TA);
+                real_t PartialnRcx_ion = ccdIon->Eval_deriv_n(0, nZ0, TA);
+                for (len_t iz=0; iz<NZ; iz++){ //Loop over all other ion species
+                    if(ions->GetZ(iz)!=1) //Don't add anything if the other ion is not D/T
+                        continue;
+                    const len_t Doffset = ions->GetIndex(iz,0); //Get index of neutral state of D
+                    
+                    const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
+                    NI_Z(Doffset, 0, -PartialnRcx_ion * V_n_D/V_p* nions[(Doffset+0)*Nr+ir]); 
+                    
+                }
+            }
+        }
+    }
+    */
