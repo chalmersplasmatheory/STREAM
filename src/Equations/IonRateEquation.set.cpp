@@ -50,8 +50,8 @@
         // Positive charge-exchange term
         if (this->includeChargeExchange) {
             ADASRateInterpolator *ccdIon = GetCCD(iIon);
-            real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*nr+ir];
-            real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*nr+ir];
+            real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*Nr+ir];
+            real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*Nr+ir];
             real_t TA;
             if (NA <= 0) TA = 0;
             else TA = 2.0/3.0 * WA / (DREAM::Constants::ec*NA);

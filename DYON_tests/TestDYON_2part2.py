@@ -63,7 +63,7 @@ a = a_fun(t)
 
 kappa    = 1
 c1       = 1.1
-c2       = 0.05
+c2       = 0.09
 c3       = 0.1
 
 R = 7.5e-4  # Ohm, i MK2 struktur
@@ -71,8 +71,8 @@ L = 9.1e-6  # H, i MK2 struktur
 
 r=np.array([0])
 
-t_d = np.array([0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
-V_d = np.array([11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
+t_d = np.array([0, 0.003, 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
+V_d = np.array([0,    11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
 V_s = interp1d(t_d, V_d, kind='linear')
 V_loop_wall = V_s(t)
 
@@ -165,7 +165,7 @@ sto_final = runiface(sts_final, 'output_final.h5',
                         quiet=False)
 #'''
 
-print(str(sto_initial.eqsys.I_p[:]))
+#print(str(sto_initial.eqsys.I_p[:]))
 fig, axs = plt.subplots(3,2)
 
 # Plasma current
@@ -205,35 +205,6 @@ axs[2,1].set_ylabel('Confinement time [s]')
 
 plt.show()
 
-'''
-'''
-# Total radiation power loss electron
-plt.plot(sto_final.grid.t[1:], sto_final.other.stream.V_p[:]*np.transpose(np.array(np.diff(sto_final.eqsys.W_cold[:,0]) / np.diff(sto_final.grid.t[:]))[np.newaxis]))
-plt.xlim(0,0.3)
-#plt.ylim(0,12e5)
-plt.xlabel('Time [s]')
-plt.ylabel('Total radiation power loss [A]')
-plt.show()
-
-rad = sto_final.other.fluid.Tcold_radiation
-ohmic = sto_final.other.fluid.Tcold_ohmic
-transport = sto_final.other.scalar.energyloss_T_cold
-equilibration = sto_final.other.fluid.Tcold_ion_coll
-plt.plot(sto_final.grid.t[1:], rad+ohmic+transport+equilibration)
-plt.xlim(0,0.3)
-#plt.ylim(0,12e5)
-plt.xlabel('Time [s]')
-plt.ylabel('Total radiation power loss [A]')
-plt.show()
-
-# Total radiation power loss ion
-plt.plot(sto_final.grid.t[1:], sto_final.other.stream.V_p[:]*np.transpose(np.array(np.diff(sto_final.eqsys.W_i[:,0]) / np.diff(sto_final.grid.t[:]))[np.newaxis]))
-plt.xlim(0,0.3)
-#plt.ylim(0,12e5)
-plt.xlabel('Time [s]')
-plt.ylabel('Total radiation power loss [A]')
-plt.show()
-
 # Ion density
 legend = []
 n_D_0=sto_final.eqsys.n_i['D'][0][:]
@@ -242,7 +213,7 @@ plt.plot(sto_final.grid.t[:],n_D_0,'b-')
 n_D_1=sto_final.eqsys.n_i['D'][1][:]
 plt.plot(sto_final.grid.t[:],n_D_1,'b--')
 legend.append('n_D_1')
-
+#'''
 n_O_0=sto_final.eqsys.n_i['O'][0][:]
 legend.append('n_O_0')
 plt.plot(sto_final.grid.t[:],n_O_0,'r-')
@@ -264,7 +235,7 @@ for i in range(2,7):
     n_C_i=sto_final.eqsys.n_i['C'][i][:]
     legend.append('n_C_'+str(i))
     plt.plot(sto_final.grid.t[:],n_C_i,'y:')
-
+#'''
 plt.xlabel('Time [s]')
 plt.ylabel('Ion density [m$^{-3}$]')
 fontP = FontProperties()
@@ -272,6 +243,27 @@ fontP.set_size('x-small')
 plt.legend(legend,prop=fontP)
 #plt.xlim(0,0.12)
 plt.show()
+
+n_D_0 = np.array(n_D_0).flatten()
+dnD0_idt = np.gradient(n_D_0)
+#'''
+n_O_0 = np.array(n_O_0).flatten()
+dnO0_idt = np.gradient(n_O_0)
+n_C_0 = np.array(n_C_0).flatten()
+dnC0_idt = np.gradient(n_C_0)
+#'''
+plt.plot(sto_final.grid.t[:], dnD0_idt)
+plt.plot(sto_final.grid.t[:], dnO0_idt)
+plt.plot(sto_final.grid.t[:], dnC0_idt)
+plt.plot(np.linspace(0,tMax_final,2),np.linspace(0,0,2),'k')
+plt.xlabel('Time [s]')
+plt.ylabel('Derivative of ion density [m$^{-3}$]')
+#fontP = FontProperties()
+#fontP.set_size('x-small')
+plt.legend(['dn_D_0/dt','dn_O_0/dt','dn_C_0/dt'],prop=fontP)
+#plt.xlim(0,0.12)
+plt.show()
+
 
 # Total amount of deuterium ions
 legend = []
@@ -281,7 +273,7 @@ plt.plot(sto_final.grid.t[1:],N_D_0,'b-')
 N_D_1=sto_final.eqsys.n_i['D'][1][1:]*sto_final.other.stream.V_p[:]
 plt.plot(sto_final.grid.t[1:],N_D_1,'b--')
 legend.append('N_D_1')
-
+#'''
 N_O_0=sto_final.eqsys.n_i['O'][0][1:]*sto_final.other.stream.V_n_tot['O'][:]
 legend.append('N_O_0')
 plt.plot(sto_final.grid.t[1:],N_O_0,'r-')
@@ -303,7 +295,7 @@ for i in range(2,7):
     N_C_i=sto_final.eqsys.n_i['C'][i][1:]*sto_final.other.stream.V_p[:]
     legend.append('N_C_'+str(i))
     plt.plot(sto_final.grid.t[1:],N_C_i,'y:')
-
+#'''
 plt.xlabel('Time [s]')
 plt.ylabel('Total amount of ions per state')
 fontP = FontProperties()
@@ -319,7 +311,7 @@ N_D_1=sto_final.eqsys.n_i['D'][1][1:]*sto_final.other.stream.V_p[:]
 N_D=N_D_0+N_D_1
 plt.plot(sto_final.grid.t[1:],N_D,'b-')
 legend.append('N_D')
-
+#'''
 N_O_0=sto_final.eqsys.n_i['O'][0][1:]*sto_final.other.stream.V_n_tot['O'][:]
 N_O_1=sto_final.eqsys.n_i['O'][1][1:]*sto_final.other.stream.V_p[:]
 N_O=N_O_0+N_O_1
@@ -335,7 +327,7 @@ for i in range(2,7):
     N_C+=sto_final.eqsys.n_i['C'][i][1:]*sto_final.other.stream.V_p[:]
 legend.append('N_C')
 plt.plot(sto_final.grid.t[1:],N_C,'y-')
-
+#'''
 plt.xlabel('Time [s]')
 plt.ylabel('Total amount of ions per species')
 fontP = FontProperties()
@@ -348,7 +340,7 @@ plt.show()
 N_D_0=sto_final.eqsys.n_i['D'][0][1:]*sto_final.other.stream.V_n_tot['D'][:]#np.transpose(np.array([np.newaxis]))
 N_D_1=sto_final.eqsys.n_i['D'][1][1:]*sto_final.other.stream.V_p[:]
 N= N_D_0+N_D_1
-
+#'''
 N_O_0=sto_final.eqsys.n_i['O'][0][1:]*sto_final.other.stream.V_n_tot['O'][:]
 N_O_1=sto_final.eqsys.n_i['O'][1][1:]*sto_final.other.stream.V_p[:]
 N+=N_O_0+N_O_1
@@ -360,7 +352,7 @@ N_C_1=sto_final.eqsys.n_i['C'][1][1:]*sto_final.other.stream.V_p[:]
 N += N_C_0 + N_C_1
 for i in range(2,7):
     N+=sto_final.eqsys.n_i['C'][i][1:]*sto_final.other.stream.V_p[:]
-
+#'''
 plt.plot(sto_final.grid.t[1:],N)
 
 plt.xlabel('Time [s]')

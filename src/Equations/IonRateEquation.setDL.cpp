@@ -40,8 +40,8 @@
             // d/dlambda_i(Positive charge-exchange term)
             if (this->includeChargeExchange) {
                 ADASRateInterpolator *ccdIon = GetCCD(iIon);
-                real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*nr+ir];
-                real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*nr+ir];
+                real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*Nr+ir];
+                real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*Nr+ir];
                 real_t TA;
                 if (NA <= 0) TA = 0;
                 else TA = 2.0/3.0 * WA / (DREAM::Constants::ec*NA);
@@ -71,7 +71,7 @@
 
                                 // D-T term (absent in DYON)
                                 if (Zi == 1)
-                                    NI_Z(DOffset+Z0, 0, Rcx_ion * dV_n/V_p * nions[(IonOffset+0)*Nr+ir]);
+                                    NI_Z(iIon, 0, Rcx_ion * dV_n/V_p * nions[(IonOffset+0)*Nr+ir]);
                             }
                         }
                     }
@@ -123,8 +123,8 @@
 
                                 // D-T CX term (absent in DYON)
                                 if (Zi == 1) {
-                                    NI_Z(DOffset, +1, -Rcx_ion * V_n_iz * dV_n_tot/(V_n_tot*V_n_tot) * nions[(IonOffset+Z0i)*Nr+ir]);
-                                    NI_Z(iz+Z0i, +1, Rcx_ion * dV_n_iz/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir]);
+                                    NI_Z(iIon, +1, -Rcx_ion * V_n_iz * dV_n_tot/(V_n_tot*V_n_tot) * nions[(IonOffset+Z0i)*Nr+ir]);
+                                    NI_Z(iz, +1, Rcx_ion * dV_n_iz/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir]);
                                 }
                             }
                         }

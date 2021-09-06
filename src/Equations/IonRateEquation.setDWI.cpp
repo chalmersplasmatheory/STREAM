@@ -18,8 +18,8 @@
     // Positive charge-exchange term
         if (this->includeChargeExchange) {
             ADASRateInterpolator *ccdIon = GetCCD(iIon);
-            real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*nr+ir];
-            real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*nr+ir];
+            real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*Nr+ir];
+            real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*Nr+ir];
             real_t TA;
             if (NA <= 0) TA = 0;
             else TA = 2.0/3.0 * WA / (DREAM::Constants::ec*NA);
@@ -45,22 +45,23 @@
                                 continue;
 
                             Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
+                            
                             real_t PartialTRcx = ccd->Eval_deriv_T(Z0i-1, ni, Ti); //Evaluate cx-coeff. for the charge state
-
+                            
                             if (Z0 == 0) {
                                 // Apply to neutral deuterium (Z0=0)
-                                NI_Z(IonOffset+Z0i, 0, -PartialTRcx * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir]); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
+                                NI_Z(iz, 0, -PartialTRcx * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir]); //First argument is 0 since we want the neutral density for D/T (and we have Z0=0 here)
 
                                 // D-T term (absent in DYON)
                                 if (Zi == 1)
-                                    NI_Z(DOffset+Z0, 1, PartialTRcx_ion * 2.0/(3.0*N_i[iIon*Nr+ir]) * V_n_iz/V_n_tot * nions[(IonOffset+Z0i)*Nr+ir]);
+                                    NI_Z(iIon, 1, PartialTRcx_ion * 2.0/(3.0*N_i[iIon*Nr+ir]) * V_n_iz/V_n_tot * nions[(IonOffset+0)*Nr+ir]);
                             } else if (Z0 == 1) {
                                 // Apply to neutral deuterium (Z0-1 = 0)
-                                NI_Z(IonOffset+Z0i, -1, PartialTRcx * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir]); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
+                                NI_Z(iz, -1, PartialTRcx * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir]); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
 
                                 // D-T term (absent in DYON)
                                 if (Zi == 1)
-                                    NI_Z(DOffset+Z0, 0, PartialTRcx_ion * 2.0/(3.0*N_i[iIon*Nr+ir]) * V_n/V_p * nions[(IonOffset+Z0i)*Nr+ir]);
+                                    NI_Z(iIon, 0, PartialTRcx_ion * 2.0/(3.0*N_i[iIon*Nr+ir]) * V_n/V_p * nions[(IonOffset+0)*Nr+ir]);
                             }
                         }
                     }
@@ -77,9 +78,9 @@
                     
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
                     if (Z0 == 0){
-                        NI(+1, PartialTRcx_ion * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n_D/V_n_tot * nions[Doffset*Nr + ir]); 
+                        NI_Z(iIon,+1, PartialTRcx_ion * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n_D/V_n_tot * nions[Doffset*Nr + ir]); 
                     }else{
-                        NI(+1, PartialTRcx_ion * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n_D/V_p * nions[Doffset*Nr + ir]);
+                        NI_Z(iIon,+1, PartialTRcx_ion * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n_D/V_p * nions[Doffset*Nr + ir]);
                     }
                 }
             }
@@ -95,7 +96,7 @@
                         continue;
                     const len_t Doffset = ions->GetIndex(iz,0); //Get index of neutral state of D
                     const real_t V_n_D = this->volumes->GetNeutralVolume(iz); 
-                    NI(0, -PartialTRcx_ion * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n_D/V_p * nions[Doffset*Nr + ir]); 
+                    NI_Z(iIon, 0, -PartialTRcx_ion * 2.0/(3.0*N_i[iz*Nr+ir]) * V_n_D/V_p * nions[Doffset*Nr + ir]); 
                     
                 }
             }
