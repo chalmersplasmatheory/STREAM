@@ -88,10 +88,13 @@ class ADASRate:
         """
         Evaluate this rate for the named element and charge state.
         """
+        if n <= 0:
+            return 0
+
         r = self.elements[name]['rates'][Z0]
 
         if r is None:
-            raise ValueError(f"Cannot evaluate ADAS rate {self.name} for Z0 = {Z0}.")
+            raise ValueError(f"Cannot evaluate ADAS rate {self.name} for '{name}' with Z0 = {Z0}.")
 
         ln, lT = np.log10(n), np.log10(T)
         exp = r(ln, lT)

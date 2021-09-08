@@ -166,6 +166,28 @@ class SimulationResult:
         plt.show()
 
 
+    def plotIonDensity(self, ion='D'):
+        """
+        Plot charge state density evolution for the named ion species.
+        """
+        fig, axs = plt.subplots(1,1)
+
+        uqh = self.simulation.unknowns
+        _ion = self.simulation.ions[ion]
+
+        ni = self.x[f'ni{ion}']
+
+        for Z0 in range(0, _ion['Z']+1):
+            lbl = ion + f'{Z0}'
+            if Z0 > 0: lbl += '+'
+
+            axs.plot(self.t, ni[Z0], label=lbl)
+
+        axs.legend(frameon=False)
+
+        return axs
+
+
     def plotQuantity(self, data, ax=None, title=None, *args, **kwargs):
         """
         Plot a named unknown quantity.

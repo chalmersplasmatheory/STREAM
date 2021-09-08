@@ -28,7 +28,7 @@ def evalResistance(quantities):
     """
     """
     R = quantities.plasmavolume.R
-    a = quantities.plasmavolume.a
+    a = quantities.plasmavolume.a(quantities.t)
 
     sg = evalConductivity(quantities)
     Rp = 2*R/a**2 * (1/sg)
@@ -40,7 +40,7 @@ def evalResistance(quantities):
     Z = quantities.getZeff()
 
     R = quantities.plasmavolume.R
-    a = quantities.plasmavolume.a
+    a = quantities.plasmavolume.a(quantities.t)
 
     return 2*R/a**2 * evaluateDYONResistivity(n=n, T=T, Z=Z)
 

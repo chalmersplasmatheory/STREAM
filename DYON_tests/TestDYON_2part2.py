@@ -14,7 +14,7 @@ import DREAM.Settings.Solver as Solver
 import DREAM.Settings.CollisionHandler as Collisions
 import DREAM.Settings.Equations.ColdElectrons as ColdElectrons
 import DREAM.Settings.Equations.ColdElectronTemperature as ColdElectronTemperature
-import DREAM.Settings.Equations.ElectricField as ElectricField
+import DREAM.Settings.Equations.ElectricField as ElectricField_D
 import DREAM.Settings.Equations.DistributionFunction as DistFunc
 
 sys.path.append('../py/')
@@ -36,7 +36,7 @@ import numpy as np
 tMax_initial = 1e-4  # simulation time in seconds
 Nt_initial   = 2000   # number of time steps
 tMax_final   = 3e-1  # simulation time in seconds
-Nt_final     = 1e4*tMax_final   # number of time steps
+Nt_final     = 5e3*tMax_final   # number of time steps
 
 pgp = 2.7e-3
 n_D_0 = 4.8e20 * pgp
@@ -88,13 +88,13 @@ E_initial = J/sigma
 
 sts_initial = STREAMSettings()
 
-wall_time = L/R
+wall_time = L/R*0.3
 print('wall_time = {} s'.format(wall_time))
 
 print(str(r_wall))
 #sts_initial.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
 #sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
-#sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
+#sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
 sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
 sts_initial.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)

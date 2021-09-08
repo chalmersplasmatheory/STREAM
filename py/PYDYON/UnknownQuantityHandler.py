@@ -16,6 +16,7 @@ class UnknownQuantityHandler:
         """
         Constructor.
         """
+        self.t = None
         self.x = None
         self.plasmavolume = plasmavolume
         self.ions = ions
@@ -155,7 +156,7 @@ class UnknownQuantityHandler:
         Te = self['Te']
         Ti = self['Ti']
 
-        return self.plasmavolume.getV_n(ion, ne=ne, Te=Te, Ti=Ti)
+        return self.plasmavolume.getV_n(self.t, ion, ne=ne, Te=Te, Ti=Ti)
     
 
     def getTotalNeutralVolume(self, ion):
@@ -166,14 +167,14 @@ class UnknownQuantityHandler:
         Te = self['Te']
         Ti = self['Ti']
 
-        return self.plasmavolume.getV_n_tot(ion, ne=ne, Te=Te, Ti=Ti)
+        return self.plasmavolume.getV_n_tot(self.t, ion, ne=ne, Te=Te, Ti=Ti)
 
 
     def getPlasmaVolume(self):
         """
         Returns the plasma volume V_p.
         """
-        return self.plasmavolume.getV_p()
+        return self.plasmavolume.getV_p(self.t)
 
 
     def getZeff(self):
@@ -193,10 +194,11 @@ class UnknownQuantityHandler:
         return Zup / Zdn
 
 
-    def update(self, x):
+    def update(self, t, x):
         """
         Set new data for the unknown quantities.
         """
+        self.t = t
         self.x = x
 
 
@@ -268,14 +270,14 @@ class UnknownQuantityHandler:
             else:
                 x[self.map[k]] = v
 
-        self.update(x)
+        self.update(t=0, x=x)
 
         if Te is not None:
             x[self.map['We']] = 3/2 * e*Te * self['ne']
         if Ti is not None:
             x[self.map['Wi']] = 3/2 * e*Ti * self.getTotalIonDensity()
 
-        self.update(x)
+        self.update(t=0, x=x)
 
         return x
 

@@ -1,6 +1,8 @@
 # Main equation solver of PYDYON
 
 
+import numpy as np
+import sys
 from scipy.integrate import solve_ivp
 from . IonHandler import IonHandler
 from . PlasmaVolume import PlasmaVolume
@@ -101,26 +103,26 @@ class Simulation:
         # Ion equations
         Dizcx0  = DeuteriumAtomBalance(self.unknowns, self.ions)
         Dizcx1  = DeuteriumIonBalance(self.unknowns, self.ions)
-        Din     = DeuteriumInflux(self.unknowns, self.ions, simple=True, **tausettings)
-        itransp = IonTransport(self.unknowns, self.ions, **tausettings)
+        Din     = DeuteriumInflux(self.unknowns, self.ions, simple=False, **tausettings)
+        Itransp = IonTransport(self.unknowns, self.ions, **tausettings)
         Iizcx   = IonParticleBalance(self.unknowns, self.ions)
         Iin     = IonInflux(self.unknowns, self.ions, **tausettings)
 
-        self._terms.extend((Dizcx0, Dizcx1, Din, itransp, Iizcx, Iin))
+        self._terms.extend((Dizcx0, Dizcx1, Din, Itransp, Iizcx, Iin))
         for ion in self.ions:
             A = ion['name']
             Z = ion['Z']
 
             if A == 'D':
                 eqsys[i('niD_0')] = lambda t, x : Dizcx0(t, x) + Din(t, x)
-                eqsys[i('niD_1')] = lambda t, x : Dizcx1(t, x) - itransp(t, x, 'D', Z0=1)
+                eqsys[i('niD_1')] = lambda t, x : Dizcx1(t, x) - Itransp(t, x, 'D', Z0=1)
             else:
                 # Add neutral equations
-                for Z0 in range(1, Z+1):
+                for Z0 in range(0, Z+1):
                     if Z0 == 0:
-                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(t, x, A, Z0) + Iin(t, x, A)
+                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x, A=A, Z0=Z0 : Iizcx(t, x, A, Z0) + Iin(t, x, A)
                     else:
-                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x : Iizcx(t, x, A, Z0) - Itransp(t, x, A, Z0=Z0)
+                        eqsys[i(f'ni{A}_{Z0}')] = lambda t, x, A=A, Z0=Z0 : Iizcx(t, x, A, Z0) - Itransp(t, x, A, Z0=Z0)
 
         atol = [0.0] * len(eqsys)
 
@@ -154,9 +156,10 @@ class Simulation:
 
         def dydt(t, x):
             print(f't = {t} s')
-            self.unknowns.update(x)
+            self.unknowns.update(t, x)
             return [f(t,x) for f in equations]
 
+        #sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x)
         sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x, method='Radau')
         
         return SimulationResult(sol.t, self.unknowns.getdict(x=sol.y), simulation=self)
