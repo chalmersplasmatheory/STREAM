@@ -34,7 +34,7 @@ import numpy as np
 #Np   = 300  # number of momentum grid points
 #Nxi  = 20   # number of pitch grid points
 tMax_initial = 1e-4  # simulation time in seconds
-Nt_initial   = 4000   # number of time steps
+Nt_initial   = 2000   # number of time steps
 tMax_final   = 3e-1  # simulation time in seconds
 Nt_final     = 1e4*tMax_final   # number of time steps
 
@@ -63,7 +63,7 @@ a = a_fun(t)
 
 kappa    = 1
 c1       = 1.1
-c2       = 0.09
+c2       = 0.05
 c3       = 0.1
 
 R = 7.5e-4  # Ohm, i MK2 struktur

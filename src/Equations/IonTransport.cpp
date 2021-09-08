@@ -47,7 +47,7 @@ void IonTransport::Rebuild(
     real_t dtauinvdTcold = this->coefftauinv->EvaluateConfinementTime_dTcold(0); 
     real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(0); 
     real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(0);
-    real_t V_p    = PV->GetPlasmaVolume(); 
+    
     this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
     this->dn_i    = - tauinv; 
     this->dI_p    = - dtauinvdIp;
