@@ -65,6 +65,34 @@ class SimulationResult:
         plt.tight_layout()
         plt.show()
 
+    def plotJET(self):
+        """
+        Plot a summary of the results.
+        """
+        fig, axs = plt.subplots(3, 2, figsize=(10, 6))
+
+        self.plotQuantity('Ip', axs[0,0], color='k', title='Plasma current', axis=[0,0.3,0,6e5])
+        self.plotQuantity('Te', axs[1, 0], color='k', title='Electron temperature', axis=[0,0.3,0,400])
+        self.plotQuantity('Ti', axs[2, 0], color='k', title='Ion temperature', axis=[0,0.3,0,400])
+        self.plotQuantity('ne', axs[0,1], color='k', title='Electron density', axis=[0,0.3,0,6e18])
+
+        #nD = self.x['niD']
+        #self.plotQuantity(nD[0], axs[1,0], color='k', label='D-0', title='Deuterium')
+        #self.plotQuantity(nD[1], axs[1,0], color='r', label='D-1')
+        #axs[1,0].set_ylabel('nD')
+        #axs[1,0].legend()
+
+
+        #self.plotQuantity('IMK2', axs[1,2], color='k', title='MK2 current')
+
+        #gamma_i = self.x['ne'] / (nD[0] + self.x['ne'])
+        #self.plotQuantity(gamma_i*100, axs[1,2], color='k', title='Ionization fraction')
+        #axs[1,2].set_ylabel(r'\%')
+        #axs[1,2].set_ylim([0, 105])
+
+        plt.tight_layout()
+        plt.show()
+
 
     def plotKimThesis45(self):
         """
@@ -188,7 +216,7 @@ class SimulationResult:
         return axs
 
 
-    def plotQuantity(self, data, ax=None, title=None, *args, **kwargs):
+    def plotQuantity(self, data, ax=None, title=None, axis=None, *args, **kwargs):
         """
         Plot a named unknown quantity.
         """
@@ -208,6 +236,10 @@ class SimulationResult:
 
         if title is not None:
             ax.set_title(title)
+
+        if axis is not None:
+            ax.set_xlim([axis[0],axis[1]])
+            ax.set_ylim([axis[2], axis[3]])
 
         return ax
 
