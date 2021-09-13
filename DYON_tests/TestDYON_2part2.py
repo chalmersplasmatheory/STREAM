@@ -61,6 +61,7 @@ a_vec = np.sqrt(V_p/(2*np.pi**2*r_0))
 a_fun = interp1d(t_a, a_vec, kind='cubic')
 a = a_fun(t)
 
+
 kappa    = 1
 c1       = 1.1
 c2       = 0.05
@@ -143,7 +144,7 @@ sts_initial.solver.preconditioner.setEnabled(False)
 
 sts_initial.other.include('fluid', 'stream', 'scalar')
 
-sts_initial.save('STREAMSettings_initial.h5')
+sts_initial.save('settings_initial.h5')
 
 
 
@@ -159,7 +160,7 @@ sts_final.timestep.setNt(Nt_final)
 
 sts_final.fromOutput('output_initial.h5')
 sts_final.output.setFilename('output_final.h5')
-sts_final.save('STREAMSettings_final.h5')
+sts_final.save('settings_final.h5')
 
 sto_final = runiface(sts_final, 'output_final.h5',
                         quiet=False)

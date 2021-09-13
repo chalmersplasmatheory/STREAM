@@ -2,12 +2,13 @@
 
 from . ADAS import ADAS
 import numpy as np
+import scipy.interpolate
 import scipy.constants
 
 
 class PlasmaVolume:
 
-    def __init__(self, a, R, V_vessel, ions, kappa=1):
+    def __init__(self, a, R, V_vessel, ions, kappa=1, t=None):
         """
         Constructor.
 
@@ -19,7 +20,9 @@ class PlasmaVolume:
         """
         self.adas = ADAS()
 
-        if not callable(a):
+        if not isinstance(a,list):
+            self.a = scipy.interpolate.interp1d(t, a)
+        elif not callable(a):
             self.a = lambda t : a
         else:
             self.a = a

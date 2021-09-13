@@ -49,6 +49,7 @@ TERMS = {
 # Mapping from STREAMSettings to PYDYON settings.
 SETTINGS = {
     'a': lambda ss : ss.radialgrid.a,
+    'ta': lambda ss : ss.radialgrid.ta,
     'R': lambda ss : ss.radialgrid.R0,
     'V_vessel': lambda ss : ss.radialgrid.vessel_volume,
     'Bphi': lambda ss : ss.radialgrid.B0[0],
@@ -76,7 +77,7 @@ def compareToSTREAM(ss, so, verbose=True):
     ions = IonHandler()
     ions.addIon('D', Z=1)
 
-    pv = PlasmaVolume(a=settings['a'], R=settings['R'], V_vessel=settings['V_vessel'], ions=ions)
+    pv = PlasmaVolume(a=settings['a'], R=settings['R'], V_vessel=settings['V_vessel'], ions=ions, t=settings['ta'])
 
     # Construct unknown quantity handler
     unknowns = UnknownQuantityHandler(ions, pv)
