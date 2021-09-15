@@ -35,8 +35,8 @@ import numpy as np
 #Nxi  = 20   # number of pitch grid points
 tMax_initial = 1e-4  # simulation time in seconds
 Nt_initial   = 2000   # number of time steps
-tMax_final   = 3e-1  # simulation time in seconds
-Nt_final     = 5e3*tMax_final   # number of time steps
+tMax_final   = 3e-1-tMax_initial  # simulation time in seconds
+Nt_final     = 15e3*tMax_final   # number of time steps
 
 pgp = 2.7e-3
 n_D_0 = 4.8e20 * pgp
@@ -156,7 +156,10 @@ sts_final = STREAMSettings(sts_initial)
 #sts_final.eqsys.E_field.setBoundaryCondition(ElectricField.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
 sts_final.timestep.setTmax(tMax_final)
 sts_final.timestep.setNt(Nt_final)
+sts_final.timestep.setNumberOfSaveSteps(1000)
 #sts_final.solver.setDebug(saveresidual=True, timestep=0, iteration=0)
+
+sts_final.radialgrid.setMinorRadius(a, t=t-sto_initial.grid.t[-1])
 
 sts_final.fromOutput('output_initial.h5')
 sts_final.output.setFilename('output_final.h5')

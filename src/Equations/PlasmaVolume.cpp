@@ -17,13 +17,13 @@ using namespace DREAM;
     }
     
     real_t PlasmaVolume::GetPlasmaVolume() const{
-        return grid->GetVpVol(0) * grid->GetRadialGrid()->GetDr(0) * radials->GetMajorRadius(); 
+        return grid->GetVpVol(0) * radials->GetMinorRadius() * radials->GetMajorRadius(); 
     }
     
     real_t PlasmaVolume::GetNeutralVolume(const len_t iz){ 
         real_t a = radials->GetMinorRadius();       
         real_t lambda_i = unknowns->GetUnknownData(id_lambda_i)[iz];  
-                       
+
         //Eq. 13 in startup-appendix + added triangularity 
         if (lambda_i <= a){
             real_t R0 = radials->GetMajorRadius();
