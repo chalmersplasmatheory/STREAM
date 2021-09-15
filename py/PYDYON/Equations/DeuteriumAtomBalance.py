@@ -52,7 +52,7 @@ class DeuteriumAtomBalance:
             A = ion['name']
             if A == 'D':
                 continue
-            
+
             Z = ion['Z']
             ni = self.quantities.getIonData(A)
 

@@ -8,7 +8,7 @@ import scipy.constants
 
 class PlasmaVolume:
 
-    def __init__(self, a, R, V_vessel, ions, kappa=1, t=None):
+    def __init__(self, a, R, V_vessel, ions, kappa=1, ta=None):
         """
         Constructor.
 
@@ -20,10 +20,10 @@ class PlasmaVolume:
         """
         self.adas = ADAS()
 
-        if not isinstance(a,list):
-            self.a = scipy.interpolate.interp1d(t, a)
+        if isinstance(a,np.ndarray):
+            self.a = scipy.interpolate.interp1d(ta, a)
         elif not callable(a):
-            self.a = lambda t : a
+            self.a = lambda ta : a
         else:
             self.a = a
 

@@ -22,6 +22,7 @@ class Simulation:
     settings = {
         # Tokamak parameters
         'a': 0.5,           # Minor radius (m)
+        'ta': None,         # Time for minor radius array (s)
         'R': 3,             # Major radius (m)
         'V_vessel': 100,    # Vessel volume (m^3)
         'Bphi': 2.3,        # Toroidal magnetic field (T)
@@ -141,7 +142,7 @@ class Simulation:
 
         s = self.settings
 
-        pv = PlasmaVolume(a=s['a'], R=s['R'], V_vessel=s['V_vessel'], ions=self.ions)
+        pv = PlasmaVolume(a=s['a'], R=s['R'], V_vessel=s['V_vessel'], ions=self.ions, ta=s['ta'])
         self.unknowns = UnknownQuantityHandler(self.ions, pv)
         self.unknowns.setvector(values)
 
