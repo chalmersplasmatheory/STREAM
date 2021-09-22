@@ -30,9 +30,9 @@ TERMS = {
     #'LambdaO': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh: pv.getLambda('O', uqh['ne'], uqh['Te'], uqh['Ti']), 'stream': lambda so: so.eqsys.lambda_i['O'][1:,0]},
 
     #'Radiated power': { 'pydyon': RadiatedPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_radiation[:,0] },
-    #'D Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['D'][:-1]/so.eqsys.N_i['D'][:-1]/1.60217662e-19 },
-    #'C Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['C'][:-1]/so.eqsys.N_i['C'][:-1]/1.60217662e-19 },
-    #'O Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['O'][:-1]/so.eqsys.N_i['O'][:-1]/1.60217662e-19 },
+    #'D Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['D'][1:]/so.eqsys.N_i['D'][1:]/1.60217662e-19 },
+    #'C Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['C'][1:]/so.eqsys.N_i['C'][1:]/1.60217662e-19 },
+    #'O Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['O'][1:]/so.eqsys.N_i['O'][1:]/1.60217662e-19 },
 
     #'D-0 density': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalniD(t, x)[0], 'stream': lambda so : so.eqsys.n_i['D'][0][1:]},
     #'D-1 density': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalniD(t, x)[1], 'stream': lambda so : so.eqsys.n_i['D'][1][1:]},
@@ -138,7 +138,7 @@ def compareToSTREAM(ss, so, verbose=True):
             ax = fig.add_subplot(111)
             ax.plot(t, stream, 'k', label='STREAM')
             ax.plot(t, pydyon, 'r--', label='PYDYON')
-            #ax.plot(t, stream/pydyon, 'k')
+            #ax.plot(t, stream.flatten()/pydyon.flatten(), 'k')
             ax.set_xlabel('Time (s)')
             ax.set_title(name)
             ax.set_xlim([0, t[-1]])
@@ -236,7 +236,7 @@ def _evaluateTerm(so, term, unknowns, ions, settings):
     t = so.grid.t[1:]
     y = np.zeros((t.size,))
     for i in range(t.size):
-        x = fromSTREAM(so, unknowns, time=i)
+        x = fromSTREAM(so, unknowns, time=i+1)
 
         if 'eval' in term:
             y[i] = term['eval'](obj, t[i], x, unknowns)

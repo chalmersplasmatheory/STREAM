@@ -149,17 +149,6 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
                 if (this->stream_terms->Wi_iontransport[iZ] != nullptr)
                     this->stream_terms->Wi_iontransport[iZ]->SetVectorElements(v, nions);
             }
-            
-            /*const real_t *W = this->unknowns->GetUnknownData(DREAM::OptionConstants::UQTY_WI_ENER);
-            real_t sum=0;
-            for (len_t i = 0; i < nZ; i++){
-                sum = sum+v[i];
-                printf("%e, ", W[i]);
-            }
-            printf("\n%e\n",sum);
-            real_t tauinv=this->confinementTime->EvaluateConfinementTime(0);
-            printf("%e\n", tauinv);
-//            const real_t *N = this->unkowns->GetUnknowndata(DREAM::OptionConstants::UQTY_NI_DENS);*/
         );
     }
 

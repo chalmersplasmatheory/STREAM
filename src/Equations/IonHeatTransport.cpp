@@ -70,6 +70,11 @@ bool IonHeatTransport::SetCSJacobianBlock(
     const len_t, const len_t derivId, FVM::Matrix *jac, const real_t*,
     const len_t iIon, const len_t Z0, const len_t rOffset
 ) { 
+    // W_i has no charge-state resolution, so we only add
+    // any elements on Z0=0.
+    if (Z0 > 0)
+        return false;
+
     if(derivId==id_Ip){
 		jac->SetElement(iIon, 0,this->dI_p);
 		return true;
@@ -100,6 +105,11 @@ void IonHeatTransport::SetCSMatrixElements(
 void IonHeatTransport::SetCSVectorElements(
     real_t* vec, const real_t*, const len_t, const len_t Z0, const len_t rOffset
 ) {
+    // W_i has no charge-state resolution, so we only add
+    // any elements on Z0=0.
+    if (Z0 > 0)
+        return;
+
     vec[iIon]-= W_i * tauinv;
 }
 
