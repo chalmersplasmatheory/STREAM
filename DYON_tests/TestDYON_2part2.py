@@ -5,6 +5,7 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+import scipy.constants
 from matplotlib.font_manager import FontProperties
 from PlasmaParameters import evaluateSpitzerConductivity
 
@@ -28,7 +29,6 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 
 # Grid parameters
 #Ändra?
-import numpy as np
 
 #pMax = 1    # maximum momentum in units of m_e*c
 #Np   = 300  # number of momentum grid points
@@ -39,15 +39,15 @@ tMax_final   = 3e-1-tMax_initial  # simulation time in seconds
 Nt_final     = 15e3*tMax_final   # number of time steps
 
 pgp = 2.7e-3
-n_D_0 = 4.8e20 * pgp
-n_D_1 = 0.002*n_D_0
+gamma_i = 2e-3      # Ionization fraction
+n_D_tot = 4.8e20 * pgp
 n_D = np.zeros((2,1))
 #print(str(n_D))
-n_D[0]=n_D_0
-n_D[1]=n_D_1
+n_D[0]=n_D_tot*(1-gamma_i)
+n_D[1]=n_D_tot*gamma_i
 
 n_C = 0
-n_O = 0.001 * n_D_0
+n_O = 0.001 * n_D_tot
 
 V_vessel = 100
 B        = 2.4
@@ -69,12 +69,13 @@ c3       = 0.1
 
 R = 7.5e-4  # Ohm, i MK2 struktur
 L = 9.1e-6  # H, i MK2 struktur
+Lp = scipy.constants.mu_0*r_0*(np.log(8*R0/a(0)) + 0.5 - 2)
 
 r=np.array([0])
 
-t_d = np.array([0, 0.003, 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ])
-V_d = np.array([0,    11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60])
-V_s = interp1d(t_d, V_d, kind='linear')
+t_Vloop = [0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ]
+d_Vloop = [11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60]
+V_s = interp1d(t_Vloop, d_Vloop, kind='linear')
 V_loop_wall = V_s(t)
 
 T_e_initial = 1
@@ -98,7 +99,7 @@ print(str(r_wall))
 #sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
 sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
-sts_initial.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
+sts_initial.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
 sts_initial.eqsys.E_field.setCircuitVloop(V_loop_wall, t)
 
 sts_initial.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)

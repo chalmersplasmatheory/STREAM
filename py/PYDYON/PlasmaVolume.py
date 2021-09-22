@@ -20,7 +20,7 @@ class PlasmaVolume:
         """
         self.adas = ADAS()
 
-        if isinstance(a,np.ndarray):
+        if isinstance(a,np.ndarray) and a.size > 1:
             self.a = scipy.interpolate.interp1d(ta, a, bounds_error=False, fill_value="extrapolate")
         elif not callable(a):
             self.a = lambda ta : a

@@ -20,14 +20,14 @@ TERMS = {
     # Volume terms
     'Plasma volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, x, _ : pv.getV_p(t),'stream': lambda so: so.other.stream.V_p[:].flatten()},
     'D neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n(t, 'D', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n['D'][:].flatten()},
-    'C neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n(t, 'C', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n['C'][:].flatten()},
-    'O neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n(t, 'O', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n['O'][:].flatten()},
+    #'C neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n(t, 'C', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n['C'][:].flatten()},
+    #'O neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n(t, 'O', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n['O'][:].flatten()},
     'D total neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n_tot(t, 'D', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n_tot['D'][:].flatten()},
-    'C total neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n_tot(t, 'C', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n_tot['C'][:].flatten()},
-    'O total neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n_tot(t, 'O', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n_tot['O'][:].flatten()},
-    'LambdaD': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getLambda('D', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.eqsys.lambda_i['D'][1:,0]},
-    'LambdaC': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh: pv.getLambda('C', uqh['ne'], uqh['Te'], uqh['Ti']), 'stream': lambda so: so.eqsys.lambda_i['C'][1:,0]},
-    'LambdaO': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh: pv.getLambda('O', uqh['ne'], uqh['Te'], uqh['Ti']), 'stream': lambda so: so.eqsys.lambda_i['O'][1:,0]},
+    #'C total neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n_tot(t, 'C', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n_tot['C'][:].flatten()},
+    #'O total neutral volume': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getV_n_tot(t, 'O', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.other.stream.V_n_tot['O'][:].flatten()},
+    #'LambdaD': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh : pv.getLambda('D', uqh['ne'], uqh['Te'], uqh['Ti']),'stream': lambda so: so.eqsys.lambda_i['D'][1:,0]},
+    #'LambdaC': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh: pv.getLambda('C', uqh['ne'], uqh['Te'], uqh['Ti']), 'stream': lambda so: so.eqsys.lambda_i['C'][1:,0]},
+    #'LambdaO': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh: pv.getLambda('O', uqh['ne'], uqh['Te'], uqh['Ti']), 'stream': lambda so: so.eqsys.lambda_i['O'][1:,0]},
 
     'Radiated power': { 'pydyon': RadiatedPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_radiation[:,0] },
     'Ohmic power': { 'pydyon': OhmicPowerTerm, 'stream': lambda so : -so.other.fluid.Tcold_ohmic[:,0] },
@@ -259,7 +259,7 @@ def fromSTREAM(so, uqh, time=0, ion='D'):
     for ion in so.eqsys.n_i.ions:
         dct[f'ni{ion.name}']=ion.data[time,:,0]
 
-    return uqh.setvector(dct)
+    return uqh.setvector(dct,so.eqsys.grid.t[time])
 
 
 def loadSTREAMSettings(ss):

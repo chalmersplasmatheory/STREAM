@@ -52,7 +52,7 @@ class DeuteriumIonBalance:
             ni = self.quantities.getIonData(A)
 
             for Z0 in range(1,Z+1):
-                Rcx = self.adas.CCD(A, Z0, n=ni[Z0], T=Te)
+                Rcx = self.adas.CCD(A, Z0, n=ni[Z0], T=Ti)
                 cx += Rcx*nD[0] * ni[Z0]
 
         dn = izrec + Vn/Vp * cx

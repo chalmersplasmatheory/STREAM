@@ -32,7 +32,7 @@ class SimulationResult:
                 'IMK2': self.x['IMK2'][i],
                 'niD': self.x['niD'][:,i]
             }
-            x = uqh.setvector(dct)
+            x = uqh.setvector(dct,t=self.t[i])
             val.append(term(self.t[i], x))
 
         return np.array(val)

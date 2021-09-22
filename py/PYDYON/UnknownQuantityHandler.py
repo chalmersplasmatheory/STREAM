@@ -242,7 +242,7 @@ class UnknownQuantityHandler:
         return dct
 
 
-    def setvector(self, dct=None, **kwargs):
+    def setvector(self, dct=None, t=0, **kwargs):
         """
         Converts a dictionary with names for unknowns to a numpy
         array.
@@ -270,14 +270,14 @@ class UnknownQuantityHandler:
             else:
                 x[self.map[k]] = v
 
-        self.update(t=0, x=x)
+        self.update(t=t, x=x)
 
         if Te is not None:
             x[self.map['We']] = 3/2 * e*Te * self['ne']
         if Ti is not None:
             x[self.map['Wi']] = 3/2 * e*Ti * self.getTotalIonDensity()
 
-        self.update(t=0, x=x)
+        self.update(t=t, x=x)
 
         return x
 

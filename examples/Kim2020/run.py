@@ -76,8 +76,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
 
     # Radial grid
     ss.radialgrid.setB0(Btor)
-    #ss.radialgrid.setMinorRadius(a)
-    ss.radialgrid.setMinorRadius([1.9, 1.6, 1.6], [0, 0.1, 100])
+    ss.radialgrid.setMinorRadius(a)
+    #ss.radialgrid.setMinorRadius([1.9, 1.6, 1.6], [0, 0.1, 100])
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(a)
     ss.radialgrid.setVesselVolume(V_vessel)

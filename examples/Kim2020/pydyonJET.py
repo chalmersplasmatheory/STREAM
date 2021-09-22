@@ -9,6 +9,41 @@ import sys
 sys.path.append('../../py')
 
 from PYDYON import Simulation
+from STREAM import STREAMSettings, STREAMOutput
+SETTINGS = {
+    'a': lambda ss : ss.radialgrid.a,
+    'ta': lambda ss : ss.radialgrid.ta,
+    'R': lambda ss : ss.radialgrid.R0,
+    'V_vessel': lambda ss : ss.radialgrid.vessel_volume,
+    'kappa': lambda ss : ss.radialgrid.kappa,
+    'Bphi': lambda ss : ss.radialgrid.B0[0],
+    'Bv': lambda ss : 1e-3,
+    # The following currently only work with the 'TYPE_CIRCUIT' model in STREAM
+    'l_MK2': lambda ss : ss.radialgrid.b,
+    'Vloop': lambda ss : ss.eqsys.E_field.circuit_Vloop if ss.eqsys.E_field.circuit_Vloop.size==1 else scipy.interpolate.interp1d(ss.eqsys.E_field.circuit_Vloop_t, ss.eqsys.E_field.circuit_Vloop),
+    'Lp': lambda ss : ss.eqsys.E_field.circuit_Lp,
+    'LMK2': lambda ss : ss.eqsys.E_field.circuit_Lwall,
+    'M': lambda ss : ss.eqsys.E_field.circuit_M,
+    'RMK2': lambda ss : ss.eqsys.E_field.circuit_Rwall if ss.eqsys.E_field.circuit_Rwall<1 else np.inf,
+    # "simple" neutral deuterium influx
+    'simple': lambda ss : ss.radialgrid.c2==1
+}
+def loadSTREAMSettings(ss):
+    """
+    Convert a STREAMSettings object into a dict with settings
+    for PYDYON.
+    """
+    # Load settings from STREAMSettings object
+    settings = {}
+    for s in SETTINGS.keys():
+        settings[s] = SETTINGS[s](ss)
+
+    return settings
+
+OUTFILE = '2'
+
+ss = STREAMSettings('../../DYON_tests/settings_final.h5')
+so = STREAMOutput('../../DYON_tests/output_final.h5')
 
 
 prefill = 2.7e-3    # Pa
@@ -44,6 +79,10 @@ params = {
     'RMK2': 7.5e-4
 }
 
+print('PYDYON: \n'+str(params)+'\n\n')
+sparam = loadSTREAMSettings(ss)
+print('STREAM: \n'+str(sparam)+'\n\n')
+'''
 sim = Simulation(**params)
 
 sim.addIon('D', 1)
@@ -65,3 +104,4 @@ plt.show()
 solution.plotJET()
 #solution.plotKimThesis45()
 #solution.plotKim2020()
+'''
