@@ -84,7 +84,7 @@ class UnknownQuantityHandler:
             A = ion['name']
             Z = ion['Z']
             ni = self.getIonData(A)
-            
+
             for Z0 in range(1,Z+1):
                 ne += Z0 * ni[Z0]
 

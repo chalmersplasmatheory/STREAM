@@ -54,7 +54,7 @@ class ConfinementTime:
         e    = scipy.constants.e
 
         Beddy = scipy.constants.mu_0 * IMK2 / (np.pi * self.l_MK2)
-        Bz = self.Bv + Beddy
+        Bz = np.sqrt(self.Bv**2 + Beddy**2)
 
         Lf = 0.25*a*Bphi/Bz * np.exp(Ip/Iref)
 

@@ -69,7 +69,8 @@ c3       = 0.1
 
 R = 7.5e-4  # Ohm, i MK2 struktur
 L = 9.1e-6  # H, i MK2 struktur
-Lp = scipy.constants.mu_0*r_0*(np.log(8*R0/a(0)) + 0.5 - 2)
+Lp = scipy.constants.mu_0*r_0*(np.log(8*r_0/a[0]) + 0.5 - 2)
+print(str(Lp))
 
 r=np.array([0])
 
@@ -99,7 +100,7 @@ print(str(r_wall))
 #sts_initial.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER, V_loop_wall_R0=V_loop_wall/r_0, times=t, inverse_wall_time=1/wall_time, R0=r_0)
 sts_initial.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
 sts_initial.eqsys.E_field.setInitialProfile(efield=E_initial)
-sts_initial.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
+sts_initial.eqsys.E_field.setInductances(Lp=5.19e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
 sts_initial.eqsys.E_field.setCircuitVloop(V_loop_wall, t)
 
 sts_initial.eqsys.T_cold.setType(ColdElectronTemperature.TYPE_SELFCONSISTENT)
@@ -209,7 +210,7 @@ axs[2,1].set_xlabel('Time [s]')
 axs[2,1].set_ylabel('Confinement time [s]')
 
 plt.show()
-
+'''
 # Ion density
 legend = []
 n_D_0=sto_final.eqsys.n_i['D'][0][:]
@@ -218,7 +219,7 @@ plt.plot(sto_final.grid.t[:],n_D_0,'b-')
 n_D_1=sto_final.eqsys.n_i['D'][1][:]
 plt.plot(sto_final.grid.t[:],n_D_1,'b--')
 legend.append('n_D_1')
-#'''
+#''' '''
 n_O_0=sto_final.eqsys.n_i['O'][0][:]
 legend.append('n_O_0')
 plt.plot(sto_final.grid.t[:],n_O_0,'r-')
@@ -240,7 +241,7 @@ for i in range(2,7):
     n_C_i=sto_final.eqsys.n_i['C'][i][:]
     legend.append('n_C_'+str(i))
     plt.plot(sto_final.grid.t[:],n_C_i,'y:')
-#'''
+#''' '''
 plt.xlabel('Time [s]')
 plt.ylabel('Ion density [m$^{-3}$]')
 fontP = FontProperties()
@@ -251,12 +252,12 @@ plt.show()
 
 n_D_0 = np.array(n_D_0).flatten()
 dnD0_idt = np.gradient(n_D_0)
-#'''
+#''' '''
 n_O_0 = np.array(n_O_0).flatten()
 dnO0_idt = np.gradient(n_O_0)
 n_C_0 = np.array(n_C_0).flatten()
 dnC0_idt = np.gradient(n_C_0)
-#'''
+#''' '''
 plt.plot(sto_final.grid.t[:], dnD0_idt)
 plt.plot(sto_final.grid.t[:], dnO0_idt)
 plt.plot(sto_final.grid.t[:], dnC0_idt)
@@ -278,7 +279,7 @@ plt.plot(sto_final.grid.t[1:],N_D_0,'b-')
 N_D_1=sto_final.eqsys.n_i['D'][1][1:]*sto_final.other.stream.V_p[:]
 plt.plot(sto_final.grid.t[1:],N_D_1,'b--')
 legend.append('N_D_1')
-#'''
+#''' '''
 N_O_0=sto_final.eqsys.n_i['O'][0][1:]*sto_final.other.stream.V_n_tot['O'][:]
 legend.append('N_O_0')
 plt.plot(sto_final.grid.t[1:],N_O_0,'r-')
@@ -300,7 +301,7 @@ for i in range(2,7):
     N_C_i=sto_final.eqsys.n_i['C'][i][1:]*sto_final.other.stream.V_p[:]
     legend.append('N_C_'+str(i))
     plt.plot(sto_final.grid.t[1:],N_C_i,'y:')
-#'''
+#''' '''
 plt.xlabel('Time [s]')
 plt.ylabel('Total amount of ions per state')
 fontP = FontProperties()
@@ -316,7 +317,7 @@ N_D_1=sto_final.eqsys.n_i['D'][1][1:]*sto_final.other.stream.V_p[:]
 N_D=N_D_0+N_D_1
 plt.plot(sto_final.grid.t[1:],N_D,'b-')
 legend.append('N_D')
-#'''
+#''' '''
 N_O_0=sto_final.eqsys.n_i['O'][0][1:]*sto_final.other.stream.V_n_tot['O'][:]
 N_O_1=sto_final.eqsys.n_i['O'][1][1:]*sto_final.other.stream.V_p[:]
 N_O=N_O_0+N_O_1
@@ -332,7 +333,7 @@ for i in range(2,7):
     N_C+=sto_final.eqsys.n_i['C'][i][1:]*sto_final.other.stream.V_p[:]
 legend.append('N_C')
 plt.plot(sto_final.grid.t[1:],N_C,'y-')
-#'''
+#''' '''
 plt.xlabel('Time [s]')
 plt.ylabel('Total amount of ions per species')
 fontP = FontProperties()
@@ -345,7 +346,7 @@ plt.show()
 N_D_0=sto_final.eqsys.n_i['D'][0][1:]*sto_final.other.stream.V_n_tot['D'][:]#np.transpose(np.array([np.newaxis]))
 N_D_1=sto_final.eqsys.n_i['D'][1][1:]*sto_final.other.stream.V_p[:]
 N= N_D_0+N_D_1
-#'''
+#''' '''
 N_O_0=sto_final.eqsys.n_i['O'][0][1:]*sto_final.other.stream.V_n_tot['O'][:]
 N_O_1=sto_final.eqsys.n_i['O'][1][1:]*sto_final.other.stream.V_p[:]
 N+=N_O_0+N_O_1
@@ -357,7 +358,7 @@ N_C_1=sto_final.eqsys.n_i['C'][1][1:]*sto_final.other.stream.V_p[:]
 N += N_C_0 + N_C_1
 for i in range(2,7):
     N+=sto_final.eqsys.n_i['C'][i][1:]*sto_final.other.stream.V_p[:]
-#'''
+#''' '''
 plt.plot(sto_final.grid.t[1:],N)
 
 plt.xlabel('Time [s]')

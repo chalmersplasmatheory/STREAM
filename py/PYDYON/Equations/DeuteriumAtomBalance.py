@@ -75,10 +75,18 @@ class DeuteriumAtomBalance:
         else:
             return dn
 
-    def evalDDensity(self,t,x):
-        nD = self.quantities['niD']
-        return nD[0],nD[1]
+    def evalTi(self,t,x):
+        Ti = self.quantities['Ti']
+        return Ti
 
-    def evalncoldDensity(self,t,x):
-        ne = self.quantities['ne']
-        return ne
+    def evalniD(self,t,x):
+        ni = self.quantities.getIonData('D')
+        return ni[0], ni[1]
+
+    def evalniC(self,t,x):
+        ni = self.quantities.getIonData('C')
+        return ni[0], ni[1], ni[2], ni[3], ni[4], ni[5], ni[6]
+
+    def evalniO(self,t,x):
+        ni = self.quantities.getIonData('O')
+        return ni[0], ni[1], ni[2], ni[3], ni[4], ni[5], ni[6], ni[7], ni[8]

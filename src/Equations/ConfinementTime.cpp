@@ -25,7 +25,7 @@ ConfinementTime::ConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadia
 /**
  * Evaluates the inverted confinement time
  */
-real_t ConfinementTime::EvaluateConfinementTime(len_t ir){
+real_t ConfinementTime::EvaluateConfinementTime(len_t ir){ 
     return EvaluatePerpendicularConfinementTime(ir)
         + EvaluateParallelConfinementTime(ir);
 }
@@ -56,7 +56,6 @@ real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) {
     real_t a      = radials->GetMinorRadius();
     real_t B      = radials->GetMagneticField();
     real_t T_cold = unknowns->GetUnknownData(id_Tcold)[ir];
-
     return T_cold/(8*a*a*B);
 }
 

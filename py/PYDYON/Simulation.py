@@ -158,7 +158,8 @@ class Simulation:
         def dydt(t, x):
             print(f't = {t} s')
             self.unknowns.update(t, x)
-            return [f(t,x) for f in equations]
+            var = np.array([f(t,x) for f in equations])
+            return var.flatten()
 
         #sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x)
         sol = solve_ivp(dydt, t_span=(0, tMax), y0=self.unknowns.x, method='Radau')
