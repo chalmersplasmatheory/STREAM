@@ -17,6 +17,8 @@ class SimulationResult:
 
         self.simulation = simulation
 
+    def getT(self):
+        return self.t
 
     def evaluateTerm(self, term):
         """

@@ -33,7 +33,6 @@ def evalResistance(quantities):
     sg = evalConductivity(quantities)
     Rp = 2*R/a**2 * (1/sg)
 
-    return Rp
     """
     n = quantities['ne']
     T = quantities['Te']
@@ -41,9 +40,10 @@ def evalResistance(quantities):
 
     R = quantities.plasmavolume.R
     a = quantities.plasmavolume.a(quantities.t)
+    
+    Rp = 2*R/a**2 * evaluateDYONResistivity(n=n, T=T, Z=Z)
 
-    return 2*R/a**2 * evaluateDYONResistivity(n=n, T=T, Z=Z)
-
+    return Rp
 
 def evaluateBraamsConductivity(n, T, Z):
     """

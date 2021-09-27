@@ -117,7 +117,7 @@ sts_initial.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_DISABLED)
 sts_initial.eqsys.n_i.setJET_CWrecycling()
 
 sts_initial.radialgrid.setB0(B)
-sts_initial.radialgrid.setMinorRadius(a, t=t)
+sts_initial.radialgrid.setMinorRadius(a[0])#, t=t)
 sts_initial.radialgrid.setMajorRadius(r_0)
 sts_initial.radialgrid.setWallRadius(r_wall)
 sts_initial.radialgrid.setVesselVolume(V_vessel)

@@ -58,7 +58,7 @@ TERMS = {
     'i-e equilibration': { 'pydyon': EquilibrationPowerTerm, 'stream': lambda so : so.other.stream.Wi_e_coll[:,0] },
     #'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.scalar.energyloss_T_cold[:,0] },
     #'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.stream.Tcold_transport[:,0] },
-    'i heat convection': { 'pydyon': IonConvectivePowerTerm, 'stream': lambda so : -np.sum(so.other.stream.Wi_iontransport[:,:,0], axis=1) },
+    #'i heat convection': { 'pydyon': IonConvectivePowerTerm, 'stream': lambda so : -np.sum(so.other.stream.Wi_iontransport[:,:,0], axis=1) },
     #'Charge-exchange heat loss': { 'pydyon': ChargeExchangePowerTerm, 'stream': lambda so : -so.other.stream.Wi_chargeexchange[:,0] },
     #'i particle transport': { 'pydyon': IonTransport, 'eval': lambda ce, t, x, _: ce(t, x, 'D', Z0=1), 'stream': lambda so : -so.other.stream.ni_iontransport[:,1,0] },
     #'Confinement time': { 'pydyon': ConfinementTime, 'stream': lambda so : so.other.stream.tau_D[:,0] },
@@ -92,7 +92,7 @@ SETTINGS = {
     'Bv': lambda ss : 1e-3,
     # The following currently only work with the 'TYPE_CIRCUIT' model in STREAM
     'l_MK2': lambda ss : ss.radialgrid.b,
-    'Vloop': lambda ss : ss.eqsys.E_field.circuit_Vloop if ss.eqsys.E_field.circuit_Vloop.size==1 else scipy.interpolate.interp1d(ss.eqsys.E_field.circuit_Vloop_t, ss.eqsys.E_field.circuit_Vloop),
+    'Vloop': lambda ss : ss.eqsys.E_field.circuit_Vloop if ss.eqsys.E_field.circuit_Vloop.size==1 else scipy.interpolate.interp1d(ss.eqsys.E_field.circuit_Vloop_t, ss.eqsys.E_field.circuit_Vloop, bounds_error = False, fill_value = 'extrapolate'),
     'Lp': lambda ss : ss.eqsys.E_field.circuit_Lp,
     'LMK2': lambda ss : ss.eqsys.E_field.circuit_Lwall,
     'M': lambda ss : ss.eqsys.E_field.circuit_M,
@@ -149,7 +149,6 @@ def compareToSTREAM(ss, so, verbose=True):
                 print(f"- Term '{name}' ACCURATE to within 10%")
 
     plt.show()
-
 
 def compareToSTREAMdt(ss, so, verbose=True):
     """

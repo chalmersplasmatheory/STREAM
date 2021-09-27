@@ -28,7 +28,7 @@ class OhmicPowerTerm:
         Evaluate the radiated power.
         """
         Ip = self.quantities['Ip']
-        Vp = self.quantities.getPlasmaVolume()
+        Vp = self.quantities.getV_p()
         Rp = Conductivity.evalResistance(self.quantities)
 
         Pohm = Ip**2 * Rp / Vp
