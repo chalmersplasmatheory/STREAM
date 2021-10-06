@@ -16,8 +16,8 @@ class DeuteriumAtomBalance:
         self.ions = ions
 
 
-    def __call__(self, t, x):
-        return self.eval(t, x)
+    def __call__(self, t, x, full=False):
+        return self.eval(t, x, full)
 
 
     def eval(self, t, x, full=False):
