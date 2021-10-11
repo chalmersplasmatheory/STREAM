@@ -26,7 +26,7 @@ def evalResistance(quantities):
     Evaluates the plasma resistance, rather than the
     plasma conductivity.
     """
-    """
+
     R = quantities.plasmavolume.R
     a = quantities.plasmavolume.a(quantities.t)
 
@@ -42,7 +42,7 @@ def evalResistance(quantities):
     a = quantities.plasmavolume.a(quantities.t)
     
     Rp = 2*R/a**2 * evaluateDYONResistivity(n=n, T=T, Z=Z)
-
+    """
     return Rp
 
 def evaluateBraamsConductivity(n, T, Z):
