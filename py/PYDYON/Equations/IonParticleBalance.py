@@ -27,12 +27,13 @@ class IonParticleBalance:
         """
         Vn_tot = self.quantities.getV_n_tot(ionname)
         Vn = self.quantities.getV_n(ionname)
-        VnD = self.quantities.getV_n(ionname)
+        VnD = self.quantities.getV_n('D')
         Vp = self.quantities.getV_p()
 
         ne = self.quantities['ne']
         Te = self.quantities['Te']
         Ti = self.quantities['Ti']
+        nD = self.quantities.getIonData('D')
 
         dndt = 0
         if Z0 == 0:  # Neutral
@@ -43,9 +44,10 @@ class IonParticleBalance:
 
             ni = self.quantities.getIonData(ionname)
 
-            dndt = -Vn/Vn_tot * Riz * ne*ni[0] + Vp/Vn_tot * Rrec * ne*ni[1]
+            Rcx = self.adas.CCD(ionname, 1, n=ni[1], T=Ti)
+
+            dndt = -Vn/Vn_tot * Riz * ne*ni[0] + Vp/Vn_tot * Rrec * ne*ni[1] + VnD/Vn_tot * Rcx * nD[0] * ni[1]
         else:    # Ionized
-            nD = self.quantities.getIonData('D')
             ni = self.quantities.getIonData(ionname)
 
             if Z0 >= self.ions[ionname]['Z']:

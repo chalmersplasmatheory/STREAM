@@ -28,7 +28,7 @@ class IonInflux:
         Evaluate this deuterium influx term.
         """
         Vp = self.quantities.getV_p()
-        Vn_tot = self.quantities.getV_n_tot('D')
+        Vn_tot = self.quantities.getV_n_tot(ionname)
 
         Gamma = 0
         for ion in self.ions:

@@ -64,7 +64,7 @@ a = a_fun(t)
 
 kappa    = 1
 c1       = 1.1
-c2       = 0.05
+c2       = 0.09
 c3       = 0.1
 
 R = 7.5e-4  # Ohm, i MK2 struktur

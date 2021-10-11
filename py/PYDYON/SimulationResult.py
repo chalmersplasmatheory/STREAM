@@ -62,6 +62,28 @@ class SimulationResult:
 
         return np.array(val)
 
+    def evaluateTermIon(self, term, ionname):
+        """
+        Evaluates a term of the given type.
+        """
+        uqh = self.simulation.unknowns
+        val = []
+        for i in range(self.t.size):
+            dct = {
+                'We': self.x['We'][i],
+                'Wi': self.x['Wi'][i],
+                'Ip': self.x['Ip'][i],
+                'IMK2': self.x['IMK2'][i],
+                'niD': self.x['niD'][:,i],
+                'niO': self.x['niO'][:,i],
+                'niC': self.x['niC'][:,i]
+            }
+            x = uqh.setvector(dct,t=self.t[i])
+            val.append(term(self.t[i], x, ionname))
+
+        return np.array(val)
+
+
     def evaluateTermFull(self, term, eq,  full=False):
         """
         Evaluates a term of the given type.

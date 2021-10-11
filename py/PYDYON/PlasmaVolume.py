@@ -55,6 +55,25 @@ class PlasmaVolume:
 
         return np.sqrt(2*e*Ti/m) / (ne*self.adas.SCD(ion, 0, n=ne, T=Te))
 
+    def getLambdaVec(self, ion, ne, Te, Ti):
+        """
+        Calculates the mean-free path length lambda_i for ion
+        species 'ion'.
+
+        :param ion: Name of ion species to calculate mean-free path for.
+        :param ne:  Electron density to evaluate at.
+        :param Te:  Electron temperature to evaluate at.
+        :param Ti:  Ion temperature to evaluate at.
+        """
+        e = scipy.constants.e
+        m = self.ions.getMass(ion)
+        ne_len = len(ne)
+        adas = np.zeros(ne_len)
+        for i in range(ne_len):
+            adas[i] = self.adas.SCD(ion, 0, n=ne[i], T=Te[i])
+
+        return np.sqrt(2*e*Ti/m) / (ne*adas)
+
 
     def getV_n(self, t, ion, ne, Te, Ti):
         """
