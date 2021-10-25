@@ -71,17 +71,10 @@ ions = solution.simulation.ions
 RTOL = 1e-1
 i = 1
 
-
+'''
 # Lambda_O
 name = 'Lambda_O'
 stream = so.eqsys.lambda_i['O'][1:,0]
-'''
-t = so.grid.t[1:]
-for i in range(t.size):
-    x = STREAM.fromSTREAM(so, uqh, time=i + 1, ion='O')
-
-    y[i] = term['eval'](obj, t[i], x, uqh)
-'''
 pydyon = uqh.plasmavolume.getLambdaVec('O', solution.x['ne'][:], solution.x['Te'][:], solution.x['Ti'][:])
 fig = plt.figure(i)
 ax = fig.add_subplot(111)
@@ -94,7 +87,6 @@ ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
 i=i+1
-
 '''
 # Radiated power
 name = 'Radiated power'
@@ -111,7 +103,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # Ohmic Power
 name = 'Ohmic power'
@@ -128,9 +120,9 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
-'''
+
 # e-i equilibration
 name = 'e-i equilibration'
 stream = so.other.fluid.Tcold_ion_coll[:,0]
@@ -146,7 +138,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # e heat convection
 name = 'e heat convection'
@@ -163,7 +155,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # i heat convection
 name = 'i heat convection'
@@ -180,7 +172,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # Charge-exchange heat loss
 name = 'Charge-exchange heat loss'
@@ -197,9 +189,9 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
-'''
+
 # D particle transport
 name = 'i particle transport'
 stream = -so.other.stream.ni_iontransport[:,1,0]
@@ -215,7 +207,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
 '''
 # O particle transport
@@ -238,7 +230,7 @@ ax.legend()
 fig.tight_layout()
 i=i+1
 #'''
-'''
+
 # Confinement time
 name = 'Confinement time'
 stream = so.other.stream.tau_D[:,0]
@@ -254,9 +246,9 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
-'''
+
 # D0 density
 name = 'D0 density'
 stream = so.eqsys.n_i['D'][0][1:]
@@ -271,7 +263,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # D1 density
 name = 'D1 density'
@@ -287,7 +279,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
 
 # C0 density
@@ -304,7 +296,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # C1 density
 name = 'C1 density'
@@ -320,7 +312,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # C2 density
 name = 'C2 density'
@@ -336,7 +328,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # C3 density
 name = 'C3 density'
@@ -352,7 +344,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # C4 density
 name = 'C4 density'
@@ -368,7 +360,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # C5 density
 name = 'C5 density'
@@ -384,7 +376,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # C6 density
 name = 'C6 density'
@@ -400,7 +392,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # O0 density
 name = 'O0 density'
@@ -416,7 +408,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # O1 density
 name = 'O1 density'
@@ -432,7 +424,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # O2 density
 name = 'O2 density'
@@ -448,7 +440,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # O3 density
 name = 'O3 density'
@@ -464,7 +456,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # O4 density
 name = 'O4 density'
@@ -480,7 +472,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # O5 density
 name = 'O5 density'
@@ -496,7 +488,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # O6 density
 name = 'O6 density'
@@ -512,7 +504,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # O7 density
 name = 'O7 density'
@@ -528,7 +520,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # O8 density
 name = 'O8 density'
@@ -544,9 +536,9 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
-'''
+
 # D0 negative ionization
 name = 'D0 negative ionization'
 stream = so.other.stream.ionrateequation_negIonization[:,0,0]
@@ -562,7 +554,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 # D0 positive recombination
 name = 'D0 positive recombination'
@@ -579,9 +571,9 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
-'''
+
 # D0 negative C-X
 name = 'D0 negative C-X'
 stream = so.other.stream.ionrateequation_negChargeExchange[:,0,0]
@@ -597,9 +589,9 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
-'''
+
 # D0 influx
 name = 'D0 influx'
 stream = so.other.stream.neutralinflux['D'][:] / so.other.stream.V_n_tot['D'][:]
@@ -615,8 +607,9 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
+'''
 # O0 influx
 name = 'O0 influx'
 stream = so.other.stream.neutralinflux['O'][:] / so.other.stream.V_n_tot['O'][:]
@@ -632,8 +625,9 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
-'''
+plt.show() #i=i+1
+#'''
+
 # D1 positive ionization
 name = 'D1 positive ionization'
 stream = so.other.stream.ionrateequation_posIonization[:,1,0]
@@ -649,7 +643,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 
 
 # D1 negative recombination
@@ -667,9 +661,9 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
-'''
+
 # D1 positive C-X
 name = 'D1 positive C-X'
 stream = so.other.stream.ionrateequation_posChargeExchange[:,1,0]
@@ -685,7 +679,7 @@ ax.set_title(name)
 ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
-i=i+1
+plt.show() #i=i+1
 #'''
 
 '''
@@ -774,9 +768,7 @@ fig.tight_layout()
 i=i+1
 #'''
 
-
-plt.show()
-
+#plt.show()
 
 '''
 # D0 negative recombination

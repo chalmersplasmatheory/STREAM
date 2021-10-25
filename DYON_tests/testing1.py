@@ -29,13 +29,13 @@ for Z0 in range(0,18):
         else:
             print(str(Z0))
     if Z0 == 0:
-        plt.plot(do.grid.t[1:],do.other.stream.neutralinflux['D'][:,0]/do.other.stream.V_n_tot['D'][:,0], label='transport')
+        plt.plot(do.grid.t[1:],do.other.stream.neutralinflux['D'][:,0]/do.other.stream.V_n_tot['D'][:,0], label='influx')
     if Z0 == 2:
         plt.plot(do.grid.t[1:], do.other.stream.neutralinflux['C'][:, 0]/ do.other.stream.V_n_tot['C'][:, 0],
-                 label='transport')
+                 label='influx')
     if Z0 == 9:
         plt.plot(do.grid.t[1:], do.other.stream.neutralinflux['O'][:, 0] / do.other.stream.V_n_tot['O'][:, 0],
-                 label='transport')
+                 label='influx')
     plt.legend()
     
     plt.show()
