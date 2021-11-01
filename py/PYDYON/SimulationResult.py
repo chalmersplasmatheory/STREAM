@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from . Equations import *
-
+from PYDYON import ConfinementTime
 
 class SimulationResult:
     
@@ -143,6 +143,64 @@ class SimulationResult:
         self.plotQuantity('Te', axs[1, 0], color='k', title='Electron temperature', axis=[0,0.3,0,400])
         self.plotQuantity('Ti', axs[2, 0], color='k', title='Ion temperature', axis=[0,0.3,0,400])
         self.plotQuantity('ne', axs[0,1], color='k', title='Electron density', axis=[0,0.3,0,6e18])
+
+        #nD = self.x['niD']
+        #self.plotQuantity(nD[0], axs[1,0], color='k', label='D-0', title='Deuterium')
+        #self.plotQuantity(nD[1], axs[1,0], color='r', label='D-1')
+        #axs[1,0].set_ylabel('nD')
+        #axs[1,0].legend()
+
+
+        #self.plotQuantity('IMK2', axs[1,2], color='k', title='MK2 current')
+
+        #gamma_i = self.x['ne'] / (nD[0] + self.x['ne'])
+        #self.plotQuantity(gamma_i*100, axs[1,2], color='k', title='Ionization fraction')
+        #axs[1,2].set_ylabel(r'\%')
+        #axs[1,2].set_ylim([0, 105])
+
+        plt.tight_layout()
+        plt.show()
+        
+    def plotJetPydyonVsStream(self, so):
+        """
+        Plot a summary of the results.
+        """
+        fig, axs = plt.subplots(3, 2, figsize=(10, 6))
+        
+        legend = ['PYDYON', 'STREAM']
+        self.plotQuantity('Ip', axs[0,0], color = 'r', axis=[0,0.3,0,6e5]) #, title='Plasma current'
+        axs[0, 0].plot(so.grid.t[:], so.eqsys.I_p[:], 'k')
+        axs[0, 0].legend(legend)
+        axs[0, 0].set_xlabel('Time [s]')
+        axs[0, 0].set_ylabel('Plasma current [A]')
+        
+        self.plotQuantity('Te', axs[1, 0], color = 'r', axis=[0,0.3,0,400]) #, title='Electron temperature'
+        axs[1, 0].plot(so.grid.t[:], so.eqsys.T_cold[:], 'k')
+        axs[1, 0].legend(legend)
+        axs[1, 0].set_xlabel('Time [s]')
+        axs[1, 0].set_ylabel('Electron temperature [eV]')
+        
+        self.plotQuantity('Ti', axs[2, 0], color = 'r', axis=[0,0.3,0,400]) #, title='Ion temperature'
+        axs[2, 0].plot(so.grid.t[:],
+                       2.0 / 3.0 * so.eqsys.W_i['D'][:] / so.eqsys.N_i['D'][:] / 1.60217662e-19, 'k')
+        axs[2, 0].legend(legend)
+        axs[2, 0].set_xlabel('Time [s]')
+        axs[2, 0].set_ylabel('Ion temperature [eV]')
+        
+        self.plotQuantity('ne', axs[0,1], color = 'r', axis=[0,0.3,0,6e18]) #, title='Electron density'
+        axs[0, 1].plot(so.grid.t[:], so.eqsys.n_cold[:], 'k')
+        axs[0, 1].legend(legend)
+        axs[0, 1].set_xlabel('Time [s]')
+        axs[0, 1].set_ylabel('Electron density [m$^{-3}$]')
+
+        confinementTime = ConfinementTime(self.simulation.unknowns, self.simulation.ions)
+        tau_D = self.evaluateTerm(confinementTime)
+        axs[2, 1].plot(self.getT(), tau_D, color = 'r')
+        axs[2, 1].plot(so.grid.t[1:], so.other.stream.tau_D[:], color='k')
+        axs[2, 1].legend(legend)
+        #axs[2, 1].title('Confinement time')
+        axs[2, 1].set_xlabel('Time [s]')
+        axs[2, 1].set_ylabel('Confinement time [s]')
 
         #nD = self.x['niD']
         #self.plotQuantity(nD[0], axs[1,0], color='k', label='D-0', title='Deuterium')

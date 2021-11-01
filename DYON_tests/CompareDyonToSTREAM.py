@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 import scipy.constants
+from scipy.interpolate import interp1d
 import sys
 
 sys.path.append('../py')
@@ -22,7 +23,7 @@ SETTINGS = {
     'Bv': lambda ss : 1e-3,
     # The following currently only work with the 'TYPE_CIRCUIT' model in STREAM
     'l_MK2': lambda ss : ss.radialgrid.b,
-    'Vloop': lambda ss : ss.eqsys.E_field.circuit_Vloop if ss.eqsys.E_field.circuit_Vloop.size==1 else scipy.interpolate.interp1d(ss.eqsys.E_field.circuit_Vloop_t, ss.eqsys.E_field.circuit_Vloop, bounds_error = False, fill_value = 'extrapolate'),
+    #'Vloop': lambda ss : ss.eqsys.E_field.circuit_Vloop if ss.eqsys.E_field.circuit_Vloop.size==1 else scipy.interpolate.interp1d(ss.eqsys.E_field.circuit_Vloop_t, ss.eqsys.E_field.circuit_Vloop, bounds_error = False, fill_value = 'extrapolate'),
     'Lp': lambda ss : ss.eqsys.E_field.circuit_Lp,
     'LMK2': lambda ss : ss.eqsys.E_field.circuit_Lwall,
     'M': lambda ss : ss.eqsys.E_field.circuit_M,
@@ -42,12 +43,49 @@ def loadSTREAMSettings(ss):
 
     return settings
 
-ss = STREAMSettings('settings_final.h5')
+#ss = STREAMSettings('settings_final.h5')
 so = STREAMOutput('output_final.h5')
 
-settings = loadSTREAMSettings(ss)
+#settings = loadSTREAMSettings(ss)
 
-sim = Simulation(**settings)
+prefill = 2.7e-3    # Pa
+gamma_i = 2e-3      # Ionization fraction
+nD0 = 4.8e20 * prefill
+nD = nD0 * np.array([1-gamma_i, gamma_i])
+
+nC = np.zeros((7,))
+nO = np.zeros((9,))
+nO[0] = 1e-3 * nD0
+
+R0 = 2.96
+
+t_a   = [0  ,  0.017,  0.05,  0.085,  0.14,  0.19,  0.25,  0.3]
+V_p   = np.array([100, 80    , 56   , 48    , 52   , 51.75, 54.25, 56  ])
+tet   = np.linspace(0, 0.3, 100)
+a_fun   = scipy.interpolate.interp1d(t_a, np.sqrt(V_p/(2*np.pi**2*R0)))
+a=a_fun(tet)
+
+t_Vloop = [0 , 0.02 , 0.0325, 0.0475, 0.08, 0.1 , 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3 , 0.335, 0.35, 0.37, 0.4 , 0.45, 0.5 ]
+d_Vloop = [11, 21.25, 26    , 26.25 , 24  , 16.5, 8.25 , 7.9 , 7.75, 7.5 , 7.25, 6.5 , 6.5 , 6.75, 6.75 , 6   , 4.75, 4.25, 4.5 , 3.60]
+Vloop   = scipy.interpolate.interp1d(t_Vloop, d_Vloop)
+
+params = {
+    'a': a,
+    'ta': tet,
+    'R': R0,
+    'V_vessel': 100,
+    'Bphi': 2.4,
+    'Bv': 1e-3,
+    'l_MK2': 1,
+    'Vloop': Vloop,
+    'Lp': 5.19e-6,
+    'LMK2': 9.1e-6,
+    'M': 2.49e-6,
+    'RMK2': 7.5e-4
+}
+
+#sim = Simulation(**settings)
+sim = Simulation(**params)
 
 prefill = 2.7e-3    # Pa
 gamma_i = 2e-3      # Ionization fraction
@@ -71,6 +109,8 @@ ions = solution.simulation.ions
 RTOL = 1e-1
 i = 1
 
+solution.plotJetPydyonVsStream(so)
+
 '''
 # Lambda_O
 name = 'Lambda_O'
@@ -87,6 +127,7 @@ ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
 i=i+1
+'''
 '''
 # Radiated power
 name = 'Radiated power'
@@ -122,7 +163,7 @@ ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
 #'''
-
+'''
 # e-i equilibration
 name = 'e-i equilibration'
 stream = so.other.fluid.Tcold_ion_coll[:,0]
@@ -191,7 +232,7 @@ ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
 #'''
-
+'''
 # D particle transport
 name = 'i particle transport'
 stream = -so.other.stream.ni_iontransport[:,1,0]
@@ -230,7 +271,7 @@ ax.legend()
 fig.tight_layout()
 i=i+1
 #'''
-
+'''
 # Confinement time
 name = 'Confinement time'
 stream = so.other.stream.tau_D[:,0]
@@ -248,7 +289,7 @@ ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
 #'''
-
+'''
 # D0 density
 name = 'D0 density'
 stream = so.eqsys.n_i['D'][0][1:]
@@ -281,7 +322,7 @@ ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
 #'''
-
+'''
 # C0 density
 name = 'C0 density'
 stream = so.eqsys.n_i['C'][0][1:]
@@ -538,7 +579,7 @@ ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
 #'''
-
+'''
 # D0 negative ionization
 name = 'D0 negative ionization'
 stream = so.other.stream.ionrateequation_negIonization[:,0,0]
@@ -573,7 +614,7 @@ ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
 #'''
-
+'''
 # D0 negative C-X
 name = 'D0 negative C-X'
 stream = so.other.stream.ionrateequation_negChargeExchange[:,0,0]
@@ -591,7 +632,7 @@ ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
 #'''
-
+'''
 # D0 influx
 name = 'D0 influx'
 stream = so.other.stream.neutralinflux['D'][:] / so.other.stream.V_n_tot['D'][:]
@@ -627,7 +668,7 @@ ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
 #'''
-
+'''
 # D1 positive ionization
 name = 'D1 positive ionization'
 stream = so.other.stream.ionrateequation_posIonization[:,1,0]
@@ -663,7 +704,7 @@ ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
 #'''
-
+'''
 # D1 positive C-X
 name = 'D1 positive C-X'
 stream = so.other.stream.ionrateequation_posChargeExchange[:,1,0]
@@ -680,92 +721,6 @@ ax.set_xlim([0, 0.3])
 ax.legend()
 fig.tight_layout()
 plt.show() #i=i+1
-#'''
-
-'''
-# D0 diff
-name = 'D0 diff'
-streamI = so.other.stream.ionrateequation_negIonization[:,0,0].flatten()
-streamR = so.other.stream.ionrateequation_posRecombination[:,0,0].flatten()
-streamCX = so.other.stream.ionrateequation_negChargeExchange[:,0,0].flatten()
-streamT = so.other.stream.neutralinflux['D'][:].flatten() / so.other.stream.V_n_tot['D'][:].flatten()
-stream = streamI + streamR + streamCX + streamT
-pterm  = DeuteriumAtomBalance(sim.unknowns, sim.ions)
-pydyonI = solution.evaluateTermFull(pterm, 2, True)
-pydyonR = solution.evaluateTermFull(pterm, 3, True)
-pydyonCX = solution.evaluateTermFull(pterm, 6, True)
-ptermT  = DeuteriumInflux(sim.unknowns, sim.ions)
-pydyonT = solution.evaluateTerm(ptermT)
-pydyon  = pydyonI + pydyonR + pydyonCX + pydyonT
-fig = plt.figure(i)
-ax = fig.add_subplot(111)
-ax.plot(so.grid.t[1:], stream, 'k', label='STREAM')
-ax.plot(solution.getT(), pydyon, 'r--', label='PYDYON')
-# ax.plot(t, stream.flatten()/pydyon.flatten(), 'k')
-ax.set_xlabel('Time (s)')
-ax.set_title(name)
-ax.set_xlim([0, 0.3])
-ax.legend()
-fig.tight_layout()
-i=i+1
-
-# D1 diff
-name = 'D1 diff'
-streamI = so.other.stream.ionrateequation_posIonization[:,1,0]
-streamR = so.other.stream.ionrateequation_negRecombination[:,1,0]
-streamCX = so.other.stream.ionrateequation_posChargeExchange[:,1,0]
-streamT = -so.other.stream.ni_iontransport[:,1,0]
-stream = streamI + streamR + streamCX - streamT
-pterm  = DeuteriumIonBalance(sim.unknowns, sim.ions)
-pydyonI = solution.evaluateTermFull(pterm, 1, True).flatten()
-pydyonR = solution.evaluateTermFull(pterm, 4, True).flatten()
-pydyonCX = solution.evaluateTermFull(pterm, 5, True).flatten()
-ptermT  = IonTransport(sim.unknowns, sim.ions)
-pydyonT = solution.evaluateTermIonState(ptermT, 'D', 1).flatten()
-pydyon  = pydyonI + pydyonR + pydyonCX - pydyonT
-fig = plt.figure(i)
-ax = fig.add_subplot(111)
-ax.plot(so.grid.t[1:], stream, 'k', label='STREAM')
-ax.plot(solution.getT(), pydyon, 'r--', label='PYDYON')
-# ax.plot(t, stream.flatten()/pydyon.flatten(), 'k')
-ax.set_xlabel('Time (s)')
-ax.set_title(name)
-ax.set_xlim([0, 0.3])
-ax.legend()
-fig.tight_layout()
-i=i+1
-
-# D0 grad
-name = 'D0 grad'
-stream = np.gradient(so.eqsys.n_i['D'][0][1:].flatten())
-pydyon = np.gradient(solution.x['niD'][0,:])
-fig = plt.figure(i)
-ax = fig.add_subplot(111)
-ax.plot(so.grid.t[1:], stream, 'k', label='STREAM')
-ax.plot(solution.getT(), pydyon, 'r--', label='PYDYON')
-# ax.plot(t, stream.flatten()/pydyon.flatten(), 'k')
-ax.set_xlabel('Time (s)')
-ax.set_title(name)
-ax.set_xlim([0, 0.3])
-ax.legend()
-fig.tight_layout()
-i=i+1
-
-# D1 grad
-name = 'D1 grad'
-stream = np.gradient(so.eqsys.n_i['D'][1][1:].flatten())
-pydyon = np.gradient(solution.x['niD'][1,:])
-fig = plt.figure(i)
-ax = fig.add_subplot(111)
-ax.plot(so.grid.t[1:], stream, 'k', label='STREAM')
-ax.plot(solution.getT(), pydyon, 'r--', label='PYDYON')
-# ax.plot(t, stream.flatten()/pydyon.flatten(), 'k')
-ax.set_xlabel('Time (s)')
-ax.set_title(name)
-ax.set_xlim([0, 0.3])
-ax.legend()
-fig.tight_layout()
-i=i+1
 #'''
 
 #plt.show()
