@@ -91,7 +91,7 @@ E_initial = J/sigma
 
 sts_initial = STREAMSettings()
 
-wall_time = L/R#*0.3
+wall_time = L/R*0.3
 print('wall_time = {} s'.format(wall_time))
 
 print(str(r_wall))

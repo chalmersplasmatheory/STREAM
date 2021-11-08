@@ -62,12 +62,14 @@ class Ions(DREAMIons.Ions):
         for ion in self.ions:
             if ion.name == deuterium:
                 ion.setRecyclingCoefficient(carbon, 0.015) #Ändrat från 0.03!!!
-                ion.setRecyclingCoefficient(iron, 0.015)
+                ion.setRecyclingCoefficient(iron, 0.00001) # Vad ska detta vara?
             elif ion.name == oxygen:
                 ion.setRecyclingCoefficient(carbon, 1.0)
                 ion.setRecyclingCoefficient(oxygen, 1.0)
             elif ion.name == tritium:
                 ion.setRecyclingCoefficient(tritium, 1.0)
+            elif ion.name == iron:
+                ion.setRecyclingCoefficient(iron, 1.0)
 
 
     def fromdict(self, data):

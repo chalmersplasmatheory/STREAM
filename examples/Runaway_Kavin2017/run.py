@@ -17,6 +17,7 @@ import DREAM.Settings.Solver as Solver
 import DREAM.Settings.Atomics as Atomics
 from STREAM import STREAMOutput, STREAMSettings, runiface
 import STREAM.Settings.Equations.ElectricField as ElectricField
+import DREAM.Settings.Equations.ElectricField as ElectricField_D
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
@@ -50,7 +51,7 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
 
     n0 = 0.01e20/7#3.22e22 * prefill  # Initial total deuterium density
     # n0 = 2.78e22 * prefill  # Initial total deuterium density
-    nD = n0 * np.array([[1 - gamma], [gamma]])
+    nD = np.array([[n0], [n0 * gamma/(1-gamma)]])
 
     Btor = 2.65     # Toroidal magnetic field [T]
     a = 1.6         # Plasma minor radius [m]
@@ -70,11 +71,14 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
     ss.atomic.adas_interpolation = Atomics.ADAS_INTERP_BILINEAR
 
     # Electric field
-    ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
-    ss.eqsys.E_field.setInitialProfile(E0)
-    Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.5 - 2))
-    ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
-    ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
+    #ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+    #ss.eqsys.E_field.setInitialProfile(E0)
+    #Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.5 - 2))
+    #ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
+    #ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
+    ss.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
+    ss.eqsys.E_field.setInitialProfile(efield=E0)
+    ss.eqsys.E_field.setBoundaryCondition(bctype=ElectricField_D.BC_TYPE_PRESCRIBED, V_loop_wall_R0=Vloop, times=Vloop_t, R0=R0)
 
     # Electron temperature
     ss.eqsys.T_cold.setType(Tcold.TYPE_SELFCONSISTENT)
@@ -132,7 +136,19 @@ def drawplot1(axs, so, toffset=0.7):
     nD0 = so.eqsys.n_i['D'][0][:]
     nD1 = so.eqsys.n_i['D'][1][:]
 
-    Vp = so.other.stream.V_p[:, 0] / 1e6
+
+    nFe = []
+    for iFe in range(0,27):
+        nFe.append(so.eqsys.n_i['Fe'][iFe][:])
+    nFe = np.array(nFe)
+
+    totFe = nFe[0,1:].flatten() * so.other.stream.V_n_tot['Fe'][:].flatten()
+    for iFe in range(0,27):
+        totFe = totFe + nFe[iFe,1:].flatten() * so.other.stream.V_p[:, 0].flatten()
+
+    gammaFe = (1 - nFe[0,1:].flatten() * so.other.stream.V_n_tot['Fe'][:].flatten() / totFe)
+
+    Vp = so.other.stream.V_p[:, 0]
     Poh = -so.other.fluid.Tcold_ohmic[:, 0] * Vp
     Prad = so.other.fluid.Tcold_radiation[:, 0] * Vp
 
@@ -149,8 +165,8 @@ def drawplot1(axs, so, toffset=0.7):
     plotInternal(axs[0, 1], t, 7 * nD0 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='m', showlabel=True, label='$n_{\rm D0}$')
     plotInternal(axs[0, 1], t, nD1 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='c', showlabel=True, label='$n_{\rm D1}$')
 
-    plotInternal(axs[1, 0], t[1:], Poh, ylabel=r'$P$ (MW)', color='m', showlabel=True, label='$P_{\rm oh}$')
-    plotInternal(axs[1, 0], t[1:], Prad, ylabel=r'$P$ (MW)', color='r', showlabel=True, label='$P_{\rm rad}$')
+    plotInternal(axs[1, 0], t[1:], Poh / 1e6, ylabel=r'$P$ (MW)', color='m', showlabel=True, label='$P_{\rm oh}$')
+    plotInternal(axs[1, 0], t[1:], Prad / 1e6, ylabel=r'$P$ (MW)', color='r', showlabel=True, label='$P_{\rm rad}$')
 
     plotInternal(axs[1, 1], t, Uext, ylabel=r'$U$ (V)', color='k', showlabel=True, label='$U_{\rm ext}$')
     plotInternal(axs[1, 1], t, Ures, ylabel=r'$U$ (V)', color='m', showlabel=True, label='$U_{\rm res}$')
@@ -158,17 +174,33 @@ def drawplot1(axs, so, toffset=0.7):
     plotInternal(axs[2, 0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='k', showlabel=True, label='$I_{\rm p}$')
     plotInternal(axs[2, 0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='m', showlabel=True, label='$I_{\rm re}$')
 
+    plotInternal(axs[3, 0], t[1:], gammaFe, ylabel=r'$\gamma_{\rm Fe}$ (%)', color='k', showlabel=False, label='$I_{\rm p}$')
+
+    plotInternal(axs[3, 1], t[:], nFe[3, :], ylabel=r'$n$ m$^{-3}$', color='k', showlabel=True, label='$n_{\rm Fe3}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[4, :], ylabel=r'$n$ m$^{-3}$', color='y', showlabel=True, label='$n_{\rm Fe4}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[5, :], ylabel=r'$n$ m$^{-3}$', color='m', showlabel=True, label='$n_{\rm Fe5}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[6, :], ylabel=r'$n$ m$^{-3}$', color='r', showlabel=True, label='$n_{\rm Fe6}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[7, :], ylabel=r'$n$ m$^{-3}$', color='c', showlabel=True, label='$n_{\rm Fe7}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[8, :], ylabel=r'$n$ m$^{-3}$', color='g', showlabel=True, label='$n_{\rm Fe8}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[9, :], ylabel=r'$n$ m$^{-3}$', color='b', showlabel=True, label='$n_{\rm Fe9}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[10, :], ylabel=r'$n$ m$^{-3}$', color='silver', showlabel=True, label='$n_{\rm Fe10}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[11, :], ylabel=r'$n$ m$^{-3}$', color='dimgrey', showlabel=True, label='$n_{\rm Fe11}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[12, :], ylabel=r'$n$ m$^{-3}$', color='gold', showlabel=True, label='$n_{\rm Fe12}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[13, :], ylabel=r'$n$ m$^{-3}$', color='deeppink', showlabel=True, label='$n_{\rm Fe13}$', yscalelog = True)
+
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
             axs[i,j].set_xlim([t[0], t[-1]])
             axs[i,j].grid(True)
-'''
+
     axs[0,0].set_ylim([0, 0.1])
     axs[0,1].set_ylim([0, 0.012])
     axs[1,0].set_ylim([0, 2.5])
     axs[1,1].set_ylim([0, 16])
     axs[2,0].set_ylim([0, 0.7])
-'''
+    #axs[1, 0].set_ylim([0, 0.025])
+    axs[1, 1].set_ylim([1e-8, 1e14])
+
     #axs[0,0].set_yticks([0, 50, 100, 150, 200])
     #axs[0,1].set_yticks([0, 5, 10, 15])
     #axs[1,0].set_yticks([0, 20, 40, 60, 80])
@@ -253,7 +285,7 @@ def drawplot3(axs, so, toffset=0):
         ax.grid(True)
 
 
-def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, *args, **kwargs):
+def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, yscalelog = False, *args, **kwargs):
     if label is not None and showlabel == False:
         label = None
 
@@ -270,12 +302,14 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
     if ylim is not None:
         ax.set_ylim(ylim)
 
+    if yscalelog:
+        ax.set_yscale('log')
 
 def makeplots(so1, so2):
-    fig1, axs1 = plt.subplots(3, 2, figsize=(7, 10))
+    fig1, axs1 = plt.subplots(4, 2, figsize=(7, 10))
 
     drawplot1(axs1, so1)
-    drawplot1(axs1, so2, toffset=so1.grid.t[-1])
+    drawplot1(axs1, so2, toffset=so1.grid.t[-1]+0.7)
 
     #fig2, axs2 = plt.subplots(1, 2, figsize=(10, 4))
 
@@ -309,7 +343,7 @@ def main(argv):
 
     if not settings.skip:
         prefill = 3e-4
-        ss1 = generate(prefill=prefill, nt=70000)
+        ss1 = generate(prefill=prefill, nt=10000)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
 
