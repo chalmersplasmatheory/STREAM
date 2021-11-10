@@ -53,7 +53,7 @@ void SimulationGenerator::DefineOptions_ElectricField(DREAM::Settings *s) {
 }
 
 void SimulationGenerator::ConstructEquation_E_field(
-    EquationSystem *eqsys, DREAM::Settings *s
+    EquationSystem *eqsys, DREAM::Settings *s,  struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
     enum OptionConstants::eqterm_E_field_eqn type =
         (enum OptionConstants::eqterm_E_field_eqn)s->GetInteger(MODULENAME "/type");
@@ -65,7 +65,7 @@ void SimulationGenerator::ConstructEquation_E_field(
             );
 
         case OptionConstants::UQTY_E_FIELD_EQN_SELFCONSISTENT:
-            ConstructEquation_E_field_selfconsistent(eqsys, s);
+            ConstructEquation_E_field_selfconsistent(eqsys, s, oqty_terms);
             break;
 
         case OptionConstants::UQTY_E_FIELD_EQN_CIRCUIT:
@@ -84,7 +84,7 @@ void SimulationGenerator::ConstructEquation_E_field(
  * Construct the usual self-consistent electric field equation.
  */
 void SimulationGenerator::ConstructEquation_E_field_selfconsistent(
-    EquationSystem *eqsys, DREAM::Settings *s
+    EquationSystem *eqsys, DREAM::Settings *s, struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
     DREAM::FVM::Grid *fluidGrid = eqsys->GetFluidGrid();
 
@@ -107,7 +107,7 @@ void SimulationGenerator::ConstructEquation_E_field_selfconsistent(
 
     // Define equation for E
     DREAM::SimulationGenerator::ConstructEquation_E_field_selfconsistent(
-        eqsys, s
+        eqsys, s, oqty_terms
     );
 
     // Define equation for poloidal flux

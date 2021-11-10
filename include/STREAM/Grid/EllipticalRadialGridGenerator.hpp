@@ -59,6 +59,9 @@ namespace STREAM {
         real_t GetTriangularity(){return currTriang; }
         real_t GetMagneticField(){ return currB0; }
         real_t GetMajorRadius(){ return R0; }
+        
+        void GetRThetaPhiFromCartesian(real_t*, real_t*, real_t*, real_t , real_t , real_t, real_t, real_t ) override {};
+        void GetGradRCartesian(real_t* ,real_t, real_t, real_t) override {};
     };
 }
 

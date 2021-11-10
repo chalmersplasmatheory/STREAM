@@ -45,8 +45,8 @@ namespace STREAM {
         );
 
         // Electric field and related equations
-        static void ConstructEquation_E_field(EquationSystem*, DREAM::Settings*);
-        static void ConstructEquation_E_field_selfconsistent(EquationSystem*, DREAM::Settings*);
+        static void ConstructEquation_E_field(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
+        static void ConstructEquation_E_field_selfconsistent(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
         static void ConstructEquation_E_field_circuit(EquationSystem*, DREAM::Settings*);
 
         // Ion density equation
