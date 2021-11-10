@@ -144,7 +144,7 @@ void SimulationGenerator::ConstructEquations(
     }
 
     // Standard equations
-    ConstructEquation_E_field(eqsys, s);
+    ConstructEquation_E_field(eqsys, s, oqty_terms);
     DREAM::SimulationGenerator::ConstructEquation_j_hot(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_j_tot(eqsys, s);
     DREAM::SimulationGenerator::ConstructEquation_j_ohm(eqsys, s);

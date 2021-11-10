@@ -56,6 +56,8 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
     Btor = 2.65     # Toroidal magnetic field [T]
     a = 1.6         # Plasma minor radius [m]
     R0 = 5.7        # Plasma major radius [m]
+    b = 8*R0/np.exp(7/4)
+    print(str(b))
     l_MK2 = 1       # Distance between plasma centre and passive structure [m] (unused)
     V_vessel = 1700 # Vacuum vessel volume [m^3]
 
@@ -73,12 +75,12 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
     # Electric field
     #ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
     #ss.eqsys.E_field.setInitialProfile(E0)
-    #Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.5 - 2))
+    #Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.25 - 2))
     #ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
     #ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
     ss.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
     ss.eqsys.E_field.setInitialProfile(efield=E0)
-    ss.eqsys.E_field.setBoundaryCondition(bctype=ElectricField_D.BC_TYPE_PRESCRIBED, V_loop_wall_R0=Vloop, times=Vloop_t, R0=R0)
+    ss.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER, V_loop_wall_R0=Vloop/R0, times=Vloop_t, inverse_wall_time=1e-12, R0=R0)
 
     # Electron temperature
     ss.eqsys.T_cold.setType(Tcold.TYPE_SELFCONSISTENT)
@@ -87,6 +89,7 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
 
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
+    # Add tritium?
     ss.eqsys.n_i.addIon(name='Fe', Z=26, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=0, r=np.array([0]), T=Ti0)
 
     # Enable runaway
@@ -100,7 +103,7 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
     ss.radialgrid.setB0(Btor)
     ss.radialgrid.setMinorRadius(a)
     ss.radialgrid.setMajorRadius(R0)
-    ss.radialgrid.setWallRadius(a)
+    ss.radialgrid.setWallRadius(b)
     ss.radialgrid.setVesselVolume(V_vessel)
 
     ss.radialgrid.setRecyclingCoefficient1(1)
