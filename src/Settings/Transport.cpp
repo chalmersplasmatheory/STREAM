@@ -64,11 +64,7 @@ bool SimulationGenerator::ConstructTransportTerm(
     enum OptionConstants::eqterm_transport_type type =
         (enum OptionConstants::eqterm_transport_type)s->GetInteger(mod + "/type");
 
-    if (type == OptionConstants::EQTERM_TRANSPORT_DYON) {
-        // TODO
-        
-        //return true;
-    } else if (type != OptionConstants::EQTERM_TRANSPORT_NONE)
+    if (type != OptionConstants::EQTERM_TRANSPORT_NONE)
         return DREAM::SimulationGenerator::ConstructTransportTerm(
             oprtr, mod, grid, momtype, eqsys, s, kinetic,
             heat, advective_bc, diffusive_bc, oqty_terms,
