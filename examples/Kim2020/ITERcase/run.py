@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants
 import sys
-sys.path.append('../Deuterium_Burn-through')
-sys.path.append('../../py')
+sys.path.append('../../Deuterium_Burn-through')
+sys.path.append('../../../py')
 
 #from run import makeplots
 import PlasmaParameters as Formulas
@@ -114,12 +114,37 @@ def drawplot1(axs, so, toffset=0):
     Ti = so.eqsys.W_i.getTemperature()['D'][:,0]
     tau = so.other.stream.tau_D[:,0]
 
-    plotInternal(axs[0,0], t, Ip/1e3, ylabel=r'$I_{\rm p}$ (kA)', color='k')
-    plotInternal(axs[0,1], t, ne/1e17, ylabel=r'$n_{\rm e}$ (m$^{-3}$)', color='k')
-    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='k')
+    plotInternal(axs[0,0], t, Ip/1e3, ylabel=r'$I_{\rm p}$ (kA)', color='g', showlabel=True, label='STREAM')
+    plotInternal(axs[0,1], t, ne/1e17, ylabel=r'$n_{\rm e}$ ($17\cdot 10^17$m$^{-3}$)', color='g', showlabel=True, label='STREAM')
+    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='g', showlabel=True, label='STREAM')
 
-    plotInternal(axs[2,0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='k')
-    plotInternal(axs[2,1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='k')
+    plotInternal(axs[2,0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='g', showlabel=True, label='STREAM')
+    plotInternal(axs[2,1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='g', showlabel=True, label='STREAM')
+
+    Ip_mat = np.genfromtxt('DyonData/PlasmaCurrent_DYON.csv', delimiter=',')
+    t_Ip_d = Ip_mat[:, 0]
+    Ip_d = Ip_mat[:, 1]
+    plotInternal(axs[0, 0], t_Ip_d, Ip_d/1e3, ylabel=r'$I_{\rm p}$ (kA)', color='k', showlabel=True, label='DYON')
+
+    ne_mat = np.genfromtxt('DyonData/ElectronDensity_DYON.csv', delimiter=',')
+    t_ne_d = ne_mat[:, 0]
+    ne_d = ne_mat[:, 1]
+    plotInternal(axs[0, 1], t_ne_d, ne_d/1e17, ylabel=r'$n_{\rm e}$ ($17\cdot 10^17$m$^{-3}$)', color='k', showlabel=True, label='DYON')
+
+    Te_mat = np.genfromtxt('DyonData/ElectronTemperature_DYON.csv', delimiter=',')
+    t_Te_d = Te_mat[:, 0]
+    Te_d = Te_mat[:, 1]
+    plotInternal(axs[1, 0], t_Te_d, Te_d, ylabel=r'$T_{\rm e}$ (eV)', color='k', showlabel=True, label='DYON')
+
+    Ti_mat = np.genfromtxt('DyonData/IonTemperature_DYON.csv', delimiter=',')
+    t_Ti_d = Ti_mat[:, 0]
+    Ti_d = Ti_mat[:, 1]
+    plotInternal(axs[2, 0], t_Ti_d, Ti_d, ylabel=r'$T_{\rm i}$ (eV)', color='k', showlabel=True, label='DYON')
+
+    tau_mat = np.genfromtxt('DyonData/ConfinementTime_DYON.csv', delimiter=',')
+    t_tau_d = tau_mat[:, 0]
+    tau_d = tau_mat[:, 1]
+    plotInternal(axs[2, 1], t_tau_d, tau_d, ylabel=r'$\tau_{\rm D}$ (s)', color='k', showlabel=True, label='DYON')
 
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
@@ -137,6 +162,8 @@ def drawplot1(axs, so, toffset=0):
     axs[1,0].set_yticks([0, 20, 40, 60, 80])
     axs[2,0].set_yticks([0, 20, 40, 60, 80])
     axs[2,1].set_yticks([0, 0.1, 0.2, 0.3, 0.4])
+
+    axs[0,0].legend(loc='best', prop={'size': 8})
 
 
 def drawplot2(axs, so, toffset=0):

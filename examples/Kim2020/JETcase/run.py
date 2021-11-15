@@ -4,22 +4,24 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants
+from scipy.interpolate import interp1d
 import sys
-sys.path.append('../Deuterium_Burn-through')
-sys.path.append('../../py')
+
+sys.path.append('../../Deuterium_Burn-through')
+sys.path.append('../../../py')
 
 #from run import makeplots
 import PlasmaParameters as Formulas
 import DREAM.Settings.Equations.ColdElectronTemperature as Tcold
 import DREAM.Settings.Solver as Solver
-
+import DREAM.Settings.Equations.ElectricField as ElectricField_D
 import DREAM.Settings.Atomics as Atomics
 from STREAM import STREAMOutput, STREAMSettings, runiface
 import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=1e-4, nt=2000):
+def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e3, tmax=1e-4, nt=2000, selfconsistent = False):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -32,32 +34,58 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=1e-4,
     :param tmax:    Simulation time [s]
     """
     n0 = 3.22e22 * prefill  # Initial total deuterium density
-    #n0 = 2.78e22 * prefill  # Initial total deuterium density
     nD = n0 * np.array([[1-gamma], [gamma]])
+    nO = fractionO * n0
+    nC = fractionC * n0
 
-    Btor = 2.65     # Toroidal magnetic field [T]
-    a = 1.6         # Plasma minor radius [m]
-    R0 = 5.65       # Plasma major radius [m]
-    l_MK2 = 1       # Distance between plasma centre and passive structure [m] (unused)
-    V_vessel = 1000 # Vacuum vessel volume
+    Btor = 2.4      # Toroidal magnetic field [T]
+    R0 = 2.96       # Plasma major radius [m]
+    r_wall = 1      # Distance between plasma centre and passive structure [m] (unused)
+    V_vessel = 100  # Vacuum vessel volume
+
+    t = np.linspace(0, 0.3, 100)
+    t_a = np.array([0, 0.017, 0.05, 0.085, 0.14, 0.19, 0.25, 0.3])
+    V_p = np.array([100, 80, 56, 48, 52, 51.75, 54.25, 56])
+    a_vec = np.sqrt(V_p / (2 * np.pi ** 2 * R0))
+    a_fun = interp1d(t_a, a_vec, kind='cubic')
+    a = a_fun(t)  # Plasma minor radius [m]
+
+    tVloop = [0, 0.02, 0.0325, 0.0475, 0.08, 0.1, 0.125, 0.13, 0.15, 0.20, 0.22, 0.23, 0.25, 0.3, 0.335, 0.35, 0.37,
+               0.4, 0.45, 0.5]
+    Vloop = [11, 21.25, 26, 26.25, 24, 16.5, 8.25, 7.9, 7.75, 7.5, 7.25, 6.5, 6.5, 6.75, 6.75, 6, 4.75, 4.25, 4.5,
+               3.60]
+
+    c1 = 1.1
+    c2 = 0.09
+    c3 = 0.1
 
     Te0 = 1     # electron temperature [eV]
     Ti0 = 0.026 # ion temperature [eV]
 
     # Initial electric field
-    E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
+    sigma = Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
+    j0 = Ip / (a_vec[0] ** 2 * np.pi)  # 943?
+    E0 = j0 / sigma
 
     ss = STREAMSettings()
 
     ss.atomic.adas_interpolation = Atomics.ADAS_INTERP_BILINEAR
 
     # Electric field
-    ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
-    ss.eqsys.E_field.setInitialProfile(E0)
-    #ss.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
-    Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.5 - 2))
-    ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
-    ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
+    if selfconsistent:
+        R = 7.5e-4  # Resistance in MK2 structure [Ohm]
+        L = 9.1e-6  # Inductance in MK2 structure [H]
+        wall_time = L / R
+        ss.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
+        ss.eqsys.E_field.setInitialProfile(efield=E0)
+        ss.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER,
+                                                       V_loop_wall_R0=Vloop / R0, times=t,
+                                                       inverse_wall_time=1 / wall_time, R0=R0)
+    else:
+        ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+        ss.eqsys.E_field.setInitialProfile(efield=E0)
+        ss.eqsys.E_field.setInductances(Lp=5.19e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
+        ss.eqsys.E_field.setCircuitVloop(Vloop, tVloop)
 
     # Electron temperature
     ss.eqsys.T_cold.setType(Tcold.TYPE_SELFCONSISTENT)
@@ -66,6 +94,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=1e-4,
 
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
+    ss.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nC, r=np.array([0]), T=Ti0)
+    ss.eqsys.n_i.addIon(name='O', Z=8, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nO, r=np.array([0]), T=Ti0)
 
     # Disable runaway
     ss.eqsys.n_re.setAvalanche(False)
@@ -76,15 +106,14 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=1e-4,
 
     # Radial grid
     ss.radialgrid.setB0(Btor)
-    ss.radialgrid.setMinorRadius(a)
-    #ss.radialgrid.setMinorRadius([1.9, 1.6, 1.6], [0, 0.1, 100])
+    ss.radialgrid.setMinorRadius(a, t)
     ss.radialgrid.setMajorRadius(R0)
-    ss.radialgrid.setWallRadius(a)
+    ss.radialgrid.setWallRadius(r_wall)
     ss.radialgrid.setVesselVolume(V_vessel)
 
-    ss.radialgrid.setRecyclingCoefficient1(1)
-    ss.radialgrid.setRecyclingCoefficient2(0)
-    ss.radialgrid.setRecyclingCoefficient3(1)
+    ss.radialgrid.setRecyclingCoefficient1(c1)
+    ss.radialgrid.setRecyclingCoefficient2(c2)
+    ss.radialgrid.setRecyclingCoefficient3(c3)
     
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)
@@ -95,7 +124,6 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=1e-4,
     ss.solver.preconditioner.setEnabled(False)
     ss.timestep.setTmax(tmax)
     ss.timestep.setNt(nt)
-    ss.timestep.setNumberOfSaveSteps(10000)
 
     ss.other.include('fluid', 'stream', 'scalar')
 
@@ -114,65 +142,62 @@ def drawplot1(axs, so, toffset=0):
     Ti = so.eqsys.W_i.getTemperature()['D'][:,0]
     tau = so.other.stream.tau_D[:,0]
 
-    plotInternal(axs[0,0], t, Ip/1e3, ylabel=r'$I_{\rm p}$ (kA)', color='k')
-    plotInternal(axs[0,1], t, ne/1e17, ylabel=r'$n_{\rm e}$ (m$^{-3}$)', color='k')
-    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='k')
+    plotInternal(axs[0,0], t, Ip, ylabel=r'$I_{\rm p}$ (A)', color='g', showlabel=True, label='STREAM')
+    plotInternal(axs[0,1], t, ne, ylabel=r'$n_{\rm e}$ (m$^{-3}$)', color='g', showlabel=True, label='STREAM')
+    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='g', showlabel=True, label='STREAM')
 
-    plotInternal(axs[2,0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='k')
-    plotInternal(axs[2,1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='k')
+    plotInternal(axs[2,0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='g', showlabel=True, label='STREAM')
+    plotInternal(axs[2,1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='g', showlabel=True, label='STREAM')
+
+    Ip_mat = np.genfromtxt('DyonData/PlasmaCurrent_DYON.csv', delimiter=',')
+    t_Ip_d = Ip_mat[:,0]
+    Ip_d = Ip_mat[:, 1]
+    plotInternal(axs[0, 0], t_Ip_d, Ip_d, ylabel=r'$I_{\rm p}$ (A)', color='k', showlabel=True, label='DYON')
+
+    Ip_mat_m = np.genfromtxt('DyonData/PlasmaCurrent_measured.csv', delimiter=',')
+    t_Ip_m = Ip_mat_m[:, 0]
+    Ip_m = Ip_mat_m[:, 1]
+    plotInternal(axs[0, 0], t_Ip_m, Ip_m, ylabel=r'$I_{\rm p}$ (A)', color='silver', showlabel=True, label='Measured')
+
+    ne_mat = np.genfromtxt('DyonData/ElectronDensity_DYON.csv', delimiter=',')
+    t_ne_d = ne_mat[:, 0]
+    ne_d = ne_mat[:, 1]
+    plotInternal(axs[0, 1], t_ne_d, ne_d, ylabel=r'$n_{\rm e}$ (m$^{-3}$)', color='k', showlabel=True, label='DYON')
+
+    Te_mat = np.genfromtxt('DyonData/ElectronTemperature_DYON.csv', delimiter=',')
+    t_Te_d = Te_mat[:, 0]
+    Te_d = Te_mat[:, 1]
+    plotInternal(axs[1, 0], t_Te_d, Te_d, ylabel=r'$T_{\rm e}$ (eV)', color='k', showlabel=True, label='DYON')
+
+    Ti_mat = np.genfromtxt('DyonData/IonTemperature_DYON.csv', delimiter=',')
+    t_Ti_d = Ti_mat[:, 0]
+    Ti_d = Ti_mat[:, 1]
+    plotInternal(axs[2, 0], t_Ti_d, Ti_d, ylabel=r'$T_{\rm i}$ (eV)', color='k', showlabel=True, label='DYON')
+
+    tau_mat = np.genfromtxt('DyonData/ConfinementTime_DYON.csv', delimiter=',')
+    t_tau_d = tau_mat[:, 0]
+    tau_d = tau_mat[:, 1]
+    plotInternal(axs[2, 1], t_tau_d, tau_d, ylabel=r'$\tau_{\rm D}$ (s)', color='k', showlabel=True, label='DYON')
+
 
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
             axs[i,j].set_xlim([0, 0.3])
             axs[i,j].grid(True)
 
-    axs[0,0].set_ylim([0, 230])
-    axs[0,1].set_ylim([0, 15])
-    axs[1,0].set_ylim([0, 80])
-    axs[2,0].set_ylim([0, 80])
-    axs[2,1].set_ylim([0, 0.5])
+    axs[0,0].set_ylim([0, 6e5])
+    axs[0,1].set_ylim([0, 6e18])
+    axs[1,0].set_ylim([0, 400])
+    axs[2,0].set_ylim([0, 400])
+    axs[2,1].set_ylim([0, 0.1])
 
-    axs[0,0].set_yticks([0, 50, 100, 150, 200])
-    axs[0,1].set_yticks([0, 5, 10, 15])
-    axs[1,0].set_yticks([0, 20, 40, 60, 80])
-    axs[2,0].set_yticks([0, 20, 40, 60, 80])
-    axs[2,1].set_yticks([0, 0.1, 0.2, 0.3, 0.4])
+    axs[0,0].set_yticks([0, 2e5, 4e5, 6e5])
+    axs[0,1].set_yticks([0, 2e18, 4e18, 6e18])
+    axs[1,0].set_yticks([0, 100, 200, 300, 400])
+    axs[2,0].set_yticks([0, 100, 200, 300, 400])
+    axs[2,1].set_yticks([0, 0.05, 0.1])
 
-
-def drawplot2(axs, so, toffset=0):
-    t = so.grid.t[:] + toffset
-    showlabel = (toffset==0)
-
-    Vp = so.other.stream.V_p[:,0] / 1e6
-    Poh = -so.other.fluid.Tcold_ohmic[:,0] * Vp
-    Pequi = so.other.fluid.Tcold_ion_coll[:,0] * Vp
-    Pconve = so.other.scalar.energyloss_T_cold[:,0] / 1e6
-    Prad = so.other.fluid.Tcold_radiation[:,0] * Vp
-
-    PequiI = so.other.stream.Wi_e_coll[:,0] * Vp
-    Pcx = -so.other.stream.Wi_chargeexchange[:,0] * Vp
-    Pconvi = -so.other.stream.Wi_iontransport[:,0] * Vp
-
-    ylbl = 'MW'
-    plotInternal(axs[0], t[1:], Poh, ylabel=ylbl, color='r', linestyle='--', label='Ohmic', showlabel=showlabel)
-    plotInternal(axs[0], t[1:], Pequi, ylabel=ylbl, color='b', linestyle='--', label='Equilibration', showlabel=showlabel)
-    plotInternal(axs[0], t[1:], Pconve, ylabel=ylbl, color='k', linestyle='--', label='Transport', showlabel=showlabel)
-    plotInternal(axs[0], t[1:], Prad, ylabel=ylbl, color='m', linestyle='--', label='Radiation + ionization', showlabel=showlabel)
-
-    plotInternal(axs[1], t[1:], PequiI, color='b', linestyle='--', ylabel=ylbl, label='Equilibration', showlabel=showlabel)
-    plotInternal(axs[1], t[1:], Pcx, color='r', linestyle='--', ylabel=ylbl, label='Charge exchange', showlabel=showlabel)
-    plotInternal(axs[1], t[1:], Pconvi, ylabel=ylbl, color='k', linestyle='--', label='Transport', showlabel=showlabel)
-
-    axs[0].set_title('Electron energy balance')
-    axs[1].set_title('Ion energy balance')
-    for ax in axs:
-        ax.set_xlim([0, 0.3])
-        ax.set_ylim([0, 0.5])
-        ax.legend(frameon=False)
-        ax.grid(True)
-        ax.set_xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25])
-        ax.set_yticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5])
-
+    axs[0,0].legend(loc='best', prop={'size': 8})
 
 def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, *args, **kwargs):
     if label is not None and showlabel == False:
@@ -198,13 +223,8 @@ def makeplots(so1, so2):
     drawplot1(axs1, so1)
     drawplot1(axs1, so2, toffset=so1.grid.t[-1])
 
-    fig2, axs2 = plt.subplots(1, 2, figsize=(10, 4))
-
-    drawplot2(axs2, so1)
-    drawplot2(axs2, so2, toffset=so1.grid.t[-1])
 
     fig1.tight_layout()
-    fig2.tight_layout()
     plt.show()
 
 
@@ -223,7 +243,7 @@ def main(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if not settings.skip:
-        prefill = 2 * 0.8e-3 / 133.32   # Pa -> Torr
+        prefill = 2 * 2.7e-3 / 133.32   # Pa -> Torr
         ss1 = generate(prefill=prefill)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
@@ -231,8 +251,7 @@ def main(argv):
         ss2 = STREAMSettings(ss1)
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.3 - ss1.timestep.tmax)
-        ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(3000)
+        ss2.timestep.setNt(5000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:
