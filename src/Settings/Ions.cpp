@@ -40,7 +40,7 @@ void SimulationGenerator::DefineOptions_Ions(DREAM::Settings *s) {
         2, ndim, (real_t*)nullptr
     );
 
-    // TODO transport settings
+    
 }
 
 /**
