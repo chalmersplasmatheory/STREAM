@@ -370,7 +370,7 @@
         \end{aligned}
     \end{equation}
     where the total influx of neutral deuterium particles from the wall is
-    \begin{equation}
+    \begin{equation}\label{eq:GammaDtot}
         \Gamma_{D,{\rm in}}^{\rm tot} = \Vp\frac{Y_D^D n_D^{(1)}}{\tau_D},
     \end{equation}
     with the deuterium recycling coefficient
@@ -453,7 +453,7 @@
     \begin{equation}
         V_i^{(j)} = \begin{cases}
             \gamma_{n,i}V,&\quad j=0,\\
-            \Vp, &\quad j\geq 1,
+            \Vp, &\quad j\geq 1, 
         \end{cases}\qquad
         %
         \hat{V}_i^{(j)} = \begin{cases}
@@ -471,31 +471,34 @@
     \begin{equation}
         \begin{aligned}
             \frac{\dd n_i^{(j)}}{\dd t} &=
-                \frac{\hat{V}_i^{(j)}}{V_i^{(j)}}\left(
+                \frac{1}{V_i^{(j)}}(\hat{V}_i^{(j-1)}
                     I_i^{(j-1)}n_en_i^{(j-1)}
-                    -I_i^{(j)}n_en_i^{(j)}
+                    -\hat{V}_i^{(j)}I_i^{(j)}n_en_i^{(j)}
                     %
-                    + R_i^{(j+1)}n_en_i^{(j+1)}
-                    -R_i^{(j)}n_en_i^{(j)}
-                \right) +\\
-                %
-                &+ \frac{\hat{V}_D^{(j)}}{V_D^{(j)}}\sum_k\sum_{l\geq 1}n_k^{(l)}\left(
-                    R_{ik,{\rm cx}}^{(j+1)}n_i^{(j+1)}
-                    -R_{ik,{\rm cx}}^{(j)}n_i^{(j)}
-                \right)
-                +\frac{\Gamma_i^{(j)}}{V_i^{(j)}}
+                    + \hat{V}_i^{(j+1)}R_i^{(j+1)}n_en_i^{(j+1)} \\
+                    &-\hat{V}_i^{(j)}R_i^{(j)}n_en_i^{(j)} 
+                	%
+                	+ \hat{V}_D^{(0)}n_D^{(0)}A_{i,{\rm cx}}^{(j)} ) 
+                +\Gamma_i^{(j)}.
         \end{aligned}
     \end{equation}
-    where the charge-exchange coefficient $R_{ik,{\rm cx}}$ is taken to be zero
-    for $i=k=D$ and $i,k\neq D$, i.e.\ exactly one of the ion species involved
-    in the interaction must be deuterium, and the particle flux
+    Here the coefficient $A_{i,{\rm cx}}^{(j)}$ is given by
     \begin{equation}
-        \Gamma_i^{(j)} = \Vp\begin{cases}
-            \Gamma_{i,{\rm in}}^{(0)}, &\quad j=0,\\
-            -n_i^{(j)}/\tau_i, &\quad j\geq 1
+    	A_{i,{\rm cx}}^{(j)} = \begin{cases}
+    	(-1)^{(j+1)}\sum_{k,l\geq 1}R_{ik,{\rm cx}}^{(l)}n_k^{(l)}, &\quad i=D, k\neq D,\\
+    	R_{ik,{\rm cx}}^{(j+1)}n_i^{(j+1)}
+                    -R_{ik,{\rm cx}}^{(j)}n_i^{(j)}, &\quad i\neq D, k=D,
+    	\end{cases}
+    \end{equation}
+    where we note that there are no charge-exchange contributions for $i=k=D$ and $i,k\neq D$, i.e.\ exactly one of the ion species involved in the interaction is deuterium, and the particle flux is given by
+    \begin{equation}
+        \Gamma_i^{(j)} = \begin{cases}
+            \Gamma_{D,{\rm in}}^{\rm tot}/V_i^{(j)}, &\quad j=0, i=D,\\
+            -\Gamma_{i,{\rm in}}^{(0)}/V_i^{(j)}, &\quad j=0, i\neq D,\\
+            -n_i^{(j)}/\tau_i, &\quad j\geq 1, 
         \end{cases}
     \end{equation}
-    where $\Gamma_{i,{\rm in}}^{(0)}$ is given by equation~\eqref{eq:Gamma0}.
+    where $\Gamma_{D,{\rm in}}^{\rm tot}$ is given by equation~\eqref{eq:GammaDtot} and $\Gamma_{i,{\rm in}}^{(0)}$ is given by equation~\eqref{eq:Gamma0}.
 
     \subsection{Required modifications}
     Based on the above discussion, the following modifications will be required
