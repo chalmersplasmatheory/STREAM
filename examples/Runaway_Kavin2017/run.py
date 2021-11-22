@@ -22,7 +22,7 @@ import STREAM.Settings.Equations.IonSpecies as Ions
 
 
 
-def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.003, nt=1000):
+def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.003, nt=10000, EfieldDyon = False):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -50,7 +50,6 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
     '''
 
     n0 = 0.01e20/7#3.22e22 * prefill  # Initial total deuterium density
-    # n0 = 2.78e22 * prefill  # Initial total deuterium density
     nD = np.array([[n0], [n0 * gamma/(1-gamma)]])
 
     Btor = 2.65     # Toroidal magnetic field [T]
@@ -73,14 +72,16 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
     ss.atomic.adas_interpolation = Atomics.ADAS_INTERP_BILINEAR
 
     # Electric field
-    #ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
-    #ss.eqsys.E_field.setInitialProfile(E0)
-    #Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.25 - 2))
-    #ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
-    #ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
-    ss.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
-    ss.eqsys.E_field.setInitialProfile(efield=E0)
-    ss.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER, V_loop_wall_R0=Vloop/R0, times=Vloop_t, inverse_wall_time=1e-12, R0=R0)
+    if EfieldDyon:
+        ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+        ss.eqsys.E_field.setInitialProfile(E0)
+        Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.25 - 2))
+        ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
+        ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
+    else:
+        ss.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
+        ss.eqsys.E_field.setInitialProfile(efield=E0)
+        ss.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER, V_loop_wall_R0=Vloop/R0, times=Vloop_t, inverse_wall_time=1e-12, R0=R0)
 
     # Electron temperature
     ss.eqsys.T_cold.setType(Tcold.TYPE_SELFCONSISTENT)
@@ -196,13 +197,14 @@ def drawplot1(axs, so, toffset=0.7):
             axs[i,j].set_xlim([t[0], t[-1]])
             axs[i,j].grid(True)
 
-    axs[0,0].set_ylim([0, 0.1])
+    #axs[0,0].set_ylim([0, 0.1])
     axs[0,1].set_ylim([0, 0.012])
     axs[1,0].set_ylim([0, 2.5])
     axs[1,1].set_ylim([0, 16])
     axs[2,0].set_ylim([0, 0.7])
     #axs[1, 0].set_ylim([0, 0.025])
     axs[1, 1].set_ylim([1e-8, 1e14])
+    axs[3, 1].set_ylim([1e-9, 1e-2])
 
     #axs[0,0].set_yticks([0, 50, 100, 150, 200])
     #axs[0,1].set_yticks([0, 5, 10, 15])
@@ -345,8 +347,7 @@ def main(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if not settings.skip:
-        prefill = 3e-4
-        ss1 = generate(prefill=prefill, nt=10000)
+        ss1 = generate(EfieldDyon=False)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
 
