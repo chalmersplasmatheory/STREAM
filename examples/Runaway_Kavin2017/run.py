@@ -48,11 +48,11 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
     #t_end   = 2        # [s]   (Simulation ends)
     '''
     if tritium:
-        n0 = 0.01e20 / 7  # 3.22e22 * prefill  # Initial total deuterium density
+        n0 = 0.01e20 / 9 # /7  # 3.22e22 * prefill  # Initial total deuterium density
         nD = np.array([[n0*0.5], [n0 * gamma / (1 - gamma)*0.5]])
         nT = np.array([[n0 * 0.5], [n0 * gamma / (1 - gamma) * 0.5]])
     else:
-        n0 = 0.01e20 / 7#3.22e22 * prefill  # Initial total deuterium density
+        n0 = 0.01e20 / 9 # /7 #3.22e22 * prefill  # Initial total deuterium density
         nD = np.array([[n0], [n0 * gamma / (1 - gamma)]])
 
     Btor = 2.65     # Toroidal magnetic field [T]
@@ -100,7 +100,7 @@ def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.0
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_NEGLECT)
     ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
 
-    # Recycling coefficients (unused)
+    # Recycling coefficients 
     ss.eqsys.n_i.setJET_CWrecycling()
 
     # Radial grid
@@ -204,21 +204,22 @@ def drawplot1(axs, so, toffset=0.7):
         for j in range(axs.shape[1]):
             axs[i,j].set_xlim([t[0], t[-1]])
             axs[i,j].grid(True)
-
+    
+    upperlim = 3.35
     axs[0,0].set_ylim([0, 0.1])
-    axs[0, 0].set_xlim([0.65, 2.05])
+    axs[0, 0].set_xlim([0.65, upperlim])
     axs[0,1].set_ylim([0, 0.012])
-    axs[0,1].set_xlim([0.65, 2.05])
-    axs[1,0].set_ylim([0, 2.5])
-    axs[1, 0].set_xlim([0.65, 2.05])
+    axs[0,1].set_xlim([0.65, upperlim])
+    #axs[1,0].set_ylim([0, 2.5])
+    axs[1, 0].set_xlim([0.65, upperlim])
     axs[1,1].set_ylim([0, 16])
-    axs[1,1].set_xlim([0.65, 2.05])
+    axs[1,1].set_xlim([0.65, upperlim])
     axs[2,0].set_ylim([0, 0.7])
-    axs[2, 0].set_xlim([0.65, 2.05])
-    axs[3,0].set_xlim([0.65, 2.05])
+    axs[2, 0].set_xlim([0.65, upperlim])
+    axs[3,0].set_xlim([0.65, upperlim])
     #axs[1, 0].set_ylim([0, 0.025])
     axs[3, 1].set_ylim([1e-9, 1e-1])
-    axs[3, 1].set_xlim([0.65, 2.05])
+    axs[3, 1].set_xlim([0.65, upperlim])
 
     #axs[0,0].set_yticks([0, 50, 100, 150, 200])
     #axs[0,1].set_yticks([0, 5, 10, 15])
@@ -277,9 +278,9 @@ def main(argv):
 
         ss2 = STREAMSettings(ss1)
         ss2.fromOutput(f'output1{ext}.h5')
-        ss2.timestep.setTmax(1.3 - ss1.timestep.tmax)
+        ss2.timestep.setTmax(1.3*2 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(50000)
+        ss2.timestep.setNt(50000*2)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:
