@@ -119,7 +119,7 @@ class Ions(DREAMIons.Ions):
         for ion in self.ions:
             if ion.name == deuterium:
                 ion.setRecyclingCoefficient(carbon, 0.015) #Ändrat från 0.03!!!
-                ion.setRecyclingCoefficient(iron, 3e-3) # Vad ska detta vara?
+                ion.setRecyclingCoefficient(iron, 1.7e-2) # Vad ska detta vara?
             elif ion.name == oxygen:
                 ion.setRecyclingCoefficient(carbon, 1.0)
                 ion.setRecyclingCoefficient(oxygen, 1.0)
