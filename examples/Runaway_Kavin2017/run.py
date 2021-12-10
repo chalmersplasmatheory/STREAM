@@ -21,45 +21,28 @@ import STREAM.Settings.Equations.IonSpecies as Ions
 
 
 
-def generate(prefill=3e-4, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.003, nt=10000, EfieldDyon = False, tritium=False):
+def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.003, nt=10000, EfieldDyon = False, tritium=False):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
     
-    :param prefill: Prefill gas pressure [Torr]
+    :param n0:      Deuterium density [m^-3]
+    :param Btor:    Toroidal magnetic field [T]
     :param gamma:   Degree of ionization
     :param Vloop:   External loop voltage [V]
     :param Vloop_t: Time vector corresponding to given loop voltage [V]
-    :param j0:      Initial plasma current density [A/m^2]
+    :param Ures0:   Initial voltage in plasma [V]
     :param tmax:    Simulation time [s]
     """
-
-    '''
-    #V_v     = 1700     # [m^3] (Vessel Volume)
-    #R       = 5.7      # [m]   (major radius)
-    #a       = 1.6      # [m]   (minor radius)
-    #B       = 2.65     # [T]   (Toroidal magnetic field, at R = 6.2 m)
-    #Y_H     = 1        #       (Recycling coefficient for hydrogen)
-    #U_ext   = 10.6     # [V]   (External voltage)
-    #T_e0    = 5        # [eV]  (Initial electron temperature)
-    #T_i0    = 1        # [eV]  (Initial ion temperature)
-    #gamma_0 = 0.03     #       (Initial degree of ionization)
-    #t_bd    = 0.7      # [s]   (Time of gas breakdown, simulation starts)
-    #t_end   = 2        # [s]   (Simulation ends)
-    '''
     if tritium:
-        n0 = 0.01e20 / 9 # /7  # 3.22e22 * prefill  # Initial total deuterium density
         nD = np.array([[n0*0.5], [n0 * gamma / (1 - gamma)*0.5]])
         nT = np.array([[n0 * 0.5], [n0 * gamma / (1 - gamma) * 0.5]])
     else:
-        n0 = 0.01e20 / 9 # /7 #3.22e22 * prefill  # Initial total deuterium density
         nD = np.array([[n0], [n0 * gamma / (1 - gamma)]])
 
-    Btor = 2.65     # Toroidal magnetic field [T]
     a = 1.6         # Plasma minor radius [m]
     R0 = 5.7        # Plasma major radius [m]
     b = 8*R0/np.exp(7/4)
-    print(str(b))
     V_vessel = 1700 # Vacuum vessel volume [m^3]
 
     Te0 = 5     # electron temperature [eV]
@@ -161,11 +144,14 @@ def drawplot1(axs, so, toffset=0.7):
     Ptransp = so.other.scalar.energyloss_T_cold[:,0] * Vp
     Pequi = so.other.fluid.Tcold_ion_coll[:, 0] * Vp
 
-    Uext = 10.6 * t / t
+    #Uext = so.eqsys.V
     Ures = 2 * np.pi * 5.7 * so.eqsys.E_field[:,0]
 
     Ip = so.eqsys.I_p[:,0]
     Ire = 1.602e-19 * 2.99792458e8 * 1.6**2 * np.pi * so.eqsys.n_re[:]
+
+    EoverED = so.eqsys.E_field.norm('ED')[1:,0]
+    EoverEC = so.eqsys.E_field[1:,0]/so.other.fluid.Ectot[:,0]
 
     plotInternal(axs[0, 0], t, Te / 1e3, ylabel=r'$T$ (keV)', color='k', showlabel=True, label='$T_{\rm e}$')
     plotInternal(axs[0, 0], t, Ti / 1e3, ylabel=r'$T$ (keV)', color='m', showlabel=True, label='$T_{\rm i}$')
@@ -179,11 +165,14 @@ def drawplot1(axs, so, toffset=0.7):
     plotInternal(axs[1, 0], t[1:], Ptransp / 1e6, ylabel=r'$P$ (MW)', color='c', showlabel=True, label='$P_{\rm transp}$')
     plotInternal(axs[1, 0], t[1:], Pequi / 1e6, ylabel=r'$P$ (MW)', color='g', showlabel=True, label='$P_{\rm equi}$')
 
-    plotInternal(axs[1, 1], t, Uext, ylabel=r'$U$ (V)', color='k', showlabel=True, label='$U_{\rm ext}$')
+    #plotInternal(axs[1, 1], t, Uext, ylabel=r'$U$ (V)', color='k', showlabel=True, label='$U_{\rm ext}$')
     plotInternal(axs[1, 1], t, Ures, ylabel=r'$U$ (V)', color='m', showlabel=True, label='$U_{\rm res}$')
 
     plotInternal(axs[2, 0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='k', showlabel=True, label='$I_{\rm p}$')
     plotInternal(axs[2, 0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='m', showlabel=True, label='$I_{\rm re}$')
+
+    plotInternal(axs[2, 1], t[1:], EoverED, ylabel=r'$E/E$', color='k', showlabel=True, label='$E/E_{\rm D}$', yscalelog = True)
+    plotInternal(axs[2, 1], t[1:], EoverEC, ylabel=r'$E/E$', color='m', showlabel=True, label='$E/E_{\rm C}$', yscalelog = True)
 
     plotInternal(axs[3, 0], t[1:], gammaFe, ylabel=r'$\gamma_{\rm Fe}$ (%)', color='k', showlabel=False, label='$I_{\rm p}$')
     
@@ -204,28 +193,29 @@ def drawplot1(axs, so, toffset=0.7):
         for j in range(axs.shape[1]):
             axs[i,j].set_xlim([t[0], t[-1]])
             axs[i,j].grid(True)
-    
-    upperlim = 3.35
-    axs[0,0].set_ylim([0, 0.1])
-    axs[0, 0].set_xlim([0.65, upperlim])
-    axs[0,1].set_ylim([0, 0.012])
-    axs[0,1].set_xlim([0.65, upperlim])
-    #axs[1,0].set_ylim([0, 2.5])
-    axs[1, 0].set_xlim([0.65, upperlim])
-    axs[1,1].set_ylim([0, 16])
-    axs[1,1].set_xlim([0.65, upperlim])
+
+
+    #upperlim = 3.35
+    #axs[0,0].set_ylim([0, 0.1])
+    #axs[0, 0].set_xlim([0.65, upperlim])
+    #axs[0,1].set_ylim([0, 0.012])
+    #axs[0,1].set_xlim([0.65, upperlim])
+    #axs[1, 0].set_xlim([0.65, upperlim])
+    #axs[1,1].set_ylim([0, 16])
+    #axs[1,1].set_xlim([0.65, upperlim])
     axs[2,0].set_ylim([0, 0.7])
-    axs[2, 0].set_xlim([0.65, upperlim])
-    axs[3,0].set_xlim([0.65, upperlim])
+    #axs[2, 0].set_xlim([0.65, upperlim])
+    #axs[3,0].set_xlim([0.65, upperlim])
     #axs[1, 0].set_ylim([0, 0.025])
     axs[3, 1].set_ylim([1e-9, 1e-1])
-    axs[3, 1].set_xlim([0.65, upperlim])
+    #axs[3, 1].set_xlim([0.65, upperlim])
 
     #axs[0,0].set_yticks([0, 50, 100, 150, 200])
     #axs[0,1].set_yticks([0, 5, 10, 15])
     #axs[1,0].set_yticks([0, 20, 40, 60, 80])
     #axs[2,0].set_yticks([0, 20, 40, 60, 80])
     #axs[2,1].set_yticks([0, 0.1, 0.2, 0.3, 0.4])
+
 
 def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, yscalelog = False, *args, **kwargs):
     if label is not None and showlabel == False:
@@ -256,8 +246,70 @@ def makeplots(so1, so2):
     fig1.tight_layout()
     plt.show()
 
+def savePlots(so1, so2, directory, filename):
+    fig1, axs1 = plt.subplots(4, 2, figsize=(7, 10))
 
-def main(argv):
+    drawplot1(axs1, so1)
+    drawplot1(axs1, so2, toffset=so1.grid.t[-1]+0.7)
+
+    fig1.tight_layout()
+    fig1.savefig(directory + '/' + filename + '.pdf')
+    plt.close()
+
+def parameterSweep(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.array([])):
+    directory = '../../../Figures/RunawayParameterSweep'
+    for tritium in [False, True]:
+        addT = 'T' if tritium else ''
+        for n0 in n0_list:
+            ss1 = generate(n0=n0, EfieldDyon=False, tritium=tritium)
+            ss1.save(f'Sweep/settings1_n0_{np.round(n0,-14)}_' + addT + '.h5')
+            so1 = runiface(ss1, f'Sweep/output1_n0_{np.round(n0,-14)}_' + addT + '.h5', quiet=False)
+
+            ss2 = STREAMSettings(ss1)
+            ss2.fromOutput(f'Sweep/output1_n0_{np.round(n0,-14)}_' + addT + '.h5')
+            ss2.timestep.setTmax(1.3 * 2 - ss1.timestep.tmax)
+            ss2.timestep.setNumberOfSaveSteps(0)
+            ss2.timestep.setNt(10000)
+            ss2.save(f'Sweep/settings2_n0_{np.round(n0,-14)}_' + addT + '.h5')
+            so2 = runiface(ss2, f'Sweep/output2_n0_{np.round(n0,-14)}_' + addT + '.h5', quiet=False)
+
+            filename = f'n0_{np.round(n0,-14)}'
+            savePlots(so1, so2, directory, filename)
+
+        for Vloop in Vloop_list:
+            ss1 = generate(Vloop=Vloop, EfieldDyon=False, tritium=tritium)
+            ss1.save(f'Sweep/settings1_Vloop_{np.round(Vloop,3)}_' + addT + '.h5')
+            so1 = runiface(ss1, f'Sweep/output1_Vloop_{np.round(Vloop,3)}_' + addT + '.h5', quiet=False)
+
+            ss2 = STREAMSettings(ss1)
+            ss2.fromOutput(f'Sweep/output1_Vloop_{np.round(Vloop,3)}_' + addT + '.h5')
+            ss2.timestep.setTmax(1.3 * 2 - ss1.timestep.tmax)
+            ss2.timestep.setNumberOfSaveSteps(0)
+            ss2.timestep.setNt(30000)
+            ss2.save(f'Sweep/settings2_Vloop_{np.round(Vloop,3)}_' + addT + '.h5')
+            so2 = runiface(ss2, f'Sweep/output2_Vloop_{np.round(Vloop,3)}_' + addT + '.h5', quiet=False)
+
+            filename = f'Vloop_{np.round(Vloop,3)}'
+            savePlots(so1, so2, directory, filename)
+            
+        for Btor in Btor_list:
+            ss1 = generate(Btor=Btor, EfieldDyon=False, tritium=tritium)
+            ss1.save(f'Sweep/settings1_Btor{np.round(Btor,3)}_' + addT + '.h5')
+            so1 = runiface(ss1, f'Sweep/output1_Btor{np.round(Btor,3)}_' + addT + '.h5', quiet=False)
+
+            ss2 = STREAMSettings(ss1)
+            ss2.fromOutput(f'Sweep/output1_Btor{np.round(Btor,3)}_' + addT + '.h5')
+            ss2.timestep.setTmax(1.3 * 2 - ss1.timestep.tmax)
+            ss2.timestep.setNumberOfSaveSteps(0)
+            ss2.timestep.setNt(30000)
+            ss2.save(f'Sweep/settings2_Btor{np.round(Btor,3)}_' + addT + '.h5')
+            so2 = runiface(ss2, f'Sweep/output2_Btor{np.round(Btor,3)}_' + addT + '.h5', quiet=False)
+
+            filename = f'Btor{np.round(Btor,3)}'
+            savePlots(so1, so2, directory, filename)
+
+
+def oneRun(argv):
     FONTSIZE = 16
     plt.rcParams.update({'font.size': FONTSIZE})
 
@@ -280,7 +332,7 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(1.3*2 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(30000)
+        ss2.timestep.setNt(10000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:
@@ -292,6 +344,14 @@ def main(argv):
 
     return 0
 
+def main(argv):
+    #oneRun(argv=argv)
+    #'''
+    n0_list = np.array([0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4])*1e17
+    Vloop_list = np.array([10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15])
+    #Btor_list = np.array([2.5, 3])
+    parameterSweep(n0_list, Vloop_list)
+    #'''
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
