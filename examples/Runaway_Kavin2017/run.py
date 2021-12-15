@@ -3,7 +3,7 @@
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.constants
+from scipy.constants import c, e, m_e, mu_0
 import sys
 sys.path.append('../Deuterium_Burn-through')
 sys.path.append('../../py')
@@ -21,7 +21,7 @@ import STREAM.Settings.Equations.IonSpecies as Ions
 
 
 
-def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.003, nt=10000, EfieldDyon = False, tritium=False):
+def generate(n0=0.01e20/9, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.003, nt=10000, EfieldDyon = False, tritium=False):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -59,7 +59,7 @@ def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0
     if EfieldDyon:
         ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
         ss.eqsys.E_field.setInitialProfile(E0)
-        Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.25 - 2))
+        Lp = float(mu_0 * R0 * (np.log(8*R0/a) + 0.25 - 2))
         ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
         ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
     else:
@@ -113,7 +113,7 @@ def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0
     return ss
 
 
-def drawplot1(axs, so, toffset=0.7):
+def drawplot1(axs, so, toffset=0.7, showlabel=True):
     """
     Draw a plot with a output from the given STREAMOutput object.
     """
@@ -126,6 +126,8 @@ def drawplot1(axs, so, toffset=0.7):
     nD0 = so.eqsys.n_i['D'][0][:]
     nD1 = so.eqsys.n_i['D'][1][:]
 
+    vth = np.sqrt(2*e*Te / m_e)
+    streamingParameter = so.eqsys.j_tot[:,0] / (e * ne * vth)
 
     nFe = []
     for iFe in range(0,27):
@@ -148,46 +150,72 @@ def drawplot1(axs, so, toffset=0.7):
     Ures = 2 * np.pi * 5.7 * so.eqsys.E_field[:,0]
 
     Ip = so.eqsys.I_p[:,0]
-    Ire = 1.602e-19 * 2.99792458e8 * 1.6**2 * np.pi * so.eqsys.n_re[:]
+    #Ire = e * c * 1.6**2 * np.pi * so.eqsys.n_re[:]
+    Ire = so.eqsys.j_re.current()[:]
+    Iwall = so.eqsys.I_wall[:,0]
 
     EoverED = so.eqsys.E_field.norm('ED')[1:,0]
-    EoverEC = so.eqsys.E_field[1:,0]/so.other.fluid.Ectot[:,0]
+    #EoverEC = so.eqsys.E_field[1:,0]/so.other.fluid.Ectot[:,0]
+    ECoverED = so.other.fluid.Eceff[:,0] / so.other.fluid.EDreic[:,0]
 
-    plotInternal(axs[0, 0], t, Te / 1e3, ylabel=r'$T$ (keV)', color='k', showlabel=True, label='$T_{\rm e}$')
-    plotInternal(axs[0, 0], t, Ti / 1e3, ylabel=r'$T$ (keV)', color='m', showlabel=True, label='$T_{\rm i}$')
+    tauRE = so.other.stream.tau_RE[:,0]
+    tauRE1 = so.other.stream.tau_RE1[:,0]
+    tauRE2 = so.other.stream.tau_RE2[:,0]
 
-    plotInternal(axs[0, 1], t, ne / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='k', showlabel=True, label='$n_{\rm e}$')
-    plotInternal(axs[0, 1], t, 7 * nD0 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='m', showlabel=True, label='$n_{\rm D0}$')
-    plotInternal(axs[0, 1], t, nD1 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='c', showlabel=True, label='$n_{\rm D1}$')
+    gammaTot = so.other.fluid.runawayRate[:,0]
+    gammaDreicer = so.other.fluid.gammaDreicer[:,0]
+    gammaAva = so.other.fluid.GammaAva[:,0] * so.eqsys.n_re[1:,0]
 
-    plotInternal(axs[1, 0], t[1:], Poh / 1e6, ylabel=r'$P$ (MW)', color='m', showlabel=True, label='$P_{\rm oh}$')
-    plotInternal(axs[1, 0], t[1:], Prad / 1e6, ylabel=r'$P$ (MW)', color='r', showlabel=True, label='$P_{\rm rad}$')
-    plotInternal(axs[1, 0], t[1:], Ptransp / 1e6, ylabel=r'$P$ (MW)', color='c', showlabel=True, label='$P_{\rm transp}$')
-    plotInternal(axs[1, 0], t[1:], Pequi / 1e6, ylabel=r'$P$ (MW)', color='g', showlabel=True, label='$P_{\rm equi}$')
+    plotInternal(axs[0, 0], t, Te / 1e3, ylabel=r'$T$ (keV)', color='k', showlabel=showlabel, label=r'$T_{\rm e}$')
+    plotInternal(axs[0, 0], t, Ti / 1e3, ylabel=r'$T$ (keV)', color='m', showlabel=showlabel, label=r'$T_{\rm i}$')
 
-    #plotInternal(axs[1, 1], t, Uext, ylabel=r'$U$ (V)', color='k', showlabel=True, label='$U_{\rm ext}$')
-    plotInternal(axs[1, 1], t, Ures, ylabel=r'$U$ (V)', color='m', showlabel=True, label='$U_{\rm res}$')
+    plotInternal(axs[0, 1], t, ne / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='k', showlabel=showlabel, label=r'$n_{\rm e}$')
+    plotInternal(axs[0, 1], t, 7 * nD0 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='m', showlabel=showlabel, label=r'$n_{\rm D0}$')
+    plotInternal(axs[0, 1], t, nD1 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='c', showlabel=showlabel, label=r'$n_{\rm D1}$')
 
-    plotInternal(axs[2, 0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='k', showlabel=True, label='$I_{\rm p}$')
-    plotInternal(axs[2, 0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='m', showlabel=True, label='$I_{\rm re}$')
+    plotInternal(axs[0, 2], t, streamingParameter, ylabel=r'$u_e/v_{\rm th}$', color='k', showlabel=showlabel, label=r'$\xi$')
+    axs[0,2].set_ylim([0, 0.2])
 
-    plotInternal(axs[2, 1], t[1:], EoverED, ylabel=r'$E/E$', color='k', showlabel=True, label='$E/E_{\rm D}$', yscalelog = True)
-    plotInternal(axs[2, 1], t[1:], EoverEC, ylabel=r'$E/E$', color='m', showlabel=True, label='$E/E_{\rm C}$', yscalelog = True)
+    plotInternal(axs[1, 0], t[1:], Poh / 1e6, ylabel=r'$P$ (MW)', color='m', showlabel=showlabel, label=r'$P_{\rm oh}$')
+    plotInternal(axs[1, 0], t[1:], Prad / 1e6, ylabel=r'$P$ (MW)', color='r', showlabel=showlabel, label=r'$P_{\rm rad}$')
+    plotInternal(axs[1, 0], t[1:], Ptransp / 1e6, ylabel=r'$P$ (MW)', color='c', showlabel=showlabel, label=r'$P_{\rm transp}$')
+    plotInternal(axs[1, 0], t[1:], Pequi / 1e6, ylabel=r'$P$ (MW)', color='g', showlabel=showlabel, label=r'$P_{\rm equi}$')
 
-    plotInternal(axs[3, 0], t[1:], gammaFe, ylabel=r'$\gamma_{\rm Fe}$ (%)', color='k', showlabel=False, label='$I_{\rm p}$')
+    #plotInternal(axs[1, 1], t, Uext, ylabel=r'$U$ (V)', color='k', showlabel=showlabel, label='$U_{\rm ext}$')
+    plotInternal(axs[1, 1], t, Ures, ylabel=r'$U$ (V)', color='m', showlabel=showlabel, label=r'$U_{\rm res}$')
+
+    plotInternal(axs[1, 2], t[1:], tauRE, ylabel=r'$\tau_{\rm re}$ (s)', color='k', showlabel=showlabel, label=r'$\tau_{\rm re}$', yscalelog=True)
+    plotInternal(axs[1, 2], t[1:], tauRE1, ylabel=r'$\tau_{\rm re}$ (s)', color='r', showlabel=showlabel, label=r'Parallel', linestyle='--', yscalelog=True)
+    plotInternal(axs[1, 2], t[1:], tauRE2, ylabel=r'$\tau_{\rm re}$ (s)', color='r', showlabel=showlabel, label=r'Drifts', linestyle=':', yscalelog=True)
+
+    plotInternal(axs[2, 0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='k', showlabel=showlabel, label=r'$I_{\rm p}$')
+    plotInternal(axs[2, 0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='m', showlabel=showlabel, label=r'$I_{\rm re}$')
+
+    plotInternal(axs[2, 1], t[1:], EoverED*100, ylabel=r'$E/E_{\mathrm{D}}$ (\%)', color='k', showlabel=showlabel, label=r'$E/E_{\rm D}$', yscalelog = False)
+    plotInternal(axs[2, 1], t[1:], ECoverED*100, ylabel=r'$E/E_{\mathrm{D}}$ (\%)', color='m', showlabel=showlabel, label=r'$E_{\rm C}/E_{\rm D}$', yscalelog = False)
+    axs[2,1].set_ylim([0, 10])
+
+    plotInternal(axs[2, 2], t, Iwall/1e3, ylabel=r'$I_{\rm wall}$ (kA)', color='k', showlabel=showlabel, label=r'$I_{\rm wall}$')
+
+    plotInternal(axs[3, 0], t[1:], gammaFe, ylabel=r'$\gamma_{\rm Fe}$ (\%)', color='k', showlabel=showlabel, label=r'$I_{\rm p}$')
     
     n_norm = 1e20
-    plotInternal(axs[3, 1], t[:], nFe[3, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='k', showlabel=True, label='$n_{\rm Fe3}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[4, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='y', showlabel=True, label='$n_{\rm Fe4}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[5, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='m', showlabel=True, label='$n_{\rm Fe5}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[6, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='r', showlabel=True, label='$n_{\rm Fe6}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[7, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='c', showlabel=True, label='$n_{\rm Fe7}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[8, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='g', showlabel=True, label='$n_{\rm Fe8}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[9, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='b', showlabel=True, label='$n_{\rm Fe9}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[10, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='silver', showlabel=True, label='$n_{\rm Fe10}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[11, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='dimgrey', showlabel=True, label='$n_{\rm Fe11}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[12, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='gold', showlabel=True, label='$n_{\rm Fe12}$', yscalelog = True)
-    plotInternal(axs[3, 1], t[:], nFe[13, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='deeppink', showlabel=True, label='$n_{\rm Fe13}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[3, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='k', showlabel=showlabel, label=r'$n_{\rm Fe3}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[4, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='y', showlabel=showlabel, label=r'$n_{\rm Fe4}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[5, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='m', showlabel=showlabel, label=r'$n_{\rm Fe5}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[6, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='r', showlabel=showlabel, label=r'$n_{\rm Fe6}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[7, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='c', showlabel=showlabel, label=r'$n_{\rm Fe7}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[8, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='g', showlabel=showlabel, label=r'$n_{\rm Fe8}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[9, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='b', showlabel=showlabel, label=r'$n_{\rm Fe9}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[10, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='silver', showlabel=showlabel, label=r'$n_{\rm Fe10}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[11, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='dimgrey', showlabel=showlabel, label=r'$n_{\rm Fe11}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[12, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='gold', showlabel=showlabel, label=r'$n_{\rm Fe12}$', yscalelog = True)
+    plotInternal(axs[3, 1], t[:], nFe[13, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='deeppink', showlabel=showlabel, label=r'$n_{\rm Fe13}$', yscalelog = True)
+
+    plotInternal(axs[3, 2], t[1:], gammaTot, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='k', showlabel=showlabel, label=r'$\gamma_{\rm tot}$', yscalelog=False)
+    plotInternal(axs[3, 2], t[1:], gammaDreicer, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='b', showlabel=showlabel, label=r'$\gamma_{\rm Dreicer}$', yscalelog=False)
+    plotInternal(axs[3, 2], t[1:], gammaAva, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='r', showlabel=showlabel, label=r'$\gamma_{\rm ava}$', yscalelog=False)
+    axs[3,2].set_ylim([0, 4e15])
 
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
@@ -238,10 +266,18 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
         ax.set_yscale('log')
 
 def makeplots(so1, so2):
-    fig1, axs1 = plt.subplots(4, 2, figsize=(7, 10))
+    fig1, axs1 = plt.subplots(4, 3, figsize=(12, 10))
 
     drawplot1(axs1, so1)
-    drawplot1(axs1, so2, toffset=so1.grid.t[-1]+0.7)
+    drawplot1(axs1, so2, toffset=so1.grid.t[-1]+0.7, showlabel=False)
+
+    axs1[0,0].legend(frameon=False)
+    axs1[0,1].legend(frameon=False)
+    axs1[1,0].legend(frameon=False)
+    axs1[2,0].legend(frameon=False)
+    axs1[2,1].legend(frameon=False)
+    axs1[2,2].legend(frameon=False)
+    axs1[3,2].legend(frameon=False)
 
     fig1.tight_layout()
     plt.show()
@@ -345,13 +381,13 @@ def oneRun(argv):
     return 0
 
 def main(argv):
-    #oneRun(argv=argv)
-    #'''
+    oneRun(argv=argv)
+    '''
     n0_list = np.array([0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4])*1e17
     Vloop_list = np.array([10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15])
     #Btor_list = np.array([2.5, 3])
     parameterSweep(n0_list, Vloop_list)
-    #'''
+    '''
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
