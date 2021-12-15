@@ -24,6 +24,7 @@ class ElectricField(DREAMEfield):
         self.circuit_Lwall = 0
         self.circuit_M = 0
         self.circuit_Rwall = 0
+        self.circuit_Iwall0 = 0
 
         self.circuit_Vloop = None
         self.circuit_Vloop_t = None
@@ -67,6 +68,13 @@ class ElectricField(DREAMEfield):
         self.circuit_Vloop_t = _time
 
 
+    def setWallCurrent(self, Iwall0):
+        """
+        Sets the initial value of the wall current.
+        """
+        self.circuit_Iwall0 = float(Iwall0)
+
+
     def fromdict(self, data):
         """
         Sets this parameter from settings provided in the given dictionary.
@@ -81,6 +89,9 @@ class ElectricField(DREAMEfield):
             self.circuit_Lwall = data['circuit']['Lwall']
             self.circuit_M = data['circuit']['M']
             self.circuit_Rwall = data['circuit']['Rwall']
+
+            if 'Iwall0' in data['circuit']:
+                self.circuit_Iwall0 = data['circuit']['Iwall0']
 
             self.circuit_Vloop = data['circuit']['Vloop']['x']
             self.circuit_Vloop_t = data['circuit']['Vloop']['t']
@@ -107,6 +118,7 @@ class ElectricField(DREAMEfield):
                     'Lwall': self.circuit_Lwall,
                     'M': self.circuit_M,
                     'Rwall': self.circuit_Rwall,
+                    'Iwall0': self.circuit_Iwall0,
                     'Vloop': {
                         'x': self.circuit_Vloop,
                         't': self.circuit_Vloop_t

@@ -60,8 +60,11 @@ def generate(n0=0.01e20/9, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0
         ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
         ss.eqsys.E_field.setInitialProfile(E0)
         Lp = float(mu_0 * R0 * (np.log(8*R0/a) + 0.25 - 2))
+        #ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=5e-6)
         ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
         ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
+        # Value based on statement in (de Vries & Gribov 2019; page 12)
+        #ss.eqsys.E_field.setWallCurrent(1.5e6)
     else:
         ss.eqsys.E_field.setType(ElectricField.TYPE_SELFCONSISTENT)
         ss.eqsys.E_field.setInitialProfile(efield=E0)
@@ -80,7 +83,7 @@ def generate(n0=0.01e20/9, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0
     ss.eqsys.n_i.addIon(name='Fe', Z=26, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=0, r=np.array([0]), T=Ti0)
 
     # Enable runaway
-    ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_NEGLECT)
+    ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
     ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
 
     # Recycling coefficients 
@@ -190,6 +193,7 @@ def drawplot1(axs, so, toffset=0.7, showlabel=True):
 
     plotInternal(axs[2, 0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='k', showlabel=showlabel, label=r'$I_{\rm p}$')
     plotInternal(axs[2, 0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='m', showlabel=showlabel, label=r'$I_{\rm re}$')
+    axs[2, 0].set_ylim([0, 2])
 
     plotInternal(axs[2, 1], t[1:], EoverED*100, ylabel=r'$E/E_{\mathrm{D}}$ (\%)', color='k', showlabel=showlabel, label=r'$E/E_{\rm D}$', yscalelog = False)
     plotInternal(axs[2, 1], t[1:], ECoverED*100, ylabel=r'$E/E_{\mathrm{D}}$ (\%)', color='m', showlabel=showlabel, label=r'$E_{\rm C}/E_{\rm D}$', yscalelog = False)
@@ -212,10 +216,10 @@ def drawplot1(axs, so, toffset=0.7, showlabel=True):
     plotInternal(axs[3, 1], t[:], nFe[12, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='gold', showlabel=showlabel, label=r'$n_{\rm Fe12}$', yscalelog = True)
     plotInternal(axs[3, 1], t[:], nFe[13, :]/n_norm, ylabel=r'$n$ m$^{-3}$', color='deeppink', showlabel=showlabel, label=r'$n_{\rm Fe13}$', yscalelog = True)
 
-    plotInternal(axs[3, 2], t[1:], gammaTot, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='k', showlabel=showlabel, label=r'$\gamma_{\rm tot}$', yscalelog=False)
+    plotInternal(axs[3, 2], t[1:], gammaTot, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='k', showlabel=showlabel, label=r'$\mathrm{d}n_{\rm re} / \mathrm{d} t$', yscalelog=False)
     plotInternal(axs[3, 2], t[1:], gammaDreicer, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='b', showlabel=showlabel, label=r'$\gamma_{\rm Dreicer}$', yscalelog=False)
     plotInternal(axs[3, 2], t[1:], gammaAva, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='r', showlabel=showlabel, label=r'$\gamma_{\rm ava}$', yscalelog=False)
-    axs[3,2].set_ylim([0, 4e15])
+    axs[3,2].set_ylim([0, 1e16])
 
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
@@ -366,9 +370,9 @@ def oneRun(argv):
 
         ss2 = STREAMSettings(ss1)
         ss2.fromOutput(f'output1{ext}.h5')
-        ss2.timestep.setTmax(1.3*2 - ss1.timestep.tmax)
+        ss2.timestep.setTmax(1.3*6 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(10000)
+        ss2.timestep.setNt(30000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:
