@@ -151,7 +151,7 @@ def drawplot1(axs, so, toffset=0.7):
     Ire = 1.602e-19 * 2.99792458e8 * 1.6**2 * np.pi * so.eqsys.n_re[:]
 
     EoverED = so.eqsys.E_field.norm('ED')[1:,0]
-    EoverEC = so.eqsys.E_field[1:,0]/so.other.fluid.Ectot[:,0]
+    ECoverED = so.other.fluid.Ectot[:,0]/so.other.fluid.ED[:,0]
 
     plotInternal(axs[0, 0], t, Te / 1e3, ylabel=r'$T$ (keV)', color='k', showlabel=True, label='$T_{\rm e}$')
     plotInternal(axs[0, 0], t, Ti / 1e3, ylabel=r'$T$ (keV)', color='m', showlabel=True, label='$T_{\rm i}$')
@@ -172,7 +172,7 @@ def drawplot1(axs, so, toffset=0.7):
     plotInternal(axs[2, 0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='m', showlabel=True, label='$I_{\rm re}$')
 
     plotInternal(axs[2, 1], t[1:], EoverED, ylabel=r'$E/E$', color='k', showlabel=True, label='$E/E_{\rm D}$', yscalelog = True)
-    plotInternal(axs[2, 1], t[1:], EoverEC, ylabel=r'$E/E$', color='m', showlabel=True, label='$E/E_{\rm C}$', yscalelog = True)
+    plotInternal(axs[2, 1], t[1:], ECoverED, ylabel=r'$E/E$', color='m', showlabel=True, label='$E/E_{\rm C}$', yscalelog = True)
 
     plotInternal(axs[3, 0], t[1:], gammaFe, ylabel=r'$\gamma_{\rm Fe}$ (%)', color='k', showlabel=False, label='$I_{\rm p}$')
     
@@ -269,7 +269,7 @@ def parameterSweep(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.a
             ss2.fromOutput(f'Sweep/output1_n0_{np.round(n0,-14)}_' + addT + '.h5')
             ss2.timestep.setTmax(1.3 * 2 - ss1.timestep.tmax)
             ss2.timestep.setNumberOfSaveSteps(0)
-            ss2.timestep.setNt(10000)
+            ss2.timestep.setNt(50000)
             ss2.save(f'Sweep/settings2_n0_{np.round(n0,-14)}_' + addT + '.h5')
             so2 = runiface(ss2, f'Sweep/output2_n0_{np.round(n0,-14)}_' + addT + '.h5', quiet=False)
 
@@ -285,7 +285,7 @@ def parameterSweep(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.a
             ss2.fromOutput(f'Sweep/output1_Vloop_{np.round(Vloop,3)}_' + addT + '.h5')
             ss2.timestep.setTmax(1.3 * 2 - ss1.timestep.tmax)
             ss2.timestep.setNumberOfSaveSteps(0)
-            ss2.timestep.setNt(30000)
+            ss2.timestep.setNt(50000)
             ss2.save(f'Sweep/settings2_Vloop_{np.round(Vloop,3)}_' + addT + '.h5')
             so2 = runiface(ss2, f'Sweep/output2_Vloop_{np.round(Vloop,3)}_' + addT + '.h5', quiet=False)
 
