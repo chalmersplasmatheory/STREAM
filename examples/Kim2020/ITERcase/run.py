@@ -111,13 +111,14 @@ def drawplot1(axs, so, toffset=0, showlabel=False):
     Ip = so.eqsys.I_p[:,0]
     ne = so.eqsys.n_cold[:,0]
     Te = so.eqsys.T_cold[:,0]
+    Lf = so.other.stream.Lf[:,0]
     Ti = so.eqsys.W_i.getTemperature()['D'][:,0]
     tau = so.other.stream.tau_D[:,0]
 
     plotInternal(axs[0,0], t, Ip/1e3, ylabel=r'$I_{\rm p}$ (kA)', color='g', showlabel=showlabel, label='STREAM')
-    plotInternal(axs[0,1], t, ne/1e17, ylabel=r'$n_{\rm e}$ ($17\cdot 10^17$m$^{-3}$)', color='g', showlabel=False, label='STREAM')
+    plotInternal(axs[0,1], t, ne/1e17, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{17}$m$^{-3}$)', color='g', showlabel=False, label='STREAM')
     plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='g', showlabel=False, label='STREAM')
-
+    plotInternal(axs[1,1], t[1:], Lf, ylabel=r'$L_f$ (m)', color='g', showlabel=False, label='STREAM')
     plotInternal(axs[2,0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='g', showlabel=False, label='STREAM')
     plotInternal(axs[2,1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='g', showlabel=False, label='STREAM')
 
@@ -135,6 +136,11 @@ def drawplot1(axs, so, toffset=0, showlabel=False):
     t_Te_d = Te_mat[:, 0]
     Te_d = Te_mat[:, 1]
     plotInternal(axs[1, 0], t_Te_d, Te_d, ylabel=r'$T_{\rm e}$ (eV)', color='k', showlabel=False, label='DYON')
+
+    Lf_mat = np.genfromtxt('DyonData/ConnectionLength_DYON.csv', delimiter=',')
+    t_Lf_d = Lf_mat[:, 0]
+    Lf_d = Lf_mat[:, 1]
+    plotInternal(axs[1,1], t_Lf_d, Lf_d, ylabel=r'$L_f$ (m)', color='k', showlabel=False, label='DYON')
 
     Ti_mat = np.genfromtxt('DyonData/IonTemperature_DYON.csv', delimiter=',')
     t_Ti_d = Ti_mat[:, 0]
@@ -154,6 +160,7 @@ def drawplot1(axs, so, toffset=0, showlabel=False):
     axs[0,0].set_ylim([0, 230])
     axs[0,1].set_ylim([0, 15])
     axs[1,0].set_ylim([0, 80])
+    axs[1,1].set_ylim([0, 1.5e4])
     axs[2,0].set_ylim([0, 80])
     axs[2,1].set_ylim([0, 0.5])
 
