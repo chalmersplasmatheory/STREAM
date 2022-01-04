@@ -190,6 +190,11 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = 1/this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
     );
+    DEF_FL("stream/Lf", "Effective distance travelled by a particle before colliding with the wall [m]",
+        real_t *v = qd->StoreEmpty();
+        for (len_t ir = 0; ir < nr; ir++)
+            v[ir] = this->confinementTime->EvaluateConnectionLength(ir);
+    );
 
     DEF_FL("stream/tau_RE", "Runaway electron confinement time [s]",
         real_t *v = qd->StoreEmpty();

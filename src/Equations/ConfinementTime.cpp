@@ -60,6 +60,18 @@ real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) {
 }
 
 /**
+ * Evaluates the effective connection length.
+ */
+real_t ConfinementTime::EvaluateConnectionLength(len_t ir) {
+    real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
+    real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
+    real_t a = radials->GetMinorRadius();
+    real_t B = radials->GetMagneticField();
+
+    return 0.25 * a*B * exp(I_p/I_ref) / (sqrt(B_v*B_v + Constants::mu0*Constants::mu0/(M_PI*M_PI*l_MK2*l_MK2)*I_wall*I_wall));
+}
+
+/**
  * Evaluates the derivative of the inverted confinement time with respect to the plasma current
  */
 real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir){
