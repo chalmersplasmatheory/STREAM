@@ -342,7 +342,7 @@ class SimulationResult:
         return axs
 
 
-    def plotQuantity(self, data, ax=None, title=None, axis=None, *args, **kwargs):
+    def plotQuantity(self, data, ax=None, title=None, axis=None, grid=True, *args, **kwargs):
         """
         Plot a named unknown quantity.
         """
@@ -366,6 +366,9 @@ class SimulationResult:
         if axis is not None:
             ax.set_xlim([axis[0],axis[1]])
             ax.set_ylim([axis[2], axis[3]])
+
+        if grid:
+            ax.grid()
 
         return ax
 

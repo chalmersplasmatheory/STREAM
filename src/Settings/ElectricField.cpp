@@ -48,6 +48,7 @@ void SimulationGenerator::DefineOptions_ElectricField(DREAM::Settings *s) {
     s->DefineSetting(MODULENAME "/circuit/Lwall", "Wall self-inductance", (real_t)0);
     s->DefineSetting(MODULENAME "/circuit/M", "Plasma-wall mutual inductance", (real_t)0);
     s->DefineSetting(MODULENAME "/circuit/Rwall", "Wall resistance", (real_t)0);
+    s->DefineSetting(MODULENAME "/circuit/Iwall0", "Wall current at t=0", (real_t)0);
 
     DREAM::SimulationGenerator::DefineDataT(MODULENAME "/circuit", s, "Vloop");
 }
@@ -278,7 +279,8 @@ void SimulationGenerator::ConstructEquation_E_field_circuit(
     delete [] Efield_init;
 
     // I_w(t=0) = 0
-    eqsys->SetInitialValue(id_I_w, nullptr);
+    const real_t Iwall0 = s->GetReal(MODULENAME "/circuit/Iwall0");
+    eqsys->SetInitialValue(id_I_w, &Iwall0);
 
     // Vloop(t=0) = prescribed value
     eqsys->initializer->AddRule(

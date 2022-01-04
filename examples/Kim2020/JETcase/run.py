@@ -130,7 +130,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     return ss
 
 
-def drawplot1(axs, so, toffset=0):
+def drawplot1(axs, so, toffset=0, showlabel=False):
     """
     Draw a plot with a output from the given STREAMOutput object.
     """
@@ -142,42 +142,42 @@ def drawplot1(axs, so, toffset=0):
     Ti = so.eqsys.W_i.getTemperature()['D'][:,0]
     tau = so.other.stream.tau_D[:,0]
 
-    plotInternal(axs[0,0], t, Ip, ylabel=r'$I_{\rm p}$ (A)', color='g', showlabel=True, label='STREAM')
-    plotInternal(axs[0,1], t, ne, ylabel=r'$n_{\rm e}$ (m$^{-3}$)', color='g', showlabel=True, label='STREAM')
-    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='g', showlabel=True, label='STREAM')
+    plotInternal(axs[0,0], t, Ip, ylabel=r'$I_{\rm p}$ (A)', color='g', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[0,1], t, ne, ylabel=r'$n_{\rm e}$ (m$^{-3}$)', color='g', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='g', showlabel=showlabel, label='STREAM')
 
-    plotInternal(axs[2,0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='g', showlabel=True, label='STREAM')
-    plotInternal(axs[2,1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='g', showlabel=True, label='STREAM')
+    plotInternal(axs[2,0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='g', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[2,1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='g', showlabel=showlabel, label='STREAM')
 
     Ip_mat = np.genfromtxt('DyonData/PlasmaCurrent_DYON.csv', delimiter=',')
     t_Ip_d = Ip_mat[:,0]
     Ip_d = Ip_mat[:, 1]
-    plotInternal(axs[0, 0], t_Ip_d, Ip_d, ylabel=r'$I_{\rm p}$ (A)', color='k', showlabel=True, label='DYON')
+    plotInternal(axs[0, 0], t_Ip_d, Ip_d, ylabel=r'$I_{\rm p}$ (A)', color='k', showlabel=showlabel, label='DYON')
 
     Ip_mat_m = np.genfromtxt('DyonData/PlasmaCurrent_measured.csv', delimiter=',')
     t_Ip_m = Ip_mat_m[:, 0]
     Ip_m = Ip_mat_m[:, 1]
-    plotInternal(axs[0, 0], t_Ip_m, Ip_m, ylabel=r'$I_{\rm p}$ (A)', color='silver', showlabel=True, label='Measured')
+    plotInternal(axs[0, 0], t_Ip_m, Ip_m, ylabel=r'$I_{\rm p}$ (A)', color='silver', showlabel=showlabel, label='Measured')
 
     ne_mat = np.genfromtxt('DyonData/ElectronDensity_DYON.csv', delimiter=',')
     t_ne_d = ne_mat[:, 0]
     ne_d = ne_mat[:, 1]
-    plotInternal(axs[0, 1], t_ne_d, ne_d, ylabel=r'$n_{\rm e}$ (m$^{-3}$)', color='k', showlabel=True, label='DYON')
+    plotInternal(axs[0, 1], t_ne_d, ne_d, ylabel=r'$n_{\rm e}$ (m$^{-3}$)', color='k', showlabel=showlabel, label='DYON')
 
     Te_mat = np.genfromtxt('DyonData/ElectronTemperature_DYON.csv', delimiter=',')
     t_Te_d = Te_mat[:, 0]
     Te_d = Te_mat[:, 1]
-    plotInternal(axs[1, 0], t_Te_d, Te_d, ylabel=r'$T_{\rm e}$ (eV)', color='k', showlabel=True, label='DYON')
+    plotInternal(axs[1, 0], t_Te_d, Te_d, ylabel=r'$T_{\rm e}$ (eV)', color='k', showlabel=showlabel, label='DYON')
 
     Ti_mat = np.genfromtxt('DyonData/IonTemperature_DYON.csv', delimiter=',')
     t_Ti_d = Ti_mat[:, 0]
     Ti_d = Ti_mat[:, 1]
-    plotInternal(axs[2, 0], t_Ti_d, Ti_d, ylabel=r'$T_{\rm i}$ (eV)', color='k', showlabel=True, label='DYON')
+    plotInternal(axs[2, 0], t_Ti_d, Ti_d, ylabel=r'$T_{\rm i}$ (eV)', color='k', showlabel=showlabel, label='DYON')
 
     tau_mat = np.genfromtxt('DyonData/ConfinementTime_DYON.csv', delimiter=',')
     t_tau_d = tau_mat[:, 0]
     tau_d = tau_mat[:, 1]
-    plotInternal(axs[2, 1], t_tau_d, tau_d, ylabel=r'$\tau_{\rm D}$ (s)', color='k', showlabel=True, label='DYON')
+    plotInternal(axs[2, 1], t_tau_d, tau_d, ylabel=r'$\tau_{\rm D}$ (s)', color='k', showlabel=showlabel, label='DYON')
 
 
     for i in range(axs.shape[0]):
@@ -197,7 +197,7 @@ def drawplot1(axs, so, toffset=0):
     axs[2,0].set_yticks([0, 100, 200, 300, 400])
     axs[2,1].set_yticks([0, 0.05, 0.1])
 
-    axs[0,0].legend(loc='best', prop={'size': 8})
+    axs[0,0].legend(loc='best', frameon=False, prop={'size': 10})
 
 def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, *args, **kwargs):
     if label is not None and showlabel == False:
@@ -221,10 +221,11 @@ def makeplots(so1, so2):
     fig1, axs1 = plt.subplots(3, 2, figsize=(7, 10))
 
     drawplot1(axs1, so1)
-    drawplot1(axs1, so2, toffset=so1.grid.t[-1])
+    drawplot1(axs1, so2, toffset=so1.grid.t[-1], showlabel=True)
 
 
     fig1.tight_layout()
+    #fig1.savefig('JETcase.pdf')
     plt.show()
 
 
