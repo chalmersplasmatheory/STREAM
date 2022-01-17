@@ -107,13 +107,33 @@ def drawplot1(axs, so, toffset=0, showlabel=False):
     Draw a plot with a output from the given STREAMOutput object.
     """
     t = so.grid.t[:] + toffset
-
-    Ip = so.eqsys.I_p[:,0]
-    ne = so.eqsys.n_cold[:,0]
-    Te = so.eqsys.T_cold[:,0]
-    Lf = so.other.stream.Lf[:,0]
-    Ti = so.eqsys.W_i.getTemperature()['D'][:,0]
-    tau = so.other.stream.tau_D[:,0]
+    t_csv = open('Data/time_STREAM.csv', 'ab')
+    np.savetxt(t_csv, t)
+    t_csv.close()
+    Ip = so.eqsys.I_p[:, 0]
+    Ip_csv = open('Data/PlasmaCurrent_STREAM.csv', 'ab')
+    np.savetxt(Ip_csv, Ip)
+    Ip_csv.close()
+    ne = so.eqsys.n_cold[:, 0]
+    ne_csv = open('Data/ElectronDensity_STREAM.csv', 'ab')
+    np.savetxt(ne_csv, ne)
+    ne_csv.close()
+    Te = so.eqsys.T_cold[:, 0]
+    Te_csv = open('Data/ElectronTemperature_STREAM.csv', 'ab')
+    np.savetxt(Te_csv, Te)
+    Te_csv.close()
+    Lf = so.other.stream.Lf[:, 0]
+    Lf_csv = open('Data/ConnectionLength_STREAM.csv', 'ab')
+    np.savetxt(Lf_csv, Lf)
+    Lf_csv.close()
+    Ti = so.eqsys.W_i.getTemperature()['D'][:, 0]
+    Ti_csv = open('Data/IonTemperature_STREAM.csv', 'ab')
+    np.savetxt(Ti_csv, Ti)
+    Ti_csv.close()
+    tau = so.other.stream.tau_D[:, 0]
+    tau_csv = open('Data/ConfinementTime_STREAM.csv', 'ab')
+    np.savetxt(tau_csv, tau)
+    tau_csv.close()
 
     plotInternal(axs[0,0], t, Ip/1e3, ylabel=r'$I_{\rm p}$ (kA)', color='g', showlabel=showlabel, label='STREAM')
     plotInternal(axs[0,1], t, ne/1e17, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{17}$m$^{-3}$)', color='g', showlabel=False, label='STREAM')
@@ -122,32 +142,32 @@ def drawplot1(axs, so, toffset=0, showlabel=False):
     plotInternal(axs[2,0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='g', showlabel=False, label='STREAM')
     plotInternal(axs[2,1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='g', showlabel=False, label='STREAM')
 
-    Ip_mat = np.genfromtxt('DyonData/PlasmaCurrent_DYON.csv', delimiter=',')
+    Ip_mat = np.genfromtxt('Data/PlasmaCurrent_DYON.csv', delimiter=',')
     t_Ip_d = Ip_mat[:, 0]
     Ip_d = Ip_mat[:, 1]
     plotInternal(axs[0, 0], t_Ip_d, Ip_d/1e3, ylabel=r'$I_{\rm p}$ (kA)', color='k', showlabel=showlabel, label='DYON')
 
-    ne_mat = np.genfromtxt('DyonData/ElectronDensity_DYON.csv', delimiter=',')
+    ne_mat = np.genfromtxt('Data/ElectronDensity_DYON.csv', delimiter=',')
     t_ne_d = ne_mat[:, 0]
     ne_d = ne_mat[:, 1]
     plotInternal(axs[0, 1], t_ne_d, ne_d/1e17, ylabel=r'$n_{\rm e}$ ($17\cdot 10^17$m$^{-3}$)', color='k', showlabel=False, label='DYON')
 
-    Te_mat = np.genfromtxt('DyonData/ElectronTemperature_DYON.csv', delimiter=',')
+    Te_mat = np.genfromtxt('Data/ElectronTemperature_DYON.csv', delimiter=',')
     t_Te_d = Te_mat[:, 0]
     Te_d = Te_mat[:, 1]
     plotInternal(axs[1, 0], t_Te_d, Te_d, ylabel=r'$T_{\rm e}$ (eV)', color='k', showlabel=False, label='DYON')
 
-    Lf_mat = np.genfromtxt('DyonData/ConnectionLength_DYON.csv', delimiter=',')
+    Lf_mat = np.genfromtxt('Data/ConnectionLength_DYON.csv', delimiter=',')
     t_Lf_d = Lf_mat[:, 0]
     Lf_d = Lf_mat[:, 1]
     plotInternal(axs[1,1], t_Lf_d, Lf_d, ylabel=r'$L_f$ (m)', color='k', showlabel=False, label='DYON')
 
-    Ti_mat = np.genfromtxt('DyonData/IonTemperature_DYON.csv', delimiter=',')
+    Ti_mat = np.genfromtxt('Data/IonTemperature_DYON.csv', delimiter=',')
     t_Ti_d = Ti_mat[:, 0]
     Ti_d = Ti_mat[:, 1]
     plotInternal(axs[2, 0], t_Ti_d, Ti_d, ylabel=r'$T_{\rm i}$ (eV)', color='k', showlabel=False, label='DYON')
 
-    tau_mat = np.genfromtxt('DyonData/ConfinementTime_DYON.csv', delimiter=',')
+    tau_mat = np.genfromtxt('Data/ConfinementTime_DYON.csv', delimiter=',')
     t_tau_d = tau_mat[:, 0]
     tau_d = tau_mat[:, 1]
     plotInternal(axs[2, 1], t_tau_d, tau_d, ylabel=r'$\tau_{\rm D}$ (s)', color='k', showlabel=False, label='DYON')

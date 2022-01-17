@@ -1,0 +1,432 @@
+#!/usr/bin/env python3
+#
+# This example uses parameters from Table 4.1 of [H. T. Kim, PhD Thesis (2013)]
+# to simulate basic Deuterium burn-through in a JET-like plasma.
+#
+
+import argparse
+import matplotlib.pyplot as plt
+import numpy as np
+import sys
+from scipy.constants import c, e, m_e, mu_0
+sys.path.append('../../../py')
+
+import PlasmaParameters as Formulas
+import DREAM.Settings.Equations.ColdElectronTemperature as Tcold
+import DREAM.Settings.Solver as Solver
+import DREAM.Settings.Equations.RunawayElectrons as Runaways
+import DREAM.Settings.Equations.ElectricField as ElectricField_D
+import DREAM.Settings.Atomics as Atomics
+from STREAM import STREAMOutput, STREAMSettings, runiface
+import STREAM.Settings.Equations.ElectricField as ElectricField
+import STREAM.Settings.Equations.IonSpecies as Ions
+
+
+def generate(prefill=5e-5, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, j0=883.3, tmax=1e-4, nt=10000, EfieldDYON = True):
+    """
+    Generate a STREAMSettings object for a simulation with the specified
+    parameters.
+    
+    :param prefill: Prefill gas pressure [Torr]
+    :param gamma:   Degree of ionization
+    :param Vloop:   External loop voltage [V]
+    :param Vloop_t: Time vector corresponding to given loop voltage [V]
+    :param j0:      Initial plasma current density [A/m^2]
+    :param tmax:    Simulation time [s]
+    """
+
+    n0 = 3.22e22 * prefill  # Initial total deuterium density
+    nD = n0 * (1-fractionT) * np.array([[1-gamma], [gamma]])
+    nT = n0 * fractionT * np.array([[1-gamma], [gamma]])
+
+    Btor = 2.65     # Toroidal magnetic field [T]
+    a = 1.6         # Plasma minor radius [m]
+    R0 = 5.65       # Plasma major radius [m]
+    l_MK2 = 1       # Distance between plasma centre and passive structure [m]
+    V_vessel = 1700  # Vacuum vessel volume
+
+    Te0 = 5     # electron temperature [eV]
+    Ti0 = 1 # ion temperature [eV]
+
+    # Initial electric field
+    E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
+
+    ss = STREAMSettings()
+
+    ss.atomic.adas_interpolation = Atomics.ADAS_INTERP_BILINEAR
+
+    # Electric field
+    if EfieldDYON:
+        Lp = float(mu_0 * R0 * (np.log(8 * R0 / a) + 0.25 - 2))
+
+        ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
+        ss.eqsys.E_field.setInitialProfile(E0)
+        ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
+        ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
+    else:
+        R = 1e7
+        L = 9.1e-6
+        wall_time = L / R
+
+        ss.eqsys.E_field.setType(ElectricField_D.TYPE_SELFCONSISTENT)
+        ss.eqsys.E_field.setInitialProfile(efield=E0)
+        ss.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER, V_loop_wall_R0=Vloop/R0, times=Vloop_t, inverse_wall_time=1/wall_time, R0=R0)
+
+    # Electron temperature
+    ss.eqsys.T_cold.setType(Tcold.TYPE_SELFCONSISTENT)
+    ss.eqsys.T_cold.setInitialProfile(Te0)
+    ss.eqsys.T_cold.setRecombinationRadiation(recombination=Tcold.RECOMBINATION_RADIATION_INCLUDED)
+
+    # Ions
+    ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
+    ss.eqsys.n_i.addIon(name='T', Z=1, iontype=Ions.IONS_DYNAMIC, n=nT, r=np.array([0]), T=Ti0, tritium=True)
+
+    # Enable runaway
+    ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
+    ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
+    ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
+    ss.eqsys.n_re.setTritium(True)
+    #ss.eqsys.n_re.setCompton(Runaways.COMPTON_MODE_FLUID)
+
+    # Recycling coefficients (unused)
+    ss.eqsys.n_i.setJET_CWrecycling()
+
+    # Radial grid
+    ss.radialgrid.setB0(Btor)
+    ss.radialgrid.setMinorRadius(a)
+    ss.radialgrid.setMajorRadius(R0)
+    ss.radialgrid.setWallRadius(l_MK2)
+    ss.radialgrid.setVesselVolume(V_vessel)
+
+    ss.radialgrid.setRecyclingCoefficient1(1)
+    ss.radialgrid.setRecyclingCoefficient2(0)
+    ss.radialgrid.setRecyclingCoefficient3(1)
+    
+    # Disable kinetic grids
+    ss.hottailgrid.setEnabled(False)
+    ss.runawaygrid.setEnabled(False)
+
+    # Numerical settings
+    ss.solver.setType(Solver.NONLINEAR)
+    ss.solver.preconditioner.setEnabled(False)
+    ss.timestep.setTmax(tmax)
+    ss.timestep.setNt(nt)
+
+    ss.other.include('fluid', 'stream', 'scalar')
+
+    return ss
+
+
+def drawplot1(axs, so, color='r', toffset=0):
+    """
+    Draw a plot with a output from the given STREAMOutput object.
+    """
+    t = so.grid.t[:] + toffset
+    plotInternal(axs[0], t[1:], np.diff(so.eqsys.W_cold[:,0]) / np.diff(so.grid.t[:]), ylabel=r'Power consumption (W/m$^3$)', color=color, ylim=[0,50])
+    plotInternal(axs[1], t, so.eqsys.I_p[:,0], ylabel=r'Plasma current $I_{\rm p}$ (A)', color=color, log=True)
+
+
+def drawplot2(axs, so, color='r', toffset=0):
+    t = so.grid.t[:] + toffset
+
+    V_p = so.other.stream.V_p[:,0]
+    V_n_tot = so.other.stream.V_n_tot['D'][:]
+    #dWr_dt  = np.diff(so.other.fluid.Tcold_radiation[:,0]) / np.diff(t[1:])
+    nD0 = so.eqsys.n_i['D'][0][1:,0]
+    nD1 = so.eqsys.n_i['D'][1][1:,0]
+    #gamma_i = nD1*V_p / (nD1*V_p + nD0*V_n_tot)
+    gamma_i = nD1 / (nD1 + nD0)
+
+    plotInternal(axs[0], t[1:], so.other.fluid.Tcold_radiation[:,0], 'Power loss (W)', color=color, xlbl=False)
+    plotInternal(axs[1], t[1:], gamma_i*100, r'Degree of ionization (\%)', color=color, ylim=[0,105], xlbl=False)
+    plotInternal(axs[2], t, so.eqsys.T_cold[:,0], 'Electron temperature (eV)', color=color, xlbl=False)
+    plotInternal(axs[3], t, so.eqsys.n_cold[:,0]*1e-18, 'Electron density (10$^{18}$ m$^-3$)', color=color)
+
+
+def drawplot3(axs, so, toffset=0, showlabel=True):
+    t = so.grid.t[:] + toffset
+
+    V_p = so.other.stream.V_p[:,0]
+
+    Prad    = so.other.fluid.Tcold_radiation[:,0] * V_p
+    Pequi   = so.other.fluid.Tcold_ion_coll[:,0] * V_p
+    Ptransp = so.other.scalar.energyloss_T_cold[:,0] * V_p
+    P_tot   = Prad + Pequi + Ptransp
+    P_net   = P_tot + so.other.fluid.Tcold_ohmic[:,0] * V_p
+
+    nD0 = so.eqsys.n_i['D'][0][1:,0]
+    nD1 = so.eqsys.n_i['D'][1][1:,0]
+    gamma_i = nD1 / (nD1 + nD0)
+
+    plotInternal(axs[0], t, so.eqsys.I_p[:,0]/1e3, r'$I_{\rm p}$ (kA)', linestyle='-.', color='b', xlbl=False)
+    plotInternal(axs[1], t[1:], gamma_i*100, r'Degree of ionization (\%)', color='k', ylim=[0,105], xlbl=False)
+
+    ylbl = r'Power balance'
+    plotInternal(axs[2], t[1:], P_tot, ylbl, label='Total electron power loss', showlabel=showlabel, color='r', linestyle='--')
+    plotInternal(axs[2], t[1:], Prad, ylbl, label='Radiation + ionization', showlabel=showlabel, color='b', linestyle='-.')
+    plotInternal(axs[2], t[1:], Pequi, ylbl, label='Equilibration', showlabel=showlabel, color='g', linestyle='--')
+    plotInternal(axs[2], t[1:], Ptransp, ylbl, label='Electron transport', showlabel=showlabel, color='m', linestyle=':')
+    plotInternal(axs[2], t[1:], P_net, ylbl, label='Net electron heating power', showlabel=showlabel, color='k', linestyle='-', ylim=[0, 1.5e5])
+
+    axs[0].set_xlim([0, 0.03])
+    axs[1].set_xlim([0, 0.03])
+    axs[2].set_xlim([0, 0.03])
+    axs[2].legend(frameon=False)
+
+def drawplot4(axs, so, toffset=0, showlabel=True):
+    """
+    Draw a plot with a output from the given STREAMOutput object.
+    """
+    t = so.grid.t[:] + toffset
+
+    Te = so.eqsys.T_cold[:, 0]
+    Ti = so.eqsys.W_i.getTemperature()['D'][:, 0]
+
+    ne = so.eqsys.n_cold[:, 0]
+    nD0 = so.eqsys.n_i['D'][0][:]
+    nD1 = so.eqsys.n_i['D'][1][:]
+
+    nT0 = so.eqsys.n_i['T'][0][:]
+    nT1 = so.eqsys.n_i['T'][1][:]
+
+    vth = np.sqrt(2 * e * Te / m_e)
+    streamingParameter = so.eqsys.j_tot[:, 0] / (e * ne * vth)
+    '''
+    nFe = []
+    for iFe in range(0, 27):
+        nFe.append(so.eqsys.n_i['Fe'][iFe][:])
+    nFe = np.array(nFe)
+
+    totFe = nFe[0, 1:].flatten() * so.other.stream.V_n_tot['Fe'][:].flatten()
+    for iFe in range(0, 27):
+        totFe = totFe + nFe[iFe, 1:].flatten() * so.other.stream.V_p[:, 0].flatten()
+
+    gammaFe = (1 - nFe[0, 1:].flatten() * so.other.stream.V_n_tot['Fe'][:].flatten() / totFe)
+
+    totD = nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() + nD1[1:].flatten() * so.other.stream.V_p[:,
+                                                                                               0].flatten()
+    gammaD = (1 - nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() / totD)
+    '''
+    Vp = so.other.stream.V_p[:, 0]
+    Poh = -so.other.fluid.Tcold_ohmic[:, 0] * Vp
+    Prad = so.other.fluid.Tcold_radiation[:, 0] * Vp
+    Ptransp = so.other.stream.Tcold_transport[:, 0] * Vp
+    Pequi = so.other.fluid.Tcold_ion_coll[:, 0] * Vp
+
+    # Uext = so.eqsys.V
+    Ures = 2 * np.pi * 5.7 * so.eqsys.E_field[:, 0]
+
+    Ip = so.eqsys.I_p[:, 0]
+    # Ire = e * c * 1.6**2 * np.pi * so.eqsys.n_re[:]
+    Ire = so.eqsys.j_re.current()[:]
+    Iwall = so.eqsys.I_wall[:, 0]
+
+    EoverED = so.eqsys.E_field.norm('ED')[1:, 0]
+    ECoverED = so.other.fluid.Eceff[:, 0] / so.other.fluid.EDreic[:, 0]
+
+    tauRE = so.other.stream.tau_RE[:, 0]
+    tauRE1 = so.other.stream.tau_RE1[:, 0]
+    tauRE2 = so.other.stream.tau_RE2[:, 0]
+
+    gammaTot = so.other.fluid.runawayRate[:, 0]
+    gammaDreicer = so.other.fluid.gammaDreicer[:, 0]
+    gammaAva = so.other.fluid.GammaAva[:, 0] * so.eqsys.n_re[1:, 0]
+    gammaT = so.other.fluid.gammaTritium[:, 0]
+
+    plotInternal(axs[0, 0], t, Te / 1e3, ylabel=r'$T$ (keV)', color='k', showlabel=showlabel, label=r'$T_{\rm e}$')
+    plotInternal(axs[0, 0], t, Ti / 1e3, ylabel=r'$T$ (keV)', color='m', showlabel=showlabel, label=r'$T_{\rm i}$')
+
+    plotInternal(axs[0, 1], t, ne / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='k', showlabel=showlabel,
+                 label=r'$n_{\rm e}$')
+    plotInternal(axs[0, 1], t, nD0 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='r', showlabel=showlabel,
+                 label=r'$n_{\rm D0}$')
+    plotInternal(axs[0, 1], t, nD1 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='b', showlabel=showlabel,
+                 label=r'$n_{\rm D1}$')
+    plotInternal(axs[0, 1], t, nT0 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='m', showlabel=showlabel,
+                 label=r'$n_{\rm T0}$')
+    plotInternal(axs[0, 1], t, nT1 / 1e20, ylabel=r'$n$ (1e20 m$^{-3}$)', color='c', showlabel=showlabel,
+                 label=r'$n_{\rm T1}$')
+
+    plotInternal(axs[0, 2], t, streamingParameter, ylabel=r'$u_e/v_{\rm th}$', color='k', showlabel=showlabel,
+                 label=r'$\xi$')
+
+    plotInternal(axs[1, 0], t[1:], Poh / 1e6, ylabel=r'$P$ (MW)', color='m', showlabel=showlabel, label=r'$P_{\rm oh}$')
+    plotInternal(axs[1, 0], t[1:], Prad / 1e6, ylabel=r'$P$ (MW)', color='r', showlabel=showlabel,
+                 label=r'$P_{\rm rad}$')
+    plotInternal(axs[1, 0], t[1:], Ptransp / 1e6, ylabel=r'$P$ (MW)', color='c', showlabel=showlabel,
+                 label=r'$P_{\rm transp}$')
+    plotInternal(axs[1, 0], t[1:], Pequi / 1e6, ylabel=r'$P$ (MW)', color='g', showlabel=showlabel,
+                 label=r'$P_{\rm equi}$')
+
+    # plotInternal(axs[1, 1], t, Uext, ylabel=r'$U$ (V)', color='k', showlabel=showlabel, label='$U_{\rm ext}$')
+    plotInternal(axs[1, 1], t, Ures, ylabel=r'$U$ (V)', color='m', showlabel=showlabel, label=r'$U_{\rm res}$')
+
+    plotInternal(axs[1, 2], t[1:], tauRE, ylabel=r'$\tau_{\rm re}$ (s)', color='k', showlabel=showlabel,
+                 label=r'$\tau_{\rm re}$', yscalelog=True)
+    plotInternal(axs[1, 2], t[1:], tauRE1, ylabel=r'$\tau_{\rm re}$ (s)', color='r', showlabel=showlabel,
+                 label=r'Parallel', linestyle='--', yscalelog=True)
+    plotInternal(axs[1, 2], t[1:], tauRE2, ylabel=r'$\tau_{\rm re}$ (s)', color='r', showlabel=showlabel,
+                 label=r'Drifts', linestyle=':', yscalelog=True)
+
+    plotInternal(axs[2, 0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='k', showlabel=showlabel, label=r'$I_{\rm p}$')
+    plotInternal(axs[2, 0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='m', showlabel=showlabel, label=r'$I_{\rm re}$')
+    # axs[2, 0].set_ylim([0, 2])
+
+    plotInternal(axs[2, 1], t[1:], EoverED * 100, ylabel=r'$E/E_{\mathrm{D}}$ (\%)', color='k', showlabel=showlabel,
+                 label=r'$E/E_{\rm D}$', yscalelog=False)
+    plotInternal(axs[2, 1], t[1:], ECoverED * 100, ylabel=r'$E/E_{\mathrm{D}}$ (\%)', color='m', showlabel=showlabel,
+                 label=r'$E_{\rm C}/E_{\rm D}$', yscalelog=False)
+    axs[2, 1].set_ylim([0, 10])
+
+    plotInternal(axs[2, 2], t, Iwall / 1e3, ylabel=r'$I_{\rm wall}$ (kA)', color='k', showlabel=showlabel,
+                 label=r'$I_{\rm wall}$')
+    '''
+    plotInternal(axs[3, 0], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='m', showlabel=showlabel,
+                 label=r'$\gamma_{\rm D}$')
+    plotInternal(axs[3, 0], t[1:], gammaFe, ylabel=r'$\gamma_{\rm Fe}$ (\%)', color='k', showlabel=showlabel,
+                 label=r'$\gamma_{\rm Fe}$')
+
+    
+    plotInternal(axs[3, 1], t[:], nFe[3, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='k', showlabel=showlabel,
+                 label=r'$n_{\rm Fe3}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[4, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='y', showlabel=showlabel,
+                 label=r'$n_{\rm Fe4}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[5, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='m', showlabel=showlabel,
+                 label=r'$n_{\rm Fe5}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[6, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='r', showlabel=showlabel,
+                 label=r'$n_{\rm Fe6}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[7, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='c', showlabel=showlabel,
+                 label=r'$n_{\rm Fe7}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[8, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='g', showlabel=showlabel,
+                 label=r'$n_{\rm Fe8}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[9, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='b', showlabel=showlabel,
+                 label=r'$n_{\rm Fe9}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[10, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='silver', showlabel=showlabel,
+                 label=r'$n_{\rm Fe10}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[11, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='dimgrey', showlabel=showlabel,
+                 label=r'$n_{\rm Fe11}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[12, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='gold', showlabel=showlabel,
+                 label=r'$n_{\rm Fe12}$', yscalelog=True)
+    plotInternal(axs[3, 1], t[:], nFe[13, :] / n_norm, ylabel=r'$n$ m$^{-3}$', color='deeppink', showlabel=showlabel,
+                 label=r'$n_{\rm Fe13}$', yscalelog=True)
+    '''
+    plotInternal(axs[3, 2], t[1:], gammaTot, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='k', showlabel=showlabel,
+                 label=r'$\mathrm{d}n_{\rm re} / \mathrm{d} t$', yscalelog=False)
+    plotInternal(axs[3, 2], t[1:], gammaDreicer, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='b', showlabel=showlabel,
+                 label=r'$\gamma_{\rm Dreicer}$', yscalelog=False)
+    plotInternal(axs[3, 2], t[1:], gammaAva, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='r', showlabel=showlabel,
+                 label=r'$\gamma_{\rm ava}$', yscalelog=False)
+    plotInternal(axs[3, 2], t[1:], gammaT, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='g', showlabel=showlabel,
+                 label=r'$\gamma_{\rm T}$', yscalelog=False)
+    #axs[3, 2].set_ylim([0, 1e16])
+
+    for i in range(axs.shape[0]):
+        for j in range(axs.shape[1]):
+            axs[i, j].set_xlim([t[0], t[-1]])
+            axs[i, j].grid(True)
+
+    # upperlim = 3.35
+    # axs[0,0].set_ylim([0, 0.1])
+    # axs[0, 0].set_xlim([0.65, upperlim])
+    # axs[0,1].set_ylim([0, 0.012])
+    # axs[0,1].set_xlim([0.65, upperlim])
+    # axs[1, 0].set_xlim([0.65, upperlim])
+    # axs[1,1].set_ylim([0, 16])
+    # axs[1,1].set_xlim([0.65, upperlim])
+    # axs[2,0].set_ylim([0, 0.7])
+    # axs[2, 0].set_xlim([0.65, upperlim])
+    # axs[3,0].set_xlim([0.65, upperlim])
+    # axs[1, 0].set_ylim([0, 0.025])
+    # axs[3, 1].set_ylim([1e-9, 1e-1])
+    # axs[3, 1].set_xlim([0.65, upperlim])
+
+    # axs[0,0].set_yticks([0, 50, 100, 150, 200])
+    # axs[0,1].set_yticks([0, 5, 10, 15])
+    # axs[1,0].set_yticks([0, 20, 40, 60, 80])
+    # axs[2,0].set_yticks([0, 20, 40, 60, 80])
+    # axs[2,1].set_yticks([0, 0.1, 0.2, 0.3, 0.4])
+
+
+def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, yscalelog = False, *args, **kwargs):
+    if label is not None and showlabel == False:
+        label = None
+
+    if log:
+        ax.semilogy(x, y, label=label, *args, **kwargs)
+    else:
+        ax.plot(x, y, label=label, *args, **kwargs)
+
+    ax.set_xlim([0, x[-1]])
+    if xlbl:
+        ax.set_xlabel(r'Time (s)')
+    ax.set_ylabel(ylabel)
+
+    if ylim is not None:
+        ax.set_ylim(ylim)
+
+    if yscalelog:
+        ax.set_yscale('log')
+
+def makeplots(so11, so12):
+    '''
+    fig1, axs1 = plt.subplots(2, 1, figsize=(7,5), sharex=True)
+
+    drawplot1(axs1, so11, color='b')
+    drawplot1(axs1, so12, color='b', toffset=so11.grid.t[-1])
+
+    fig2, axs2 = plt.subplots(4, 1, figsize=(7, 10))
+    drawplot2(axs2, so11, color='b')
+    drawplot2(axs2, so12, color='b', toffset=so11.grid.t[-1])
+
+    fig3, axs3 = plt.subplots(3, 1, figsize=(7, 10))
+    drawplot3(axs3, so11)
+    drawplot3(axs3, so12, toffset=so11.grid.t[-1], showlabel=False)
+    '''
+    fig4, axs4 = plt.subplots(4, 3, figsize=(12, 10))
+    drawplot4(axs4, so11, showlabel=False)
+    drawplot4(axs4, so12, toffset=so11.grid.t[-1], showlabel=True)
+
+    plt.tight_layout()
+    plt.show()
+
+
+def main(argv):
+    FONTSIZE = 16
+    plt.rcParams.update({'font.size': FONTSIZE})
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-a', '--skip-all', help="Skip all simulations and only generate plots", dest="skip", action='store_const', const=[1,2])
+    parser.add_argument('-e', '--extension', help="Append the specified string to the end of file names", dest="extension", action='store', default='')
+    parser.add_argument('-n', '--no-plot', help="Only run simulations, don't generate plots", dest="plot", action='store_false', default=True)
+    parser.add_argument('-s', '--skip', help="Skip the specified simulation(s)", dest="skip", nargs="*", type=int)
+
+    settings = parser.parse_args()
+
+    ext = '' if not settings.extension else '_' + settings.extension
+
+    if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
+        ss21 = generate(fractionT=0.5, EfieldDYON=False)
+        ss21.save(f'settings1WithT{ext}.h5')
+        so21 = runiface(ss21, f'output1WithT{ext}.h5', quiet=False)
+
+        ss22 = STREAMSettings(ss21)
+        ss22.fromOutput(f'output1WithT{ext}.h5')
+        ss22.timestep.setTmax(0.3 - ss21.timestep.tmax)
+        ss22.timestep.setNt(10000)
+        ss22.save(f'settings2WithT{ext}.h5')
+        so22 = runiface(ss22, f'output2WithT{ext}.h5', quiet=False)
+    else:
+        so21 = STREAMOutput(f'output1WithT{ext}.h5')
+        so22 = STREAMOutput(f'output2WithT{ext}.h5')
+
+    if settings.plot:
+        makeplots(so21, so22)
+
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))
+
+

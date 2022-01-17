@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import scipy.constants
-sys.path.append('../../py')
+sys.path.append('../../../py')
 
 import PlasmaParameters as Formulas
 import DREAM.Settings.Equations.ColdElectronTemperature as Tcold
@@ -36,7 +36,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionT=0, Vloop=12, Vloop_t=0, j0=883.
 
     n0 = 3.22e22 * prefill  # Initial total deuterium density
     nD = n0 * (1-fractionT) * np.array([[1-gamma], [gamma]])
-    nT = nD * fractionT
+    nT = n0 * fractionT * np.array([[1-gamma], [gamma]])
 
     Btor = 2.65     # Toroidal magnetic field [T]
     a = 1.6         # Plasma minor radius [m]
@@ -211,10 +211,10 @@ def makeplots(so11, so12, so21, so22):
 
     drawplot3(axs3, so11)
     drawplot3(axs3, so12, toffset=so11.grid.t[-1], showlabel=False)
-    axs3.suptitle('D')
+    fig3.suptitle('D')
     drawplot3(axs4, so21)
     drawplot3(axs4, so22, toffset=so21.grid.t[-1], showlabel=False)
-    axs4.suptitle('DT')
+    fig4.suptitle('DT')
 
     plt.tight_layout()
     plt.show()

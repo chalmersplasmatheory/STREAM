@@ -321,7 +321,7 @@ def savePlots(so1, so2, directory, filename):
 
 def parameterSweep(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.array([])):
     directory = '../../../Figures/RunawayParameterSweep'
-    for tritium, nt in zip([False, True], [3e4, 1e5]):
+    for tritium, nt in zip([False, True], [3e4, 2e5]):
         addT = '_T' if tritium else ''
         for n0 in n0_list:
             ss1 = generate(n0=n0, EfieldDyon=False, tritium=tritium)
@@ -410,7 +410,7 @@ def oneRun(argv):
 def main(argv):
     #oneRun(argv=argv)
 
-    n0_list = np.array([2.5, 2.6, 2.7, 2.8, 2.9]) * 1e17 #1.4, 1.5, 1.3, 1.6, 1.2, 1.7, 1.1, 1.8, 1.0
+    n0_list = np.array([1, 1.5, 2, 2.5, 2.9, 3, 3.1, 3.5]) * 1e17 #
     Vloop_list = np.array([10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14])
     #Btor_list = np.array([2.5, 3])
     parameterSweep(n0_list)#, Vloop_list)
