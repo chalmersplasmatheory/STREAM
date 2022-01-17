@@ -111,7 +111,7 @@ class Ions(DREAMIons.Ions):
             self.tNeutralPrescribedAdvection = ion.getTNeutralPrescribedAdvection()
 
 
-    def setJET_CWrecycling(self, deuterium='D', carbon='C', oxygen='O', tritium='T', iron = 'Fe'):
+    def setJET_CWrecycling(self, deuterium='D', carbon='C', oxygen='O', tritium='T', iron = 'Fe', beryllium = 'Be'):
         """
         Set recycling coefficients to the values estimated for JET-CW
         (as given in [Kim et al 2012 Nucl. Fusion 52 103016]).
@@ -119,13 +119,13 @@ class Ions(DREAMIons.Ions):
         for ion in self.ions:
             if ion.name == deuterium:
                 ion.setRecyclingCoefficient(carbon, 0.015) #Ändrat från 0.03!!!
-                ion.setRecyclingCoefficient(iron, 0.005) # Vad ska detta vara?
+                ion.setRecyclingCoefficient(iron, 0.0005) # Vad ska detta vara?
             elif ion.name == oxygen:
                 ion.setRecyclingCoefficient(carbon, 1.0)
                 ion.setRecyclingCoefficient(oxygen, 1.0)
             elif ion.name == tritium:
                 ion.setRecyclingCoefficient(tritium, 1.0)
-                ion.setRecyclingCoefficient(iron, 0.005)  # Vad ska detta vara?
+                ion.setRecyclingCoefficient(iron, 0.0005)  # Vad ska detta vara?
             elif ion.name == iron:
                 ion.setRecyclingCoefficient(iron, 1.0)
 

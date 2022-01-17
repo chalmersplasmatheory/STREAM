@@ -22,7 +22,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=5e-5, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, j0=883.3, tmax=1e-4, nt=10000, EfieldDYON = True):
+def generate(prefill=1e-5, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, j0=883.3, tmax=1e-4, nt=10000, EfieldDYON=False):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -49,7 +49,8 @@ def generate(prefill=5e-5, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, j0=883.
     Ti0 = 1 # ion temperature [eV]
 
     # Initial electric field
-    E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
+    #E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)*10
+    E0 = 14 / (2 * np.pi * R0)
 
     ss = STREAMSettings()
 
@@ -80,11 +81,11 @@ def generate(prefill=5e-5, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, j0=883.
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
     ss.eqsys.n_i.addIon(name='T', Z=1, iontype=Ions.IONS_DYNAMIC, n=nT, r=np.array([0]), T=Ti0, tritium=True)
+    #ss.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=0, r=np.array([0]), T=Ti0)
 
     # Enable runaway
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
     ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
-    ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
     ss.eqsys.n_re.setTritium(True)
     #ss.eqsys.n_re.setCompton(Runaways.COMPTON_MODE_FLUID)
 
@@ -389,6 +390,39 @@ def makeplots(so11, so12):
     plt.tight_layout()
     plt.show()
 
+def parameterSweep(prefill_list=np.array([]), Vloop_list=np.array([])):
+    directory = '../../../Figures/RunawayParameterSweep_T'
+    for prefill in prefill_list:
+        ss1 = generate(fractionT=0.5, prefill=prefill)
+        ss1.save(f'Sweep/settings1_prefill_{np.round(prefill*1e5, 2)}' + '.h5')
+        so1 = runiface(ss1, f'Sweep/output1_n0_{np.round(prefill*1e5, 2)}' + '.h5', quiet=False)
+
+        ss2 = STREAMSettings(ss1)
+        ss2.fromOutput(f'Sweep/output1_n0_{np.round(prefill*1e5, 2)}' + '.h5')
+        ss2.timestep.setTmax(8 - ss1.timestep.tmax)
+        ss2.timestep.setNumberOfSaveSteps(0)
+        ss2.timestep.setNt(1e5)
+        ss2.save(f'Sweep/settings2_n0_{np.round(prefill*1e5, 2)}' + '.h5')
+        so2 = runiface(ss2, f'Sweep/output2_n0_{np.round(prefill*1e5, 2)}' + '.h5', quiet=False)
+
+        filename = f'n0_{np.round(prefill*1e5, 2)}'
+        savePlots(so1, so2, directory, filename)
+
+    for Vloop in Vloop_list:
+        ss1 = generate(fractionT=0.5, Vloop=Vloop)
+        ss1.save(f'Sweep/settings1_Vloop_{np.round(Vloop, 3)}' + '.h5')
+        so1 = runiface(ss1, f'Sweep/output1_Vloop_{np.round(Vloop, 3)}' + '.h5', quiet=False)
+
+        ss2 = STREAMSettings(ss1)
+        ss2.fromOutput(f'Sweep/output1_Vloop_{np.round(Vloop, 3)}' + '.h5')
+        ss2.timestep.setTmax(8 - ss1.timestep.tmax)
+        ss2.timestep.setNumberOfSaveSteps(0)
+        ss2.timestep.setNt(1e5)
+        ss2.save(f'Sweep/settings2_Vloop_{np.round(Vloop, 3)}' + '.h5')
+        so2 = runiface(ss2, f'Sweep/output2_Vloop_{np.round(Vloop, 3)}' + '.h5', quiet=False)
+
+        filename = f'Vloop_{np.round(Vloop, 3)}'
+        savePlots(so1, so2, directory, filename)
 
 def main(argv):
     FONTSIZE = 16
@@ -406,14 +440,14 @@ def main(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
-        ss21 = generate(fractionT=0.5, EfieldDYON=False)
+        ss21 = generate(fractionT=0.5)
         ss21.save(f'settings1WithT{ext}.h5')
         so21 = runiface(ss21, f'output1WithT{ext}.h5', quiet=False)
 
         ss22 = STREAMSettings(ss21)
         ss22.fromOutput(f'output1WithT{ext}.h5')
-        ss22.timestep.setTmax(0.3 - ss21.timestep.tmax)
-        ss22.timestep.setNt(10000)
+        ss22.timestep.setTmax(8 - ss21.timestep.tmax)
+        ss22.timestep.setNt(200000)
         ss22.save(f'settings2WithT{ext}.h5')
         so22 = runiface(ss22, f'output2WithT{ext}.h5', quiet=False)
     else:

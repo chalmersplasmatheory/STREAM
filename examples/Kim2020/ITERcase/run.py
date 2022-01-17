@@ -55,7 +55,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
     ss.eqsys.E_field.setInitialProfile(E0)
     #ss.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
-    Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.5 - 2))
+    Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.25 - 2))
+    print(str(Lp))
     ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
     ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
 
@@ -102,38 +103,40 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     return ss
 
 
-def drawplot1(axs, so, toffset=0, showlabel=False):
+def drawplot1(axs, so, toffset=0, showlabel=False, save=True):
     """
     Draw a plot with a output from the given STREAMOutput object.
     """
     t = so.grid.t[:] + toffset
-    t_csv = open('Data/time_STREAM.csv', 'ab')
-    np.savetxt(t_csv, t)
-    t_csv.close()
     Ip = so.eqsys.I_p[:, 0]
-    Ip_csv = open('Data/PlasmaCurrent_STREAM.csv', 'ab')
-    np.savetxt(Ip_csv, Ip)
-    Ip_csv.close()
     ne = so.eqsys.n_cold[:, 0]
-    ne_csv = open('Data/ElectronDensity_STREAM.csv', 'ab')
-    np.savetxt(ne_csv, ne)
-    ne_csv.close()
     Te = so.eqsys.T_cold[:, 0]
-    Te_csv = open('Data/ElectronTemperature_STREAM.csv', 'ab')
-    np.savetxt(Te_csv, Te)
-    Te_csv.close()
-    Lf = so.other.stream.Lf[:, 0]
-    Lf_csv = open('Data/ConnectionLength_STREAM.csv', 'ab')
-    np.savetxt(Lf_csv, Lf)
-    Lf_csv.close()
     Ti = so.eqsys.W_i.getTemperature()['D'][:, 0]
-    Ti_csv = open('Data/IonTemperature_STREAM.csv', 'ab')
-    np.savetxt(Ti_csv, Ti)
-    Ti_csv.close()
+    Lf = so.other.stream.Lf[:, 0]
     tau = so.other.stream.tau_D[:, 0]
-    tau_csv = open('Data/ConfinementTime_STREAM.csv', 'ab')
-    np.savetxt(tau_csv, tau)
-    tau_csv.close()
+
+    if save:
+        t_csv = open('Data/time_STREAM.csv', 'ab')
+        np.savetxt(t_csv, t)
+        t_csv.close()
+        Ip_csv = open('Data/PlasmaCurrent_STREAM.csv', 'ab')
+        np.savetxt(Ip_csv, Ip)
+        Ip_csv.close()
+        ne_csv = open('Data/ElectronDensity_STREAM.csv', 'ab')
+        np.savetxt(ne_csv, ne)
+        ne_csv.close()
+        Te_csv = open('Data/ElectronTemperature_STREAM.csv', 'ab')
+        np.savetxt(Te_csv, Te)
+        Te_csv.close()
+        Ti_csv = open('Data/IonTemperature_STREAM.csv', 'ab')
+        np.savetxt(Ti_csv, Ti)
+        Ti_csv.close()
+        Lf_csv = open('Data/ConnectionLength_STREAM.csv', 'ab')
+        np.savetxt(Lf_csv, Lf)
+        Lf_csv.close()
+        tau_csv = open('Data/ConfinementTime_STREAM.csv', 'ab')
+        np.savetxt(tau_csv, tau)
+        tau_csv.close()
 
     plotInternal(axs[0,0], t, Ip/1e3, ylabel=r'$I_{\rm p}$ (kA)', color='g', showlabel=showlabel, label='STREAM')
     plotInternal(axs[0,1], t, ne/1e17, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{17}$m$^{-3}$)', color='g', showlabel=False, label='STREAM')
