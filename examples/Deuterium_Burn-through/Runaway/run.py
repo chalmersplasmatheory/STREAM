@@ -22,7 +22,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=1e-5, gamma=2e-2, Vloop=12, Vloop_t=0, I0=883.3, tmax=1e-4, nt=10000, EfieldDYON=False):
+def generate(prefill=1e-6, gamma=2e-2, Vloop=12, Vloop_t=0, I0=883.3, tmax=1e-4, nt=10000, EfieldDYON=False):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -220,8 +220,8 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
     gammaDreicer = so.other.fluid.gammaDreicer[:, 0]
     gammaAva = so.other.fluid.GammaAva[:, 0] * so.eqsys.n_re[1:, 0]
 
-    plotInternal(axs[0, 0], t, Te / 1e3, ylabel=r'$T$ (keV)', color='k', showlabel=showlabel, label=r'$T_{\rm e}$')
-    plotInternal(axs[0, 0], t, Ti / 1e3, ylabel=r'$T$ (keV)', color='m', showlabel=showlabel, label=r'$T_{\rm i}$')
+    plotInternal(axs[0, 0], t, Te, ylabel=r'$T$ (eV)', color='k', showlabel=showlabel, label=r'$T_{\rm e}$', yscalelog=True)
+    plotInternal(axs[0, 0], t, Ti, ylabel=r'$T$ (eV)', color='m', showlabel=showlabel, label=r'$T_{\rm i}$', yscalelog=True)
 
     plotInternal(axs[0, 1], t, ne, ylabel=r'$n$ (m$^{-3}$)', color='k', showlabel=showlabel,
                  label=r'$n_{\rm e}$')

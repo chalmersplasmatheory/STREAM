@@ -235,8 +235,8 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
     gammaTrit = so.other.fluid.gammaTritium[:, 0]
     gammaComp = so.other.fluid.gammaCompton[:, 0]
 
-    plotInternal(axs[0, 0], t, Te / 1e3, ylabel=r'$T$ (keV)', color='k', showlabel=showlabel, label=r'$T_{\rm e}$')
-    plotInternal(axs[0, 0], t, Ti / 1e3, ylabel=r'$T$ (keV)', color='m', showlabel=showlabel, label=r'$T_{\rm i}$')
+    plotInternal(axs[0, 0], t, Te, ylabel=r'$T$ (eV)', color='k', showlabel=showlabel, label=r'$T_{\rm e}$', yscalelog=True)
+    plotInternal(axs[0, 0], t, Ti, ylabel=r'$T$ (eV)', color='m', showlabel=showlabel, label=r'$T_{\rm i}$', yscalelog=True)
 
     plotInternal(axs[0, 1], t, ne, ylabel=r'$n$ (m$^{-3}$)', color='k', showlabel=showlabel,
                  label=r'$n_{\rm e}$')
@@ -299,7 +299,7 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
                  label=r'$\gamma_{\rm T}$', yscalelog=False)
     plotInternal(axs[3, 1], t[1:], gammaComp, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='m', showlabel=showlabel,
                  label=r'$\gamma_{\rm C}$', yscalelog=False)
-    #axs[3, 1].set_ylim([-6e14, 2.5e15])
+    #axs[3, 1].set_ylim([-4e11, 2e12])
 
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
@@ -415,7 +415,7 @@ def main(argv):
         ss22 = STREAMSettings(ss21)
         ss22.fromOutput(f'output1WithT{ext}.h5')
         ss22.timestep.setTmax(8 - ss21.timestep.tmax)
-        ss22.timestep.setNt(20000)
+        ss22.timestep.setNt(200000)
         ss22.save(f'settings2WithT{ext}.h5')
         so22 = runiface(ss22, f'output2WithT{ext}.h5', quiet=False)
     else:
