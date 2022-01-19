@@ -22,7 +22,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3, tmax=1e-4, nt=10000, EfieldDYON=False):
+def generate(prefill=1e-5, gamma=2e-2, Vloop=12, Vloop_t=0, I0=883.3, tmax=1e-4, nt=10000, EfieldDYON=False):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -37,8 +37,7 @@ def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3
     """
 
     n0 = 3.22e22 * prefill  # Initial total deuterium density
-    nD = n0 * (1-fractionT) * np.array([[1-gamma], [gamma]])
-    nT = n0 * fractionT * np.array([[1-gamma], [gamma]])
+    nD = n0 * np.array([[1-gamma], [gamma]])
 
     Btor = 2.65     # Toroidal magnetic field [T]
     a = 1.6         # Plasma minor radius [m]
@@ -52,7 +51,6 @@ def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3
     # Initial electric field
     j0 = I0 / (a ** 2 * np.pi)
     E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
-
     ss = STREAMSettings()
 
     ss.atomic.adas_interpolation = Atomics.ADAS_INTERP_BILINEAR
@@ -81,19 +79,14 @@ def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3
 
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
-    ss.eqsys.n_i.addIon(name='T', Z=1, iontype=Ions.IONS_DYNAMIC, n=nT, r=np.array([0]), T=Ti0, tritium=True)
 
     # Enable runaway
-    '''
+    #'''
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
     ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
-    ss.eqsys.n_re.setTritium(True)
-    ss.eqsys.n_re.setCompton(Runaways.COMPTON_MODE_FLUID, Runaways.ITER_PHOTON_FLUX_DENSITY)
     '''
     ss.eqsys.n_re.setAvalanche(False)
     ss.eqsys.n_re.setDreicer(False)
-    ss.eqsys.n_re.setTritium(False)
-    ss.eqsys.n_re.setCompton(False)
     #'''
 
     # Recycling coefficients (unused)
@@ -194,9 +187,6 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
     nD0 = so.eqsys.n_i['D'][0][:]
     nD1 = so.eqsys.n_i['D'][1][:]
 
-    nT0 = so.eqsys.n_i['T'][0][:]
-    nT1 = so.eqsys.n_i['T'][1][:]
-
     vth = np.sqrt(2 * e * Te / m_e)
     streamingParameter = so.eqsys.j_tot[:, 0] / (e * ne * vth)
 
@@ -224,15 +214,10 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
     totD = nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() + nD1[1:].flatten() * so.other.stream.V_p[:,
                                                                                                0].flatten()
     gammaD = (1 - nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() / totD)
-    totT = nT0[1:].flatten() * so.other.stream.V_n_tot['T'][:].flatten() + nT1[1:].flatten() * so.other.stream.V_p[:,
-                                                                                               0].flatten()
-    gammaT = (1 - nT0[1:].flatten() * so.other.stream.V_n_tot['T'][:].flatten() / totT)
 
     gammaTot = so.other.fluid.runawayRate[:, 0]
     gammaDreicer = so.other.fluid.gammaDreicer[:, 0]
     gammaAva = so.other.fluid.GammaAva[:, 0] * so.eqsys.n_re[1:, 0]
-    gammaTrit = so.other.fluid.gammaTritium[:, 0]
-    gammaComp = so.other.fluid.gammaCompton[:, 0]
 
     plotInternal(axs[0, 0], t, Te / 1e3, ylabel=r'$T$ (keV)', color='k', showlabel=showlabel, label=r'$T_{\rm e}$')
     plotInternal(axs[0, 0], t, Ti / 1e3, ylabel=r'$T$ (keV)', color='m', showlabel=showlabel, label=r'$T_{\rm i}$')
@@ -243,10 +228,6 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
                  label=r'$n_{\rm D0}$')
     plotInternal(axs[0, 1], t, nD1, ylabel=r'$n$ (m$^{-3}$)', color='b', showlabel=showlabel,
                  label=r'$n_{\rm D1}$')
-    plotInternal(axs[0, 1], t, nT0, ylabel=r'$n$ (m$^{-3}$)', color='m', showlabel=showlabel,
-                 label=r'$n_{\rm T0}$')
-    plotInternal(axs[0, 1], t, nT1, ylabel=r'$n$ (m$^{-3}$)', color='c', showlabel=showlabel,
-                 label=r'$n_{\rm T1}$')
 
     plotInternal(axs[0, 2], t, streamingParameter, ylabel=r'$u_e/v_{\rm th}$', color='k', showlabel=showlabel,
                  label=r'$\xi$')
@@ -278,15 +259,13 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
                  label=r'$E/E_{\rm D}$', yscalelog=False)
     plotInternal(axs[2, 1], t[1:], ECoverED * 100, ylabel=r'$E/E_{\mathrm{D}} (\%)$ ', color='m', showlabel=showlabel,
                  label=r'$E_{\rm C}/E_{\rm D}$', yscalelog=False)
-    axs[2, 1].set_ylim([-0.1 * np.max(EoverED[100:] * 100), 1.1 * np.max(EoverED[100:]) * 100])
+    axs[2, 1].set_ylim([-0.1*np.max(EoverED[100:]*100), 1.1*np.max(EoverED[100:])*100])
 
     plotInternal(axs[2, 2], t, Iwall / 1e3, ylabel=r'$I_{\rm wall}$ (kA)', color='k', showlabel=showlabel,
                  label=r'$I_{\rm wall}$')
 
     plotInternal(axs[3, 0], t[1:], gammaD, ylabel=r'$\gamma$ (\%)', color='m', showlabel=showlabel,
                  label=r'$\gamma_{\rm D}$')
-    plotInternal(axs[3, 0], t[1:], gammaT, ylabel=r'$\gamma$ (\%)', color='k', showlabel=showlabel,
-                 label=r'$\gamma_{\rm T}$')
 
     plotInternal(axs[3, 1], t[1:], gammaTot, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='k', showlabel=showlabel,
                  label=r'$\mathrm{d}n_{\rm re} / \mathrm{d} t$', yscalelog=False)
@@ -294,11 +273,7 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
                  label=r'$\gamma_{\rm Dreicer}$', yscalelog=False)
     plotInternal(axs[3, 1], t[1:], gammaAva, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='r', showlabel=showlabel,
                  label=r'$\gamma_{\rm ava}$', yscalelog=False)
-    plotInternal(axs[3, 1], t[1:], gammaTrit, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='g', showlabel=showlabel,
-                 label=r'$\gamma_{\rm T}$', yscalelog=False)
-    plotInternal(axs[3, 1], t[1:], gammaComp, ylabel=r'$\gamma_{\rm re}$ (s$^{-1}$)', color='m', showlabel=showlabel,
-                 label=r'$\gamma_{\rm C}$', yscalelog=False)
-    #axs[3, 1].set_ylim([-6e14, 2.5e15])
+    #axs[3, 1].set_ylim([-0.1*np.max(gammaTot[10:]), 1.1*np.max(gammaTot[10:])])
 
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
@@ -351,7 +326,6 @@ def makeplots(so11, so12):
     axs4[2, 0].legend(frameon=False, prop={'size': 10})
     axs4[2, 1].legend(frameon=False, prop={'size': 10})
     axs4[1, 2].legend(frameon=False, prop={'size': 10})
-    axs4[3, 0].legend(frameon=False, prop={'size': 10})
     axs4[3, 1].legend(frameon=False, prop={'size': 10})
 
     plt.tight_layout()
@@ -407,7 +381,7 @@ def main(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
-        ss21 = generate(fractionT=0.5)
+        ss21 = generate()
         ss21.save(f'settings1WithT{ext}.h5')
         so21 = runiface(ss21, f'output1WithT{ext}.h5', quiet=False)
 

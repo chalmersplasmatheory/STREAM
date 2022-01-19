@@ -84,8 +84,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     else:
         ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
         ss.eqsys.E_field.setInitialProfile(efield=E0)
-        Lp = float(scipy.constants.mu_0 * R0 * (np.log(8 * R0 / a) + 0.5 - 2))
-        ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
+        ss.eqsys.E_field.setInductances(Lp=5.19e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=7.5e-4)
         ss.eqsys.E_field.setCircuitVloop(Vloop, tVloop)
 
     # Electron temperature

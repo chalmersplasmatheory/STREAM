@@ -319,8 +319,8 @@ def savePlots(so1, so2, directory, filename):
     fig1.savefig(directory + '/' + filename + '.pdf')
     plt.close()
 
-def parameterSweep(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.array([])):
-    directory = '../../../Figures/RunawayParameterSweep'
+def parameterSweepSingle(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.array([])):
+    directory = '../../../Figures/RunawayParameterSweep/Y_Fe^D=1e-5'
     for tritium, nt in zip([False], [3e4]):#zip([False, True], [3e4, 2e5]):
         addT = '_T' if tritium else ''
         for n0 in n0_list:
@@ -372,6 +372,27 @@ def parameterSweep(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.a
             savePlots(so1, so2, directory, filename)
 
 
+def parameterSweepDouble(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.array([])):
+    directory = '../../../Figures/RunawayParameterSweep'
+    for tritium, nt in zip([False], [1e5]):  # zip([False, True], [3e4, 2e5]):
+        addT = '_T' if tritium else ''
+        for Vloop in Vloop_list:
+            for n0 in n0_list:
+                ss1 = generate(n0=n0, Vloop=Vloop, EfieldDyon=False, tritium=tritium)
+                ss1.save(f'Sweep/settings1_n0_{np.round(n0, -14)}_Vloop_{np.round(Vloop, 3)}' + addT + '.h5')
+                so1 = runiface(ss1, f'Sweep/output1_n0_{np.round(n0, -14)}_Vloop_{np.round(Vloop, 3)}' + addT + '.h5', quiet=False)
+
+                ss2 = STREAMSettings(ss1)
+                ss2.fromOutput(f'Sweep/output1_n0_{np.round(n0, -14)}_Vloop_{np.round(Vloop, 3)}' + addT + '.h5')
+                ss2.timestep.setTmax(1.3 * 6 - ss1.timestep.tmax)
+                ss2.timestep.setNumberOfSaveSteps(0)
+                ss2.timestep.setNt(nt)
+                ss2.save(f'Sweep/settings2_n0_{np.round(n0, -14)}_Vloop_{np.round(Vloop, 3)}' + addT + '.h5')
+                so2 = runiface(ss2, f'Sweep/output2_n0_{np.round(n0, -14)}_Vloop_{np.round(Vloop, 3)}' + addT + '.h5', quiet=False)
+
+                filename = f'n0_{np.round(n0, -14)}'
+                savePlots(so1, so2, directory, filename)
+
 def oneRun(argv):
     FONTSIZE = 16
     plt.rcParams.update({'font.size': FONTSIZE})
@@ -410,10 +431,10 @@ def oneRun(argv):
 def main(argv):
     #oneRun(argv=argv)
     #'''
-    n0_list = np.array([1, 2, 3, 4, 4.5, 5]) * 1e17 #
-    Vloop_list = np.array([6, 5, 4, 3]) # 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14
+    n0_list = np.array([1.25, 1.5, 1.75]) * 1e17
+    Vloop_list = np.array([2, 3])
     #Btor_list = np.array([2.5, 3])
-    parameterSweep(Vloop_list=Vloop_list)#n0_list)#, Vloop_list)
+    parameterSweepSingle(n0_list=n0_list)#, Vloop_list=Vloop_list)
     #'''
 
     return 0
