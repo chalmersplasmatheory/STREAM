@@ -34,6 +34,7 @@ def generate(prefill=1e-5, gamma=2e-2, Vloop=12, Vloop_t=0, I0=883.3, tmax=1e-4,
     :param Vloop_t:   Time vector corresponding to given loop voltage [V]
     :param I0:        Initial plasma current [A]
     :param tmax:      Simulation time [s]
+    :param nt:        Number of time steps
     """
 
     n0 = 3.22e22 * prefill  # Initial total deuterium density

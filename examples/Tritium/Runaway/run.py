@@ -34,6 +34,7 @@ def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3
     :param Vloop_t:   Time vector corresponding to given loop voltage [V]
     :param I0:        Initial plasma current [A]
     :param tmax:      Simulation time [s]
+    :param nt:        Number of time steps
     """
 
     n0 = 3.22e22 * prefill  # Initial total deuterium density
@@ -84,7 +85,7 @@ def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3
     ss.eqsys.n_i.addIon(name='T', Z=1, iontype=Ions.IONS_DYNAMIC, n=nT, r=np.array([0]), T=Ti0, tritium=True)
 
     # Enable runaway
-    '''
+    #'''
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
     ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
     ss.eqsys.n_re.setTritium(True)

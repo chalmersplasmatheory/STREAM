@@ -30,6 +30,7 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     :param Vloop_t: Time vector corresponding to given loop voltage [V]
     :param j0:      Initial plasma current density [A/m^2]
     :param tmax:    Simulation time [s]
+    :param nt:      Number of time steps
     """
     n0 = 3.22e22 * prefill  # Initial total deuterium density
     #n0 = 2.78e22 * prefill  # Initial total deuterium density
@@ -56,7 +57,6 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     ss.eqsys.E_field.setInitialProfile(E0)
     #ss.eqsys.E_field.setInductances(Lp=6.09e-6, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
     Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.25 - 2))
-    print(str(Lp))
     ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
     ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
 
@@ -78,7 +78,6 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     # Radial grid
     ss.radialgrid.setB0(Btor)
     ss.radialgrid.setMinorRadius(a)
-    #ss.radialgrid.setMinorRadius([1.9, 1.6, 1.6], [0, 0.1, 100])
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(a)
     ss.radialgrid.setVesselVolume(V_vessel)

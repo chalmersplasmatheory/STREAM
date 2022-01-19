@@ -36,6 +36,7 @@ def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0
     :param tmax:    Simulation time [s]
     :param nt:      Number of  timesteps
     :param Rwall:   Wall resistance [ohm]
+    :param nt:      Number of time steps
 
     booleans:
     :param EfieldDyon:  If circuit equations from DYON should be used, otherwise selfconsistent evolution of electric field
@@ -164,11 +165,9 @@ def drawplot1(axs, so, toffset=0.7, showlabel=True):
     Ptransp = so.other.stream.Tcold_transport[:,0] * Vp
     Pequi = so.other.fluid.Tcold_ion_coll[:, 0] * Vp
 
-    #Uext = so.eqsys.V
     Ures = 2 * np.pi * 5.7 * so.eqsys.E_field[:,0]
 
     Ip = so.eqsys.I_p[:,0]
-    #Ire = e * c * 1.6**2 * np.pi * so.eqsys.n_re[:]
     Ire = so.eqsys.j_re.current()[:]
     Iwall = so.eqsys.I_wall[:,0]
 
@@ -242,26 +241,7 @@ def drawplot1(axs, so, toffset=0.7, showlabel=True):
             axs[i,j].grid(True)
 
 
-    #upperlim = 3.35
-    #axs[0,0].set_ylim([0, 0.1])
-    #axs[0, 0].set_xlim([0.65, upperlim])
-    #axs[0,1].set_ylim([0, 0.012])
-    #axs[0,1].set_xlim([0.65, upperlim])
-    #axs[1, 0].set_xlim([0.65, upperlim])
-    #axs[1,1].set_ylim([0, 16])
-    #axs[1,1].set_xlim([0.65, upperlim])
-    #axs[2,0].set_ylim([0, 0.7])
-    #axs[2, 0].set_xlim([0.65, upperlim])
-    #axs[3,0].set_xlim([0.65, upperlim])
-    #axs[1, 0].set_ylim([0, 0.025])
     axs[3, 1].set_ylim([1e-9, 1e-1])
-    #axs[3, 1].set_xlim([0.65, upperlim])
-
-    #axs[0,0].set_yticks([0, 50, 100, 150, 200])
-    #axs[0,1].set_yticks([0, 5, 10, 15])
-    #axs[1,0].set_yticks([0, 20, 40, 60, 80])
-    #axs[2,0].set_yticks([0, 20, 40, 60, 80])
-    #axs[2,1].set_yticks([0, 0.1, 0.2, 0.3, 0.4])
 
 
 def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=False, label=None, yscalelog = False, *args, **kwargs):
@@ -321,7 +301,7 @@ def savePlots(so1, so2, directory, filename):
 
 def parameterSweepSingle(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.array([])):
     directory = '../../../Figures/RunawayParameterSweep/Y_Fe^D=1e-5'
-    for tritium, nt in zip([False], [3e4]):#zip([False, True], [3e4, 2e5]):
+    for tritium, nt in zip([False], [3e4]):
         addT = '_T' if tritium else ''
         for n0 in n0_list:
             ss1 = generate(n0=n0, EfieldDyon=False, tritium=tritium)
@@ -374,7 +354,7 @@ def parameterSweepSingle(n0_list=np.array([]), Vloop_list=np.array([]), Btor_lis
 
 def parameterSweepDouble(n0_list=np.array([]), Vloop_list=np.array([]), Btor_list=np.array([])):
     directory = '../../../Figures/RunawayParameterSweep'
-    for tritium, nt in zip([False], [1e5]):  # zip([False, True], [3e4, 2e5]):
+    for tritium, nt in zip([False], [1e5]):
         addT = '_T' if tritium else ''
         for Vloop in Vloop_list:
             for n0 in n0_list:
@@ -434,7 +414,7 @@ def main(argv):
     n0_list = np.array([1.25, 1.5, 1.75]) * 1e17
     Vloop_list = np.array([2, 3])
     #Btor_list = np.array([2.5, 3])
-    parameterSweepSingle(n0_list=n0_list)#, Vloop_list=Vloop_list)
+    parameterSweepSingle(n0_list=n0_list, Vloop_list=Vloop_list)
     #'''
 
     return 0
