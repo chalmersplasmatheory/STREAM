@@ -389,7 +389,7 @@
                 -\frac{V_{n,i}}{\gamma_{n,i}V}I_i^{(0)}n_en_i^{(0)}
                 +\frac{\Vp}{\gamma_{n,i}V}R_i^{(1)}n_en_i^{(1)}
                 +\frac{V_{n,D}}{\gamma_{n,i}V}R_{i,{\rm cx}}^{(1)} n_D^{(0)}n_i^{(1)}
-                -\frac{\Gamma_{i,{\rm in}}^{(0)}}{\gamma_{n,i}V},\\
+                +\frac{\Gamma_{i,{\rm in}}^{(0)}}{\gamma_{n,i}V},\\
             %
             \frac{\dd n_i^{(1)}}{\dd t} &=
                 \frac{V_{n,i}}{\Vp}I_i^{(0)}n_en_i^{(0)}
@@ -493,12 +493,11 @@
     where we note that there are no charge-exchange contributions for $i=k=D$ and $i,k\neq D$, i.e.\ exactly one of the ion species involved in the interaction is deuterium, and the particle flux is given by
     \begin{equation}
         \Gamma_i^{(j)} = \begin{cases}
-            \Gamma_{D,{\rm in}}^{\rm tot}/V_i^{(j)}, &\quad j=0, i=D,\\
-            -\Gamma_{i,{\rm in}}^{(0)}/V_i^{(j)}, &\quad j=0, i\neq D,\\
+            \Gamma_{i,{\rm in}}^{(0)}/V_i^{(j)}, &\quad j=0,\\
             -n_i^{(j)}/\tau_i, &\quad j\geq 1, 
         \end{cases}
     \end{equation}
-    where $\Gamma_{D,{\rm in}}^{\rm tot}$ is given by equation~\eqref{eq:GammaDtot} and $\Gamma_{i,{\rm in}}^{(0)}$ is given by equation~\eqref{eq:Gamma0}.
+    where $\Gamma_{i,{\rm in}}^{(0)}$ is given by equation~\eqref{eq:GammaDtot} if $i=D$ and by equation~\eqref{eq:Gamma0} if $i\neq D$.
 
     \subsection{Required modifications}
     Based on the above discussion, the following modifications will be required
