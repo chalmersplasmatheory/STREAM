@@ -22,7 +22,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3, tmax=1e-4, nt=10000, EfieldDYON=False):
+def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3, tmax=1e-4, nt=10000, EfieldDYON=True):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -64,7 +64,7 @@ def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3
 
         ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
         ss.eqsys.E_field.setInitialProfile(E0)
-        ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
+        ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e7)
         ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
     else:
         R = 1e7
@@ -415,7 +415,7 @@ def main(argv):
         ss22 = STREAMSettings(ss21)
         ss22.fromOutput(f'output1WithT{ext}.h5')
         ss22.timestep.setTmax(8 - ss21.timestep.tmax)
-        ss22.timestep.setNt(200000)
+        ss22.timestep.setNt(20000)
         ss22.save(f'settings2WithT{ext}.h5')
         so22 = runiface(ss22, f'output2WithT{ext}.h5', quiet=False)
     else:
