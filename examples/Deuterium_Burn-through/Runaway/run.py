@@ -22,7 +22,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=1e-6, gamma=2e-2, Vloop=12, Vloop_t=0, I0=883.3, tmax=1e-4, nt=10000, EfieldDYON=False):
+def generate(prefill=1e-6, gamma=2e-2, Vloop=12, Vloop_t=0, I0=40e3, tmax=1e-4, nt=10000, EfieldDYON=True, runaways=True):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -52,6 +52,7 @@ def generate(prefill=1e-6, gamma=2e-2, Vloop=12, Vloop_t=0, I0=883.3, tmax=1e-4,
     # Initial electric field
     j0 = I0 / (a ** 2 * np.pi)
     E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
+
     ss = STREAMSettings()
 
     ss.atomic.adas_interpolation = Atomics.ADAS_INTERP_BILINEAR
@@ -62,7 +63,7 @@ def generate(prefill=1e-6, gamma=2e-2, Vloop=12, Vloop_t=0, I0=883.3, tmax=1e-4,
 
         ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
         ss.eqsys.E_field.setInitialProfile(E0)
-        ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
+        ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e7)
         ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
     else:
         R = 1e7
@@ -71,7 +72,8 @@ def generate(prefill=1e-6, gamma=2e-2, Vloop=12, Vloop_t=0, I0=883.3, tmax=1e-4,
 
         ss.eqsys.E_field.setType(ElectricField_D.TYPE_SELFCONSISTENT)
         ss.eqsys.E_field.setInitialProfile(efield=E0)
-        ss.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER, V_loop_wall_R0=Vloop/R0, times=Vloop_t, inverse_wall_time=1/wall_time, R0=R0)
+        ss.eqsys.E_field.setBoundaryCondition(ElectricField_D.BC_TYPE_TRANSFORMER, V_loop_wall_R0=Vloop / R0,
+                                              times=Vloop_t, inverse_wall_time=1 / wall_time, R0=R0)
 
     # Electron temperature
     ss.eqsys.T_cold.setType(Tcold.TYPE_SELFCONSISTENT)
@@ -82,13 +84,12 @@ def generate(prefill=1e-6, gamma=2e-2, Vloop=12, Vloop_t=0, I0=883.3, tmax=1e-4,
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
 
     # Enable runaway
-    #'''
-    ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
-    ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
-    '''
-    ss.eqsys.n_re.setAvalanche(False)
-    ss.eqsys.n_re.setDreicer(False)
-    #'''
+    if runaways:
+        ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
+        ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
+    else:
+        ss.eqsys.n_re.setAvalanche(False)
+        ss.eqsys.n_re.setDreicer(False)
 
     # Recycling coefficients (unused)
     ss.eqsys.n_i.setJET_CWrecycling()
@@ -175,11 +176,12 @@ def drawplot3(axs, so, toffset=0, showlabel=True):
     axs[2].set_xlim([0, 0.03])
     axs[2].legend(frameon=False)
 
-def drawplot4(axs, so, toffset=0, showlabel=True):
+def drawplot4(axs, so, toffset=0, showlabel=True, save=False, fileaddon=''):
     """
     Draw a plot with a output from the given STREAMOutput object.
     """
     t = so.grid.t[:] + toffset
+
 
     Te = so.eqsys.T_cold[:, 0]
     Ti = so.eqsys.W_i.getTemperature()['D'][:, 0]
@@ -203,6 +205,7 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
     Ip = so.eqsys.I_p[:, 0]
     # Ire = e * c * 1.6**2 * np.pi * so.eqsys.n_re[:]
     Ire = so.eqsys.j_re.current()[:]
+    Iohm = so.eqsys.j_ohm.current()[:]
     Iwall = so.eqsys.I_wall[:, 0]
 
     EoverED = so.eqsys.E_field.norm('ED')[1:, 0]
@@ -219,6 +222,51 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
     gammaTot = so.other.fluid.runawayRate[:, 0]
     gammaDreicer = so.other.fluid.gammaDreicer[:, 0]
     gammaAva = so.other.fluid.GammaAva[:, 0] * so.eqsys.n_re[1:, 0]
+
+    if save:
+        t_csv = open('Data/time_'+ fileaddon +'.csv', 'ab')
+        np.savetxt(t_csv, t)
+        t_csv.close()
+        Ip_csv = open('Data/PlasmaCurrent_'+ fileaddon +'.csv', 'ab')
+        np.savetxt(Ip_csv, Ip)
+        Ip_csv.close()
+        Ire_csv = open('Data/RunawayCurrent_' + fileaddon + '.csv', 'ab')
+        np.savetxt(Ire_csv, Ire)
+        Ire_csv.close()
+        Iohm_csv = open('Data/OhmicCurrent_' + fileaddon + '.csv', 'ab')
+        np.savetxt(Iohm_csv, Iohm)
+        Iohm_csv.close()
+        Te_csv = open('Data/ElectronTemperature_'+ fileaddon +'.csv', 'ab')
+        np.savetxt(Te_csv, Te)
+        Te_csv.close()
+        Ti_csv = open('Data/IonTemperature_'+ fileaddon +'.csv', 'ab')
+        np.savetxt(Ti_csv, Ti)
+        Ti_csv.close()
+        EoverED_csv = open('Data/ElectricField_'+ fileaddon +'.csv', 'ab')
+        np.savetxt( EoverED_csv,  EoverED)
+        EoverED_csv.close()
+        ECoverED_csv = open('Data/CriticalElectricField_' + fileaddon + '.csv', 'ab')
+        np.savetxt(ECoverED_csv, ECoverED)
+        ECoverED_csv.close()
+
+        gammaTot_csv = open('Data/TotalRunawayRate_' + fileaddon + '.csv', 'ab')
+        np.savetxt(gammaTot_csv, gammaTot)
+        gammaTot_csv.close()
+        gammaDreicer_csv = open('Data/DreicerRunawayRate_' + fileaddon + '.csv', 'ab')
+        np.savetxt(gammaDreicer_csv, gammaDreicer)
+        gammaDreicer_csv.close()
+        gammaAva_csv = open('Data/AvalancheRunawayRate_' + fileaddon + '.csv', 'ab')
+        np.savetxt(gammaAva_csv, gammaAva)
+        gammaAva_csv.close()
+        tauRE_csv = open('Data/RunawayConfinementTime_'+ fileaddon +'.csv', 'ab')
+        np.savetxt(tauRE_csv, tauRE)
+        tauRE_csv.close()
+        tauRE1_csv = open('Data/RunawayDriftConfinementTime_' + fileaddon + '.csv', 'ab')
+        np.savetxt(tauRE1_csv, tauRE1)
+        tauRE1_csv.close()
+        tauRE2_csv = open('Data/RunawayParallellConfinementTime_' + fileaddon + '.csv', 'ab')
+        np.savetxt(tauRE2_csv, tauRE2)
+        tauRE2_csv.close()
 
     plotInternal(axs[0, 0], t, Te, ylabel=r'$T$ (eV)', color='k', showlabel=showlabel, label=r'$T_{\rm e}$', yscalelog=True)
     plotInternal(axs[0, 0], t, Ti, ylabel=r'$T$ (eV)', color='m', showlabel=showlabel, label=r'$T_{\rm i}$', yscalelog=True)
@@ -254,6 +302,7 @@ def drawplot4(axs, so, toffset=0, showlabel=True):
 
     plotInternal(axs[2, 0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='k', showlabel=showlabel, label=r'$I_{\rm p}$')
     plotInternal(axs[2, 0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='m', showlabel=showlabel, label=r'$I_{\rm re}$')
+    plotInternal(axs[2, 0], t, Iohm / 1e6, ylabel=r'$I$ (MA)', color='r', showlabel=showlabel, label=r'$I_{\rm ohm}$')
     # axs[2, 0].set_ylim([0, 2])
 
     plotInternal(axs[2, 1], t[1:], EoverED * 100, ylabel=r'$E/E_{\mathrm{D}} (\%)$ ', color='k', showlabel=showlabel,
@@ -302,7 +351,7 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
     if yscalelog:
         ax.set_yscale('log')
 
-def makeplots(so11, so12):
+def makeplots(so11, so12, save=False, fileaddon=''):
     '''
     fig1, axs1 = plt.subplots(2, 1, figsize=(7,5), sharex=True)
 
@@ -318,8 +367,8 @@ def makeplots(so11, so12):
     drawplot3(axs3, so12, toffset=so11.grid.t[-1], showlabel=False)
     '''
     fig4, axs4 = plt.subplots(4, 3, figsize=(12, 10))
-    drawplot4(axs4, so11, showlabel=True)
-    drawplot4(axs4, so12, toffset=so11.grid.t[-1], showlabel=False)
+    drawplot4(axs4, so11, showlabel=True, save=save, fileaddon=fileaddon)
+    drawplot4(axs4, so12, toffset=so11.grid.t[-1], showlabel=False, save=save, fileaddon=fileaddon)
 
     axs4[0, 0].legend(frameon=False, prop={'size': 10})
     axs4[0, 1].legend(frameon=False, prop={'size': 10})
@@ -332,44 +381,28 @@ def makeplots(so11, so12):
     plt.tight_layout()
     plt.show()
 
-def parameterSweep(prefill_list=np.array([]), Vloop_list=np.array([])):
-    directory = '../../../Figures/RunawayParameterSweep_T'
-    for prefill in prefill_list:
-        ss1 = generate(fractionT=0.5, prefill=prefill)
-        ss1.save(f'Sweep/settings1_prefill_{np.round(prefill*1e5, 2)}' + '.h5')
-        so1 = runiface(ss1, f'Sweep/output1_n0_{np.round(prefill*1e5, 2)}' + '.h5', quiet=False)
+def saveDataArticle():
+    fileaddons = ['noRE', 'enabledRE', 'disabledRE']
+    runaways = [True, True, False]
+    prefillpressures = 2 / 133.32 * np.array([7e-4, 7e-5, 7e-5]) # Pa -> Torr
+    for fa, re, pgp in zip(fileaddons, runaways, prefillpressures):
+        ss21 = generate(prefill=pgp, runaways=re)
+        ss21.save(f'settings1WithT{fa}.h5')
+        so21 = runiface(ss21, f'output1WithT{fa}.h5', quiet=False)
 
-        ss2 = STREAMSettings(ss1)
-        ss2.fromOutput(f'Sweep/output1_n0_{np.round(prefill*1e5, 2)}' + '.h5')
-        ss2.timestep.setTmax(8 - ss1.timestep.tmax)
-        ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(1e5)
-        ss2.save(f'Sweep/settings2_n0_{np.round(prefill*1e5, 2)}' + '.h5')
-        so2 = runiface(ss2, f'Sweep/output2_n0_{np.round(prefill*1e5, 2)}' + '.h5', quiet=False)
+        ss22 = STREAMSettings(ss21)
+        ss22.fromOutput(f'output1WithT{fa}.h5')
+        ss22.timestep.setTmax(8 - ss21.timestep.tmax)
+        ss22.timestep.setNt(100000)
+        ss22.save(f'settings2WithT{fa}.h5')
+        so22 = runiface(ss22, f'output2WithT{fa}.h5', quiet=False)
 
-        filename = f'n0_{np.round(prefill*1e5, 2)}'
-        savePlots(so1, so2, directory, filename)
-
-    for Vloop in Vloop_list:
-        ss1 = generate(fractionT=0.5, Vloop=Vloop)
-        ss1.save(f'Sweep/settings1_Vloop_{np.round(Vloop, 3)}' + '.h5')
-        so1 = runiface(ss1, f'Sweep/output1_Vloop_{np.round(Vloop, 3)}' + '.h5', quiet=False)
-
-        ss2 = STREAMSettings(ss1)
-        ss2.fromOutput(f'Sweep/output1_Vloop_{np.round(Vloop, 3)}' + '.h5')
-        ss2.timestep.setTmax(8 - ss1.timestep.tmax)
-        ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(1e5)
-        ss2.save(f'Sweep/settings2_Vloop_{np.round(Vloop, 3)}' + '.h5')
-        so2 = runiface(ss2, f'Sweep/output2_Vloop_{np.round(Vloop, 3)}' + '.h5', quiet=False)
-
-        filename = f'Vloop_{np.round(Vloop, 3)}'
-        savePlots(so1, so2, directory, filename)
+        makeplots(so21, so22, save=True, fileaddon=fa)
 
 def main(argv):
     FONTSIZE = 16
     plt.rcParams.update({'font.size': FONTSIZE})
-
+    '''
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-a', '--skip-all', help="Skip all simulations and only generate plots", dest="skip", action='store_const', const=[1,2])
@@ -398,6 +431,8 @@ def main(argv):
 
     if settings.plot:
         makeplots(so21, so22)
+    '''
+    saveDataArticle()
 
     return 0
 

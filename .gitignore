@@ -11,4 +11,4 @@ DYON_tests/Read_mat.py
 *.out
 *.toc
 *.bcf
-
+*Data
