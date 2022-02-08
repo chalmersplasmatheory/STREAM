@@ -53,6 +53,10 @@ def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4,
     j0 = I0 / (a ** 2 * np.pi)
     E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
 
+    c1 = 3.5
+    c2 = 0.25
+    c3 = 0.55
+
     ss = STREAMSettings()
 
     ss.atomic.adas_interpolation = Atomics.ADAS_INTERP_BILINEAR
@@ -101,9 +105,9 @@ def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4,
     ss.radialgrid.setWallRadius(l_MK2)
     ss.radialgrid.setVesselVolume(V_vessel)
 
-    ss.radialgrid.setRecyclingCoefficient1(1)
-    ss.radialgrid.setRecyclingCoefficient2(0)
-    ss.radialgrid.setRecyclingCoefficient3(1)
+    ss.radialgrid.setRecyclingCoefficient1(c1)
+    ss.radialgrid.setRecyclingCoefficient2(c2)
+    ss.radialgrid.setRecyclingCoefficient3(c3)
     
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)
@@ -309,7 +313,7 @@ def drawplot4(axs, so, toffset=0, showlabel=True, save=False, fileaddon=''):
                  label=r'$E/E_{\rm D}$', yscalelog=False)
     plotInternal(axs[2, 1], t[1:], ECoverED * 100, ylabel=r'$E/E_{\mathrm{D}} (\%)$ ', color='m', showlabel=showlabel,
                  label=r'$E_{\rm C}/E_{\rm D}$', yscalelog=False)
-    axs[2, 1].set_ylim([-0.1*np.max(EoverED[100:]*100), 1.1*np.max(EoverED[100:])*100])
+    axs[2, 1].set_ylim([-0.1, 6])
 
     plotInternal(axs[2, 2], t, Iwall / 1e3, ylabel=r'$I_{\rm wall}$ (kA)', color='k', showlabel=showlabel,
                  label=r'$I_{\rm wall}$')
@@ -327,7 +331,7 @@ def drawplot4(axs, so, toffset=0, showlabel=True, save=False, fileaddon=''):
 
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
-            axs[i, j].set_xlim([0, t[-1]])
+            axs[i, j].set_xlim([0, 8])
             axs[i, j].grid(True)
 
 
@@ -382,10 +386,11 @@ def makeplots(so11, so12, save=False, fileaddon=''):
     plt.show()
 
 def saveDataArticle():
-    fileaddons = ['noRE', 'enabledRE', 'disabledRE']
-    runaways = [True, True, False]
-    prefillpressures = 2 / 133.32 * np.array([8e-4, 8e-5, 8e-5]) # Pa -> Torr
+    fileaddons = ['enabledRE', 'disabledRE', 'noRE']
+    runaways = [True, False, True]
+    prefillpressures = 2 / 133.32 * np.array([8e-5, 8e-5, 8e-4]) # Pa -> Torr
     for fa, re, pgp in zip(fileaddons, runaways, prefillpressures):
+
         ss21 = generate(prefill=pgp, runaways=re)
         ss21.save(f'settings1WithT{fa}.h5')
         so21 = runiface(ss21, f'output1WithT{fa}.h5', quiet=False)
@@ -396,8 +401,11 @@ def saveDataArticle():
         ss22.timestep.setNt(100000)
         ss22.save(f'settings2WithT{fa}.h5')
         so22 = runiface(ss22, f'output2WithT{fa}.h5', quiet=False)
-
-        makeplots(so21, so22, save=True, fileaddon=fa)
+        '''
+        so21 = STREAMOutput(f'DTwRE-1.h5')
+        so22 = STREAMOutput(f'DTwRE-2.h5')
+        '''
+        makeplots(so21, so22, save=False, fileaddon=fa)
 
 def main(argv):
     FONTSIZE = 16
@@ -433,7 +441,36 @@ def main(argv):
         makeplots(so21, so22)
     '''
     saveDataArticle()
-
+    '''
+    c1 = 1
+    c2 = 0
+    c3 = 1
+    t = np.linspace(0, 6, num=10000)
+    Y = 1 + c2 * np.exp(-(t - c1) * (t - c1) / (c3 * c3))
+    plt.plot(t, Y, color='k')
+    c1 = 1
+    c2 = 1
+    c3 = 1
+    Y = 1 + c2 * np.exp(-(t - c1) * (t - c1) / (c3 * c3))
+    plt.plot(t, Y, color='b')
+    c1 = 2.5
+    c2 = 5
+    c3 = 0.2
+    Y = 1 + c2 * np.exp(-(t - c1) * (t - c1) / (c3 * c3))
+    plt.plot(t, Y, color='r')
+    c1 = 1
+    c2 = 1
+    c3 = 1
+    Y = 1 + c2 * np.exp(-(t - c1) * (t - c1) / (c3 * c3))
+    plt.plot(t, Y, color='y')
+    c1 = 1
+    c2 = 1
+    c3 = 10
+    Y = 1 + c2 * np.exp(-(t - c1) * (t - c1) / (c3 * c3))
+    plt.plot(t, Y, color='g')
+    plt.legend(['1, 0, 1', '1, 1, 1', 'custom', '1, 10, 1', '1, 1, 10'])
+    plt.show()
+    #'''
     return 0
 
 
