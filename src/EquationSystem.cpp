@@ -10,8 +10,8 @@ EquationSystem::EquationSystem(
     DREAM::FVM::Grid *emptygrid, DREAM::FVM::Grid *rgrid,
     enum DREAM::OptionConstants::momentumgrid_type ht_type, DREAM::FVM::Grid *hottailGrid,
     enum DREAM::OptionConstants::momentumgrid_type re_type, DREAM::FVM::Grid *runawayGrid,
-    EllipticalRadialGridGenerator *r
-) : DREAM::EquationSystem(emptygrid, rgrid, ht_type, hottailGrid, re_type, runawayGrid), r(r)
+    DREAM::Settings *s, EllipticalRadialGridGenerator *r
+) : DREAM::EquationSystem(emptygrid, rgrid, ht_type, hottailGrid, re_type, runawayGrid, s), r(r)
     {}
     
 EllipticalRadialGridGenerator* EquationSystem::GetEllipticalRadialGridGenerator()
