@@ -26,7 +26,7 @@ namespace STREAM {
                 DREAM::FVM::Grid*, DREAM::FVM::Grid*,
                 enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*,
                 enum DREAM::OptionConstants::momentumgrid_type, DREAM::FVM::Grid*, 
-                EllipticalRadialGridGenerator*
+                DREAM::Settings*, EllipticalRadialGridGenerator*
             );
             
             void SetConfinementTime(ConfinementTime *CT);

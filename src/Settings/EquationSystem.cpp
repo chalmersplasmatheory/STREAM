@@ -28,7 +28,7 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
         scalarGrid, fluidGrid,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr, 
-        ergg
+        s, ergg
     );
     eqsys->SetEllipticalRadialGridGenerator(ergg);
 
