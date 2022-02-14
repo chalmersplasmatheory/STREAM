@@ -5,6 +5,7 @@ import DREAM.Settings.Equations.Ions as DREAMIons
 from . IonSpecies import IonSpecies, IONS_PRESCRIBED, ION_OPACITY_MODE_TRANSPARENT
 
 from DREAM.Settings.Equations.IonSpecies import ION_CHARGED_DIFFUSION_MODE_NONE, ION_CHARGED_DIFFUSION_MODE_PRESCRIBED, ION_NEUTRAL_DIFFUSION_MODE_NONE, ION_NEUTRAL_DIFFUSION_MODE_PRESCRIBED, ION_CHARGED_ADVECTION_MODE_NONE, ION_CHARGED_ADVECTION_MODE_PRESCRIBED, ION_NEUTRAL_ADVECTION_MODE_NONE, ION_NEUTRAL_ADVECTION_MODE_PRESCRIBED
+from DREAM.Settings.Equations.PrescribedParameter import PrescribedParameter
 
 
 # Model to use for ion heat
@@ -12,7 +13,7 @@ IONS_T_I_NEGLECT = DREAMIons.IONS_T_I_NEGLECT
 IONS_T_I_INCLUDE = DREAMIons.IONS_T_I_INCLUDE
 
 
-class Ions(DREAMIons.Ions):
+class Ions(DREAMIons.Ions, PrescribedParameter):
     
 
     def __init__(self, settings, *args, **kwargs):
@@ -20,6 +21,8 @@ class Ions(DREAMIons.Ions):
         Constructor.
         """
         super().__init__(settings=settings, *args, **kwargs)
+
+        self.fueling = {}
 
 
     def addIon(self, name, Z, iontype=IONS_PRESCRIBED, Z0=None, isotope=0, SPIMolarFraction=-1, opacity_mode=ION_OPACITY_MODE_TRANSPARENT,
@@ -130,11 +133,36 @@ class Ions(DREAMIons.Ions):
                 ion.setRecyclingCoefficient(iron, 1.0)
 
 
+    def setFueling(self, species, fueling, times=0):
+        """
+        Prescribes the time evolution of the fueling source for the specified
+        ion species.
+        """
+        n, r, t = self._setPrescribedData(data=fueling, times=times)
+
+        if len(self.fueling) > 0:
+            k = list(self.fueling.keys())[0]
+            if r != self.fueling[k]['r']:
+                raise EquationException("ions: All fueling functions must have the same 'r' grids.")
+            if t != self.fieling[k]['t']:
+                raise EquationException("ions: All fueling functions must have the same 't' grids.")
+
+        self.fueling[species] = {
+            'n': n,
+            't': t,
+            'r': r
+        }
+
+
     def fromdict(self, data):
         """
         Load ion data from the given dictionary.
         """
         super().fromdict(data)
+
+        names = data['names'].split(';')[:-1]
+        Z = data['Z']
+        types = data['types']
 
         # Load recycling coefficients
         if 'recycling' in data:
@@ -143,6 +171,23 @@ class Ions(DREAMIons.Ions):
                 for j in range(len(self.ions)):
                     if rec[i,j] != 0.0:
                         self.ions[i].setRecyclingCoefficient(self.ions[j].name, rec[i,j])
+
+        if 'fueling' in data:
+            idx = 0
+            for i in range(len(Z)):
+                if types[i] == IONS_PRESCRIBED:
+                    continue
+
+                n = data['fueling']['x'][idx,:]
+                if np.all(n==0):
+                    continue
+
+                self.fueling[names[i]] = {
+                    'n': n,
+                    'r': data['fueling']['r'],
+                    't': data['fueling']['t']
+                }
+                idx += Z[i]+1
 
 
     def todict(self):
@@ -163,6 +208,35 @@ class Ions(DREAMIons.Ions):
                 rec[i,j] = ion.getRecyclingCoefficient(self.ions[j].name)
 
         data['recycling'] = rec
+
+        if len(self.fueling) > 0:
+            # Calculate number of charge states
+            nZ0 = 0
+            for ion in self.ions:
+                if ion.ttype == IONS_PRESCRIBED:
+                    continue
+                nZ0 += ion.Z+1
+
+            k = list(self.fueling.keys())[0]
+            t, r   = self.fueling[k]['t'], self.fueling[k]['r']
+            nt, nr = t.size, r.size
+            fueling = np.zeros((nZ0, nt, nr))
+            idx = 0
+            for ion in self.ions:
+                if ion.ttype == IONS_PRESCRIBED:
+                    continue
+
+                if ion.name in self.fueling:
+                    # Only set the neutral state...
+                    fueling[idx,:] = self.fueling[ion.name]['n']
+
+                idx += ion.Z+1
+
+            data['fueling'] = {
+                'x': fueling,
+                'r': r,
+                't': t
+            }
 
         return data
 

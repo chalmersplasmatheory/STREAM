@@ -6,6 +6,7 @@
 #include <vector>
 #include "DREAM/Equations/Fluid/IonTransientTerm.hpp"
 #include "DREAM/Equations/Fluid/IonPrescribedParameter.hpp"
+#include "DREAM/Equations/Fluid/IonSourceTerm.hpp"
 #include "DREAM/Settings/SimulationGenerator.hpp"
 #include "DREAM/Settings/Settings.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
@@ -40,7 +41,7 @@ void SimulationGenerator::DefineOptions_Ions(DREAM::Settings *s) {
         2, ndim, (real_t*)nullptr
     );
 
-    
+    DREAM::SimulationGenerator::DefineDataIonRT(MODULENAME, s, "fueling");
 }
 
 /**
@@ -49,7 +50,7 @@ void SimulationGenerator::DefineOptions_Ions(DREAM::Settings *s) {
  */
 void SimulationGenerator::ConstructEquation_Ions(
     EquationSystem *eqsys, DREAM::Settings *s,
-    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel,
+    DREAM::ADAS *adas, DREAM::AMJUEL*,
     struct OtherQuantityHandler::eqn_terms *stream_terms
 ) {
     const real_t t0 = 0;
@@ -258,6 +259,24 @@ void SimulationGenerator::ConstructEquation_Ions(
         else
             desc = "Dynamic + equilibrium";
     }
+
+	// Fueling function
+	DREAM::IonSourceTerm *ppFuel = nullptr;
+	len_t ndims[3];
+	if (s->GetRealArray(MODULENAME "/fueling/x", 3, ndims, false) != nullptr) {
+		DREAM::MultiInterpolator1D *fueling =
+			DREAM::SimulationGenerator::LoadDataIonRT(
+				MODULENAME, fluidGrid->GetRadialGrid(), s,
+				nZ0_dynamic, "fueling"
+			);
+
+		ppFuel = new DREAM::IonSourceTerm(
+			fluidGrid, ih, nZ_dynamic, dynamic_indices, fueling
+		);
+
+		eqn->AddTerm(ppFuel);
+		desc += " + fueling";
+	}
 
     if (ipp != nullptr)
         eqn->AddTerm(ipp);
