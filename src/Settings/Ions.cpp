@@ -6,7 +6,6 @@
 #include <vector>
 #include "DREAM/Equations/Fluid/IonTransientTerm.hpp"
 #include "DREAM/Equations/Fluid/IonPrescribedParameter.hpp"
-#include "DREAM/Equations/Fluid/IonSourceTerm.hpp"
 #include "DREAM/Settings/SimulationGenerator.hpp"
 #include "DREAM/Settings/Settings.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
@@ -16,6 +15,7 @@
 #include "STREAM/Equations/IonRateEquation.hpp"
 #include "STREAM/Equations/NeutralTransport.hpp"
 #include "STREAM/OtherQuantityHandler.hpp"
+#include "STREAM/Equations/IonSourceTerm.hpp"
 
 
 using namespace STREAM;
@@ -261,7 +261,7 @@ void SimulationGenerator::ConstructEquation_Ions(
     }
 
 	// Fueling function
-	DREAM::IonSourceTerm *ppFuel = nullptr;
+	STREAM::IonSourceTerm *ppFuel = nullptr;
 	len_t ndims[3];
 	if (s->GetRealArray(MODULENAME "/fueling/x", 3, ndims, false) != nullptr) {
 		DREAM::MultiInterpolator1D *fueling =
@@ -270,8 +270,9 @@ void SimulationGenerator::ConstructEquation_Ions(
 				nZ0_dynamic, "fueling"
 			);
 
-		ppFuel = new DREAM::IonSourceTerm(
-			fluidGrid, ih, nZ_dynamic, dynamic_indices, fueling
+		ppFuel = new STREAM::IonSourceTerm(
+			fluidGrid, ih, nZ_dynamic, dynamic_indices, fueling,
+			volumes, eqsys->GetUnknownHandler()
 		);
 
 		eqn->AddTerm(ppFuel);

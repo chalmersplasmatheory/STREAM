@@ -17,6 +17,7 @@ set(stream
 #    "${PROJECT_SOURCE_DIR}/src/Equations/IonHeatTransportDiffusion1D.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/IonTransport.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/IonHeatTransport.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/IonSourceTerm.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/Transport.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/SputteredRecycledCoefficient.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/NeutralInflux.cpp"
