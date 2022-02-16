@@ -34,7 +34,8 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     :param tmax:    Simulation time [s]
     :param nt:      Number of time steps
     """
-    n0 = 3.22e22 * prefill  # Initial total deuterium density
+    #n0 = 3.22e22 * prefill  # Initial total deuterium density
+    n0 = 1.296e18
     nD = n0 * np.array([[1-gamma], [gamma]])
     nO = fractionO * n0
     nC = fractionC * n0
@@ -42,6 +43,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     Btor = 2.4      # Toroidal magnetic field [T]
     R0 = 2.96       # Plasma major radius [m]
     r_wall = 1      # Distance between plasma centre and passive structure [m]
+    #r_wall = 1.3
     V_vessel = 100  # Vacuum vessel volume
 
     t = np.linspace(0, 0.3, 100)
@@ -57,7 +59,8 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
                3.60]
 
     c1 = 1.1
-    c2 = 0.09
+    #c2 = 0.09
+    c2 = 0.05
     c3 = 0.1
 
     Te0 = 1     # electron temperature [eV]
@@ -103,7 +106,13 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     ss.eqsys.n_re.setDreicer(False)
 
     # Recycling coefficients (unused)
-    ss.eqsys.n_i.setJET_CWrecycling()
+    #ss.eqsys.n_i.setJET_CWrecycling()
+    for ion in ss.eqsys.n_i.ions:
+        if ion.name == 'D':
+            ion.setRecyclingCoefficient('C', 0.015)
+        elif ion.name == 'O':
+            ion.setRecyclingCoefficient('C', 1.0)
+            ion.setRecyclingCoefficient('O', 1.0)
 
     # Radial grid
     ss.radialgrid.setB0(Btor)
