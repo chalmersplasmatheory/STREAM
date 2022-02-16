@@ -7,7 +7,6 @@ import scipy.constants
 from scipy.interpolate import interp1d
 import sys
 
-sys.path.append('../../Deuterium_Burn-through')
 sys.path.append('../../../py')
 
 #from run import makeplots
@@ -34,8 +33,8 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     :param tmax:    Simulation time [s]
     :param nt:      Number of time steps
     """
-    #n0 = 3.22e22 * prefill  # Initial total deuterium density
-    n0 = 1.296e18
+    n0 = 3.22e22 * prefill  # Initial total deuterium density
+    #n0 = 1.296e18
     nD = n0 * np.array([[1-gamma], [gamma]])
     nO = fractionO * n0
     nC = fractionC * n0
