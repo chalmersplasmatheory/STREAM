@@ -155,6 +155,9 @@ class RadialGrid(PrescribedScalarParameter):
                 self.b = float(self.b[0])
             else:
                 self.b = float(self.b)
+        
+        if 'Bv' in data:
+            self.Bv = data['Bv']
 
 
     def todict(self, verify=True):
@@ -181,6 +184,7 @@ class RadialGrid(PrescribedScalarParameter):
                 't': self.tdelta,
                 'x': self.delta
             },
+            'Bv': self.Bv,
             'R0': self.R0,
             'wall_radius': self.b,
             'wall' : {

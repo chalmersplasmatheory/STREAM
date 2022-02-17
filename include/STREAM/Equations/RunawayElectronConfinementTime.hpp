@@ -29,7 +29,7 @@ namespace STREAM{
     
             RunawayElectronConfinementTime(
                 DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
-                real_t l_MK2
+                real_t l_MK2, real_t B_v
             );
             
             real_t EvaluateInverse(len_t ir);

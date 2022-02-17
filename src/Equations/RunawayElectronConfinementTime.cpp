@@ -12,10 +12,14 @@ using namespace std;
 /**
  * Constructor
  */
-RunawayElectronConfinementTime::RunawayElectronConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2) {
+RunawayElectronConfinementTime::RunawayElectronConfinementTime(
+	FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
+	real_t l_MK2, real_t B_v
+) {
     unknowns = u;
     radials  = r;
     this->l_MK2=l_MK2;
+	this->B_v = B_v;
 }
 
 /**

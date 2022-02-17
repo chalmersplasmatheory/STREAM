@@ -12,14 +12,15 @@ using namespace std;
 /**
  * Constructor
  */
-ConfinementTime::ConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2, len_t D_index) {
+ConfinementTime::ConfinementTime(
+	FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
+	real_t l_MK2, real_t B_v, len_t D_index
+) {
     unknowns = u;
     radials  = r;
     this->D_index = D_index;
     this->l_MK2=l_MK2;
-
-
-    
+	this->B_v = B_v;
 }
 
 /**

@@ -26,7 +26,7 @@ void SimulationGenerator::ConstructEquation_n_re(
     RunawayElectronConfinementTime *rect = 
         new RunawayElectronConfinementTime(
             eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator(),
-            s->GetReal("radialgrid/wall_radius")
+            s->GetReal("radialgrid/wall_radius"), s->GetReal("radialgrid/Bv")
         );
     eqsys->SetRunawayElectronConfinementTime(rect);
     

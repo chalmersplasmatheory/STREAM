@@ -39,7 +39,11 @@ namespace STREAM{
 						// use it in the *.cpp file.
 						const real_t connectionLengthFactor = 3;
                 
-                        ConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2, len_t D_index=0);
+                        ConfinementTime(
+							DREAM::FVM::UnknownQuantityHandler *u,
+							EllipticalRadialGridGenerator *r, real_t l_MK2,
+							real_t B_v, len_t D_index=0
+						);
                         
                         real_t EvaluateConfinementTime(len_t ir);
 
