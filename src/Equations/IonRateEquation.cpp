@@ -159,6 +159,8 @@ void IonRateEquation::DeallocateRateCoefficients() {
 ADASRateInterpolator *IonRateEquation::GetCCD(const len_t iIon) {
     if (this->ions->IsTritium(iIon))
         return this->adas->GetCCD(1, 3);
+	else if (this->ions->IsHydrogen(iIon))
+		return this->adas->GetCCD(1, 1);
     else
         return this->adas->GetCCD(this->ions->GetZ(iIon));
 }

@@ -3,6 +3,7 @@
 
 #include "FVM/UnknownQuantityHandler.hpp"
 #include "FVM/Grid/Grid.hpp"
+#include "DREAM/IonHandler.hpp"
 #include "DREAM/Settings/OptionConstants.hpp"
 #include <gsl/gsl_math.h>
 #include "DREAM/Constants.hpp"
@@ -21,6 +22,7 @@ namespace STREAM{
                         DREAM::FVM::UnknownQuantityHandler *unknowns; 
                         
                         EllipticalRadialGridGenerator *radials;
+						DREAM::IonHandler *ions;
                         
                         len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni; 
                         
@@ -41,7 +43,8 @@ namespace STREAM{
                 
                         ConfinementTime(
 							DREAM::FVM::UnknownQuantityHandler *u,
-							EllipticalRadialGridGenerator *r, real_t l_MK2,
+							EllipticalRadialGridGenerator *r,
+							DREAM::IonHandler*, real_t l_MK2,
 							real_t B_v, len_t D_index=0
 						);
                         

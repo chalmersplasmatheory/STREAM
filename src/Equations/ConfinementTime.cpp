@@ -14,10 +14,11 @@ using namespace std;
  */
 ConfinementTime::ConfinementTime(
 	FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
-	real_t l_MK2, real_t B_v, len_t D_index
+	IonHandler *ions, real_t l_MK2, real_t B_v, len_t D_index
 ) {
     unknowns = u;
     radials  = r;
+	this->ions = ions;
     this->D_index = D_index;
     this->l_MK2=l_MK2;
 	this->B_v = B_v;
@@ -41,6 +42,7 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
     len_t nr = radials->GetNr();
     real_t W_i    = unknowns->GetUnknownData(id_Wi)[D_index*nr+ir];
     real_t N_i    = unknowns->GetUnknownData(id_Ni)[D_index*nr+ir];
+	real_t mi     = this->ions->GetIonSpeciesMass(this->D_index);
 
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField();
@@ -49,7 +51,7 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
 	return 4/(connectionLengthFactor*a*B) * exp(-I_p/I_ref) *
-		sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*(B_v*B_v + Beddy*Beddy)/Constants::mD);
+		sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*(B_v*B_v + Beddy*Beddy)/mi);
 }
 
 /**
@@ -86,6 +88,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir){
     len_t nr = radials->GetNr();
     real_t W_i    = unknowns->GetUnknownData(id_Wi)[D_index*nr+ir];
     real_t N_i    = unknowns->GetUnknownData(id_Ni)[D_index*nr+ir];
+	real_t mi     = this->ions->GetIonSpeciesMass(this->D_index);
 
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField();
@@ -93,7 +96,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir){
     
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return -4/(connectionLengthFactor*a*B*I_ref) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*(B_v*B_v+Beddy*Beddy)/(Constants::mD));
+    return -4/(connectionLengthFactor*a*B*I_ref) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*(B_v*B_v+Beddy*Beddy)/mi);
 }
 
 /**
@@ -106,6 +109,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dIwall(len_t ir){
     len_t nr = radials->GetNr();
     real_t W_i    = unknowns->GetUnknownData(id_Wi)[D_index*nr+ir];
     real_t N_i    = unknowns->GetUnknownData(id_Ni)[D_index*nr+ir];
+	real_t mi     = this->ions->GetIonSpeciesMass(this->D_index);
 
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField();
@@ -113,7 +117,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dIwall(len_t ir){
     
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return 4/(connectionLengthFactor*a*B) *Constants::mu0*Constants::mu0*I_wall/ (2*2*M_PI*M_PI*l_MK2*l_MK2) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2.0/3.0*W_i/N_i)/((B_v*B_v+Beddy*Beddy)*(Constants::mD)));
+    return 4/(connectionLengthFactor*a*B) *Constants::mu0*Constants::mu0*I_wall/ (2*2*M_PI*M_PI*l_MK2*l_MK2) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2.0/3.0*W_i/N_i)/((B_v*B_v+Beddy*Beddy)*mi));
 }
 
 /**
@@ -126,6 +130,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dTcold(len_t ir){
     len_t nr = radials->GetNr();
     real_t W_i    = unknowns->GetUnknownData(id_Wi)[D_index*nr+ir];
     real_t N_i    = unknowns->GetUnknownData(id_Ni)[D_index*nr+ir];
+	real_t mi     = this->ions->GetIonSpeciesMass(this->D_index);
 
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField(); 
@@ -133,7 +138,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dTcold(len_t ir){
     
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return 1.0/(8*a*a*connectionLengthFactor*B) + 2*ec/(connectionLengthFactor*a*B) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*(Constants::mD)));
+    return 1.0/(8*a*a*connectionLengthFactor*B) + 2*ec/(connectionLengthFactor*a*B) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*mi));
 }
 
 /**
@@ -146,6 +151,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dWi(len_t ir){
     len_t nr = radials->GetNr();
     real_t W_i    = unknowns->GetUnknownData(id_Wi)[D_index*nr+ir];
     real_t N_i    = unknowns->GetUnknownData(id_Ni)[D_index*nr+ir];
+	real_t mi     = this->ions->GetIonSpeciesMass(this->D_index);
 
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField(); 
@@ -153,7 +159,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dWi(len_t ir){
     
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return 4/3.0*1/(connectionLengthFactor*a*B)*1/N_i * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*(Constants::mD)));
+    return 4/3.0*1/(connectionLengthFactor*a*B)*1/N_i * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*mi));
 }
 
 /**
@@ -166,6 +172,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dNi(len_t ir){
     len_t nr = radials->GetNr();
     real_t W_i    = unknowns->GetUnknownData(id_Wi)[D_index*nr+ir];
     real_t N_i    = unknowns->GetUnknownData(id_Ni)[D_index*nr+ir];
+	real_t mi     = this->ions->GetIonSpeciesMass(this->D_index);
 
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField(); 
@@ -173,7 +180,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dNi(len_t ir){
     
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return -4/3.0*1/(connectionLengthFactor*a*B)*W_i/(N_i*N_i) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*(Constants::mD)));
+    return -4/3.0*1/(connectionLengthFactor*a*B)*W_i/(N_i*N_i) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*mi));
 }
 
 /**
