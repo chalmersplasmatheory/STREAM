@@ -69,8 +69,8 @@ void ChargeExchangeTerm::SetWeights(){
         n_i = ions->GetIonDensity(0, iz, 1);
         if(ions->IsTritium(iz)){
             R_icx = adas->GetCCD(1,3)->Eval(0, n_i, T_i /DREAM::Constants::ec);
-		} else if (ions->IsHydrogen(iz)) {
-            R_icx = adas->GetCCD(1,1)->Eval(0, n_i, T_i /DREAM::Constants::ec);
+		/*} else if (ions->IsHydrogen(iz)) {
+            R_icx = adas->GetCCD(1,1)->Eval(0, n_i, T_i /DREAM::Constants::ec);*/
         } else { 
             len_t Z  = ions->GetZ(iz);
             R_icx = adas->GetCCD(Z)->Eval(0, n_i, T_i /DREAM::Constants::ec);
@@ -146,9 +146,9 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
                 if(ions->IsTritium(iz)){ 
                     R_icx = adas->GetCCD(1,3)->Eval(0, n_i, T_i /DREAM::Constants::ec);
                     dR_icxdT = adas->GetCCD(1,3)->Eval_deriv_T(0, n_i, T_i /DREAM::Constants::ec);
-                } else if(ions->IsHydrogen(iz)){ 
+                /*} else if(ions->IsHydrogen(iz)){ 
                     R_icx = adas->GetCCD(1,1)->Eval(0, n_i, T_i /DREAM::Constants::ec);
-                    dR_icxdT = adas->GetCCD(1,1)->Eval_deriv_T(0, n_i, T_i /DREAM::Constants::ec);
+                    dR_icxdT = adas->GetCCD(1,1)->Eval_deriv_T(0, n_i, T_i /DREAM::Constants::ec);*/
                 } else {
                     len_t Z = ions->GetZ(iz);
                     R_icx = adas->GetCCD(Z)->Eval(0, n_i, T_i /DREAM::Constants::ec);
@@ -171,9 +171,9 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
                 if(ions->IsTritium(iz)){
                     R_icx = adas->GetCCD(1,3)->Eval(0, n_i, T_i /DREAM::Constants::ec);
                     dR_icxdT = adas->GetCCD(1,3)->Eval_deriv_T(0, n_i, T_i /DREAM::Constants::ec);
-                } else if(ions->IsHydrogen(iz)){
+                /*} else if(ions->IsHydrogen(iz)){
                     R_icx = adas->GetCCD(1,1)->Eval(0, n_i, T_i /DREAM::Constants::ec);
-                    dR_icxdT = adas->GetCCD(1,1)->Eval_deriv_T(0, n_i, T_i /DREAM::Constants::ec);
+                    dR_icxdT = adas->GetCCD(1,1)->Eval_deriv_T(0, n_i, T_i /DREAM::Constants::ec);*/
                 } else {
                     len_t Z = ions->GetZ(iz);
                     R_icx = adas->GetCCD(Z)->Eval(0, n_i, T_i /DREAM::Constants::ec);
@@ -195,8 +195,8 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
             real_t n_i = ions->GetIonDensity(0, iz, 1);
             if(ions->IsTritium(iz)){
                 R_icx = adas->GetCCD(1,3)->Eval(0, n_i, T_i /DREAM::Constants::ec);
-            } else if(ions->IsHydrogen(iz)){
-                R_icx = adas->GetCCD(1,1)->Eval(0, n_i, T_i /DREAM::Constants::ec);
+            /*} else if(ions->IsHydrogen(iz)){
+                R_icx = adas->GetCCD(1,1)->Eval(0, n_i, T_i /DREAM::Constants::ec);*/
             } else {
                 len_t Z = ions->GetZ(iz);
                 R_icx = adas->GetCCD(Z)->Eval(0, n_i, T_i /DREAM::Constants::ec);
@@ -217,9 +217,9 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
             if(ions->IsTritium(iz)){
                 R_icx = adas->GetCCD(1,3)->Eval(0, n_i, T_i /DREAM::Constants::ec);
                 dR_icxdn = adas->GetCCD(1,3)->Eval_deriv_n(0, n_i, T_i /DREAM::Constants::ec);
-            } else if(ions->IsHydrogen(iz)){
+            /*} else if(ions->IsHydrogen(iz)){
                 R_icx = adas->GetCCD(1,1)->Eval(0, n_i, T_i /DREAM::Constants::ec);
-                dR_icxdn = adas->GetCCD(1,1)->Eval_deriv_n(0, n_i, T_i /DREAM::Constants::ec);
+                dR_icxdn = adas->GetCCD(1,1)->Eval_deriv_n(0, n_i, T_i /DREAM::Constants::ec);*/
             } else {
                 len_t Z = ions->GetZ(iz);
                 R_icx = adas->GetCCD(Z)->Eval(0, n_i, T_i /DREAM::Constants::ec);
