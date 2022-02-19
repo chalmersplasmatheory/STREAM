@@ -28,7 +28,7 @@ ChargeExchangeTerm::ChargeExchangeTerm(
  * Set the linear operator matrix elements corresponding to this term.
  */
 void ChargeExchangeTerm::SetMatrixElements(FVM::Matrix *mat, real_t*) { 
-    len_t n = ions->GetIndex(iIon,0);
+    len_t n = ions->GetIndex(D_index,0);
     mat->SetElement(iIon, n, weights[n]); 
 }
 
@@ -36,7 +36,7 @@ void ChargeExchangeTerm::SetMatrixElements(FVM::Matrix *mat, real_t*) {
  * Set function vector for this term.
  */
 void ChargeExchangeTerm::SetVectorElements(real_t *vec, const real_t *x) { 
-    len_t n = ions->GetIndex(iIon,0);
+    len_t n = ions->GetIndex(D_index,0);
     vec[iIon] += weights[n] * x[n]; 
 }
 
@@ -45,20 +45,26 @@ void ChargeExchangeTerm::SetVectorElements(real_t *vec, const real_t *x) {
  */
 void ChargeExchangeTerm::SetWeights(){ 
     real_t V_p  = pv->GetPlasmaVolume();
-    real_t V_ni = pv->GetNeutralVolume(iIon);
+    real_t V_ni = pv->GetNeutralVolume(D_index);
     
-    //real_t T_cold = unknowns->GetUnknownData(id_Tcold)[0];
-    //real_t n_cold = unknowns->GetUnknownData(id_ncold)[0];
     len_t nr = radials->GetNr();        
     len_t nZ = ions->GetNZ();
-    len_t n = ions->GetIndex(iIon,0); 
+    len_t n = ions->GetIndex(D_index,0); 
 
     // Reset weights
     weights[n] = 0;
     
     real_t W_i, N_i, T_i, n_i, R_icx;
     
-    for(len_t iz=0; iz<nZ; iz++) {
+	len_t iz;
+	if (iIon==D_index)
+		iz = 0;
+	else {
+		iz = iIon;
+		nZ = iIon+1;
+	}
+
+    for(; iz<nZ; iz++) {
         W_i = unknowns->GetUnknownData(id_Wi)[iz*nr]; 
         N_i = unknowns->GetUnknownData(id_Ni)[iz*nr];
         if(N_i == 0) {
@@ -84,8 +90,8 @@ void ChargeExchangeTerm::SetWeights(){
  */
 void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
     real_t V_p  = pv->GetPlasmaVolume();
-    real_t V_ni = pv->GetNeutralVolume(iIon);
-    real_t dV_nidlambdai = pv->GetNeutralVolume_dLambdai(iIon);
+    real_t V_ni = pv->GetNeutralVolume(D_index);
+    real_t dV_nidlambdai = pv->GetNeutralVolume_dLambdai(D_index);
     
     //real_t T_cold = unknowns->GetUnknownData(id_Tcold)[0];
     //real_t n_cold = unknowns->GetUnknownData(id_ncold)[0];
@@ -94,11 +100,19 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
     ResetDiffWeights();
         
     len_t nZ = ions->GetNZ();
-    len_t n = ions->GetIndex(iIon,0); 
+    len_t n = ions->GetIndex(D_index,0); 
     
     real_t R_icx, dR_icxdT, dR_icxdn;
     real_t W_i, N_i, T_i, n_i;
     
+	len_t iz;
+	if (iIon==D_index)
+		iz = 0;
+	else {
+		iz = iIon;
+		nZ = iIon+1;
+	}
+
     /*if(derivId == id_Tcold) {
         for(len_t iz=0; iz<nZ; iz++) {
             real_t dR_icxdT;
@@ -134,7 +148,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
             diffWeights[iIon] -= V_ni/V_p * 3.0/2.0 * (2.0/3.0 * W_i / N_i - DREAM::Constants::ec*T_0) * dR_icxdn * n_i; 
         }
     } else*/ if(derivId == id_Wi) {
-        for(len_t iz=0; iz<nZ; iz++) {
+        for(; iz<nZ; iz++) {
             W_i = unknowns->GetUnknownData(id_Wi)[iz*nr]; 
             N_i = unknowns->GetUnknownData(id_Ni)[iz*nr];
             if(N_i == 0) {
@@ -159,7 +173,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
             }
         }
     } else if(derivId == id_Ni) {
-        for(len_t iz=0; iz<nZ; iz++) {
+        for(; iz<nZ; iz++) {
             W_i = unknowns->GetUnknownData(id_Wi)[iz*nr]; 
             N_i = unknowns->GetUnknownData(id_Ni)[iz*nr];
             if(N_i == 0) {
@@ -184,7 +198,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
             }
         }
     } else if(derivId == id_lambdai) {
-        for(len_t iz=0; iz<nZ; iz++) {
+        for(; iz<nZ; iz++) {
             W_i = unknowns->GetUnknownData(id_Wi)[iz*nr]; 
             N_i = unknowns->GetUnknownData(id_Ni)[iz*nr];
             if(N_i == 0) {
@@ -204,7 +218,7 @@ void ChargeExchangeTerm::SetDiffWeights(len_t derivId, len_t nMultiples){
             diffWeights[iIon*nZ+n] -= dV_nidlambdai/V_p * 3.0/2.0 * (T_i - DREAM::Constants::ec*T_0) * R_icx * n_i; 
         }
     } else if(derivId == id_ni) {
-        for(len_t iz=0; iz<nZ; iz++) {
+        for(; iz<nZ; iz++) {
             W_i = unknowns->GetUnknownData(id_Wi)[iz*nr]; 
             N_i = unknowns->GetUnknownData(id_Ni)[iz*nr];
             if(N_i == 0) {
