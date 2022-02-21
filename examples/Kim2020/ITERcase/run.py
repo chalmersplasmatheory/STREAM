@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+#
+# Script to reproduce the ITER simulations of section 2 in (Kim et al., NF 2020).
+# Note that in order for agreement between STREAM and DYON/BKD0/SCENPLINT to
+# be achieved, it is necessary to use C-X rates for deuterium, even though the
+# main ion species used here is hydrogen. This can only be achieved by modifying
+# the source code as has been done on the 'Kim2020ITER' branch of STREAM.
 
 import argparse
 import matplotlib.pyplot as plt
