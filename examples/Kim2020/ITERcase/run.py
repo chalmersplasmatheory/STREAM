@@ -12,6 +12,7 @@ sys.path.append('../../../py')
 import PlasmaParameters as Formulas
 import DREAM.Settings.Equations.ColdElectronTemperature as Tcold
 import DREAM.Settings.Solver as Solver
+import DREAM.Settings.Equations.OhmicCurrent as JOhm
 
 import DREAM.Settings.Atomics as Atomics
 from STREAM import STREAMOutput, STREAMSettings, runiface
@@ -39,6 +40,7 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     a = 1.6         # Plasma minor radius [m]
     R0 = 5.65       # Plasma major radius [m]
     Btor = 2.65 * 6.2 / R0  # Toroidal magnetic field [T]
+    #Btor = 2.65
     l_MK2 = 1       # Distance between plasma centre and passive structure [m] (unused)
     V_vessel = 1000 # Vacuum vessel volume
 
@@ -59,6 +61,8 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     Lp = float(scipy.constants.mu_0 * R0 * (np.log(8*R0/a) + 0.25 - 2))
     ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
     ss.eqsys.E_field.setCircuitVloop(Vloop, Vloop_t)
+    #ss.eqsys.j_ohm.setConductivityMode(JOhm.CONDUCTIVITY_MODE_BRAAMS)
+    ss.eqsys.j_ohm.setConductivityMode(JOhm.CONDUCTIVITY_MODE_SAUTER_COLLISIONAL)
 
     # Electron temperature
     ss.eqsys.T_cold.setType(Tcold.TYPE_SELFCONSISTENT)
@@ -66,7 +70,7 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     ss.eqsys.T_cold.setRecombinationRadiation(recombination=Tcold.RECOMBINATION_RADIATION_INCLUDED)
 
     # Ions
-    ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
+    ss.eqsys.n_i.addIon(name='H', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0, hydrogen=True)
 
     # Disable runaway
     ss.eqsys.n_re.setAvalanche(False)
@@ -81,6 +85,7 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(a)
     ss.radialgrid.setVesselVolume(V_vessel)
+    ss.radialgrid.setBv(2e-3)
 
     ss.radialgrid.setRecyclingCoefficient1(1)
     ss.radialgrid.setRecyclingCoefficient2(0)
@@ -110,7 +115,8 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=True):
     Ip = so.eqsys.I_p[:, 0]
     ne = so.eqsys.n_cold[:, 0]
     Te = so.eqsys.T_cold[:, 0]
-    Ti = so.eqsys.W_i.getTemperature()['D'][:, 0]
+    #Ti = so.eqsys.W_i.getTemperature()['D'][:, 0]
+    Ti = so.eqsys.W_i.getTemperature()['H'][:, 0]
     Lf = so.other.stream.Lf[:, 0]
     tau = so.other.stream.tau_D[:, 0]
 
@@ -202,7 +208,8 @@ def drawplot2(axs, so, toffset=0):
     Vp = so.other.stream.V_p[:,0] / 1e6
     Poh = -so.other.fluid.Tcold_ohmic[:,0] * Vp
     Pequi = so.other.fluid.Tcold_ion_coll[:,0] * Vp
-    Pconve = so.other.scalar.energyloss_T_cold[:,0] / 1e6
+    #Pconve = so.other.scalar.energyloss_T_cold[:,0] / 1e6
+    Pconve = so.other.stream.Tcold_transport[:,0] * Vp
     Prad = so.other.fluid.Tcold_radiation[:,0] * Vp
 
     PequiI = so.other.stream.Wi_e_coll[:,0] * Vp
