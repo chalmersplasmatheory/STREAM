@@ -15,6 +15,7 @@ class IonParticleBalance:
         self.adas = ADAS()
         self.quantities = quantities
         self.ions = ions
+        self.mainIon = ions.getMainIonName()
 
 
     def __call__(self, t, x, ionname, Z0):
@@ -27,13 +28,13 @@ class IonParticleBalance:
         """
         Vn_tot = self.quantities.getV_n_tot(ionname)
         Vn = self.quantities.getV_n(ionname)
-        VnD = self.quantities.getV_n('D')
+        VnD = self.quantities.getV_n(self.mainIon)
         Vp = self.quantities.getV_p()
 
         ne = self.quantities['ne']
         Te = self.quantities['Te']
         Ti = self.quantities['Ti']
-        nD = self.quantities.getIonData('D')
+        nD = self.quantities.getIonData(self.mainIon)
 
         dndt = 0
         if Z0 == 0:  # Neutral

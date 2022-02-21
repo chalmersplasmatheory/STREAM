@@ -16,6 +16,8 @@ class ChargeExchangePowerTerm:
         self.ions = ions
         self.adas = ADAS()
 
+        self.mainIon = ions.getMainIonName()
+
 
     def __call__(self, t, x):
         return self.eval(t, x)
@@ -25,11 +27,11 @@ class ChargeExchangePowerTerm:
         """
         Evaluate the power lost through charge-exchange.
         """
-        Vn = self.quantities.getV_n('D')
+        Vn = self.quantities.getV_n(self.mainIon)
         Vp = self.quantities.getV_p()
         e  = scipy.constants.e
 
-        nD0 = self.quantities['niD'][0]
+        nD0 = self.quantities[f'ni{self.mainIon}'][0]
         Ti  = self.quantities['Ti']
         ne  = self.quantities['ne']
         T0  = 0.026

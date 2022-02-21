@@ -6,7 +6,7 @@ from DREAM.Settings.Equations.PrescribedScalarParameter import PrescribedScalarP
 
 TYPE_PRESCRIBED = 1
 TYPE_SELFCONSISTENT = 2
-TYPE_CIRCUIT = 3
+TYPE_CIRCUIT = 101
 
 
 class ElectricField(DREAMEfield):

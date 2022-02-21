@@ -13,6 +13,7 @@ class DeuteriumIonBalance:
         self.adas = ADAS()
         self.quantities = quantities
         self.ions = ions
+        self.mainIon = ions.getMainIonName()
 
 
     def __call__(self, t, x, full=False):
@@ -23,16 +24,16 @@ class DeuteriumIonBalance:
         """
         Evaluate the deuterium ion balance term.
         """
-        Vn = self.quantities.getV_n('D')
+        Vn = self.quantities.getV_n(self.mainIon)
         Vp = self.quantities.getV_p()
 
         ne = self.quantities['ne']
         Te = self.quantities['Te']
         Ti = self.quantities['Ti']
-        nD = self.quantities['niD']
+        nD = self.quantities[f'ni{self.mainIon}']
 
-        Rrec = self.adas.ACD('D', 1, n=ne, T=Te)
-        Riz  = self.adas.SCD('D', 0, n=ne, T=Te)
+        Rrec = self.adas.ACD(self.mainIon, 1, n=ne, T=Te)
+        Riz  = self.adas.SCD(self.mainIon, 0, n=ne, T=Te)
 
         # Ionization & recombination
         posIoniz = Vn/Vp * Riz*ne*nD[0]
@@ -45,7 +46,7 @@ class DeuteriumIonBalance:
         cx = 0
         for ion in self.ions:
             A = ion['name']
-            if A == 'D':
+            if A == self.mainIon:
                 continue
             
             Z = ion['Z']

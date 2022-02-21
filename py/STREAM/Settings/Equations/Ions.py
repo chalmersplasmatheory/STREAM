@@ -30,7 +30,7 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
         neutral_diffusion_mode=ION_NEUTRAL_DIFFUSION_MODE_NONE, neutral_prescribed_diffusion=None, rNeutralPrescribedDiffusion=None, tNeutralPrescribedDiffusion=None,
         charged_advection_mode=ION_CHARGED_ADVECTION_MODE_NONE, charged_prescribed_advection=None, rChargedPrescribedAdvection=None, tChargedPrescribedAdvection=None,
         neutral_advection_mode=ION_NEUTRAL_ADVECTION_MODE_NONE, neutral_prescribed_advection=None, rNeutralPrescribedAdvection=None, tNeutralPrescribedAdvection=None,
-        T=None, n=None, r=None, t=None, tritium=False):
+        T=None, n=None, r=None, t=None, tritium=False, hydrogen=False):
         """
         Adds a new ion species to the plasma.
 
@@ -89,7 +89,7 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                          neutral_prescribed_advection=neutral_prescribed_advection,
                          rNeutralPrescribedAdvection=rNeutralPrescribedAdvection,
                          tNeutralPrescribedAdvection=tNeutralPrescribedAdvection,
-                         T=T, n=n, r=r, t=t, interpr=self.r, interpt=None, tritium=tritium)
+                         T=T, n=n, r=r, t=t, interpr=self.r, interpt=None, tritium=tritium, hydrogen=hydrogen)
 
         self.ions.append(ion)
 

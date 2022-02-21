@@ -110,13 +110,14 @@ class Simulation:
         Iin     = IonInflux(self.unknowns, self.ions, **tausettings)
 
         self._terms.extend((Dizcx0, Dizcx1, Din, Itransp, Iizcx, Iin))
+        mainIon = self.ions.getMainIonName()
         for ion in self.ions:
             A = ion['name']
             Z = ion['Z']
 
-            if A == 'D':
-                eqsys[i('niD_0')] = lambda t, x : Dizcx0(t, x) + Din(t, x)
-                eqsys[i('niD_1')] = lambda t, x : Dizcx1(t, x) - Itransp(t, x, 'D', Z0=1)
+            if A == mainIon:
+                eqsys[i(f'ni{mainIon}_0')] = lambda t, x : Dizcx0(t, x) + Din(t, x)
+                eqsys[i(f'ni{mainIon}_1')] = lambda t, x : Dizcx1(t, x) - Itransp(t, x, mainIon, Z0=1)
             else:
                 # Add neutral equations
                 for Z0 in range(0, Z+1):

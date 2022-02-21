@@ -3,7 +3,7 @@
 import numpy as np
 import sys
 
-sys.path.append('../../py')
+sys.path.append('../../../py')
 
 from PYDYON import compareToSTREAM, compareToSTREAMdt
 from STREAM import STREAMSettings, STREAMOutput
