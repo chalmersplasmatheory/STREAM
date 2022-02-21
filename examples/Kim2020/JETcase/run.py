@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+#
+# Script to reproduce the JET simulation in section 3 of (Kim et al., NF 2020).
+# In order for STREAM results to match those of DYON/BKD0/SCENPLINT it is
+# necessary to change the connection length parameter used in STREAM by
+# editing the code. Locate the variable 'connectionLengthFactor' in
+# 'include/STREAM/Equations/ConfinementTime.hpp' and change its value to '1'.
+# Then, re-compile STREAM and run this script.
 
 import argparse
 import matplotlib.pyplot as plt
