@@ -34,11 +34,11 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     :param tmax:    Simulation time [s]
     :param nt:      Number of time steps
     """
-    #n0 = 3.22e22 * prefill  # Initial total deuterium density
-    n0 = 1.296e18
+    n0 = 3.22e22 * prefill  # Initial total deuterium density
     nD = n0 * np.array([[1-gamma], [gamma]])
     nO = fractionO * n0
-    nC = fractionC * n0
+    #nC = fractionC * n0
+    nC = 1e12
 
     Btor = 2.4      # Toroidal magnetic field [T]
     R0 = 2.96       # Plasma major radius [m]
@@ -120,6 +120,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(r_wall)
     ss.radialgrid.setVesselVolume(V_vessel)
+    ss.radialgrid.setBv(1e-3)
 
     ss.radialgrid.setRecyclingCoefficient1(c1)
     ss.radialgrid.setRecyclingCoefficient2(c2)
