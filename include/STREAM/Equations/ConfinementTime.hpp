@@ -3,6 +3,7 @@
 
 #include "FVM/UnknownQuantityHandler.hpp"
 #include "FVM/Grid/Grid.hpp"
+#include "DREAM/IonHandler.hpp"
 #include "DREAM/Settings/OptionConstants.hpp"
 #include <gsl/gsl_math.h>
 #include "DREAM/Constants.hpp"
@@ -21,6 +22,7 @@ namespace STREAM{
                         DREAM::FVM::UnknownQuantityHandler *unknowns; 
                         
                         EllipticalRadialGridGenerator *radials;
+						DREAM::IonHandler *ions;
                         
                         len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni; 
                         
@@ -37,9 +39,14 @@ namespace STREAM{
 						// the poloidal stray field, that it should rather be 3. To allow us to
 						// easily switch between simulation modes, we put this constant here and
 						// use it in the *.cpp file.
-						const real_t connectionLengthFactor = 3;
+						const real_t connectionLengthFactor = 1;
                 
-                        ConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2, len_t D_index=0);
+                        ConfinementTime(
+							DREAM::FVM::UnknownQuantityHandler *u,
+							EllipticalRadialGridGenerator *r,
+							DREAM::IonHandler*, real_t l_MK2,
+							real_t B_v, len_t D_index=0
+						);
                         
                         real_t EvaluateConfinementTime(len_t ir);
 

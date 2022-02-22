@@ -12,10 +12,14 @@ using namespace std;
 /**
  * Constructor
  */
-RunawayElectronConfinementTime::RunawayElectronConfinementTime(FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, real_t l_MK2) {
+RunawayElectronConfinementTime::RunawayElectronConfinementTime(
+	FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
+	real_t l_MK2, real_t B_v
+) {
     unknowns = u;
     radials  = r;
     this->l_MK2=l_MK2;
+	this->B_v = B_v;
 }
 
 /**
@@ -43,9 +47,13 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime1(l
     real_t Beddy = Constants::mu0 / (M_PI*l_MK2) * I_wall;
     real_t Bz = hypot(B_v, Beddy);
 
-    real_t Lf = a/4 * B/Bz * exp(I_p / I_ref);
+    real_t Lf  = 3*a/4 * B/Bz * exp(I_p / I_ref);
+	real_t m   = Constants::me;
+	real_t mc  = Constants::me * Constants::c;
+	real_t mc2 = mc * Constants::c;
+	real_t e   = Constants::ec;
 
-    return sqrt(2*Constants::me*Lf/(Constants::ec*E));
+	return sqrt((2*m*Lf/(e*E)) * (1 + e*E*Lf/(2*mc2)));
 }
 
 /**

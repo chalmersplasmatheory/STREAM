@@ -6,7 +6,7 @@ import time
 import scipy.constants
 import sys
 
-sys.path.append('../../py')
+sys.path.append('../../../py')
 
 from PYDYON import Simulation
 from STREAM import STREAMSettings, STREAMOutput
@@ -43,8 +43,8 @@ def loadSTREAMSettings(ss):
 
 OUTFILE = '2'
 
-ss = STREAMSettings('../../DYON_tests/settings_final.h5')
-so = STREAMOutput('../../DYON_tests/output_final.h5')
+ss = STREAMSettings(f'settings{OUTFILE}.h5')
+so = STREAMOutput(f'output{OUTFILE}.h5')
 
 
 prefill = 2.7e-3    # Pa
@@ -106,7 +106,8 @@ print('Obtained solution in {:.3f} s'.format(time.time()-tic))
 #solution.plotIonDensity('C')
 #solution.plotIonDensity('O')
 plt.show()
-solution.plotJET()
+solution.plot()
+#solution.plotJET()
 #solution.plotKimThesis45()
-#solution.plotKim2020()
+solution.plotKim2020()
 #'''

@@ -6,7 +6,7 @@ import time
 import scipy.constants
 import sys
 
-sys.path.append('../../py')
+sys.path.append('../../../py')
 
 from PYDYON import Simulation
 
@@ -16,6 +16,8 @@ print('Prefill pressure: {:.2e} Torr'.format(prefill))
 gamma_i = 2e-3      # Ionization fraction
 #nD0 = 3.22e22 * prefill
 nD0 = 2.78e22 * prefill
+#nD0 = 3.864386438643864e+17
+nD0 = 3.84e17
 nD = nD0 * np.array([1-gamma_i, gamma_i])
 
 params = {
@@ -32,8 +34,8 @@ params = {
 
 sim = Simulation(**params)
 
-sim.addIon('D', 1)
-sim.initialize(Te=1, Ti=0.03, Ip=2.4e3, IMK2=0, niD=nD)
+sim.addIon('H', 1, m=scipy.constants.m_p)
+sim.initialize(Te=1, Ti=0.026, Ip=2.4e3, IMK2=0, niH=nD)
 
 tic = time.time()
 solution = sim.solve(tMax=0.3)

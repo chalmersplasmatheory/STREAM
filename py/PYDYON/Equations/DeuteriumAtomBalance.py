@@ -15,6 +15,8 @@ class DeuteriumAtomBalance:
         self.quantities = quantities
         self.ions = ions
 
+        self.mainIon = ions.getMainIonName()
+
 
     def __call__(self, t, x, full=False):
         return self.eval(t, x, full)
@@ -26,17 +28,17 @@ class DeuteriumAtomBalance:
 
         :param full: If ``True``, also returns values of individual terms.
         """
-        V_n_tot = self.quantities.getV_n_tot('D')
-        Vn = self.quantities.getV_n('D')
+        V_n_tot = self.quantities.getV_n_tot(self.mainIon)
+        Vn = self.quantities.getV_n(self.mainIon)
         Vp = self.quantities.getV_p()
 
         ne = self.quantities['ne']
         Te = self.quantities['Te']
         Ti = self.quantities['Ti']
-        nD = self.quantities['niD']
+        nD = self.quantities[f'ni{self.mainIon}']
 
-        Rrec = self.adas.ACD('D', 1, n=ne, T=Te)
-        Riz  = self.adas.SCD('D', 0, n=ne, T=Te)
+        Rrec = self.adas.ACD(self.mainIon, 1, n=ne, T=Te)
+        Riz  = self.adas.SCD(self.mainIon, 0, n=ne, T=Te)
 
         # Ionization & recombination
         posRec   = Vp*Rrec*ne*nD[1]
@@ -50,7 +52,7 @@ class DeuteriumAtomBalance:
         cx = 0
         for ion in self.ions:
             A = ion['name']
-            if A == 'D':
+            if A == self.mainIon:
                 continue
 
             Z = ion['Z']
@@ -80,7 +82,7 @@ class DeuteriumAtomBalance:
         return Ti
 
     def evalniD(self,t,x):
-        ni = self.quantities.getIonData('D')
+        ni = self.quantities.getIonData(self.mainIon)
         return ni[0], ni[1]
 
     def evalniC(self,t,x):
@@ -90,3 +92,5 @@ class DeuteriumAtomBalance:
     def evalniO(self,t,x):
         ni = self.quantities.getIonData('O')
         return ni[0], ni[1], ni[2], ni[3], ni[4], ni[5], ni[6], ni[7], ni[8]
+
+

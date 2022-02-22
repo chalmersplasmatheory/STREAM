@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+#
+# Script to reproduce the JET simulation in section 3 of (Kim et al., NF 2020).
+# In order for STREAM results to match those of DYON/BKD0/SCENPLINT it is
+# necessary to change the connection length parameter used in STREAM by
+# editing the code. Locate the variable 'connectionLengthFactor' in
+# 'include/STREAM/Equations/ConfinementTime.hpp' and change its value to '1'.
+# Then, re-compile STREAM and run this script.
 
 import argparse
 import matplotlib.pyplot as plt
@@ -34,10 +41,10 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     :param nt:      Number of time steps
     """
     n0 = 3.22e22 * prefill  # Initial total deuterium density
-    #n0 = 1.296e18
     nD = n0 * np.array([[1-gamma], [gamma]])
     nO = fractionO * n0
-    nC = fractionC * n0
+    #nC = fractionC * n0
+    nC = 1e12
 
     Btor = 2.4      # Toroidal magnetic field [T]
     R0 = 2.96       # Plasma major radius [m]
@@ -119,6 +126,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(r_wall)
     ss.radialgrid.setVesselVolume(V_vessel)
+    ss.radialgrid.setBv(1e-3)
 
     ss.radialgrid.setRecyclingCoefficient1(c1)
     ss.radialgrid.setRecyclingCoefficient2(c2)

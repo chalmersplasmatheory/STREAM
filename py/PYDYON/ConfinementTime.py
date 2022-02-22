@@ -23,6 +23,8 @@ class ConfinementTime:
         self.quantities = quantities
         self.ions = ions
 
+        self.mainIon = ions.getMainIonName()
+
 
     def __call__(self, t, x):
         return self.eval(t, x)
@@ -53,13 +55,14 @@ class ConfinementTime:
         Iref = 100e3
         e    = scipy.constants.e
 
-        Beddy = scipy.constants.mu_0 * IMK2 / (np.pi * self.l_MK2)
+        Beddy = scipy.constants.mu_0 * IMK2 / (2 * np.pi * self.l_MK2)
         Bz = np.sqrt(self.Bv**2 + Beddy**2)
 
         Lf = 0.25*a*Bphi/Bz * np.exp(Ip/Iref)
 
-        mD = scipy.constants.m_p + scipy.constants.m_n
-        Cs = np.sqrt(e*(Te + Ti)/mD)
+        #mD = scipy.constants.m_p + scipy.constants.m_n
+        m = self.ions.getMass(self.mainIon)
+        Cs = np.sqrt(e*(Te + Ti)/m)
 
         return Lf / Cs
 

@@ -78,6 +78,7 @@ void SimulationGenerator::ConstructEquation_Ions(
 
     // Get list of tritium species
     vector<string> tritiumNames = s->GetStringList(MODULENAME "/tritiumnames");
+    vector<string> hydrogenNames = s->GetStringList(MODULENAME "/hydrogennames");
 
     // Verify that exactly one type per ion species is given
     if (nZ != ntypes)
@@ -161,15 +162,16 @@ void SimulationGenerator::ConstructEquation_Ions(
         );
 
     // Construct ion handler
-    DREAM::IonHandler *ih = new DREAM::IonHandler(fluidGrid->GetRadialGrid(), eqsys->GetUnknownHandler(), Z, nZ, ionNames, tritiumNames);
+    DREAM::IonHandler *ih = new DREAM::IonHandler(fluidGrid->GetRadialGrid(), eqsys->GetUnknownHandler(), Z, nZ, ionNames, tritiumNames, hydrogenNames);
     eqsys->SetIonHandler(ih);
     
     // Confinement time 
     EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); 
     
     real_t l_MK2 = s->GetReal("radialgrid/wall_radius");
+	real_t B_v = s->GetReal("radialgrid/Bv");
     ConfinementTime *confinementTime = new ConfinementTime(
-        eqsys->GetUnknownHandler(), r, l_MK2
+        eqsys->GetUnknownHandler(), r, ih, l_MK2, B_v
     );
     eqsys->SetConfinementTime(confinementTime);
     

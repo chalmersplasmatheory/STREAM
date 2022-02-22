@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate
+import scipy.constants
 from . Equations import *
 from . import ConfinementTime, IonHandler, PlasmaVolume, UnknownQuantityHandler, Simulation
 
@@ -30,9 +31,9 @@ TERMS = {
     #'LambdaO': {'pydyon': PlasmaVolume, 'eval': lambda pv, t, _, uqh: pv.getLambda('O', uqh['ne'], uqh['Te'], uqh['Ti']), 'stream': lambda so: so.eqsys.lambda_i['O'][1:,0]},
 
     #'Radiated power': { 'pydyon': RadiatedPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_radiation[:,0] },
-    #'D Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['D'][1:]/so.eqsys.N_i['D'][1:]/1.60217662e-19 },
-    #'C Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['C'][1:]/so.eqsys.N_i['C'][1:]/1.60217662e-19 },
-    #'O Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['O'][1:]/so.eqsys.N_i['O'][1:]/1.60217662e-19 },
+    'D Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['D'][1:]/so.eqsys.N_i['D'][1:]/1.60217662e-19 },
+    'C Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['C'][1:]/so.eqsys.N_i['C'][1:]/1.60217662e-19 },
+    'O Ion temperature': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalTi(t, x), 'stream': lambda so : 2.0/3.0*so.eqsys.W_i['O'][1:]/so.eqsys.N_i['O'][1:]/1.60217662e-19 },
 
     #'D-0 density': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalniD(t, x)[0], 'stream': lambda so : so.eqsys.n_i['D'][0][1:]},
     #'D-1 density': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalniD(t, x)[1], 'stream': lambda so : so.eqsys.n_i['D'][1][1:]},
@@ -53,13 +54,13 @@ TERMS = {
     #'O-7 density': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalniO(t, x)[7], 'stream': lambda so : so.eqsys.n_i['O'][7][1:]},
     #'O-8 density': { 'pydyon': DeuteriumAtomBalance, 'eval': lambda dab, t, x, _ : dab.evalniO(t, x)[8], 'stream': lambda so : so.eqsys.n_i['O'][8][1:]},
 
-    'Ohmic power': { 'pydyon': OhmicPowerTerm, 'stream': lambda so : -so.other.fluid.Tcold_ohmic[:,0] },
+    #'Ohmic power': { 'pydyon': OhmicPowerTerm, 'stream': lambda so : -so.other.fluid.Tcold_ohmic[:,0] },
     'e-i equilibration': { 'pydyon': EquilibrationPowerTerm, 'stream': lambda so : so.other.fluid.Tcold_ion_coll[:,0] },
     'i-e equilibration': { 'pydyon': EquilibrationPowerTerm, 'stream': lambda so : so.other.stream.Wi_e_coll[:,0] },
     #'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.scalar.energyloss_T_cold[:,0] },
     #'e heat convection': { 'pydyon': ElectronConvectivePowerTerm, 'stream': lambda so : so.other.stream.Tcold_transport[:,0] },
     #'i heat convection': { 'pydyon': IonConvectivePowerTerm, 'stream': lambda so : -np.sum(so.other.stream.Wi_iontransport[:,:,0], axis=1) },
-    #'Charge-exchange heat loss': { 'pydyon': ChargeExchangePowerTerm, 'stream': lambda so : -so.other.stream.Wi_chargeexchange[:,0] },
+    'Charge-exchange heat loss': { 'pydyon': ChargeExchangePowerTerm, 'stream': lambda so : -so.other.stream.Wi_chargeexchange[:,0] },
     #'i particle transport': { 'pydyon': IonTransport, 'eval': lambda ce, t, x, _: ce(t, x, 'D', Z0=1), 'stream': lambda so : -so.other.stream.ni_iontransport[:,1,0] },
     #'Confinement time': { 'pydyon': ConfinementTime, 'stream': lambda so : so.other.stream.tau_D[:,0] },
     #r'dI\_p / dt': { 'pydyon': CircuitEquation, 'eval': lambda ce, t, x, _: ce.dIp_dt(t,x), 'stream': lambda so : np.diff(so.eqsys.I_p[:,0]) / np.diff(so.grid.t[:]) , 'atol': 1 },
@@ -89,7 +90,7 @@ SETTINGS = {
     'V_vessel': lambda ss : ss.radialgrid.vessel_volume,
     'kappa': lambda ss : ss.radialgrid.kappa,
     'Bphi': lambda ss : ss.radialgrid.B0[0],
-    'Bv': lambda ss : 1e-3,
+    'Bv': lambda ss : ss.radialgrid.Bv,
     # The following currently only work with the 'TYPE_CIRCUIT' model in STREAM
     'l_MK2': lambda ss : ss.radialgrid.b,
     'Vloop': lambda ss : ss.eqsys.E_field.circuit_Vloop if ss.eqsys.E_field.circuit_Vloop.size==1 else scipy.interpolate.interp1d(ss.eqsys.E_field.circuit_Vloop_t, ss.eqsys.E_field.circuit_Vloop, bounds_error = False, fill_value = 'extrapolate'),
@@ -112,7 +113,10 @@ def compareToSTREAM(ss, so, verbose=True):
     # Construct ion object
     ions = IonHandler()
     for ion in so.eqsys.n_i.ions:
-        ions.addIon(ion.name,ion.Z)
+        if ion.name == 'H':
+            ions.addIon(ion.name,ion.Z, m=scipy.constants.m_p)
+        else:
+            ions.addIon(ion.name,ion.Z)
     #ions.addIon('D', Z=1)
     #ions.addIon('C', Z=6)
     #ions.addIon('O', Z=8)
@@ -123,7 +127,8 @@ def compareToSTREAM(ss, so, verbose=True):
     unknowns = UnknownQuantityHandler(ions, pv)
 
     # Evaluate terms and plot those which deviate
-    RTOL = 1e-1
+    #RTOL = 1e-1
+    RTOL = 1e-2
     for name, term in TERMS.items():
         t, pydyon, stream = _evaluateTerm(so, term, unknowns, ions, settings)
         ATOL = 0 if 'atol' not in term else term['atol']
@@ -138,15 +143,19 @@ def compareToSTREAM(ss, so, verbose=True):
             ax = fig.add_subplot(111)
             ax.plot(t, stream, 'k', label='STREAM')
             ax.plot(t, pydyon, 'r--', label='PYDYON')
-            #ax.plot(t, stream.flatten()/pydyon.flatten(), 'k')
+            #ax.plot(stream.flatten()/pydyon.flatten(), 'k')
             ax.set_xlabel('Time (s)')
             ax.set_title(name)
-            ax.set_xlim([0, t[-1]])
+            #ax.set_xlim([0, t[-1]])
             ax.legend()
             fig.tight_layout()
         else:
             if verbose:
-                print(f"- Term '{name}' ACCURATE to within 10%")
+                if RTOL >= 1e-2:
+                    s = '{:d}'.format(int(RTOL*100))
+                else:
+                    s = '{:.2f}'.format(RTOL*100)
+                print(f"- Term '{name}' ACCURATE to within {s}%")
 
     plt.show()
 
@@ -274,9 +283,7 @@ def fromSTREAM(so, uqh, time=0, ion='D'):
         'Te': so.eqsys.T_cold[time,0],
         'Ti': so.eqsys.W_i.getTemperature(ion)[time,0],
         'Ip': so.eqsys.I_p[time,0],
-        'IMK2': so.eqsys.I_wall[time,0],
-        # TODO insert all other ion densities
-        f'ni{ion}': so.eqsys.n_i[ion].data[time,:,0]
+        'IMK2': so.eqsys.I_wall[time,0]
     }
     for ion in so.eqsys.n_i.ions:
         dct[f'ni{ion.name}']=ion.data[time,:,0]

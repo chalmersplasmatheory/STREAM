@@ -9,8 +9,13 @@ class DeuteriumInflux:
 
     # Parameters of deuterium recycling coefficient
     c1 = 1.1
-    c2 = 0.09
+    c2 = 0.05
     c3 = 0.1
+    """
+    c1 = 1.0
+    c2 = 0
+    c3 = 1.0
+    """
     
 
     def __init__(self, quantities, ions, simple=False, Bphi=2.3, Bv=1e-3, l_MK2=1):
@@ -26,6 +31,8 @@ class DeuteriumInflux:
         self.simpleYD = simple
         self.tau = ConfinementTime(quantities, ions, Bphi=Bphi, Bv=Bv, l_MK2=l_MK2)
 
+        self.mainIon = ions.getMainIonName()
+
 
     def __call__(self, t, x):
         return self.eval(t, x)
@@ -37,9 +44,9 @@ class DeuteriumInflux:
         """
         YD = self.evaluateRecyclingCoefficient(t)
         Vp = self.quantities.getV_p()
-        Vn_tot = self.quantities.getV_n_tot('D')
+        Vn_tot = self.quantities.getV_n_tot(self.mainIon)
 
-        nD1 = self.quantities.getIonData('D')[1]
+        nD1 = self.quantities.getIonData(self.mainIon)[1]
 
         Gamma = Vp*YD*nD1 / self.tau(t, x)
 

@@ -27,6 +27,17 @@ class IonHandler:
         self.ions.append({'name': name, 'Z': int(Z), 'm': m})
 
 
+    def getMainIonName(self):
+        """
+        Returns the main ion name (either 'H' or 'D').
+        """
+        for ion in self.ions:
+            if ion['name'] in ['H', 'D']:
+                return ion['name']
+
+        raise KeyError("No main ion species found. Expected 'H' or 'D'.")
+
+
     def getMass(self, name):
         """
         Returns the mass of the named ion species.

@@ -17,6 +17,7 @@ class IonInflux:
         self.quantities = quantities
         self.ions = ions
         self.tau = ConfinementTime(quantities, ions, Bphi=Bphi, Bv=Bv, l_MK2=l_MK2)
+        self.mainIon = ions.getMainIonName()
 
 
     def __call__(self, t, x, ionname):
@@ -50,17 +51,17 @@ class IonInflux:
         """
         Evaluate the sputtering/recycling coefficient.
         """
-        if I == 'D':
-            if A == 'D': raise Exception('This term should not be applied to deuterium.')
+        if I == self.mainIon:
+            if A == self.mainIon: raise Exception('This term should not be applied to deuterium.')
             elif A == 'C': return 0
             elif A == 'O': return 0
         elif I == 'C':
             #if A == 'D': return 0.03
-            if A == 'D': return 0.015
+            if A == self.mainIon: return 0.015
             elif A == 'C': return 0
             elif A == 'O': return 1
         elif I == 'O':
-            if A == 'D': return 0
+            if A == self.mainIon: return 0
             elif A == 'C': return 0
             elif A == 'O': return 1
         else:

@@ -273,12 +273,12 @@ void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
     len_t D_index;
     const vector<string>& ionNames = ionHandler->GetNameList();
     for (D_index = 0; D_index < ionNames.size(); D_index++)
-        if (ionNames[D_index] == "D")
+        if (ionNames[D_index] == "D" || ionNames[D_index] == "H")
             break;
 
     if (D_index == ionNames.size())
         throw DREAM::SettingsException(
-            "T_i: Expected to find one deuterium ion species named 'D'."
+            "T_i: Expected to find one deuterium/hydrogen ion species named 'D'/'H'."
         );
 
     D_index = ionHandler->GetIndex(D_index, 0);
