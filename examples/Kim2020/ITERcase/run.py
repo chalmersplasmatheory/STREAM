@@ -38,7 +38,7 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
 
     a = 1.6         # Plasma minor radius [m]
     R0 = 5.65       # Plasma major radius [m]
-    Btor = 2.65 * 6.2 / R0  # Toroidal magnetic field [T]
+    Btor = 2.65#* 6.2 / R0  # Toroidal magnetic field [T]
     l_MK2 = 1       # Distance between plasma centre and passive structure [m] (unused)
     V_vessel = 1000 # Vacuum vessel volume
 
