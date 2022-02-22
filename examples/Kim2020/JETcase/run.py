@@ -44,7 +44,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     nD = n0 * np.array([[1-gamma], [gamma]])
     nO = fractionO * n0
     #nC = fractionC * n0
-    nC = 1e12
+    nC = 1e3
 
     Btor = 2.4      # Toroidal magnetic field [T]
     R0 = 2.96       # Plasma major radius [m]
@@ -147,7 +147,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     return ss
 
 
-def drawplot1(axs, so, toffset=0, showlabel=False, save=False):
+def drawplot1(axs, so, toffset=0, showlabel=False, save=True, first=True):
     """
     Draw a plot with a output from the given STREAMOutput object.
     """
@@ -160,25 +160,29 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False):
     tau = so.other.stream.tau_D[:, 0]
 
     if save:
-        t_csv = open('Data/time_STREAM.csv', 'ab')
+        if first:
+            worab = 'w'
+        else:
+            worab = 'ab'
+        t_csv = open('Data/time_STREAM.csv', worab)
         np.savetxt(t_csv, t)
         t_csv.close()
-        Ip_csv = open('Data/PlasmaCurrent_STREAM.csv', 'ab')
+        Ip_csv = open('Data/PlasmaCurrent_STREAM.csv', worab)
         np.savetxt(Ip_csv, Ip)
         Ip_csv.close()
-        ne_csv = open('Data/ElectronDensity_STREAM.csv', 'ab')
+        ne_csv = open('Data/ElectronDensity_STREAM.csv', worab)
         np.savetxt(ne_csv, ne)
         ne_csv.close()
-        Te_csv = open('Data/ElectronTemperature_STREAM.csv', 'ab')
+        Te_csv = open('Data/ElectronTemperature_STREAM.csv', worab)
         np.savetxt(Te_csv, Te)
         Te_csv.close()
-        Ti_csv = open('Data/IonTemperature_STREAM.csv', 'ab')
+        Ti_csv = open('Data/IonTemperature_STREAM.csv', worab)
         np.savetxt(Ti_csv, Ti)
         Ti_csv.close()
-        Lf_csv = open('Data/ConnectionLength_STREAM.csv', 'ab')
+        Lf_csv = open('Data/ConnectionLength_STREAM.csv', worab)
         np.savetxt(Lf_csv, Lf)
         Lf_csv.close()
-        tau_csv = open('Data/ConfinementTime_STREAM.csv', 'ab')
+        tau_csv = open('Data/ConfinementTime_STREAM.csv', worab)
         np.savetxt(tau_csv, tau)
         tau_csv.close()
 
@@ -267,7 +271,7 @@ def makeplots(so1, so2):
     fig1, axs1 = plt.subplots(3, 2, figsize=(7, 10))
 
     drawplot1(axs1, so1)
-    drawplot1(axs1, so2, toffset=so1.grid.t[-1], showlabel=True)
+    drawplot1(axs1, so2, toffset=so1.grid.t[-1], showlabel=True, first=False)
 
 
     fig1.tight_layout()
