@@ -176,7 +176,7 @@ def drawplot3(axs, so, toffset=0, showlabel=True):
     axs[2].set_xlim([0, 0.03])
     axs[2].legend(frameon=False)
 
-def drawplot4(axs, so, toffset=0, showlabel=True, save=False, fileaddon=''):
+def drawplot4(axs, so, toffset=0, showlabel=True, save=False, fileaddon='', first=True):
     """
     Draw a plot with a output from the given STREAMOutput object.
     """
@@ -224,47 +224,51 @@ def drawplot4(axs, so, toffset=0, showlabel=True, save=False, fileaddon=''):
     gammaAva = so.other.fluid.GammaAva[:, 0] * so.eqsys.n_re[1:, 0]
 
     if save:
-        t_csv = open('Data/time_'+ fileaddon +'.csv', 'ab')
+        if first:
+            worab = 'w'
+        else:
+            worab = 'ab'
+        t_csv = open('Data/time_'+ fileaddon +'.csv', worab)
         np.savetxt(t_csv, t)
         t_csv.close()
-        Ip_csv = open('Data/PlasmaCurrent_'+ fileaddon +'.csv', 'ab')
+        Ip_csv = open('Data/PlasmaCurrent_'+ fileaddon +'.csv', worab)
         np.savetxt(Ip_csv, Ip)
         Ip_csv.close()
-        Ire_csv = open('Data/RunawayCurrent_' + fileaddon + '.csv', 'ab')
+        Ire_csv = open('Data/RunawayCurrent_' + fileaddon + '.csv', worab)
         np.savetxt(Ire_csv, Ire)
         Ire_csv.close()
-        Iohm_csv = open('Data/OhmicCurrent_' + fileaddon + '.csv', 'ab')
+        Iohm_csv = open('Data/OhmicCurrent_' + fileaddon + '.csv', worab)
         np.savetxt(Iohm_csv, Iohm)
         Iohm_csv.close()
-        Te_csv = open('Data/ElectronTemperature_'+ fileaddon +'.csv', 'ab')
+        Te_csv = open('Data/ElectronTemperature_'+ fileaddon +'.csv', worab)
         np.savetxt(Te_csv, Te)
         Te_csv.close()
-        Ti_csv = open('Data/IonTemperature_'+ fileaddon +'.csv', 'ab')
+        Ti_csv = open('Data/IonTemperature_'+ fileaddon +'.csv', worab)
         np.savetxt(Ti_csv, Ti)
         Ti_csv.close()
-        EoverED_csv = open('Data/ElectricField_'+ fileaddon +'.csv', 'ab')
+        EoverED_csv = open('Data/ElectricField_'+ fileaddon +'.csv', worab)
         np.savetxt( EoverED_csv,  EoverED)
         EoverED_csv.close()
-        ECoverED_csv = open('Data/CriticalElectricField_' + fileaddon + '.csv', 'ab')
+        ECoverED_csv = open('Data/CriticalElectricField_' + fileaddon + '.csv', worab)
         np.savetxt(ECoverED_csv, ECoverED)
         ECoverED_csv.close()
 
-        gammaTot_csv = open('Data/TotalRunawayRate_' + fileaddon + '.csv', 'ab')
+        gammaTot_csv = open('Data/TotalRunawayRate_' + fileaddon + '.csv', worab)
         np.savetxt(gammaTot_csv, gammaTot)
         gammaTot_csv.close()
-        gammaDreicer_csv = open('Data/DreicerRunawayRate_' + fileaddon + '.csv', 'ab')
+        gammaDreicer_csv = open('Data/DreicerRunawayRate_' + fileaddon + '.csv', worab)
         np.savetxt(gammaDreicer_csv, gammaDreicer)
         gammaDreicer_csv.close()
-        gammaAva_csv = open('Data/AvalancheRunawayRate_' + fileaddon + '.csv', 'ab')
+        gammaAva_csv = open('Data/AvalancheRunawayRate_' + fileaddon + '.csv', worab)
         np.savetxt(gammaAva_csv, gammaAva)
         gammaAva_csv.close()
-        tauRE_csv = open('Data/RunawayConfinementTime_'+ fileaddon +'.csv', 'ab')
+        tauRE_csv = open('Data/RunawayConfinementTime_'+ fileaddon +'.csv', worab)
         np.savetxt(tauRE_csv, tauRE)
         tauRE_csv.close()
-        tauRE1_csv = open('Data/RunawayParallellConfinementTime_' + fileaddon + '.csv', 'ab')
+        tauRE1_csv = open('Data/RunawayParallellConfinementTime_' + fileaddon + '.csv', worab)
         np.savetxt(tauRE1_csv, tauRE1)
         tauRE1_csv.close()
-        tauRE2_csv = open('Data/RunawayDriftConfinementTime_' + fileaddon + '.csv', 'ab')
+        tauRE2_csv = open('Data/RunawayDriftConfinementTime_' + fileaddon + '.csv', worab)
         np.savetxt(tauRE2_csv, tauRE2)
         tauRE2_csv.close()
 
@@ -368,7 +372,7 @@ def makeplots(so11, so12, save=False, fileaddon=''):
     '''
     fig4, axs4 = plt.subplots(4, 3, figsize=(12, 10))
     drawplot4(axs4, so11, showlabel=True, save=save, fileaddon=fileaddon)
-    drawplot4(axs4, so12, toffset=so11.grid.t[-1], showlabel=False, save=save, fileaddon=fileaddon)
+    drawplot4(axs4, so12, toffset=so11.grid.t[-1], showlabel=False, save=save, fileaddon=fileaddon, first=False)
 
     axs4[0, 0].legend(frameon=False, prop={'size': 10})
     axs4[0, 1].legend(frameon=False, prop={'size': 10})
@@ -387,15 +391,15 @@ def saveDataArticle():
     prefillpressures = 2 / 133.32 * np.array([8e-4, 8e-5, 8e-5]) # Pa -> Torr
     for fa, re, pgp in zip(fileaddons, runaways, prefillpressures):
         ss21 = generate(prefill=pgp, runaways=re)
-        ss21.save(f'settings1WithT{fa}.h5')
-        so21 = runiface(ss21, f'output1WithT{fa}.h5', quiet=False)
+        ss21.save(f'settings1{fa}.h5')
+        so21 = runiface(ss21, f'output1{fa}.h5', quiet=False)
 
         ss22 = STREAMSettings(ss21)
-        ss22.fromOutput(f'output1WithT{fa}.h5')
+        ss22.fromOutput(f'output1{fa}.h5')
         ss22.timestep.setTmax(8 - ss21.timestep.tmax)
         ss22.timestep.setNt(100000)
-        ss22.save(f'settings2WithT{fa}.h5')
-        so22 = runiface(ss22, f'output2WithT{fa}.h5', quiet=False)
+        ss22.save(f'settings2{fa}.h5')
+        so22 = runiface(ss22, f'output2{fa}.h5', quiet=False)
 
         makeplots(so21, so22, save=True, fileaddon=fa)
 

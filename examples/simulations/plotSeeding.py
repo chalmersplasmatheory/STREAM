@@ -23,7 +23,7 @@ def confplotCurrent(ax):
     ax.set_ylim([0, 15])
     ax.set_xlabel(r'Time $t$ (s)', usetex=True)
     ax.set_ylabel(r'Plasma current $I_{\rm p}$ (MA)', usetex=True)
-    ax.legend(frameon=False)
+    ax.legend(frameon=False, fontsize=FONTSIZE)
     confgeneral(ax)
 
 
@@ -47,8 +47,8 @@ def confplotEfield(ax):
 def confplotRates(ax):
     ax.set_ylim([0, 10e15])
     ax.set_xlabel(r'Time $t$ (s)', usetex=True)
-    ax.set_ylabel(r'$\mathrm{d}n_{\rm re}/\mathrm{d}t$ (m$^{-3}$s$^{-1}$)', usetex=True)
-    ax.legend(frameon=False)
+    ax.set_ylabel(r'$\partial n_{\rm re}/\partial t$ (m$^{-3}$s$^{-1}$)', usetex=True)
+    ax.legend(frameon=False, fontsize=FONTSIZE)
     confgeneral(ax)
 
 
