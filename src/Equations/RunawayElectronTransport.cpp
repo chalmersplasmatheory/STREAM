@@ -9,7 +9,7 @@
 using namespace STREAM;
 
 /**
- * Constructor.
+ * Constructor. 
  */
 RunawayElectronTransport::RunawayElectronTransport(
     DREAM::FVM::Grid *g, EllipticalRadialGridGenerator *r,

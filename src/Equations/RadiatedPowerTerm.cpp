@@ -2,7 +2,7 @@
 #include "STREAM/Settings/OptionConstants.hpp"
 
 /**
-* Implementation of class representing the radiated power.
+* Implementation of class representing the radiated power. 
 */
 
 using namespace STREAM;

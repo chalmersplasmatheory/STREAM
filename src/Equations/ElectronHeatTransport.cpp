@@ -1,7 +1,7 @@
 /**
  * Electron heat transport term implemented as
  *
- *   dW/dt = 3/2 * n_e*T_e/tau
+ *   dW/dt = 3/2 * n_e*T_e/tau 
  *
  * where tau is the particle confinement time.
  */

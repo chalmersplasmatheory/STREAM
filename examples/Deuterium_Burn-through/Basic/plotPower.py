@@ -105,6 +105,7 @@ plt.xlabel(r'Time (s)')
 plt.ylabel('W/m$^-3$')
 plt.legend()
 """
+
 t, tauPar = getTauPar(so1, so2)
 t, tauPerp = getTauPerp(so1, so2)
 

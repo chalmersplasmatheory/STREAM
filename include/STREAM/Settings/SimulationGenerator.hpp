@@ -9,7 +9,7 @@
 #include "STREAM/EquationSystem.hpp"
 #include "STREAM/OtherQuantityHandler.hpp"
 
-namespace STREAM {
+namespace STREAM { 
     class SimulationGenerator {
     public:
         static DREAM::Settings *CreateSettings();
@@ -96,7 +96,6 @@ namespace STREAM {
             const std::string& subname="transport"
         );
         // STREAM main grid
-        //static DREAM::FVM::Grid *ConstructRadialGrid(DREAM::Settings*);
         static DREAM::FVM::RadialGrid *ConstructRadialGrid_Cylindrical(DREAM::Settings*);
         static EllipticalRadialGridGenerator *ConstructRadialGrid_Elliptical(DREAM::Settings*);
         

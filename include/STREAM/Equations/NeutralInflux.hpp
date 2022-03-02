@@ -7,7 +7,7 @@
 #include "STREAM/Equations/PlasmaVolume.hpp" 
 #include <gsl/gsl_math.h>
 
-namespace STREAM{
+namespace STREAM{ 
     class NeutralInflux {
         private: 
             DREAM::IonHandler *ions;

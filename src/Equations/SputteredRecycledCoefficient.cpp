@@ -1,7 +1,6 @@
 #include "STREAM/Equations/SputteredRecycledCoefficient.hpp"
 
 using namespace STREAM;
-//using namespace DREAM;
 using namespace std;
 
 /**
@@ -27,10 +26,5 @@ SputteredRecycledCoefficient::~SputteredRecycledCoefficient() {
  * for incident ion species 'lower' and sputtered ion species 'upper'.
  */
 real_t SputteredRecycledCoefficient::GetSRCoefficient(len_t upper, len_t lower){
-    /*if (coefficientTable->find(upper) != coefficientTable->end() && coefficientTable->find(upper)->second.find(lower) != coefficientTable->find(upper)->second.end()){ 
-        return coefficientTable->find(upper)->second.find(lower)->second;
-    } else {
-        return 0; 
-    }*/
     return coefficientTable[lower][upper];
 }

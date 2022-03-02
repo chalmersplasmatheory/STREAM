@@ -31,24 +31,23 @@ namespace STREAM {
 	public:
 		IonTransport(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, const len_t iIon,
 			ConfinementTime *tauinv, DREAM::FVM::UnknownQuantityHandler *u, PlasmaVolume *PV);
-		/*~IonTransport();*/
         
-        void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*);
+        	void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*);
 
 		virtual bool SetCSJacobianBlock(
-            const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*,
-            const len_t iIon, const len_t Z0, const len_t rOffset
-        ) override;
-        virtual void SetCSMatrixElements(
-            DREAM::FVM::Matrix*, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
-        ) override;
-        virtual void SetCSVectorElements(
-            real_t*, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
-        ) override;
-        
-        virtual len_t GetNumberOfNonZerosPerRow() const override{ return 1; }
-        
-        virtual len_t GetNumberOfNonZerosPerRow_jac() const override { return 6; }
-	};
+		    const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*,
+		    const len_t iIon, const len_t Z0, const len_t rOffset
+		) override;
+		virtual void SetCSMatrixElements(
+		    DREAM::FVM::Matrix*, real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
+		) override;
+		virtual void SetCSVectorElements(
+		    real_t*, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
+		) override;
+		
+		virtual len_t GetNumberOfNonZerosPerRow() const override{ return 1; }
+		
+		virtual len_t GetNumberOfNonZerosPerRow_jac() const override { return 6; }
+		};
 }
 #endif/*_STREAM_EQUATIONS_ION_TRANSPORT_HPP*/

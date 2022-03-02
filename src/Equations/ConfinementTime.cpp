@@ -8,7 +8,7 @@ using namespace STREAM;
 using namespace DREAM;
 using namespace std;
 
-
+ 
 /**
  * Constructor
  */

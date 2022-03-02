@@ -10,7 +10,7 @@ using namespace std;
 
 
 /**
- * Constructor
+ * Constructor.
  */
 RunawayElectronConfinementTime::RunawayElectronConfinementTime(
 	FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
@@ -23,7 +23,7 @@ RunawayElectronConfinementTime::RunawayElectronConfinementTime(
 }
 
 /**
- * Evaluates the inverted confinement time
+ * Evaluates the inverted confinement time.
  */
 real_t RunawayElectronConfinementTime::EvaluateInverse(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];

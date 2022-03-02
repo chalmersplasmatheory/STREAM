@@ -4,7 +4,7 @@
 #include "STREAM/stream.h"
 #include "DREAM/config.h"
 
-namespace STREAM{
+namespace STREAM{ 
     class SputteredRecycledCoefficient {
         private: 
             real_t **coefficientTable;

@@ -35,14 +35,6 @@ using namespace DREAM;
         } else {
             return GetPlasmaVolume();
         }
-        /**
-        //Eq. 13 in startup-appendix
-        if (lambda_i <= a){
-            return  2*M_PI*M_PI*R0*kappa*(a*a-(a-lambda_i)*(a-lambda_i));
-        } else {
-            return GetPlasmaVolume();
-        }
-        */ 
     }
     
     //gamma_n,i * vessel volume V, with gamma_n,i from eq. 12 in startup-appendix

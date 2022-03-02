@@ -56,8 +56,7 @@ void IonHeatTransport::Rebuild(
         this->T_i_J = 0;
     } else {
         this->T_i_J   = 2.0/3.0 * W_i / N_i;
-    }    
-    //this->T_i_J   = 2.0/3.0 * W_i / N_i;
+    }
     this->tauinv  = coefftauinv->EvaluateConfinementTime(0);
     this->dI_p    = - dtauinvdIp * W_i;
     this->dI_wall = - dtauinvdIwall * W_i;
@@ -68,7 +67,7 @@ void IonHeatTransport::Rebuild(
 
 bool IonHeatTransport::SetCSJacobianBlock(
     const len_t, const len_t derivId, FVM::Matrix *jac, const real_t*,
-    const len_t iIon, const len_t Z0, const len_t rOffset
+    const len_t iIon, const len_t Z0, const len_t
 ) { 
     // W_i has no charge-state resolution, so we only add
     // any elements on Z0=0.
@@ -96,14 +95,14 @@ bool IonHeatTransport::SetCSJacobianBlock(
     }
 }
 void IonHeatTransport::SetCSMatrixElements(
-    FVM::Matrix *mat, real_t*, const len_t, const len_t Z0, const len_t rOffset
+    FVM::Matrix *mat, real_t*, const len_t, const len_t , const len_t
 ) {
     mat->SetElement(iIon, iIon, -3.0/2.0 * T_i_J * tauinv);
 } 
 
 
 void IonHeatTransport::SetCSVectorElements(
-    real_t* vec, const real_t*, const len_t, const len_t Z0, const len_t rOffset
+    real_t* vec, const real_t*, const len_t, const len_t Z0, const len_t
 ) {
     // W_i has no charge-state resolution, so we only add
     // any elements on Z0=0.

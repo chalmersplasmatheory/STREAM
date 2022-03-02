@@ -18,7 +18,7 @@ namespace STREAM {
             
             const real_t T_0 = 0.026; // Room temperature in eV
             
-            real_t id_Wi, id_Ni, id_ni, id_lambdai; //id_Tcold, id_ncold, 
+            real_t id_Wi, id_Ni, id_ni, id_lambdai;
             
             len_t D_index;
             

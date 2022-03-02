@@ -7,7 +7,7 @@
 #include "DREAM/ADAS.hpp"
 #include "DREAM/IonHandler.hpp"
 
-namespace STREAM{
+namespace STREAM{ 
 	class MeanFreePathTerm : public DREAM::FVM::EvaluableEquationTerm{
 	private:
 		len_t iz;

@@ -14,7 +14,7 @@
  *
  * Note that this equation is applied to a single _ion species_,
  * (and to all its charge states).
- * If using collfreq_mode FULL and kinetic ionization is used,
+ * If using collfreq_mode FULL and kinetic ionization is used, 
  * ionization rates will here be set to 0 to avoid double counting.
  */
 

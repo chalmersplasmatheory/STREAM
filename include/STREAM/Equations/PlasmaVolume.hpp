@@ -10,7 +10,7 @@
 
 
 namespace STREAM{
-    class PlasmaVolume{ 
+    class PlasmaVolume{
     private:
         DREAM::FVM::Grid *grid; 
         real_t vessel_vol;

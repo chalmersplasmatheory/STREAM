@@ -7,7 +7,7 @@ using namespace DREAM;
 using namespace STREAM;
 
 /**
- * Constructor.
+ * Constructor. 
  */
 ElectronTransportDiffusion::ElectronTransportDiffusion(
     FVM::Grid *grid, EllipticalRadialGridGenerator *radials, ConfinementTime *tauinv, FVM::UnknownQuantityHandler *unknowns

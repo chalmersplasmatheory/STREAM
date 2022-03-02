@@ -6,7 +6,6 @@
 
     const len_t Z  = this->ions->GetZ(iIon);
     const real_t *n_cold = this->unknowns->GetUnknownData(id_n_cold);
-    //const real_t *T_cold = this->unknowns->GetUnknownData(id_T_cold);
     const real_t V_p = this->volumes->GetPlasmaVolume();
     const real_t V_n = this->volumes->GetNeutralVolume(iIon); 
     const real_t V_n_tot = this->volumes->GetTotalNeutralVolume(iIon);
@@ -47,7 +46,6 @@
                 else TA = 2.0/3.0 * WA / (DREAM::Constants::ec*NA);
                 if (Z == 1){
                     if (Z0 == 1){
-                        const len_t DOffset = ions->GetIndex(iIon, 0);
                         real_t nD1 = ions->GetIonDensity(ir, iIon, 1);
 
                         real_t Rcx_ion = ccdIon->Eval(0, nD1, TA);
@@ -96,7 +94,6 @@
                 // d/dlambda_i(Negative charge-exchange term)
                 if (Z == 1){
                     if(Z0 == 0){
-                        const len_t DOffset = ions->GetIndex(iIon, 0);
                         real_t nD1 = ions->GetIonDensity(ir, iIon, 1);
 
                         real_t Rcx_ion = ccdIon->Eval(0, nD1, TA);

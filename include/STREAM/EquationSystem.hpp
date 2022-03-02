@@ -12,7 +12,7 @@
 #include "STREAM/Equations/RunawayElectronConfinementTime.hpp"
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 
-namespace STREAM {
+namespace STREAM { 
     class EquationSystem : public DREAM::EquationSystem {
         public: 
             ConfinementTime *CT;

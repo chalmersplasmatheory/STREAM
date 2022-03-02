@@ -32,7 +32,7 @@ namespace STREAM {
 
 	protected:
 		virtual void SetDiffusionTerm(const len_t Z0, real_t t);
-		virtual void SetPartialDiffusionTerm(len_t /*derivId*/, len_t /*nMultiples*/) override;
+		virtual void SetPartialDiffusionTerm(len_t, len_t) override;
 		
 	public:
 		IonHeatTransportDiffusion(DREAM::FVM::Grid *g, DREAM::IonHandler *ihdl, bool allocCoefficients, const len_t iIon, 

@@ -16,7 +16,7 @@
 namespace STREAM{
     class RunawayElectronConfinementTime {
         protected:
-            DREAM::FVM::UnknownQuantityHandler *unknowns; 
+            DREAM::FVM::UnknownQuantityHandler *unknowns;
             
             EllipticalRadialGridGenerator *radials;
             

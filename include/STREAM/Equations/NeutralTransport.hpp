@@ -10,7 +10,7 @@
 
 
 namespace STREAM {
-	class NeutralTransport : public DREAM::IonEquationTerm<DREAM::FVM::EquationTerm> { 
+	class NeutralTransport : public DREAM::IonEquationTerm<DREAM::FVM::EquationTerm> {
 	private:
 		NeutralInflux *NI;
 		PlasmaVolume *PV;

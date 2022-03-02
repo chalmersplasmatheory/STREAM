@@ -9,7 +9,7 @@ using namespace STREAM;
 
 
 /**
- * Constructor.
+ * Constructor. 
  */
 OtherQuantityHandler::OtherQuantityHandler(
     ConfinementTime *confinementTime, NeutralInflux *neutralInflux,

@@ -16,8 +16,6 @@ namespace STREAM {
         
         EllipticalRadialGridGenerator *radials;
 
-        // Precomputed coefficient used for calculating
-        // derivatives of the diffusion coefficient Drr...
         real_t *dn_cold=nullptr;
         real_t *dI_p=nullptr;
         real_t *dI_wall=nullptr;
@@ -25,7 +23,6 @@ namespace STREAM {
         real_t *dW_i=nullptr;
         real_t *dN_i=nullptr;
 
-        // IDs of unknown quantities used by the operator...
         len_t id_ncold, id_Ip, id_Iwall=0, id_Tcold, id_Wi, id_Ni;
 
         void AllocateDiffCoeff(); 

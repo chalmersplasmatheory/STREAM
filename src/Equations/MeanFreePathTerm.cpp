@@ -5,11 +5,11 @@
 
 #include "STREAM/Equations/MeanFreePathTerm.hpp"
 #include "DREAM/Settings/OptionConstants.hpp"
-#include <cmath> //Needed for example for sqrt
+#include <cmath>
 
 using namespace STREAM;
 using namespace DREAM;
-using namespace std; //Standard functions 
+using namespace std; 
 
     MeanFreePathTerm::MeanFreePathTerm(FVM::Grid *g, len_t iz, FVM::UnknownQuantityHandler *u, ADAS *adas, IonHandler *ions): FVM::EvaluableEquationTerm(g), iz(iz), unknowns(u), adas(adas), ions(ions){
         id_W_i = u->GetUnknownID(OptionConstants::UQTY_WI_ENER);

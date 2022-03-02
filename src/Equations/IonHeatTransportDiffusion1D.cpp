@@ -125,7 +125,6 @@ void IonHeatTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
         real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
         real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(ir);
         
-        // Ska det vara d...[Z0-1][ir] eller bara d...[ir]?
         this->dn_i[Z0-1][ir]    = 3/2 * Constants::ec * a * a * tauinv; 
         this->dI_p[Z0-1][ir]    = 3/2 * Constants::ec * a * a * dtauinvdIp * n_i;
         this->dI_wall[Z0-1][ir] = 3/2 * Constants::ec * a * a * dtauinvdIwall * n_i;
@@ -141,8 +140,6 @@ void IonHeatTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
 void IonHeatTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMultiples){
 	if (derivId != this->id_ni && derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_Ni)
         return;
-    
-    // ResetDifferentiationCoefficients(); //Ska vara med?
     
     const len_t nr = this->grid->GetNr();
 	

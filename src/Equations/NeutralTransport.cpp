@@ -4,7 +4,7 @@ using namespace DREAM;
 using namespace STREAM;
 
 /**
- * Constructor.
+ * Constructor. 
  */
 NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
 	const len_t iIon, FVM::UnknownQuantityHandler *u, NeutralInflux *NI, PlasmaVolume *PV) : 
@@ -27,7 +27,6 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
         }
     }
     
-    //delete [] this->dn_kj;
     len_t Z_i = ions->GetZ(iIon);
     if(Z_i==1 && !ions->IsTritium(iIon)){
         this->dn_kj = new real_t[1];
@@ -128,11 +127,10 @@ void NeutralTransport::SetCSMatrixElements(
 
 
 void NeutralTransport::SetCSVectorElements(
-    real_t* vec, const real_t*, const len_t iIon, const len_t Z0, const len_t rOffset
+    real_t* vec, const real_t*, const len_t , const len_t Z0, const len_t rOffset
 ) {
     if (Z0 != 0)
         return;
 
     vec[rOffset]+=wall_term; 
-    //printf("%.7e \n",wall_term);
 }

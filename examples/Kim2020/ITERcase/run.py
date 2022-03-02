@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants
 import sys
-sys.path.append('../../Deuterium_Burn-through')
 sys.path.append('../../../py')
 
 #from run import makeplots

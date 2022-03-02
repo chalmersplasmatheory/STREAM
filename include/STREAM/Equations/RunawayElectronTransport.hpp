@@ -6,7 +6,7 @@
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 #include "STREAM/Equations/RunawayElectronConfinementTime.hpp"
 
-namespace STREAM {
+namespace STREAM { 
     class RunawayElectronTransport : public DREAM::FVM::EquationTerm {
     private:
         EllipticalRadialGridGenerator *radials;

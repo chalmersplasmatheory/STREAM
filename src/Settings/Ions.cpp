@@ -179,7 +179,7 @@ void SimulationGenerator::ConstructEquation_Ions(
     real_t vessel_volume = s->GetReal("radialgrid/wall/vessel_volume");
     if (vessel_volume == 0){
         throw DREAM::SettingsException(
-            "Vessel volume is unspecified" //Is this an ok exception? 
+            "Vessel volume is unspecified"
         );
     }
     PlasmaVolume *volumes = new PlasmaVolume(
@@ -229,9 +229,7 @@ void SimulationGenerator::ConstructEquation_Ions(
                 eqn->AddTerm(ire);
                 stream_terms->iontransport[iZ] = new IonTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetConfinementTime(), eqsys->GetUnknownHandler(), eqsys->GetPlasmaVolume());
                 eqn->AddTerm(stream_terms->iontransport[iZ]);
-                //if (iZ == 0) {
                 eqn->AddTerm(new NeutralTransport(eqsys->GetFluidGrid(), eqsys->GetIonHandler(), iZ, eqsys->GetUnknownHandler(), neutralInflux, eqsys->GetPlasmaVolume()));
-                //}
 
                 eqsys->AddIonRateEquation(ire);
             } break;

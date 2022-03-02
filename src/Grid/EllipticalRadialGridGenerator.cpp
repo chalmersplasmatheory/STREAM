@@ -196,8 +196,6 @@ void EllipticalRadialGridGenerator::GetGradRCartesian(
  * coordinate system.
  */
 real_t EllipticalRadialGridGenerator::FindClosestApproach(
-    /*real_t x1, real_t y1, real_t,
-    real_t x2, real_t y2, real_t*/
     real_t, real_t, real_t, real_t, real_t, real_t
 ) {
     // TODO

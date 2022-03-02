@@ -111,8 +111,7 @@ void ElectronHeatTransportDiffusion::Rebuild(
         if(ir>0)
             n += (1-deltaRadialFlux[ir]) * ncold[ir-1];
 
-        // Factor ec (=elementary charge) to convert from
-        // eV to joule
+        // Factor ec (=elementary charge) to convert from eV to joule
         this->dn_cold[ir] = 3.0/2.0 * Constants::ec * a * a * tauinv; 
         this->dI_p[ir]    = 3.0/2.0 * Constants::ec * a * a * dtauinvdIp * n;
         this->dI_wall[ir] = 3.0/2.0 * Constants::ec * a * a * dtauinvdIwall * n;

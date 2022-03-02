@@ -4,7 +4,7 @@ using namespace STREAM;
 using namespace std;
 
 /**
- * Constructor.
+ * Constructor. 
  */
 EquationSystem::EquationSystem(
     DREAM::FVM::Grid *emptygrid, DREAM::FVM::Grid *rgrid,

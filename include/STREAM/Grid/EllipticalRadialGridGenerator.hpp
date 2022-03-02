@@ -5,7 +5,7 @@
 #include "FVM/Grid/RadialGridGenerator.hpp"
 #include "FVM/Interpolator1D.hpp"
 
-namespace STREAM {
+namespace STREAM { 
     class EllipticalRadialGridGenerator : public DREAM::FVM::RadialGridGenerator {
     protected:
         DREAM::FVM::Interpolator1D *a, *B0, *kappa, *delta;

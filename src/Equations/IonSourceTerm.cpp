@@ -58,12 +58,10 @@ bool IonSourceTerm::SetJacobianBlock(
 			real_t dV_n_dl = this->plasmaVolume->GetNeutralVolume_dLambdai(i);
 
 			// Only non-trivial for Z0=0
-			//for (len_t Z0 = 0; Z0 <= Z[i]; Z0++) {
 			const len_t idx = this->ions->GetIndex(ionIndices[i], 0);
 			real_t *s = currentData[i];
 
 			jac->SetElement(idx, i, s[0]*dV_n_dl/V_n_tot * (1 - V_n/V_n_tot));
-			//}
 		}
 
 		return true;

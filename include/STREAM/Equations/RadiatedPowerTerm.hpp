@@ -11,7 +11,7 @@
 #include "DREAM/Settings/OptionConstants.hpp"
 
 namespace STREAM{
-    class RadiatedPowerTerm : public DREAM::RadiatedPowerTerm{ 
+    class RadiatedPowerTerm : public DREAM::RadiatedPowerTerm{
     private:
         DREAM::FVM::UnknownQuantityHandler *unknowns;
         DREAM::IonHandler *ions;

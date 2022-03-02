@@ -47,8 +47,6 @@ IonTransportDiffusion::~IonTransportDiffusion(){
  */
 void IonTransportDiffusion::Allocate(){
     Deallocate();
-    
-    //len_t nzs=ions->GetNzs();
 
     const len_t nr = this->grid->GetNr();
 
@@ -112,7 +110,6 @@ void IonTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
         real_t dtauinvdWi    = this->coefftauinv->EvaluateConfinementTime_dWi(ir); 
         real_t dtauinvdNi    = this->coefftauinv->EvaluateConfinementTime_dNi(ir);
         
-        // Ska det vara d...[Z0-1][ir] eller bara d...[ir]?
         this->dI_p[Z0-1][ir]    = a * a * dtauinvdIp;
         this->dI_wall[Z0-1][ir] = a * a * dtauinvdIwall;
         this->dT_cold[Z0-1][ir] = a * a * dtauinvdTcold;
@@ -128,8 +125,6 @@ void IonTransportDiffusion::SetDiffusionTerm(const len_t Z0, real_t){
 void IonTransportDiffusion::SetPartialDiffusionTerm(len_t derivId, len_t nMultiples){
 	if (derivId != this->id_Ip && derivId != this->id_Iwall && derivId != this->id_Tcold && derivId != this->id_Wi && derivId != this->id_Ni)
         return;
-    
-    // ResetDifferentiationCoefficients(); //Ska vara med?
     
     const len_t nr = this->grid->GetNr();
 	
