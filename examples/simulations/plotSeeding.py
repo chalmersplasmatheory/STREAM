@@ -37,7 +37,7 @@ def confplotTemperature(ax):
 
 
 def confplotEfield(ax):
-    ax.set_ylim([0, 10])
+    ax.set_ylim([0, 8])
     ax.set_xlabel(r'Time $t$ (s)', usetex=True)
     ax.set_ylabel(r'Electric field $E/E_{\rm D}$ (\%)', usetex=True)
     #ax.legend(frameon=False)
@@ -45,9 +45,9 @@ def confplotEfield(ax):
 
 
 def confplotRates(ax):
-    ax.set_ylim([0, 10e15])
+    ax.set_ylim([0, 8e15])
     ax.set_xlabel(r'Time $t$ (s)', usetex=True)
-    ax.set_ylabel(r'$\partial n_{\rm re}/\partial t$ (m$^{-3}$s$^{-1}$)', usetex=True)
+    ax.set_ylabel(r'${\rm d} n_{\rm re}/{\rm d} t$ (m$^{-3}$s$^{-1}$)', usetex=True)
     ax.legend(frameon=False, fontsize=FONTSIZE)
     confgeneral(ax)
 
@@ -154,27 +154,21 @@ fig1.subplots_adjust(top=0.83)
 ############################
 # SECOND FIGURE ("PLASMA")
 ############################
-fig2, axs2 = plt.subplots(1, 3, figsize=(14,4.5))
+fig2, axs2 = plt.subplots(1, 2, figsize=(10,4.5))
 
-# Fuelling function
-title = plotFuelling(axs2[0], so05, -2, -1, color='white')
-h05 = plotFuelling(axs2[0], so05, 0.5, 2.5, color='k')
-h10 = plotFuelling(axs2[0], so10, 1.0, 3.0, color='tab:red')
-h30 = plotFuelling(axs2[0], so30, 3.0, 5.0, color='tab:blue')
-confplotFuelling(axs2[0])
-
-plotDensity(axs2[1], so05, color='k')
-plotDensity(axs2[1], so10, color='tab:red')
-plotDensity(axs2[1], so30, color='tab:blue')
-plotShading(axs2[1])
-confplotDensity(axs2[1])
+plotDensity(axs2[0], so05, color='k')
+plotDensity(axs2[0], so10, color='tab:red')
+plotDensity(axs2[0], so30, color='tab:blue')
+plotShading(axs2[0])
+confplotDensity(axs2[0])
 
 # Temperature
-plotTemperature(axs2[2], so05, color='k')
-plotTemperature(axs2[2], so10, color='tab:red')
-plotTemperature(axs2[2], so30, color='tab:blue')
-plotShading(axs2[2])
-confplotTemperature(axs2[2])
+title = plotFuelling(axs1[0], so05, -2, -1, color='white')
+plotTemperature(axs2[1], so05, color='k')
+plotTemperature(axs2[1], so10, color='tab:red')
+plotTemperature(axs2[1], so30, color='tab:blue')
+plotShading(axs2[1])
+confplotTemperature(axs2[1])
 
 fig2.legend([title, h05, h10, h30], ['Fuelling duration:', '$0.5$-$2.5\,\mathrm{s}$', '$1$-$3\,\mathrm{s}$', '$3$-$5\,\mathrm{s}$'], loc='upper center', frameon=False, ncol=4)
 fig2.tight_layout()
