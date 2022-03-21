@@ -8,6 +8,7 @@
 #include "STREAM/Settings/OptionConstants.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
 #include "STREAM/Equations/NeutralInflux.hpp"
+#include "STREAM/Equations/OpticalThickness.hpp"
 
 using namespace STREAM;
 

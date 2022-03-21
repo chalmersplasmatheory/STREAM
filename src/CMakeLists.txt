@@ -36,6 +36,8 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Equations/ChargeExchangeTerm.cpp"
     "${PROJECT_SOURCE_DIR}/src/OtherQuantityHandler.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/OtherQuantityHandler.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/OpticalThickness.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/ElectronCyclotronHeating.cpp"
 )
 
 set_property(

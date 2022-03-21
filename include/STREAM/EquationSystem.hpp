@@ -11,6 +11,7 @@
 #include "STREAM/Equations/IonRateEquation.hpp"
 #include "STREAM/Equations/RunawayElectronConfinementTime.hpp"
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
+#include "STREAM/Equations/OpticalThickness.hpp"
 
 namespace STREAM { 
     class EquationSystem : public DREAM::EquationSystem {
@@ -21,6 +22,7 @@ namespace STREAM {
             EllipticalRadialGridGenerator *r;
             std::vector<IonRateEquation*> ire;
             RunawayElectronConfinementTime *rect;
+            OpticalThickness *OT;
             
             EquationSystem(
                 DREAM::FVM::Grid*, DREAM::FVM::Grid*,
@@ -35,6 +37,7 @@ namespace STREAM {
             void SetNeutralInflux(NeutralInflux *NI);
             void AddIonRateEquation(IonRateEquation*);
             void SetRunawayElectronConfinementTime(RunawayElectronConfinementTime*);
+            void SetOpticalThickness(OpticalThickness *OT);
             
             PlasmaVolume *GetPlasmaVolume();
             ConfinementTime *GetConfinementTime();
@@ -42,6 +45,7 @@ namespace STREAM {
             NeutralInflux *GetNeutralInflux();
             std::vector<IonRateEquation*> GetIonRateEquations();
             RunawayElectronConfinementTime *GetRunawayElectronConfinementTime();
+            OpticalThickness *GetOpticalThickness();
             
     };
 }

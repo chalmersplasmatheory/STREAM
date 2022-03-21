@@ -10,28 +10,28 @@ namespace STREAM {
     class ElectronCyclotronHeating : public DREAM::FVM::EquationTerm {
     private:
         EllipticalRadialGridGenerator *radials;
+        OpticalThickness *OT;
 	
-	real_t parentheses_ECH, eta_polo, eta_polx;
-        real_t dT_cold, dn_cold;
+	real_t parentheses_ECH, dpECH_dTe, dpECH_dne;
 
         len_t id_Tcold, id_ncold;
         
         // Input parameters
-        real_t P_inj; 
+        real_t P_inj, f_o, f_x, theta; 
 
     public:
         ElectronCyclotronHeating(
             DREAM::FVM::Grid*,
-            EllipticalRadialGridGenerator*, DREAM::FVM::UnknownQuantityHandler*);
+            EllipticalRadialGridGenerator*, DREAM::FVM::UnknownQuantityHandler*, OpticalThickness*, real_t, real_t, real_t, real_t);
         ~ElectronCyclotronHeating();
 
-        virtual len_t GetNumberOfNonZerosPerRow() const { return 1; } // What should return?
-        virtual len_t GetNumberOfNonZerosPerRow_jac() const { return 6; } // What should return?
-        virtual void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*); // beräkna parantes och optical thickness
+        virtual len_t GetNumberOfNonZerosPerRow() const { return 1; } 
+        virtual len_t GetNumberOfNonZerosPerRow_jac() const { return 2; } 
+        virtual void Rebuild(const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*); 
 
-        virtual bool SetJacobianBlock(const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*); // Derivator
-        virtual void SetMatrixElements(DREAM::FVM::Matrix*, real_t*); // Använda från SetJacobianBlock?
-        virtual void SetVectorElements(real_t*, const real_t*); // Använda från Rebuilt
+        virtual bool SetJacobianBlock(const len_t, const len_t, DREAM::FVM::Matrix*, const real_t*);
+        virtual void SetMatrixElements(DREAM::FVM::Matrix*, real_t*); 
+        virtual void SetVectorElements(real_t*, const real_t*);
     };
 }
 

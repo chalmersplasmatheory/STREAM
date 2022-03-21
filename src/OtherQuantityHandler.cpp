@@ -14,6 +14,7 @@ using namespace STREAM;
 OtherQuantityHandler::OtherQuantityHandler(
     ConfinementTime *confinementTime, NeutralInflux *neutralInflux,
     PlasmaVolume *plasmaVolume, RunawayElectronConfinementTime *rect, 
+    OpticalThickness *opticalThickness,
     std::vector<IonRateEquation*> ionRateEquations, struct eqn_terms *stream_terms,
     // Carried over from DREAM...
     DREAM::CollisionQuantityHandler *cqtyHottail, DREAM::CollisionQuantityHandler *cqtyRunaway,
@@ -25,7 +26,7 @@ OtherQuantityHandler::OtherQuantityHandler(
         unknowns, unknown_equations, ions, fluidGrid, hottailGrid, runawayGrid,
         scalarGrid, oqty_terms),
     confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume),
-    reConfinementTime(rect), ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
+    reConfinementTime(rect), opticalThickness(opticalThickness), ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
 
     this->id_ni = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
 
@@ -214,6 +215,17 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         const real_t I_ref = this->reConfinementTime->GetIref();
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = 1/(1-exp(-I_p/I_ref)) * this->reConfinementTime->EvaluateRunawayElectronConfinementTime2(ir);
+    );
+    
+    DEF_FL("stream/eta_o", "Optical thickness for O mode",
+        real_t *v = qd->StoreEmpty();
+        for (len_t ir = 0; ir < nr; ir++)
+            v[ir] = this->opticalThickness->EvaluateOpticalThickness_o(ir);
+    );
+    DEF_FL("stream/eta_x", "Optical thickness for X mode",
+        real_t *v = qd->StoreEmpty();
+        for (len_t ir = 0; ir < nr; ir++)
+            v[ir] = this->opticalThickness->EvaluateOpticalThickness_x(ir);
     );
 
     DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals",

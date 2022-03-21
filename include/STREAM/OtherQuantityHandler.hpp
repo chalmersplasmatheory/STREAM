@@ -13,6 +13,7 @@
 #include "STREAM/Equations/IonTransport.hpp"
 #include "STREAM/Equations/IonHeatTransport.hpp"
 #include "STREAM/Equations/RunawayElectronConfinementTime.hpp"
+#include "STREAM/Equations/OpticalThickness.hpp"
 
 namespace STREAM {
     class OtherQuantityHandler : public DREAM::OtherQuantityHandler {
@@ -29,6 +30,7 @@ namespace STREAM {
         NeutralInflux *neutralInflux;
         PlasmaVolume *plasmaVolume;
         RunawayElectronConfinementTime *reConfinementTime;
+        OpticalThickness *opticalThickness;
 
         std::vector<IonRateEquation*> ionRateEquations;
         struct eqn_terms *stream_terms;
@@ -38,7 +40,7 @@ namespace STREAM {
     public:
         OtherQuantityHandler(
             ConfinementTime*, NeutralInflux*, PlasmaVolume*,
-            RunawayElectronConfinementTime*,
+            RunawayElectronConfinementTime*, OpticalThickness*,
             std::vector<IonRateEquation*>, struct eqn_terms*,
             DREAM::CollisionQuantityHandler*, DREAM::CollisionQuantityHandler*,
             DREAM::PostProcessor*, DREAM::RunawayFluid*, DREAM::FVM::UnknownQuantityHandler*,
