@@ -34,6 +34,8 @@ namespace STREAM{
                         
                         real_t EvaluateOpticalThickness_o_dne(len_t ir);
                         real_t EvaluateOpticalThickness_x_dne(len_t ir);
+                        
+                        //void Initialize();
     };
 }
 

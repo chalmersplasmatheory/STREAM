@@ -57,6 +57,42 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
         (real_t)1e-3
     );
     
+    s->DefineSetting(
+        "radialgrid/P_inj",
+        "Injected ECH power [W]",
+        (real_t)0.0
+    );
+    
+    s->DefineSetting(
+        "radialgrid/f_o",
+        "Fraction of O mode",
+        (real_t)0.5
+    );
+    
+    s->DefineSetting(
+        "radialgrid/f_x",
+        "Fraction of X mode",
+        (real_t)0.5
+    );
+    
+    s->DefineSetting(
+        "radialgrid/theta",
+        "Poloidal angle between EC-beam path and vertical z-axis [rad]",
+        (real_t)M_PI/4.0
+    );
+    
+    s->DefineSetting(
+        "radialgrid/phi",
+        "Toroidal angle between magnetic field and ECH wave injection [rad]",
+        (real_t)0.0
+    );
+    
+    s->DefineSetting(
+        "radialgrid/N",
+        "Fundamental harmonic",
+        (int_t)1
+    );
+    
     DREAM::SimulationGenerator::DefineOptions_f_ripple(MODULENAME, s);
 }
 

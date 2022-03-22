@@ -14,6 +14,7 @@
 #include "STREAM/Equations/IonHeatTransport.hpp"
 #include "STREAM/Equations/RunawayElectronConfinementTime.hpp"
 #include "STREAM/Equations/OpticalThickness.hpp"
+#include "STREAM/Equations/ElectronCyclotronHeating.hpp"
 
 namespace STREAM {
     class OtherQuantityHandler : public DREAM::OtherQuantityHandler {
@@ -24,6 +25,7 @@ namespace STREAM {
             DREAM::MaxwellianCollisionalEnergyTransferTerm **Wi_e_coll=nullptr;
             IonHeatTransport **Wi_iontransport=nullptr;
             ElectronHeatTransport *Tcold_transport=nullptr;
+            ElectronCyclotronHeating *Tcold_ECH=nullptr;
         };
     private:
         ConfinementTime *confinementTime;

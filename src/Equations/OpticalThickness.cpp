@@ -346,3 +346,8 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     
     return detax_dne;
 }
+/*
+void ConfinementTime::Initialize() {
+    this->id_Tcold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
+    this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
+}*/

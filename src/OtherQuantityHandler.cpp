@@ -120,6 +120,14 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             this->stream_terms->Tcold_transport->SetVectorElements(v, Wcold);
         );
     }
+    
+    if (this->stream_terms->Tcold_ECH != nullptr) {
+        DEF_SC("stream/Tcold_ECH", "Electron Cyclotron Heating (from STREAM::ElectronCyclotronHeating)",
+            real_t *v = qd->StoreEmpty();
+            v[0] = 0;
+            this->stream_terms->Tcold_ECH->SetVectorElements(v, nullptr);
+        );
+    }
 
     if (this->stream_terms->Wi_e_coll != nullptr) {
         DEF_SC_MUL("stream/Wi_e_coll", nIons, "Ion-electron collision heat loss rate",

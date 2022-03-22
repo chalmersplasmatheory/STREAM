@@ -182,6 +182,7 @@ void SimulationGenerator::ConstructEquations(
         
     eqsys->GetConfinementTime()->Initialize();
     eqsys->GetRunawayElectronConfinementTime()->Initialize();
+    //eqsys->GetOpticalThickness()->Initialize();
 }
 
 /**
