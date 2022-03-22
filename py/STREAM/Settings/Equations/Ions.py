@@ -131,6 +131,37 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                 ion.setRecyclingCoefficient(iron, 0.00001)  # Vad ska detta vara?
             elif ion.name == iron:
                 ion.setRecyclingCoefficient(iron, 1.0)
+            elif ion.name == carbon:
+                ion.setRecyclingCoefficient(carbon, 0.015)
+
+    '''
+    def initializeSputteringRecyclingCoefficientTable(self):
+        nZ = len(self.ions)
+        coefficientTable = []
+        for lIon in nZ:
+            coefficientTableRow = []
+            for uIon in nZ:
+                element = [[0], [0]]
+                coefficientTableRow.append(element)
+            coefficientTable.append(coefficientTableRow)
+        self.coefficientTable = coefficientTable
+
+    def setSputteringRecyclingCoefficientTableElement(self, lowerIonSpecies, upperIonSpecies, Y, tY):
+        nZ = len(self.ions)
+        lIon = -1
+        uIon = -1
+        iIon = 0
+        while (uIon == -1 or lion ==-1) and iIon < nZ:
+            if lowerIonSpecies == self.ions[iIon]:
+                lIon = iIon
+            if upperIonSpecies == self.ions[iIon]:
+                uIon = iIon
+            iIon += 1
+        if lIon != -1 and uIon != -1:
+            self.coefficientTable[lIon][uIon][0] = Y
+            self.coefficientTable[lIon][uIon][1] = tY
+    '''
+
 
 
     def setFueling(self, species, fueling, times=0):

@@ -43,8 +43,10 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     n0 = 3.22e22 * prefill  # Initial total deuterium density
     nD = n0 * np.array([[1-gamma], [gamma]])
     nO = fractionO * n0
-    #nC = fractionC * n0
-    nC = 1e3
+    if fractionC <= 0:
+        nC = 1e3
+    else:
+        nC = fractionC * n0
 
     Btor = 2.4      # Toroidal magnetic field [T]
     R0 = 2.96       # Plasma major radius [m]
@@ -65,7 +67,6 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
                3.60]
 
     c1 = 1.1
-    #c2 = 0.09
     c2 = 0.05
     c3 = 0.1
 

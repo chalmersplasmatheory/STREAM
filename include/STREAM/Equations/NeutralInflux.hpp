@@ -37,4 +37,35 @@ namespace STREAM{
             real_t EvaluateNeutralInflux_dNi(real_t t, const len_t iIon);
     };
 }
+
+
+/*
+namespace STREAM{ 
+    class NeutralInflux {
+        private: 
+            DREAM::IonHandler *ions;
+            SputteredRecycledCoefficient *SRC;
+            ConfinementTime *coefftauinv; 
+            PlasmaVolume *PV; 
+
+        public:
+            NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, PlasmaVolume *PV);
+            
+            real_t EvaluateNeutralInflux_dnkj(real_t t, const len_t iIon, const len_t kIon);
+                        
+            real_t EvaluateNeutralInflux(real_t t, const len_t iIon);
+
+            real_t EvaluateNeutralInflux_dIp(real_t t, const len_t iIon);
+
+            real_t EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon);
+
+            real_t EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon);
+
+            real_t EvaluateNeutralInflux_dWi(real_t t, const len_t iIon);
+            
+            real_t EvaluateNeutralInflux_dNi(real_t t, const len_t iIon);
+    };
+}
+*/
+
 #endif /*_STREAM_EQUATIONS_NEUTRAL_INFLUX_HPP*/

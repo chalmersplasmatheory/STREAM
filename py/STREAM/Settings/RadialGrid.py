@@ -36,6 +36,7 @@ class RadialGrid(PrescribedScalarParameter):
         self.setTriangularity(0)
 
 
+
     def setB0(self, B0, t=0):
         """
         Prescribe the (time evolution of the) magnetic field strength
