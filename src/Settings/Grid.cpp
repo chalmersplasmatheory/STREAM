@@ -22,23 +22,7 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "B0");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "kappa");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "delta");
-    
-    s->DefineSetting(
-        "radialgrid/wall/c1",
-        "Coefficients for deuterium recycling",
-        (real_t)1.1
-    );
-    s->DefineSetting(
-        "radialgrid/wall/c2",
-        "Coefficients for deuterium recycling",
-        (real_t)0.09
-    );
-    s->DefineSetting(
-        "radialgrid/wall/c3",
-        "Coefficients for deuterium recycling",
-        (real_t)0.1
-    );
-    
+        
     s->DefineSetting(
         "radialgrid/wall/vessel_volume", 
         "The vacuum vessel volume",

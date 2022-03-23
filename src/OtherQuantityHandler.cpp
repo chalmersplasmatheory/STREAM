@@ -181,7 +181,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         const len_t nZ = this->ions->GetNZ();
         real_t *v = qd->StoreEmpty();
         for (len_t iz = 0; iz < nZ; iz++)
-            v[iz] = this->neutralInflux->EvaluateNeutralInflux(t, iz);
+            v[iz] = this->neutralInflux->EvaluateNeutralInflux(iz);
     );
 
     DEF_FL("stream/tau_D", "Deuterium confinement time",
@@ -255,10 +255,6 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     DEF_SC("stream/V", "Tokamak vessel volume",
         real_t v = this->plasmaVolume->GetVesselVolume();
         qd->Store(&v);
-    );
-    DEF_SC("stream/Y_D", "Deuterium recycling coefficient",
-        real_t y_d = this->neutralInflux->DeuteriumRecyclingCoefficient(t);
-        qd->Store(&y_d);
     );
 
     // Diagnostics for ion rate equations
