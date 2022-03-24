@@ -109,7 +109,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     ss.eqsys.n_re.setDreicer(False)
 
     # Recycling coefficients (unused)
-    ss.eqsys.n_i.setJET_CWrecycling()
+    ss.eqsys.n_i.setJET_CWrecycling(tMax=1)
     for ion in ss.eqsys.n_i.ions:
         if ion.name == 'D':
             ion.setRecyclingCoefficient('C', 0.015)

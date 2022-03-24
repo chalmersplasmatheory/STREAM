@@ -9,7 +9,7 @@ using namespace std;
 SputteredRecycledCoefficient::SputteredRecycledCoefficient(
     DREAM::FVM::Interpolator1D ***coefficientTable, DREAM::IonHandler *ihdl
 ) : coefficientTable(coefficientTable), ions(ihdl) {
-    //AllocateForCurrTable();
+    AllocateForCurrTable();
 }
 
 /**
@@ -29,6 +29,12 @@ void SputteredRecycledCoefficient::AllocateForCurrTable() {
     for (len_t z = 0; z < nZ; z++) {
     	currCoefficientTable[z] = new real_t[nZ];
     }
+    /*
+    currCoefficientTable = new real_t*[nZ];
+    currCoefficientTable[0] = new real_t[nZ*nZ];
+    for (len_t z = 1; z < nZ; z++) {
+    	currCoefficientTable[z] = new real_t[z-1] + nZ;
+    */
 }
 
 /**
