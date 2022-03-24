@@ -77,6 +77,11 @@ class IonSpecies(DREAMIonSpecies.IonSpecies):
         if species in self.recycling:
             print("WARNING: Updating recycling coefficient for species '{}' and '{}'.".format(self.name, species))
 
+        if isinstance(values, float) or isinstance(values, int):
+            values = [float(values)]
+        if isinstance(tvalues, float) or isinstance(tvalues, int):
+            tvalues = [float(tvalues)]
+
         self.recycling[species] = [np.array(values), np.array(tvalues)]
 
 

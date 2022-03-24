@@ -126,13 +126,13 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                 c2 = 0.05
                 c3 = 0.1
                 Y = c1 - c2 * (1 - np.exp(-t/c3))
-                ion.setRecyclingCoefficient(deuterium, Y)
-                ion.setRecyclingCoefficient(carbon, 0.015*np.ones(Nt))
+                ion.setRecyclingCoefficient(deuterium, Y, t)
+                ion.setRecyclingCoefficient(carbon, 0.015)
             elif ion.name == oxygen:
-                ion.setRecyclingCoefficient(carbon, 1.0*np.ones(Nt))
-                ion.setRecyclingCoefficient(oxygen, 1.0*np.ones(Nt))
+                ion.setRecyclingCoefficient(carbon, 1.0)
+                ion.setRecyclingCoefficient(oxygen, 1.0)
             elif ion.name == tritium:
-                ion.setRecyclingCoefficient(tritium, 1.0*np.ones(Nt))
+                ion.setRecyclingCoefficient(tritium, 1.0)
 
 
     def setFueling(self, species, fueling, times=0):
@@ -220,13 +220,13 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
             for j in range(nions):
                 values, tvalues = ion.getRecyclingCoefficient(self.ions[j].name)
                 if len(values) == 1:
-                    sputRecCoefficientTable[i,j,:] = np.array(values*np.ones(NtSputRec))
+                    sputRecCoefficientTable[i,j,:] = np.array(values[0]*np.ones(NtSputRec))
                 elif any(tvalues != tSputRec):
-                    raise DREAMException(
+                    raise EquationException(
                         "Ions: Recycling coefficient for species '{}' due to species '{}' does not have the correct time vector.".format(
                             self.ions[j], ion))
                 elif len(values) != NtSputRec:
-                    raise DREAMException(
+                    raise EquationException(
                         "Ions: Recycling coefficient for species '{}' due to species '{}' does not have the correct length.".format(
                             self.ions[j], ion))
                 else:

@@ -18,16 +18,13 @@ class RadialGrid(PrescribedScalarParameter):
         self.kappa, self.tkappa = None, None
         self.delta, self.tdelta = None, None
         self.vessel_volume = None
-        self.c1 = None
-        self.c2 = None
-        self.c3 = None
         self.b = 0.0
         self.R0 = 2.0
         self.Iref = 100.0e3
         self.Bv = 1.0e-3
         self.P_inj = 0.0
-        self.f_o = 0.0
-        self.f_x = 0.0
+        self.f_o = 0.5
+        self.f_x = 0.5
         self.theta = np.pi/4
         self.phi = 0.0
         self.N = 1
@@ -118,30 +115,6 @@ class RadialGrid(PrescribedScalarParameter):
         """
         self.vessel_volume = float(v)
 
-    def setRecyclingCoefficient1(self, c1):
-        """
-        Prescribe the first recycling coefficient for deuterium.
-
-        :param c1: recycling coefficient.
-        """
-        self.c1 = float(c1)
-		
-    def setRecyclingCoefficient2(self, c2):
-        """
-        Prescribe the second recycling coefficient for deuterium.
-
-        :param c2: recycling coefficient.
-        """
-        self.c2 = float(c2)
-		
-    def setRecyclingCoefficient3(self, c3):
-        """
-        Prescribe the third recycling coefficient for deuterium.
-
-        :param c3: recycling coefficient.
-        """
-        self.c3 = float(c3)
-
     def setInjectedECHPower(self, P_inj):
         """
         Prescribe the injected ECH power.
@@ -217,9 +190,6 @@ class RadialGrid(PrescribedScalarParameter):
         self.kappa, self.tkappa = data['kappa']['x'], data['kappa']['t']
         self.delta, self.tdelta = data['delta']['x'], data['delta']['t']
         self.vessel_volume = data['wall']['vessel_volume']
-        self.c1 = data['wall']['c1']
-        self.c2 = data['wall']['c2']
-        self.c3 = data['wall']['c3']
         self.R0 = data['R0']
 
         if 'wall_radius' in data:
@@ -280,10 +250,7 @@ class RadialGrid(PrescribedScalarParameter):
             'R0': self.R0,
             'wall_radius': self.b,
             'wall' : {
-                'vessel_volume': self.vessel_volume,
-                'c1': self.c1,
-                'c2': self.c2,
-                'c3': self.c3
+                'vessel_volume': self.vessel_volume
             },
             'P_inj': self.P_inj,
             'f_o': self.f_o,
@@ -307,12 +274,6 @@ class RadialGrid(PrescribedScalarParameter):
 
         if type(self.vessel_volume) != float:
             raise TypeError('The prescribed vessel volume must be of type float')
-        if type(self.c1) != float:
-            raise TypeError('The prescribed recycle coefficient 1 must be of type float')
-        if type(self.c2) != float:
-            raise TypeError('The prescribed recycle coefficient 2 must be of type float')
-        if type(self.c3) != float:
-            raise TypeError('The prescribed recycle coefficient 3 must be of type float')
         if type(self.Bv) != float:
             raise TypeError('The prescribed stray magnetic field must be of type float')
         if type(self.Iref) != float:
@@ -337,7 +298,7 @@ class RadialGrid(PrescribedScalarParameter):
             raise DREAMException("RadialGrid: The specified wall radius is not a scalar: {}.".format(self.b))
 
 
-        if self.f_o + self.f_x != 1:
+        if self.f_o + self.f_x != 1 and self.f_o + self.f_x != 0:
             self.f_o = self.f_o / (self.f_o + self.f_x)
             self.f_x = self.f_x / (self.f_o + self.f_x)
             print('WARNING: fractions of O and X mode modified to sum to 1.')
