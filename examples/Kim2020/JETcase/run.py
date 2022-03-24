@@ -66,10 +66,6 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     Vloop = [11, 21.25, 26, 26.25, 24, 16.5, 8.25, 7.9, 7.75, 7.5, 7.25, 6.5, 6.5, 6.75, 6.75, 6, 4.75, 4.25, 4.5,
                3.60]
 
-    c1 = 1.1
-    c2 = 0.05
-    c3 = 0.1
-
     Te0 = 1     # electron temperature [eV]
     Ti0 = 0.026 # ion temperature [eV]
 
@@ -113,7 +109,7 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     ss.eqsys.n_re.setDreicer(False)
 
     # Recycling coefficients (unused)
-    #ss.eqsys.n_i.setJET_CWrecycling()
+    ss.eqsys.n_i.setJET_CWrecycling()
     for ion in ss.eqsys.n_i.ions:
         if ion.name == 'D':
             ion.setRecyclingCoefficient('C', 0.015)
@@ -129,10 +125,6 @@ def generate(prefill=5e-5, gamma=2e-3, fractionO = 0.001, fractionC = 0, Ip=2.4e
     ss.radialgrid.setVesselVolume(V_vessel)
     ss.radialgrid.setBv(1e-3)
 
-    ss.radialgrid.setRecyclingCoefficient1(c1)
-    ss.radialgrid.setRecyclingCoefficient2(c2)
-    ss.radialgrid.setRecyclingCoefficient3(c3)
-    
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)
     ss.runawaygrid.setEnabled(False)
