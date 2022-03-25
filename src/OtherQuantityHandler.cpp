@@ -181,7 +181,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         const len_t nZ = this->ions->GetNZ();
         real_t *v = qd->StoreEmpty();
         for (len_t iz = 0; iz < nZ; iz++)
-            v[iz] = this->neutralInflux->EvaluateNeutralInflux(iz);
+            v[iz] = this->neutralInflux->EvaluateNeutralInflux(iz, t);
     );
 
     DEF_FL("stream/tau_D", "Deuterium confinement time",

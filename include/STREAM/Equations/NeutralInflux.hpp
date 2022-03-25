@@ -20,7 +20,7 @@ namespace STREAM{
             
             real_t EvaluateNeutralInflux_dnkj(const len_t iIon, const len_t kIon);
                         
-            real_t EvaluateNeutralInflux(const len_t iIon);
+            real_t EvaluateNeutralInflux(const len_t iIon, const real_t t);
 
             real_t EvaluateNeutralInflux_dIp(const len_t iIon);
 

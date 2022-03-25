@@ -12,7 +12,8 @@ NeutralInflux::NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficie
 /**
  * Evaluates the neutral influx
  */
-real_t NeutralInflux::EvaluateNeutralInflux(const len_t iIon){
+real_t NeutralInflux::EvaluateNeutralInflux(const len_t iIon, const real_t t){
+    this->SRC->Rebuild(t);
     real_t tauinv = coefftauinv->EvaluateConfinementTime(0);
     real_t V_p    = PV->GetPlasmaVolume(); 
     len_t nZ = ions->GetNZ();

@@ -64,11 +64,11 @@ bool SputteredRecycledCoefficient::NeedsRebuild(const real_t t) {
     	while (uIon < nZ && !needsRebuild) {
     	    Y = *this->coefficientTable[lIon][uIon]->Eval(t);
     	    if (Y != currCoefficientTable[lIon][uIon]) {
-    	    	needsRebuild = true;
+    	    	return true;
     	    }
     	}
     }
-    return (needsRebuild);
+    return false;
 }
 
 /**
@@ -78,7 +78,10 @@ bool SputteredRecycledCoefficient::Rebuild(const real_t t) {
     len_t nZ = ions->GetNZ();
     for (len_t lIon = 0; lIon < nZ; lIon++) {
     	for (len_t uIon = 0; uIon < nZ; uIon++) {
-    	    currCoefficientTable[lIon][uIon] = *this->coefficientTable[lIon][uIon]->Eval(t);
+    	    if (this->coefficientTable[lIon][uIon] == nullptr) 
+    	        currCoefficientTable[lIon][uIon] = 0;
+            else
+        	currCoefficientTable[lIon][uIon] = *this->coefficientTable[lIon][uIon]->Eval(t);
     	}
     }
     return true;

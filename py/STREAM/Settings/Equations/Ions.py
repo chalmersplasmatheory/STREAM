@@ -113,6 +113,12 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
             self.rNeutralPrescribedAdvection = ion.getRNeutralPrescribedAdvection()
             self.tNeutralPrescribedAdvection = ion.getTNeutralPrescribedAdvection()
 
+    def getIndex(self, species):
+        for iIon in range(len(self.ions)):
+            if self.ions[iIon].getName() == species:
+                return iIon
+        print("WARNING: no species of name '{}'.".format(self.name))
+
 
     def setJET_CWrecycling(self, deuterium='D', carbon='C', oxygen='O', tritium='T', Nt=100, tMax=20):
         """
@@ -132,7 +138,11 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                 ion.setRecyclingCoefficient(carbon, 1.0)
                 ion.setRecyclingCoefficient(oxygen, 1.0)
             elif ion.name == tritium:
-                ion.setRecyclingCoefficient(tritium, 1.0)
+                c1 = 1.1
+                c2 = 0.05
+                c3 = 0.1
+                Y = c1 - c2 * (1 - np.exp(-t / c3))
+                ion.setRecyclingCoefficient(tritium, Y, t)
 
 
     def setFueling(self, species, fueling, times=0):

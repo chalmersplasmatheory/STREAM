@@ -67,6 +67,9 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
 
+    iD = ss.eqsys.n_i.getIndex('D')
+    ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1)
+
     # Disable runaway
     ss.eqsys.n_re.setAvalanche(False)
     ss.eqsys.n_re.setDreicer(False)
@@ -80,10 +83,6 @@ def generate(prefill=5e-5, gamma=2e-3, Vloop=12, Vloop_t=0, j0=298.4, tmax=0.003
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(a)
     ss.radialgrid.setVesselVolume(V_vessel)
-
-    ss.radialgrid.setRecyclingCoefficient1(1)
-    ss.radialgrid.setRecyclingCoefficient2(0)
-    ss.radialgrid.setRecyclingCoefficient3(1)
     
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)

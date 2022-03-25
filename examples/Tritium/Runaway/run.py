@@ -97,8 +97,12 @@ def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3
     ss.eqsys.n_re.setCompton(False)
     #'''
 
-    # Recycling coefficients (unused)
-    ss.eqsys.n_i.setJET_CWrecycling()
+    # Recycling coefficients
+    iD = ss.eqsys.n_i.getIndex('D')
+    ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1)
+
+    iT = ss.eqsys.n_i.getIndex('T')
+    ss.eqsys.n_i.ions[iT].setRecyclingCoefficient('T', 1)
 
     # Radial grid
     ss.radialgrid.setB0(Btor)
@@ -106,10 +110,6 @@ def generate(prefill=1e-6, gamma=2e-2, fractionT=0, Vloop=12, Vloop_t=0, I0=40e3
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(l_MK2)
     ss.radialgrid.setVesselVolume(V_vessel)
-
-    ss.radialgrid.setRecyclingCoefficient1(1)
-    ss.radialgrid.setRecyclingCoefficient2(0)
-    ss.radialgrid.setRecyclingCoefficient3(1)
     
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)

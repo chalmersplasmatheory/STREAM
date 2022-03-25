@@ -72,7 +72,8 @@ class IonSpecies(DREAMIonSpecies.IonSpecies):
         this ion species and :math:`j` the species of the interacting ion.
 
         :param str species: Name of interacting ion species.
-        :param float value: Recycling coefficient value.
+        :param float values: Vector of recycling coefficient values through time.
+        :param float tvalues: Corresponding time vector.
         """
         if species in self.recycling:
             print("WARNING: Updating recycling coefficient for species '{}' and '{}'.".format(self.name, species))

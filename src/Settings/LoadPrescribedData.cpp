@@ -75,7 +75,7 @@ FVM::Interpolator1D ***STREAM::SimulationGenerator::LoadDataT_3D(
     	    onlyZeroElements = true;
     	    
     	    for (len_t k = 0; k < nt; k++) {
-		if (x[(i*nx[0]+j)*nx[1] + k] != 0) {
+		if (x[(i*nx[1]+j)*nx[2] + k] != 0) {
 		    onlyZeroElements = false;
 		    break;
 		}
@@ -90,7 +90,7 @@ FVM::Interpolator1D ***STREAM::SimulationGenerator::LoadDataT_3D(
    	        // Copy data
   	        for (len_t k = 0; k < nt; k++) {
 		    new_t[k] = t[k];
-  		    new_x[k] = x[(i*nx[0]+j)*nx[1] + k];
+  		    new_x[k] = x[(i*nx[1]+j)*nx[2] + k];
 	        }
 	    
     	        interp[i][j] = new FVM::Interpolator1D(nt, 1, new_t, new_x, interp1_meth);
