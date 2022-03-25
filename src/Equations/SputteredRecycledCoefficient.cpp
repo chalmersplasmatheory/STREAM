@@ -26,15 +26,9 @@ SputteredRecycledCoefficient::~SputteredRecycledCoefficient() {
 void SputteredRecycledCoefficient::AllocateForCurrTable() {
     len_t nZ = ions->GetNZ();
     currCoefficientTable = new real_t*[nZ];
-    for (len_t z = 0; z < nZ; z++) {
-    	currCoefficientTable[z] = new real_t[nZ];
-    }
-    /*
-    currCoefficientTable = new real_t*[nZ];
     currCoefficientTable[0] = new real_t[nZ*nZ];
-    for (len_t z = 1; z < nZ; z++) {
-    	currCoefficientTable[z] = new real_t[z-1] + nZ;
-    */
+    for (len_t z = 1; z < nZ; z++) 
+    	currCoefficientTable[z] = currCoefficientTable[z-1] + nZ;
 }
 
 /**

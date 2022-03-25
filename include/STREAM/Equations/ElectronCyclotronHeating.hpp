@@ -5,12 +5,14 @@
 #include "FVM/Grid/Grid.hpp"
 #include "FVM/Matrix.hpp"
 #include "STREAM/Equations/OpticalThickness.hpp"
+#include "STREAM/Equations/PlasmaVolume.hpp"
 
 namespace STREAM {
     class ElectronCyclotronHeating : public DREAM::FVM::EquationTerm {
     private:
         EllipticalRadialGridGenerator *radials;
         OpticalThickness *OT;
+        PlasmaVolume *PV;
 	
 	real_t parentheses_ECH, dpECH_dTe, dpECH_dne;
 
@@ -22,7 +24,7 @@ namespace STREAM {
     public:
         ElectronCyclotronHeating(
             DREAM::FVM::Grid*,
-            EllipticalRadialGridGenerator*, DREAM::FVM::UnknownQuantityHandler*, OpticalThickness*, real_t, real_t, real_t, real_t);
+            EllipticalRadialGridGenerator*, DREAM::FVM::UnknownQuantityHandler*, OpticalThickness*, PlasmaVolume*, real_t, real_t, real_t, real_t);
         ~ElectronCyclotronHeating();
 
         virtual len_t GetNumberOfNonZerosPerRow() const { return 1; } 

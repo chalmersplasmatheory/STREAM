@@ -26,11 +26,6 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
             sum_derivs++;
         }
     }
-    
-    //len_t Z_i = ions->GetZ(iIon);
-    /*if(Z_i==1 && !ions->IsTritium(iIon)){
-        this->dn_kj = new real_t[1];
-    } else {*/
     this->dn_kj = new real_t[nZ]; //[nZ+1];
     
 }
@@ -56,12 +51,7 @@ void NeutralTransport::Rebuild(const real_t t, const real_t, FVM::UnknownQuantit
     this->dlambda_i = - Gamma0/(V_tot*V_tot)*dVtotdlambdai;
     
     len_t nZ = ions->GetNZ();
-    //len_t Z_i = ions->GetZ(iIon);
     real_t dGamma0dnkj=0;
-    /*if(Z_i==1 && !ions->IsTritium(iIon)){
-        dGamma0dnkj = this->NI->EvaluateNeutralInflux_dnkj(t, iIon, iIon);
-        this->dn_kj[0] = dGamma0dnkj/V_tot;
-    } else {*/
     for (len_t kIon = 0; kIon < nZ; kIon++) {
         dGamma0dnkj = this->NI->EvaluateNeutralInflux_dnkj(iIon, kIon); // (t, iIon, kIon);
         this->dn_kj[kIon] = dGamma0dnkj/V_tot; // this->dn_kj[kIon+1]
@@ -76,10 +66,6 @@ bool NeutralTransport::SetCSJacobianBlock(
         return false;
 
     if(derivId==uqtyId){
-        //len_t Z_i = ions->GetZ(iIon);
-        /*if(Z_i==1 && !ions->IsTritium(iIon)){
-            jac->SetElement(rOffset, rOffset+1, this->dn_kj[0]);
-        } else {*/
         len_t nZ = ions->GetNZ();
         for (len_t kIon = 0, idx = 0; kIon < nZ; kIon++) {
             len_t Z_k = ions->GetZ(kIon);

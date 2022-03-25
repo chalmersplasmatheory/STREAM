@@ -20,14 +20,14 @@ using namespace std;
  */
 ElectronCyclotronHeating::ElectronCyclotronHeating(
     DREAM::FVM::Grid *g, EllipticalRadialGridGenerator *rGrid, 
-    DREAM::FVM::UnknownQuantityHandler *unknowns, OpticalThickness *OT, 
+    DREAM::FVM::UnknownQuantityHandler *unknowns, OpticalThickness *OT,  PlasmaVolume *PV,
     real_t P_inj, real_t f_o, real_t f_x, real_t theta
-) : EquationTerm(g), radials(rGrid), OT(OT), P_inj(P_inj), f_o(f_o), f_x(f_x), theta(theta) {
+) : EquationTerm(g), radials(rGrid), OT(OT), PV(PV), P_inj(P_inj), f_o(f_o), f_x(f_x), theta(theta) {
 
     SetName("ElectronCyclotronHeating"); 
 	
     this->id_Tcold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
-    this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
+    this->id_ncold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD);
     
 }
 
@@ -44,18 +44,20 @@ ElectronCyclotronHeating::~ElectronCyclotronHeating() {
 void ElectronCyclotronHeating::Rebuild(
     const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*
 ) {
+    real_t fact = 1.0e-2;
+    real_t V_p = this->PV->GetPlasmaVolume();
     
     real_t eta_polo = this->OT->EvaluateOpticalThickness_o(0) / cos(theta);
     real_t eta_polx = this->OT->EvaluateOpticalThickness_x(0) / cos(theta);
-    this->parentheses_ECH = P_inj * (1 - f_o*exp(-eta_polo) - f_x*exp(-eta_polx));
+    this->parentheses_ECH = - P_inj * (1 - f_o*exp(-eta_polo) - f_x*exp(-eta_polx)) / V_p; // * fact;
     
     real_t dnpolo_dTe = this->OT->EvaluateOpticalThickness_o_dTe(0) / cos(theta);
     real_t dnpolx_dTe = this->OT->EvaluateOpticalThickness_x_dTe(0) / cos(theta);
-    this->dpECH_dTe = P_inj * (f_o*exp(-eta_polo) * dnpolo_dTe + f_x*exp(-eta_polx) * dnpolx_dTe);
+    this->dpECH_dTe = P_inj * (f_o*exp(-eta_polo) * dnpolo_dTe + f_x*exp(-eta_polx) * dnpolx_dTe) / V_p; // * fact;
     
     real_t dnpolo_dne = this->OT->EvaluateOpticalThickness_o_dne(0) / cos(theta);
     real_t dnpolx_dne = this->OT->EvaluateOpticalThickness_x_dne(0) / cos(theta);
-    this->dpECH_dne = P_inj * (f_o*exp(-eta_polo) * dnpolo_dne + f_x*exp(-eta_polx) * dnpolx_dne);
+    this->dpECH_dne = - P_inj * (f_o*exp(-eta_polo) * dnpolo_dne + f_x*exp(-eta_polx) * dnpolx_dne) / V_p; // * fact;
 }
 
 /**

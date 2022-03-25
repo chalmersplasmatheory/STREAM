@@ -35,6 +35,7 @@ real_t OpticalThickness::EvaluateOpticalThickness_o(len_t ir){
     real_t ec   = DREAM::Constants::ec;
     real_t eps0 = DREAM::Constants::eps0;
     real_t c    = DREAM::Constants::c;
+    real_t mc2  = DREAM::Constants::mc2inEV;
     
     real_t omega_ce = ec * B / me;
     real_t omega = N * omega_ce;
@@ -42,14 +43,14 @@ real_t OpticalThickness::EvaluateOpticalThickness_o(len_t ir){
     real_t n_c = me * eps0 * pow(omega,2) / pow(ec,2);
     real_t n_parallel = cos(phi);
     
-    real_t A = pow(M_PI,2) * R0 / (lambda * me);
+    real_t A = pow(M_PI,2) * R0 / (lambda * mc2);
     
     real_t eta_o;
     
     if (N == 1) {
 	eta_o = A * T_e * n_e / n_c * sqrt(1.0 - theta) / ( 1.0 + pow(n_parallel, 2) * ( 0.5 - theta ) );
     } else {
-    	real_t G = A / pow(c,2) * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * me * pow(c,2) ), N - 2.0) * theta;
+    	real_t G = A * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * mc2 ), N - 2.0) * theta;
     	
     	real_t S = 1.0 - n_e / n_c * ( pow(N,2) / ( pow(N,2) - 1.0 ) );
     	real_t P = 1.0 - n_e / n_c;
@@ -85,6 +86,7 @@ real_t OpticalThickness::EvaluateOpticalThickness_x(len_t ir){
     real_t ec   = DREAM::Constants::ec;
     real_t eps0 = DREAM::Constants::eps0;
     real_t c    = DREAM::Constants::c;
+    real_t mc2  = DREAM::Constants::mc2inEV;
     
     real_t omega_ce = ec * B / me;
     real_t omega = N * omega_ce;
@@ -92,30 +94,40 @@ real_t OpticalThickness::EvaluateOpticalThickness_x(len_t ir){
     real_t n_c = me * eps0 * pow(omega,2) / pow(ec,2);
     real_t n_parallel = cos(phi);
     
-    real_t A = pow(M_PI,2) * R0 / (lambda * me);
+    real_t A = pow(M_PI,2) * R0 / (lambda * mc2);
     
     real_t eta_x;
     
     if (N == 1) {
 	eta_x = A * T_e * pow(n_parallel,2) * pow(2.0 - theta, 1.5) * pow(1 + theta, 2) / theta;
     } else {
-    	real_t G = A / pow(c,2) * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * me * pow(c,2) ), N - 2) * theta;
+    	real_t G = A * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * mc2 ), N - 2) * theta;
+    	printf("G=%.4e\n", G);
     	
     	real_t S = 1.0 - n_e / n_c * ( pow(N,2) / ( pow(N,2) - 1.0 ) );
+    	printf("S=%.4e\n", S);
     	real_t P = 1.0 - n_e / n_c;
+    	printf("P=%.4e\n", P);
     	real_t D = - n_e / n_c * ( N / ( pow(N,2) - 1.0 ) );
+    	printf("D=%.4e\n", D);
     	
     	real_t E = - (S + P) * (S - pow(n_parallel,2)) + pow(D,2);
+    	printf("E=%.4e\n", E);
     	real_t C = P * ( pow(S - pow(n_parallel,2),2) - pow(D,2));
+    	printf("C=%.4e\n", C);
     	
-    	real_t n_perpx2 = (- E - sqrt( pow(E,2) - 4.0 * S * C)) / (2 * S);
+    	real_t n_perpx2 = (- E - sqrt( pow(E,2) - 4.0 * S * C)) / (2.0 * S);
+    	printf("n_perpx2=%.4e\n", n_perpx2);
     	real_t n_perpx  = sqrt(n_perpx2);
     	real_t n_x2     = n_perpx2 + pow(n_parallel,2);
     	
     	real_t F_1x = pow( (S - D - n_x2) * (P - n_perpx2) , 2);
+    	printf("F_1x=%.4e\n", F_1x);
     	real_t F_2x = pow(D,2) * pow( P - n_perpx2 , 2) + pow(n_parallel,2) * P * pow( S - n_x2 , 2);
+    	printf("F_2x=%.4e\n", F_2x);
     	
     	eta_x = G * pow(T_e, N - 1) * pow(n_perpx, 2 * N - 3) * F_1x / F_2x;
+    	printf("eta_x=%.4e\n", eta_x);
     }
     
     return eta_x;
@@ -135,6 +147,7 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     real_t ec   = DREAM::Constants::ec;
     real_t eps0 = DREAM::Constants::eps0;
     real_t c    = DREAM::Constants::c;
+    real_t mc2  = DREAM::Constants::mc2inEV;
     
     real_t omega_ce = ec * B / me;
     real_t omega = N * omega_ce;
@@ -142,14 +155,14 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     real_t n_c = me * eps0 * pow(omega,2) / pow(ec,2);
     real_t n_parallel = cos(phi);
     
-    real_t A = pow(M_PI,2) * R0 / (lambda * me);
+    real_t A = pow(M_PI,2) * R0 / (lambda * mc2);
     
     real_t detao_dTe;
     
     if (N == 1) {
 	detao_dTe = A * n_e / n_c * sqrt(1.0 - theta) / ( 1.0 + pow(n_parallel, 2) * ( 0.5 - theta ) );
     } else {
-    	real_t G = A / pow(c,2) * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * me * pow(c,2) ), N - 2.0) * theta;
+    	real_t G = A * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * mc2 ), N - 2.0) * theta;
     	
     	real_t S = 1.0 - n_e / n_c * ( pow(N,2) / ( pow(N,2) - 1.0 ) );
     	real_t P = 1.0 - n_e / n_c;
@@ -185,6 +198,7 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     real_t ec   = DREAM::Constants::ec;
     real_t eps0 = DREAM::Constants::eps0;
     real_t c    = DREAM::Constants::c;
+    real_t mc2  = DREAM::Constants::mc2inEV;
     
     real_t omega_ce = ec * B / me;
     real_t omega = N * omega_ce;
@@ -192,14 +206,14 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     real_t n_c = me * eps0 * pow(omega,2) / pow(ec,2);
     real_t n_parallel = cos(phi);
     
-    real_t A = pow(M_PI,2) * R0 / (lambda * me);
+    real_t A = pow(M_PI,2) * R0 / (lambda * mc2);
     
     real_t detax_dTe;
     
     if (N == 1) {
 	detax_dTe = A * pow(n_parallel,2) * pow(2.0 - theta, 1.5) * pow(1 + theta, 2) / theta;
     } else {
-    	real_t G = A / pow(c,2) * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * me * pow(c,2) ), N - 2) * theta;
+    	real_t G = A * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * mc2 ), N - 2) * theta;
     	
     	real_t S = 1.0 - n_e / n_c * ( pow(N,2) / ( pow(N,2) - 1.0 ) );
     	real_t P = 1.0 - n_e / n_c;
@@ -235,6 +249,7 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     real_t ec   = DREAM::Constants::ec;
     real_t eps0 = DREAM::Constants::eps0;
     real_t c    = DREAM::Constants::c;
+    real_t mc2  = DREAM::Constants::mc2inEV;
     
     real_t omega_ce = ec * B / me;
     real_t omega = N * omega_ce;
@@ -242,14 +257,14 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     real_t n_c = me * eps0 * pow(omega,2) / pow(ec,2);
     real_t n_parallel = cos(phi);
     
-    real_t A = pow(M_PI,2) * R0 / (lambda * me);
+    real_t A = pow(M_PI,2) * R0 / (lambda * mc2);
     
     real_t detao_dne;
     
     if (N == 1) {
 	detao_dne = A * T_e * 1.0 / n_c * sqrt(1.0 - theta) / ( 1.0 + pow(n_parallel, 2) * ( 0.5 - theta ) );
     } else {
-    	real_t G = A / pow(c,2) * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * me * pow(c,2) ), N - 2.0) * theta;
+    	real_t G = A * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * mc2 ), N - 2.0) * theta;
     	
     	real_t S = 1.0 - n_e / n_c * ( pow(N,2) / ( pow(N,2) - 1.0 ) );
     	real_t P = 1.0 - n_e / n_c;
@@ -298,6 +313,7 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     real_t ec   = DREAM::Constants::ec;
     real_t eps0 = DREAM::Constants::eps0;
     real_t c    = DREAM::Constants::c;
+    real_t mc2  = DREAM::Constants::mc2inEV;
     
     real_t omega_ce = ec * B / me;
     real_t omega = N * omega_ce;
@@ -305,14 +321,14 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     real_t n_c = me * eps0 * pow(omega,2) / pow(ec,2);
     real_t n_parallel = cos(phi);
     
-    real_t A = pow(M_PI,2) * R0 / (lambda * me);
+    real_t A = pow(M_PI,2) * R0 / (lambda * mc2);
     
     real_t detax_dne;
     
     if (N == 1) {
 	detax_dne = 0.0;
     } else {
-    	real_t G = A / pow(c,2) * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * me * pow(c,2) ), N - 2.0) * theta;
+    	real_t G = A * pow(N,3) / tgamma(N) * pow( pow(N,2) / ( 2.0 * mc2 ), N - 2.0) * theta;
     	
     	real_t S = 1.0 - n_e / n_c * ( pow(N,2) / ( pow(N,2) - 1.0 ) );
     	real_t P = 1.0 - n_e / n_c;
@@ -347,7 +363,7 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dTe(len_t ir){
     return detax_dne;
 }
 /*
-void ConfinementTime::Initialize() {
+void OpticalThickness::Initialize() {
     this->id_Tcold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
     this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
 }*/

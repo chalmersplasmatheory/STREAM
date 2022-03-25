@@ -20,7 +20,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop=12, Vloop_t=0, Ip=2.4e3, tmax=1e-5, nt=2000):
+def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop=12, Vloop_t=0, Ip=2.4e3, tmax=2e-5, nt=2000):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -287,7 +287,7 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.3 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(3000)
+        ss2.timestep.setNt(50000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:

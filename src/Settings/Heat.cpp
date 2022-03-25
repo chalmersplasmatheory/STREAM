@@ -126,6 +126,8 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     stream_terms->Tcold_transport = ht;
     op_W_cold->AddTerm(ht);
     
+    string desc = "dWc/dt = j_ohm*E - radiation - transport";
+    
     // Add ECH
     real_t P_inj = s->GetReal("radialgrid/P_inj"); 
     real_t f_o   = s->GetReal("radialgrid/f_o"); 
@@ -134,19 +136,23 @@ void SimulationGenerator::ConstructEquation_T_cold_selfconsistent(
     real_t phi   = s->GetReal("radialgrid/phi");
     len_t N      = s->GetInteger("radialgrid/N");
     
-    OpticalThickness *opticalThickness = new OpticalThickness(unknowns, radials, N, theta, phi);
-    eqsys->SetOpticalThickness(opticalThickness);
     
-    ElectronCyclotronHeating *ech = new ElectronCyclotronHeating(
-        eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(),
-        eqsys->GetUnknownHandler(), eqsys->GetOpticalThickness(), P_inj, f_o, f_x, theta
-    );
-    stream_terms->Tcold_ECH = ech;
-    op_W_cold->AddTerm(ech);
+    if (P_inj != 0.0) {
+        OpticalThickness *opticalThickness = new OpticalThickness(unknowns, radials, N, theta, phi);
+        eqsys->SetOpticalThickness(opticalThickness);
+    
+        ElectronCyclotronHeating *ech = new ElectronCyclotronHeating(
+            eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(),
+            eqsys->GetUnknownHandler(), eqsys->GetOpticalThickness(), eqsys->GetPlasmaVolume(), P_inj, f_o, f_x, theta
+        );
+        stream_terms->Tcold_ECH = ech;
+        op_W_cold->AddTerm(ech);
+        
+        desc += " + ECH";
+    }
 
     eqsys->SetOperator(id_T_cold, id_E_field, op_E_field);
     eqsys->SetOperator(id_T_cold, id_n_cold, op_n_cold);
-    string desc = "dWc/dt = j_ohm*E + ECH - radiation - transport";
 
     // Energy transfer from runaways to cold electrons.
     // If the kinetic runaway grid is enabled and we do not resolve the cold
