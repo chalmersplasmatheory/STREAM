@@ -20,7 +20,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop=12, Vloop_t=0, Ip=2.4e3, tmax=1e-4, nt=2000):
+def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop=12, Vloop_t=0, Ip=2.4e3, tmax=1e-5, nt=2000):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -61,8 +61,9 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     phi = 20 * np.pi / 180
     N = 2
 
-    t_start = 0.04
-    t_end = 0.3
+    t_start = 0
+    t_dur = 0.26
+    t_end = t_start + t_dur
     Nt = 53
     t = np.linspace(t_start, t_end, Nt)
 
@@ -71,15 +72,15 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     c3 = 0.1
     Y_DD = c1 - c2 * (1 - np.exp(-(t - t_start) / c3))
 
-    t_DC_vec = np.array([0.04, 0.205, 0.21, 0.215, 0.22, 0.225, 0.30])
+    t_DC_vec = np.array([0.04, 0.205, 0.21, 0.215, 0.22, 0.225, 0.30]) - 0.04
     Y_DC_vec = np.array([0.50, 0.500, 0.51, 0.535, 0.58, 0.645, 2.50])
 
     Y_DC_fun = interp1d(t_DC_vec, Y_DC_vec, kind='linear')
     Y_DC = Y_DC_fun(t) / 100
 
-    t_V_vec1 = np.array([0.04, 0.05, 0.08, 0.10, 0.12])
+    t_V_vec1 = np.array([0.04, 0.05, 0.08, 0.10, 0.12]) - 0.04
     V_vec1 = np.array([3.6, 3.90, 4.35, 4.45, 4.49])
-    t_V_vec2 = np.array([0.12, 0.127, 0.15, 0.20, 0.25, 0.31])
+    t_V_vec2 = np.array([0.12, 0.127, 0.15, 0.20, 0.25, 0.31]) - 0.04
     V_vec2 = np.array([4.49, 4.000, 3.10, 2.44, 2.31, 2.30])
 
     V_fun1 = interp1d(t_V_vec1, V_vec1, kind='cubic')
@@ -144,7 +145,7 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     ss.radialgrid.setVesselVolume(V_vessel)
     ss.radialgrid.setIref(10e3)
 
-    #ss.radialgrid.setECHParameters(P_inj, f_o, f_x, theta, phi, N)
+    ss.radialgrid.setECHParameters(P_inj, f_o, f_x, theta, phi, N)
 
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)
@@ -278,7 +279,7 @@ def main(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if not settings.skip:
-        ss1 = generate(nt=40000)
+        ss1 = generate(nt=50000)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
 
@@ -294,7 +295,7 @@ def main(argv):
         so2 = STREAMOutput(f'output2{ext}.h5')
 
     if settings.plot:
-        makeplots(so1, so2)
+        makeplots(so1, so2, toffset=0.04)
 
     return 0
 
