@@ -21,6 +21,38 @@ OpticalThickness::OpticalThickness(
     this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
 }
 
+real_t OpticalThickness::EvaluateTau(len_t ir) {
+    real_t T_e = unknowns->GetUnknownData(id_Tcold)[ir];
+    real_t n_e = unknowns->GetUnknownData(id_ncold)[ir];
+    
+    real_t R_a = 1.8;
+    real_t N_par2 = sin(phi) * R_a / 5.4 * sin(phi) * R_a / 5.4;
+    real_t tau = 6.6e-22 * n_e * T_e * pow(1 - N_par2, 1.5) / cos(theta);
+    
+    //printf("\nSCENPLINT:   tau=%.4e\n", tau*cos(theta));
+    return tau;
+}
+
+real_t OpticalThickness::EvaluateTau_dTe(len_t ir) {
+    real_t n_e = unknowns->GetUnknownData(id_ncold)[ir];
+    
+    real_t R_a = 1.8;
+    real_t N_par2 = sin(phi) * R_a / 5.4 * sin(phi) * R_a / 5.4;
+    real_t tau = 6.6e-22 * n_e * pow(1 - N_par2, 1.5) / cos(theta);
+    
+    return tau;
+}
+
+real_t OpticalThickness::EvaluateTau_dne(len_t ir) {
+    real_t T_e = unknowns->GetUnknownData(id_Tcold)[ir];
+    
+    real_t R_a = 1.8;
+    real_t N_par2 = sin(phi) * R_a / 5.4 * sin(phi) * R_a / 5.4;
+    real_t tau = 6.6e-22 * T_e * pow(1 - N_par2, 1.5) / cos(theta);
+    
+    return tau;
+}
+
 /**
  * Evaluates the optical thickness of the O mode 
  */
@@ -88,7 +120,7 @@ real_t OpticalThickness::EvaluateOpticalThickness_o(len_t ir){
     	real_t F_2 = (D*D) * ((T + Q)*(T + Q)) + n_par2 * P *((V + Q)*(V + Q)); 
     	
     	eta_o = G * pow((T_e / mc2), N - 1.0) * pow(n_perp, 2 * N - 3) * F_1 / F_2;
-    	//printf("\neta_x=%.4e", eta_o);
+    	//printf("\nDYON:      eta_x=%.4e", eta_o);
     	//printf("\n For o:     eta_o=%.3e, n_perp=%.3e, F_1=%.3e, F_2=%.3e, R=%.3e, Q=%.3e", eta_o, n_perp, F_1, F_2, R, Q);
     }
     
@@ -162,12 +194,10 @@ real_t OpticalThickness::EvaluateOpticalThickness_x(len_t ir){
     	real_t F_2 = (D*D) * ((T + Q)*(T + Q)) + n_par2 * P *((V + Q)*(V + Q)); 
     	
     	eta_x = G * pow((T_e / mc2), N - 1.0) * pow(n_perp, 2 * N - 3) * F_1 / F_2;
-    	//printf("\neta_x=%.4e", eta_x);
+    	//printf("\nDYON:      eta_x=%.4e", eta_x);
     	//printf("\n For x:     eta_x=%.3e, n_perp=%.3e, F_1=%.3e, F_2=%.3e, R=%.3e, Q=+%.3e", eta_x, n_perp, F_1, F_2, R, Q);
-	real_t N_par2 = sin(20 * M_PI / 180) * 1.8 / 5.4;
-    	real_t tau = 6.6e-22 * n_e * T_e * pow(1 - N_par2, 1.5) / cos(14 * M_PI / 180);
-    	//printf("\n SCENPLINT:   tau=%.3e\n", tau);
-    	//printf("\n 1/n_c*mc2=%.3e\n", 1/(n_c*mc2));
+    	printf("\n 1/n_c * mc2=%.4e", 1/(n_c * mc2));
+	
     }
     
     return eta_x;

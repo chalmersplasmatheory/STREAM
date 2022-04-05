@@ -27,6 +27,10 @@ namespace STREAM{
                 public:
                         OpticalThickness(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r, len_t, real_t, real_t);
                         
+                        real_t EvaluateTau(len_t ir);
+                        real_t EvaluateTau_dTe(len_t ir);
+                        real_t EvaluateTau_dne(len_t ir);
+                        
                         real_t EvaluateOpticalThickness_o(len_t ir);
                         real_t EvaluateOpticalThickness_x(len_t ir);
                         
