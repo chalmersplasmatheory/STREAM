@@ -44,20 +44,20 @@ ElectronCyclotronHeating::~ElectronCyclotronHeating() {
 void ElectronCyclotronHeating::Rebuild(
     const real_t, const real_t, DREAM::FVM::UnknownQuantityHandler*
 ) {
-    real_t fact = 1.0e-2;
+    real_t fact = 8.0e-4;
     real_t V_p = this->PV->GetPlasmaVolume();
     
     real_t eta_polo = this->OT->EvaluateOpticalThickness_o(0) / cos(theta);
-    real_t eta_polx = this->OT->EvaluateOpticalThickness_x(0) / cos(theta);
-    this->parentheses_ECH = - P_inj * (1 - f_o*exp(-eta_polo) - f_x*exp(-eta_polx)) / V_p; // * fact;
+    real_t eta_polx = this->OT->EvaluateOpticalThickness_x(0) / cos(theta) * fact;
+    this->parentheses_ECH = - P_inj * (1 - f_o*exp(-eta_polo) - f_x*exp(-eta_polx)) / V_p ;
     
     real_t dnpolo_dTe = this->OT->EvaluateOpticalThickness_o_dTe(0) / cos(theta);
-    real_t dnpolx_dTe = this->OT->EvaluateOpticalThickness_x_dTe(0) / cos(theta);
-    this->dpECH_dTe = P_inj * (f_o*exp(-eta_polo) * dnpolo_dTe + f_x*exp(-eta_polx) * dnpolx_dTe) / V_p; // * fact;
+    real_t dnpolx_dTe = this->OT->EvaluateOpticalThickness_x_dTe(0) / cos(theta) * fact;
+    this->dpECH_dTe = - P_inj * (f_o*exp(-eta_polo) * dnpolo_dTe + f_x*exp(-eta_polx) * dnpolx_dTe) / V_p;
     
     real_t dnpolo_dne = this->OT->EvaluateOpticalThickness_o_dne(0) / cos(theta);
-    real_t dnpolx_dne = this->OT->EvaluateOpticalThickness_x_dne(0) / cos(theta);
-    this->dpECH_dne = - P_inj * (f_o*exp(-eta_polo) * dnpolo_dne + f_x*exp(-eta_polx) * dnpolx_dne) / V_p; // * fact;
+    real_t dnpolx_dne = this->OT->EvaluateOpticalThickness_x_dne(0) / cos(theta) * fact;
+    this->dpECH_dne = - P_inj * (f_o*exp(-eta_polo) * dnpolo_dne + f_x*exp(-eta_polx) * dnpolx_dne) / V_p;
 }
 
 /**

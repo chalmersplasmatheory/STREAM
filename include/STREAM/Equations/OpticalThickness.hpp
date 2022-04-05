@@ -5,6 +5,7 @@
 #include "FVM/Grid/Grid.hpp"
 #include "DREAM/Settings/OptionConstants.hpp"
 #include <gsl/gsl_math.h>
+#include <cmath>
 #include "DREAM/Constants.hpp"
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 
