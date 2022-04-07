@@ -87,10 +87,10 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     V_fun2 = interp1d(t_V_vec2, V_vec2, kind='cubic')
     V_loop = np.append(V_fun1(t[:16]), V_fun2(t[16:]))
 
-    '''
+    #'''
     plt.plot(t, Y_DD, 'k')
     plt.plot(t, Y_DC * 100, 'r')
-    plt.xlim([0, 0.3])
+    plt.xlim([-0.04, 0.26])
     plt.ylim([0, 3])
     plt.show()
     plt.scatter(t_V_vec2, V_vec2)
@@ -129,7 +129,7 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     iD = ss.eqsys.n_i.getIndex('D')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', Y_DD, t)
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('C', Y_DC, t)
-
+    
     iC = ss.eqsys.n_i.getIndex('C')
     ss.eqsys.n_i.ions[iC].setRecyclingCoefficient('C', 0.015)
 
@@ -203,7 +203,7 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
         tau_csv.close()
 
     plotInternal(axs[0, 0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (kA)', color='g', showlabel=showlabel, label='STREAM')
-    plotInternal(axs[0, 1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{17}$m$^{-3}$)', color='g', showlabel=False,
+    plotInternal(axs[0, 1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='g', showlabel=False,
                  label='STREAM')
     plotInternal(axs[1, 0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='g', showlabel=False, label='STREAM')
     plotInternal(axs[1, 1], t[1:], Lf, ylabel=r'$L_f$ (m)', color='g', showlabel=False, label='STREAM', log=True)
