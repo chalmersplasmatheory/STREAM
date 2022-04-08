@@ -31,7 +31,7 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
 
     s->DefineSetting(
         "radialgrid/Iref",
-        "Reference plasma current at which flux surfaces form [A]",
+        "Reference current at which flux surfaces form [A]",
         (real_t)100e3
     );
 
@@ -39,6 +39,12 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
         "radialgrid/Bv",
         "Stray vertical magnetic field [T]",
         (real_t)1e-3
+    );
+    
+    s->DefineSetting(
+        "radialgrid/connectionLengthFactor",
+        "Connection length factor", 
+        (real_t)3.0
     );
     
     s->DefineSetting(

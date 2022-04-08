@@ -153,9 +153,11 @@ void SimulationGenerator::ConstructEquation_Ions(
     EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); 
     
     real_t l_MK2 = s->GetReal("radialgrid/wall_radius");
-	real_t B_v = s->GetReal("radialgrid/Bv");
+    real_t B_v = s->GetReal("radialgrid/Bv");
+    real_t I_ref = s->GetReal("radialgrid/Iref");
+    real_t connectionLengthFactor = s->GetReal("radialgrid/connectionLengthFactor");
     ConfinementTime *confinementTime = new ConfinementTime(
-        eqsys->GetUnknownHandler(), r, ih, l_MK2, B_v
+        eqsys->GetUnknownHandler(), r, ih, l_MK2, B_v, I_ref, connectionLengthFactor
     );
     eqsys->SetConfinementTime(confinementTime);
     

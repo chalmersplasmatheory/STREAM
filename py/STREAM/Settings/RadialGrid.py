@@ -22,6 +22,7 @@ class RadialGrid(PrescribedScalarParameter):
         self.R0 = 2.0
         self.Iref = 100.0e3
         self.Bv = 1.0e-3
+        self.connectionLengthFactor = 3.0
         self.P_inj = 0.0
         self.f_o = 0.5
         self.f_x = 0.5
@@ -50,6 +51,12 @@ class RadialGrid(PrescribedScalarParameter):
         Sets the value of the stray magnetic field.
         """
         self.Bv = float(Bv)
+
+    def setConnectionLengthFactor(self, connectionLengthFactor):
+        """
+        Sets the value of the stray magnetic field.
+        """
+        self.connectionLengthFactor = float(connectionLengthFactor)
 
 
     def setIref(self, Iref):
@@ -106,7 +113,7 @@ class RadialGrid(PrescribedScalarParameter):
         :param t:     Time vector (if ``delt`` varies with time).
         """
         self.delta, self.tdelta = self._setScalarData(data=delta, times=t)
-        
+
     def setVesselVolume(self, v):
         """
         Prescribe the vacuum vessel volume.
@@ -198,9 +205,15 @@ class RadialGrid(PrescribedScalarParameter):
                 self.b = float(self.b[0])
             else:
                 self.b = float(self.b)
-        
+
         if 'Bv' in data:
             self.Bv = data['Bv']
+
+        if 'connectionLengthFactor' in data:
+            self.connectionLengthFactor = data['connectionLengthFactor']
+
+        if 'Iref' in data:
+            self.Iref = data['Iref']
 
         if 'P_inj' in data:
             self.P_inj = data['P_inj']
@@ -247,6 +260,8 @@ class RadialGrid(PrescribedScalarParameter):
                 'x': self.delta
             },
             'Bv': self.Bv,
+            'connectionLengthFactor': self.connectionLengthFactor,
+            'Iref': self.Iref,
             'R0': self.R0,
             'wall_radius': self.b,
             'wall' : {
@@ -276,6 +291,10 @@ class RadialGrid(PrescribedScalarParameter):
             raise TypeError('The prescribed vessel volume must be of type float')
         if type(self.Bv) != float:
             raise TypeError('The prescribed stray magnetic field must be of type float')
+        if type(self.connectionLengthFactor) != float:
+            raise TypeError('The prescribed connection length factor must be of type float')
+        if type(self.Iref) != float:
+            raise TypeError('The prescribed reference current must be of type float')
         if type(self.Iref) != float:
             raise TypeError('The prescribed reference plasma current must be of type float')
         if type(self.P_inj) != float:

@@ -14,14 +14,16 @@ using namespace std;
  */
 ConfinementTime::ConfinementTime(
 	FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
-	IonHandler *ions, real_t l_MK2, real_t B_v, len_t D_index
+	IonHandler *ions, real_t l_MK2, real_t B_v, real_t I_ref, real_t connectionLengthFactor, len_t D_index
 ) {
     unknowns = u;
     radials  = r;
-	this->ions = ions;
+    this->ions = ions;
     this->D_index = D_index;
     this->l_MK2=l_MK2;
-	this->B_v = B_v;
+    this->B_v = B_v;
+    this->I_ref = I_ref;
+    this->connectionLengthFactor = connectionLengthFactor;
 }
 
 /**
@@ -48,9 +50,9 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
     real_t B = radials->GetMagneticField();
     real_t ec = DREAM::Constants::ec;
 
-	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
-
-	return 4/(connectionLengthFactor*a*B) * exp(-I_p/I_ref) *
+    real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
+    
+    return 4/(connectionLengthFactor*a*B) * exp(-I_p/I_ref) *
 		sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*(B_v*B_v + Beddy*Beddy)/mi);
 }
 
@@ -73,7 +75,7 @@ real_t ConfinementTime::EvaluateConnectionLength(len_t ir) {
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField();
 
-	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
+    real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
     return 0.25 * connectionLengthFactor * a*B * exp(I_p/I_ref) / (sqrt(B_v*B_v + Beddy*Beddy));
 }

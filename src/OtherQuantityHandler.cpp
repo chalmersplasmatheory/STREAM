@@ -122,7 +122,7 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     }
     
     if (this->stream_terms->Tcold_ECH != nullptr) {
-        DEF_SC("stream/Tcold_ECH", "Electron Cyclotron Heating (from STREAM::ElectronCyclotronHeating)",
+        DEF_SC("fluid/Tcold_ECH", "Electron Cyclotron Heating (from STREAM::ElectronCyclotronHeating)",
             real_t *v = qd->StoreEmpty();
             v[0] = 0;
             this->stream_terms->Tcold_ECH->SetVectorElements(v, nullptr);

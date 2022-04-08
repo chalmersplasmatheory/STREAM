@@ -30,8 +30,8 @@ namespace STREAM{
 
                 public:
                         real_t l_MK2;
-                        real_t I_ref = 100000;
-                        real_t B_v   = 2.0e-3;
+                        real_t I_ref;
+                        real_t B_v;
 
 			// The following factor appears in the connection length. In "older" studies
 			// (pre-Mineev 2014 (http://www-naweb.iaea.org/napc/physics/FEC/FEC2014/fec2014-preprints/255_PPCP320.pdf))
@@ -39,13 +39,14 @@ namespace STREAM{
 			// the poloidal stray field, that it should rather be 3. To allow us to
 			// easily switch between simulation modes, we put this constant here and
 			// use it in the *.cpp file.
-			const real_t connectionLengthFactor = 3;
+			real_t connectionLengthFactor = 1.0;
                 
                         ConfinementTime(
 							DREAM::FVM::UnknownQuantityHandler *u,
 							EllipticalRadialGridGenerator *r,
 							DREAM::IonHandler*, real_t l_MK2,
-							real_t B_v, len_t D_index=0
+							real_t B_v, real_t I_ref, real_t connectionLengthFactor,
+							len_t D_index=0
 						);
                         
                         real_t EvaluateConfinementTime(len_t ir);

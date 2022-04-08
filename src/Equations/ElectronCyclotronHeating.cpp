@@ -46,16 +46,13 @@ void ElectronCyclotronHeating::Rebuild(
 ) {
     real_t V_p = this->PV->GetPlasmaVolume();
     
-    real_t tau = this->OT->EvaluateTau(0);
-    /*this->parentheses_ECH = - P_inj * (1 - exp(-tau)) / V_p;
+    /*real_t tau = this->OT->EvaluateTau(0);
+    this->parentheses_ECH = - P_inj * (1 - exp(-tau)) / V_p;
     real_t dtau_dTe = this->OT->EvaluateTau_dTe(0);
     this->dpECH_dTe = - P_inj * (exp(-tau) * dtau_dTe) / V_p;
     real_t dtau_dne = this->OT->EvaluateTau_dne(0);
     this->dpECH_dne = - P_inj * (exp(-tau) * dtau_dne) / V_p;*/
-    
-    
-    //real_t fact = 1e-5;
-    
+        
     real_t eta_polo = this->OT->EvaluateOpticalThickness_o(0) / cos(theta);
     real_t eta_polx = this->OT->EvaluateOpticalThickness_x(0) / cos(theta);
     this->parentheses_ECH = - P_inj * (1 - f_o*exp(-eta_polo) - f_x*exp(-eta_polx)) / V_p;
@@ -67,8 +64,6 @@ void ElectronCyclotronHeating::Rebuild(
     real_t dnpolo_dne = this->OT->EvaluateOpticalThickness_o_dne(0) / cos(theta);
     real_t dnpolx_dne = this->OT->EvaluateOpticalThickness_x_dne(0) / cos(theta);
     this->dpECH_dne = - P_inj * (f_o*exp(-eta_polo) * dnpolo_dne + f_x*exp(-eta_polx) * dnpolx_dne) / V_p;
-    printf("\nSCENPLINT: P_ech=%.4e", P_inj * (1 - exp(-tau)) / V_p);
-    printf("\nDYON:      P_ech=%.4e\n", -this->parentheses_ECH);
 }
 
 /**
