@@ -20,7 +20,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop=12, Vloop_t=0, Ip=2.4e3, tmax=2e-5, nt=2000):
+def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Ip=2.4e3, tmax=2e-5, nt=2000):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -44,7 +44,6 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     a = 0.5  # Plasma minor radius [m]
     R0 = 1.8  # Plasma major radius [m]
     Btor = 2.7  # * 6.2 / R0  # Toroidal magnetic field [T]
-    l_MK2 = 1  # Distance between plasma centre and passive structure [m] (unused)
     V_vessel = 56  # Vacuum vessel volume
 
     Te0 = 1  # electron temperature [eV]
@@ -68,7 +67,7 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     t = np.linspace(t_start, t_end, Nt)
 
     c1 = 1.55
-    c2 = 0.5
+    c2 = 0.52
     c3 = 0.1
     Y_DD = c1 - c2 * (1 - np.exp(-(t - t_start) / c3))
 
@@ -87,16 +86,18 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     V_fun2 = interp1d(t_V_vec2, V_vec2, kind='cubic')
     V_loop = np.append(V_fun1(t[:16]), V_fun2(t[16:]))
 
-    #'''
-    plt.plot(t, Y_DD, 'k')
-    plt.plot(t, Y_DC * 100, 'r')
-    plt.xlim([-0.04, 0.26])
+    '''
+    t_plot = np.linspace(0.04, 0.3, Nt)
+    plt.plot(t_plot, Y_DD, 'k')
+    plt.plot(t_plot, Y_DC * 100, 'r')
+    plt.xlim([0, 0.3])
     plt.ylim([0, 3])
+    plt.grid(True)
     plt.show()
-    plt.scatter(t_V_vec2, V_vec2)
-    plt.plot(t, V_loop, 'k')
+    plt.plot(t_plot, V_loop, 'k')
     plt.xlim([0, 0.3])
     plt.ylim([0, 5])
+    plt.grid(True)
     plt.show()
     #'''
 
@@ -108,7 +109,7 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
     ss.eqsys.E_field.setInitialProfile(E0)
     Lp = float(scipy.constants.mu_0 * R0 * (np.log(8 * R0 / a) + 0.25 - 2))
-    ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6) #??
+    ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6)
     ss.eqsys.E_field.setCircuitVloop(V_loop, t)
 
     # Electron temperature
@@ -144,6 +145,8 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     ss.radialgrid.setWallRadius(a)
     ss.radialgrid.setVesselVolume(V_vessel)
     ss.radialgrid.setIref(10e3)
+    ss.radialgrid.setBv(2.2e-3)
+    ss.radialgrid.setConnectionLengthFactor(1.0)
 
     ss.radialgrid.setECHParameters(P_inj, f_o, f_x, theta, phi, N)
 
@@ -158,7 +161,7 @@ def generate(prefill=0.27e-3, gamma=2e-3, fractionO = 0.02, fractionC = 0, Vloop
     ss.timestep.setNt(nt)
     ss.timestep.setNumberOfSaveSteps(10000)
 
-    ss.other.include('fluid', 'stream', 'scalar')
+    ss.other.include('fluid', 'stream', 'scalar', 'fluid/Tcold_ECH')
 
     return ss
 
@@ -218,7 +221,7 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     axs[0, 0].set_ylim([0, 0.3])
     axs[0, 1].set_ylim([0, 1.1])
     axs[1, 0].set_ylim([0, 350])
-    axs[1, 1].set_ylim([0, 1e11])
+    axs[1, 1].set_ylim([1e0, 1e11])
     axs[2, 0].set_ylim([0, 100])
     axs[2, 1].set_ylim([0, 0.04])
     '''
@@ -279,7 +282,7 @@ def main(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if not settings.skip:
-        ss1 = generate(nt=50000)
+        ss1 = generate(nt=100000)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
 
@@ -287,7 +290,7 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.3 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(50000)
+        ss2.timestep.setNt(20000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:
