@@ -7,7 +7,7 @@ import scipy.constants
 from scipy.interpolate import interp1d
 import sys
 
-sys.path.append('../../py')
+sys.path.append('../../../py')
 
 # from run import makeplots
 import PlasmaParameters as Formulas
