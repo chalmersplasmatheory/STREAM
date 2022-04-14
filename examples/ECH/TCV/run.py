@@ -83,7 +83,7 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     f_x = 1.0 # ??
     theta = 10 * np.pi / 180 # ??
     phi = 50 * np.pi / 180 # ??
-    N = 3 # ??
+    N = 2 # ??
 
     # Impurities ??
 
