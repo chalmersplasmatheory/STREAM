@@ -7,6 +7,7 @@ import scipy.constants
 from scipy.interpolate import interp1d
 import sys
 import h5py
+from scipy.signal import savgol_filter
 
 sys.path.append('../../../py')
 
@@ -22,7 +23,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.015):
+def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.11):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -35,47 +36,54 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.015):
     :param tmax:    Simulation time [s]
     :param nt:      Number of time steps
     """
-    n0 = 1e17  # Initial total deuterium density # ??
-    nD = n0 * np.array([[1 - gamma], [gamma]]) # gamma??
-    if fractionNe <= 0: # fractionNe??
+    n0 = 5e17  # Initial total deuterium density # ?
+    nD = n0 * np.array([[1 - gamma], [gamma]])
+    if fractionNe <= 0: # fractionNe ?
         nNe = 1e3
     else:
         nNe = fractionNe * n0
 
     hf = h5py.File('TCV65108.h5', 'r')
-    Halpha = np.array(hf.get('H-alpha').get('z'))
     t_loop = np.array(hf.get('Loop voltage').get('x'))
-    V_loop =- np.array(hf.get('Loop voltage').get('z'))
+    V_loop_osc =- np.array(hf.get('Loop voltage').get('z'))
+    V_loop = savgol_filter(V_loop_osc, 105, 3)
     t_fluxD = np.array(hf.get('Particle flux (D2)').get('x'))
     fluxD = np.array(hf.get('Particle flux (D2)').get('z'))
     t_Ip = np.array(hf.get('Plasma current').get('x'))
     Ip = np.array(hf.get('Plasma current').get('z'))
-    t_Vp = np.array(hf.get('Plasma volume').get('x'))
-    V_p = np.array(hf.get('Plasma volume').get('z'))
     B = np.array(hf.get('Toroidal magnetic field').get('z'))
-    hf.close()
+
 
     R0 = 0.89  # Plasma major radius [m]
-    a = 0.25  # Plasma minor radius [m]  # from data?? but data starts at t=0.02?
-    a_vec = np.sqrt(V_p / (2 * np.pi ** 2 * R0))
     Btor = 1.45   # Toroidal magnetic field [T]
     V_vessel = 4.632  # Vacuum vessel volume
 
+    t_Vp_osc = np.array(hf.get('Plasma volume').get('x'))
+    V_p_osc = np.array(hf.get('Plasma volume').get('z'))
+    V_p_s = savgol_filter(V_p_osc, 75, 3)
+    V_initfun = interp1d(np.append(np.array([-0.02]), t_Vp_osc), np.append(np.array([V_vessel]), V_p_osc), 'cubic')
+    t_Vp = np.linspace(-0.02, t_Vp_osc[-1])
+    V_p = V_initfun(t_Vp)
+    a = np.sqrt(V_p / (2 * np.pi ** 2 * R0))
 
-    Te0 = 1  # electron temperature [eV] # ??
-    Ti0 = 0.026  # ion temperature [eV] # ??
+    hf.close()
+
+    Te0 = 1  # electron temperature [eV]
+    Ti0 = 0.026  # ion temperature [eV]
 
     # Initial electric field
     it0 = int((tstart - t_Ip[0])/(t_Ip[-1] - t_Ip[0]) * t_Ip.shape[0])
-    j0 = Ip[it0] / (a ** 2 * np.pi)
+    itend = int((tend - t_Ip[0]) / (t_Ip[-1] - t_Ip[0]) * t_Ip.shape[0])
+    it0a = np.where(np.min(np.abs(t_Vp - tstart)))
+    j0 = Ip[it0] / (a[it0a] ** 2 * np.pi)
     E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
 
-    P_inj = 675e3 # Maybe 650e3
+    P_inj = 675e3 # 650e3 - 700e3
     f_o = 0 # ??
     f_x = 1.0 # ??
-    theta = 14 * np.pi / 180 # ??
-    phi = 20 * np.pi / 180 # ??
-    N = 2 # ??
+    theta = 10 * np.pi / 180 # ??
+    phi = 50 * np.pi / 180 # ??
+    N = 3 # ??
 
     # Impurities ??
 
@@ -86,8 +94,8 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.015):
     # Electric field
     ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
     ss.eqsys.E_field.setInitialProfile(E0)
-    Lp = float(scipy.constants.mu_0 * R0 * (np.log(8 * R0 / a) + 0.25 - 2))
-    ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6) # ??
+    Lp = float(scipy.constants.mu_0 * R0 * (np.log(8 * R0 / 0.25) + 0.25 - 2))
+    ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6) # ?
     ss.eqsys.E_field.setCircuitVloop(V_loop, t_loop)
 
     # Electron temperature
@@ -104,23 +112,29 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.015):
     ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
 
     # Recycling coefficients
-    t = np.linspace(tstart, 0.1)
+    t = np.linspace(tstart, tend)
     c1 = 1.022
     c2 = 0.02
     c3 = 0.1
     Y_DD = c1 - c2 * (1 - np.exp(-(t-tstart) / c3))
     iD = ss.eqsys.n_i.getIndex('D')
-    ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', Y_DD, t)
+    ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1) # ?
+
+    it0 = int((tstart - t_fluxD[0]) / (t_fluxD[-1] - t_fluxD[0]) * t_fluxD.shape[0])
+    itend = int((tend - t_fluxD[0]) / (t_fluxD[-1] - t_fluxD[0]) * t_fluxD.shape[0])
+
+    plt.show()
+    ss.eqsys.n_i.setFueling('D', fluxD[it0:itend]*1.5e-1, times=t_fluxD[it0:itend]) # ?
 
     # Radial grid
     ss.radialgrid.setB0(Btor)
-    ss.radialgrid.setMinorRadius(a)
+    ss.radialgrid.setMinorRadius(a, t_Vp)
     ss.radialgrid.setMajorRadius(R0)
-    ss.radialgrid.setWallRadius(a)
+    ss.radialgrid.setWallRadius(0.25)
     ss.radialgrid.setVesselVolume(V_vessel)
-    ss.radialgrid.setIref(10e3) # Maximal plasma current 1.2 MA, KSTAR 2 MA so same I_ref? Half? B is half for TCV
-    ss.radialgrid.setBv(2.2e-3)
-    ss.radialgrid.setConnectionLengthFactor(1.0)
+    ss.radialgrid.setIref(5e3) # Maximal plasma current 1.2 MA, KSTAR 2 MA so same I_ref? Half? B is half for TCV ??
+    ss.radialgrid.setBv(2.0e-3) # ??
+    ss.radialgrid.setConnectionLengthFactor(1.0) # ??
 
     ss.radialgrid.setECHParameters(P_inj, f_o, f_x, theta, phi, N)
 
@@ -149,41 +163,26 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     Te = so.eqsys.T_cold[:, 0]
     Ti = so.eqsys.W_i.getTemperature()['D'][:, 0]
 
-    if save:
-        if first:
-            worab = 'w'
-        else:
-            worab = 'ab'
-        t_csv = open('Data/time_STREAM.csv', worab)
-        np.savetxt(t_csv, t)
-        t_csv.close()
-        Ip_csv = open('Data/PlasmaCurrent_STREAM.csv', worab)
-        np.savetxt(Ip_csv, Ip)
-        Ip_csv.close()
-        ne_csv = open('Data/ElectronDensity_STREAM.csv', worab)
-        np.savetxt(ne_csv, ne)
-        ne_csv.close()
-        Te_csv = open('Data/ElectronTemperature_STREAM.csv', worab)
-        np.savetxt(Te_csv, Te)
-        Te_csv.close()
-        Ti_csv = open('Data/IonTemperature_STREAM.csv', worab)
-        np.savetxt(Ti_csv, Ti)
-        Ti_csv.close()
-        Lf_csv = open('Data/ConnectionLength_STREAM.csv', worab)
-        np.savetxt(Lf_csv, Lf)
-        Lf_csv.close()
-        tau_csv = open('Data/ConfinementTime_STREAM.csv', worab)
-        np.savetxt(tau_csv, tau)
-        tau_csv.close()
+    hf = h5py.File('TCV65108.h5', 'r')
+    t_Ip_d = np.array(hf.get('Plasma current').get('x')) + 0.02
+    Ip_d = np.array(hf.get('Plasma current').get('z'))
+    hf.close()
+    hf = h5py.File('firdens.h5', 'r')
+    t_FIR = np.array(hf.get('FIR').get('x')) + 0.02
+    FIR = np.array(hf.get('FIR').get('z'))
+    hf.close()
 
-    plotInternal(axs[0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='g', showlabel=showlabel, label='STREAM')
-    plotInternal(axs[1], t, ne / 1e18, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{18}$m$^{-3}$)', color='g', showlabel=False,
+    plotInternal(axs[0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[1], t_FIR, FIR / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:red', showlabel=False,
                  label='STREAM')
-    plotInternal(axs[2], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='g', showlabel=False, label='STREAM')
+    plotInternal(axs[1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False,
+                 label='STREAM')
+    plotInternal(axs[2], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
     '''
-    plotInternal(axs[1, 1], t[1:], Lf, ylabel=r'$L_f$ (m)', color='g', showlabel=False, label='STREAM', log=True)
-    plotInternal(axs[2, 0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='g', showlabel=False, label='STREAM')
-    plotInternal(axs[2, 1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='g', showlabel=False, label='STREAM')
+    plotInternal(axs[1, 1], t[1:], Lf, ylabel=r'$L_f$ (m)', color='tab:blue', showlabel=False, label='STREAM', log=True)
+    plotInternal(axs[2, 0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
+    plotInternal(axs[2, 1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='tab:blue', showlabel=False, label='STREAM')
     
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
@@ -319,7 +318,7 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.12 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(10000)
+        ss2.timestep.setNt(50000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:
