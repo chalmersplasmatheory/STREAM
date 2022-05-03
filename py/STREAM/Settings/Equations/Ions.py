@@ -117,7 +117,8 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
         for iIon in range(len(self.ions)):
             if self.ions[iIon].getName() == species:
                 return iIon
-        print("WARNING: no species of name '{}'.".format(self.name))
+        print("WARNING: no species of name '{}'.".format(species))
+        return None
 
 
     def setJET_CWrecycling(self, deuterium='D', carbon='C', oxygen='O', tritium='T', Nt=100, tMax=20):

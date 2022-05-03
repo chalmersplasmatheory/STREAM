@@ -16,7 +16,7 @@ from DREAM.Output.ScalarQuantity import ScalarQuantity
 class STREAMOutput(DREAMOutput):
     
 
-    def __init__(self, filename=None, path="", lazy=True):
+    def __init__(self, filename=None, path="", lazy=True, loadsettings=True):
         """
         Construct a new ``STREAMOutput`` object. If ``filename`` is given, the
         object is read from the (HDF5) file with that name. If ``path`` is also
@@ -27,7 +27,7 @@ class STREAMOutput(DREAMOutput):
         :param str path:     Path to group in HDF5 file containing the output.
         :param bool lazy:    If ``True``, only loads data from the file when explicitly requested.
         """
-        super().__init__(filename=filename, path=path, lazy=lazy)
+        super().__init__(filename=filename, path=path, lazy=lazy, loadsettings=loadsettings)
 
 
     def load(self, filename, path="", lazy=True, *args, **kwargs):
