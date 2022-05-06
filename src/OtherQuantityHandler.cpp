@@ -225,16 +225,18 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             v[ir] = 1/(1-exp(-I_p/I_ref)) * this->reConfinementTime->EvaluateRunawayElectronConfinementTime2(ir);
     );
     
-    DEF_FL("stream/eta_o", "Optical thickness for O mode",
-        real_t *v = qd->StoreEmpty();
-        for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->opticalThickness->EvaluateOpticalThickness_o(ir);
-    );
-    DEF_FL("stream/eta_x", "Optical thickness for X mode",
-        real_t *v = qd->StoreEmpty();
-        for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->opticalThickness->EvaluateOpticalThickness_x(ir);
-    );
+	if (this->opticalThickness) {
+		DEF_FL("stream/eta_o", "Optical thickness for O mode",
+			real_t *v = qd->StoreEmpty();
+			for (len_t ir = 0; ir < nr; ir++)
+				v[ir] = this->opticalThickness->EvaluateOpticalThickness_o(ir);
+		);
+		DEF_FL("stream/eta_x", "Optical thickness for X mode",
+			real_t *v = qd->StoreEmpty();
+			for (len_t ir = 0; ir < nr; ir++)
+				v[ir] = this->opticalThickness->EvaluateOpticalThickness_x(ir);
+		);
+	}
 
     DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals",
         const len_t nZ = this->ions->GetNZ();
