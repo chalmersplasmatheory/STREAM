@@ -44,7 +44,7 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
     len_t nr = radials->GetNr();
     real_t W_i    = unknowns->GetUnknownData(id_Wi)[D_index*nr+ir];
     real_t N_i    = unknowns->GetUnknownData(id_Ni)[D_index*nr+ir];
-	real_t mi     = this->ions->GetIonSpeciesMass(this->D_index);
+    real_t mi     = this->ions->GetIonSpeciesMass(this->D_index);
 
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField();

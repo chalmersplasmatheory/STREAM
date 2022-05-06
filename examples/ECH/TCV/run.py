@@ -23,7 +23,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.11):
+def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -65,6 +65,7 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     t_Vp = np.linspace(-0.02, t_Vp_osc[-1])
     V_p = V_initfun(t_Vp)
     a = np.sqrt(V_p / (2 * np.pi ** 2 * R0))
+    l_i = 0.5
 
     hf.close()
 
@@ -78,11 +79,11 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     j0 = Ip[it0] / (a[it0a] ** 2 * np.pi)
     E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
 
-    P_inj = 675e3 # 650e3 - 700e3
+    P_inj = 665e3 # 650e3 - 700e3
     f_o = 0 # ??
     f_x = 1.0 # ??
     theta = 10 * np.pi / 180 # ??
-    phi = 50 * np.pi / 180 # ??
+    phi = np.pi/2 # 35 * np.pi / 180 # ??
     N = 2 # ??
 
     # Impurities ??
@@ -94,7 +95,7 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     # Electric field
     ss.eqsys.E_field.setType(ElectricField.TYPE_CIRCUIT)
     ss.eqsys.E_field.setInitialProfile(E0)
-    Lp = float(scipy.constants.mu_0 * R0 * (np.log(8 * R0 / 0.25) + 0.25 - 2))
+    Lp = float(scipy.constants.mu_0 * R0 * (np.log(8 * R0 / 0.25) + l_i/2 - 2))
     ss.eqsys.E_field.setInductances(Lp=Lp, Lwall=9.1e-6, M=2.49e-6, Rwall=1e6) # ?
     ss.eqsys.E_field.setCircuitVloop(V_loop, t_loop)
 
@@ -172,13 +173,20 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     FIR = np.array(hf.get('FIR').get('z'))
     hf.close()
 
-    plotInternal(axs[0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='STREAM')
-    plotInternal(axs[0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='STREAM')
-    plotInternal(axs[1], t_FIR, FIR / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:red', showlabel=False,
+    nD0 = so.eqsys.n_i['D'][0][:]
+    nD1 = so.eqsys.n_i['D'][1][:]
+    totD = nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() + nD1[1:].flatten() * so.other.stream.V_p[:,0].flatten()
+    gammaD = (1 - nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() / totD)
+
+    plotInternal(axs[0,0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[0,0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[0,1], t_FIR, FIR / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:red', showlabel=False,
                  label='STREAM')
-    plotInternal(axs[1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False,
+    plotInternal(axs[0,1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False,
                  label='STREAM')
-    plotInternal(axs[2], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
+    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
+    plotInternal(axs[1,1], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='tab:blue', showlabel=showlabel,
+                 label=r'$\gamma_{\rm D}$')
     '''
     plotInternal(axs[1, 1], t[1:], Lf, ylabel=r'$L_f$ (m)', color='tab:blue', showlabel=False, label='STREAM', log=True)
     plotInternal(axs[2, 0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
@@ -189,8 +197,8 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
             #axs[i, j].set_xlim([0, 0.3])
             #axs[i, j].grid(True)
     '''
-    axs[0].set_ylim([0, 0.4])
-    axs[1].set_ylim([0, 2])
+    axs[0,0].set_ylim([0, 0.4])
+    axs[0,1].set_ylim([0, 4])
     #axs[2, 0].set_ylim([0, 100])
 
 
@@ -282,7 +290,7 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
 
 
 def makeplots(so1, so2, toffset):
-    fig1, axs1 = plt.subplots(3, 1, figsize=(7, 10))
+    fig1, axs1 = plt.subplots(2, 2, figsize=(7, 10))
 
     drawplot1(axs1, so1, toffset=toffset)
     drawplot1(axs1, so2, toffset=toffset + so1.grid.t[-1], showlabel=True, first=False)
@@ -316,9 +324,9 @@ def main(argv):
 
         ss2 = STREAMSettings(ss1)
         ss2.fromOutput(f'output1{ext}.h5')
-        ss2.timestep.setTmax(0.12 - ss1.timestep.tmax)
+        ss2.timestep.setTmax(0.4 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(50000)
+        ss2.timestep.setNt(100000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:

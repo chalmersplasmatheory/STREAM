@@ -24,8 +24,8 @@ class RadialGrid(PrescribedScalarParameter):
         self.Bv = 1.0e-3
         self.connectionLengthFactor = 3.0
         self.P_inj = 0.0
-        self.f_o = 0.5
-        self.f_x = 0.5
+        self.f_o = 0.0
+        self.f_x = 1.0
         self.theta = np.pi/4
         self.phi = 0.0
         self.N = 1
