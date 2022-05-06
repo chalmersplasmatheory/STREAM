@@ -21,7 +21,7 @@ import STREAM.Settings.Equations.IonSpecies as Ions
 
 
 
-def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.003, nt=100000, Rwall=1e7, EfieldDyon=False, tritium=False, impurity=True):
+def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0=14, tmax=0.003, nt=10000, Rwall=1e7, EfieldDyon=False, tritium=False, impurity=True):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -403,7 +403,7 @@ def oneRun(argv):
         ss1 = generate(n0=1.5e17, EfieldDyon=False, tritium=False)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
-
+        print('ye')
         ss2 = STREAMSettings(ss1)
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(1.3*6 - ss1.timestep.tmax)
