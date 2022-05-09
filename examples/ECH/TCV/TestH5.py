@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 import h5py
 from scipy.signal import savgol_filter
 from scipy.interpolate import interp1d
-#arr = np.array([-1, 2, 3, -2, -5, 1, 0, 1, -9])
-#print(str(for i in arr np.max(i, 0)))
+
+
 
 hf = h5py.File('firdens.h5', 'r')
 print(hf.keys())
-
+'''
 t_FIR = np.array(hf.get('FIR').get('x'))
 FIR = np.array(hf.get('FIR').get('z'))
 #i0 = np.argmin(np.abs(t_FIR+0.02))
@@ -18,10 +18,11 @@ plt.xlabel('t')
 plt.xlim([-0.02, 0.1])
 plt.show()
 
+'''
 hf.close()
-
 hf = h5py.File('TCV65108.h5', 'r')
-
+print(hf.keys())
+'''
 t_CIII = np.array(hf.get('C-III').get('x'))
 cIII = np.array(hf.get('C-III').get('z'))
 plt.plot(t_CIII, cIII)
@@ -29,7 +30,7 @@ plt.ylabel('C-III')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
-
+'''
 t_H = np.array(hf.get('H-alpha').get('x'))
 Halpha = np.array(hf.get('H-alpha').get('z'))
 plt.plot(t_H, Halpha)
@@ -37,7 +38,7 @@ plt.ylabel('H-alpha')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
-
+'''
 t_FIR = np.array(hf.get('Line-integrated (FIR)').get('x'))
 FIR = np.array(hf.get('Line-integrated (FIR)').get('z'))
 i0 = np.argmin(np.abs(t_FIR+0.02))
@@ -80,6 +81,7 @@ plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
 #'''
+'''
 t_Vp = np.array(hf.get('Plasma volume').get('x'))
 V_p_osc = np.array(hf.get('Plasma volume').get('z'))
 V_p = savgol_filter(V_p_osc, 45, 3)
@@ -101,5 +103,5 @@ plt.ylabel('Toroidal magnetic field')
 plt.xlabel('t')
 #plt.xlim([-0.02, 0.05])
 plt.show()
-
+'''
 hf.close()

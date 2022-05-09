@@ -44,14 +44,26 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
         nNe = fractionNe * n0
 
     hf = h5py.File('TCV65108.h5', 'r')
+
     t_loop = np.array(hf.get('Loop voltage').get('x'))
     V_loop_osc =- np.array(hf.get('Loop voltage').get('z'))
-    V_loop = savgol_filter(V_loop_osc, 105, 3)
+    it0_loop = int((tstart - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
+    t_loop = t_loop[it0_loop:]-tstart
+    V_loop = savgol_filter(V_loop_osc[it0_loop:], 105, 3)
+
     t_fluxD = np.array(hf.get('Particle flux (D2)').get('x'))
     fluxD = np.array(hf.get('Particle flux (D2)').get('z'))
+    it0_flux = int((tstart - t_fluxD[0]) / (t_fluxD[-1] - t_fluxD[0]) * t_fluxD.shape[0])-1
+    t_fluxD = t_fluxD[it0_flux:]-tstart
+    fluxD = fluxD[it0_flux:]
+
     t_Ip = np.array(hf.get('Plasma current').get('x'))
     Ip = np.array(hf.get('Plasma current').get('z'))
-    B = np.array(hf.get('Toroidal magnetic field').get('z'))
+    it0_Ip = int((tstart - t_Ip[0]) / (t_Ip[-1] - t_Ip[0]) * t_Ip.shape[0])-1
+    t_Ip = t_Ip[it0_Ip:] - tstart
+    Ip = Ip[it0_Ip:]
+
+    #B = np.array(hf.get('Toroidal magnetic field').get('z'))
 
 
     R0 = 0.89  # Plasma major radius [m]
@@ -61,30 +73,28 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     t_Vp_osc = np.array(hf.get('Plasma volume').get('x'))
     V_p_osc = np.array(hf.get('Plasma volume').get('z'))
     V_p_s = savgol_filter(V_p_osc, 75, 3)
-    V_initfun = interp1d(np.append(np.array([-0.02]), t_Vp_osc), np.append(np.array([V_vessel]), V_p_osc), 'cubic')
-    t_Vp = np.linspace(-0.02, t_Vp_osc[-1])
+    V_initfun = interp1d(np.append(np.array([-0.02-tstart]), t_Vp_osc-tstart), np.append(np.array([V_vessel]), V_p_s), 'cubic')
+    t_Vp = np.linspace(0, t_Vp_osc[-1]-tstart)
     V_p = V_initfun(t_Vp)
     a = np.sqrt(V_p / (2 * np.pi ** 2 * R0))
     l_i = 0.5
-
+    #plt.plot(t_Vp, a)
+    #plt.show()
     hf.close()
 
     Te0 = 1  # electron temperature [eV]
     Ti0 = 0.026  # ion temperature [eV]
 
     # Initial electric field
-    it0 = int((tstart - t_Ip[0])/(t_Ip[-1] - t_Ip[0]) * t_Ip.shape[0])
-    itend = int((tend - t_Ip[0]) / (t_Ip[-1] - t_Ip[0]) * t_Ip.shape[0])
-    it0a = np.where(np.min(np.abs(t_Vp - tstart)))
-    j0 = Ip[it0] / (a[it0a] ** 2 * np.pi)
+    j0 = Ip[0] / (a[0] ** 2 * np.pi)
     E0 = j0 / Formulas.evaluateSpitzerConductivity(n=nD[1], T=Te0, Z=1)
 
-    P_inj = 665e3 # 650e3 - 700e3
-    f_o = 0 # ??
-    f_x = 1.0 # ??
-    theta = 10 * np.pi / 180 # ??
-    phi = np.pi/2 # 35 * np.pi / 180 # ??
-    N = 2 # ??
+    P_inj = 665e3
+    f_o = 0
+    f_x = 1.0
+    theta = 10 * np.pi / 180
+    phi = 90 * np.pi / 180 #np.pi/2 # ??
+    N = 2
 
     # Impurities ??
 
@@ -121,11 +131,8 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     iD = ss.eqsys.n_i.getIndex('D')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1) # ?
 
-    it0 = int((tstart - t_fluxD[0]) / (t_fluxD[-1] - t_fluxD[0]) * t_fluxD.shape[0])
-    itend = int((tend - t_fluxD[0]) / (t_fluxD[-1] - t_fluxD[0]) * t_fluxD.shape[0])
+    ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1, times=t_fluxD) # ?
 
-    plt.show()
-    ss.eqsys.n_i.setFueling('D', fluxD[it0:itend]*1.5e-1, times=t_fluxD[it0:itend]) # ?
 
     # Radial grid
     ss.radialgrid.setB0(Btor)
@@ -151,6 +158,9 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     ss.timestep.setNumberOfSaveSteps(10000)
 
     ss.other.include('fluid', 'stream', 'scalar', 'fluid/Tcold_ECH')
+
+    #plt.plot(np.zeros(1), np.zeros(1))
+    #plt.show()
 
     return ss
 
