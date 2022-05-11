@@ -387,10 +387,10 @@ real_t OpticalThickness::EvaluateOpticalThickness_o_dne(len_t ir){
     real_t detao_dne;
     
     if (N == 1) {
-    	real_t dterm1 = dalpha_dne * sqrt(1.0 - alpha) / (1.0 + n_par2 * ( 0.5 - alpha ));
+    	real_t dterm1 = sqrt(1.0 - alpha) / (1.0 + n_par2 * ( 0.5 - alpha ));
     	real_t dterm2 = - alpha * 1.0 / (2.0 * sqrt(1.0 - alpha)) / (1.0 + n_par2 * ( 0.5 - alpha ));
     	real_t dterm3 = alpha * sqrt(1.0 - alpha) / ((1.0 + n_par2 * ( 0.5 - alpha ))*(1.0 + n_par2 * ( 0.5 - alpha ))) * n_par2;
-	detao_dne = A * (T_e / mc2) * (dterm1 + dterm2 + dterm3);
+	detao_dne = A * (T_e / mc2) * (dterm1 + dterm2 + dterm3) * dalpha_dne;
     } else {
     	real_t G = A * N3 / tgamma(N) * pow(N2 / 2.0, N - 2);
 
@@ -492,7 +492,7 @@ real_t OpticalThickness::EvaluateOpticalThickness_x_dne(len_t ir){
         real_t dterm1 = - 1.5 * sqrt(2.0 - alpha) * ((1.0 + alpha)*(1.0 + alpha)) / alpha;
         real_t dterm2 = 2 * pow(2.0 - alpha, 1.5) * (1.0 + alpha) / alpha;
         real_t dterm3 = - pow(2.0 - alpha, 1.5) * ((1.0 + alpha)*(1.0 + alpha)) / (alpha*alpha);
-	detax_dne = A * (T_e / mc2) * n_par2 * (dterm1 + dterm2 + dterm3);
+	detax_dne = A * (T_e / mc2) * n_par2 * (dterm1 + dterm2 + dterm3)*dalpha_dne;
     } else {
     	real_t G = A * N3 / tgamma(N) * pow(N2 / 2.0, N - 2);
 

@@ -22,7 +22,7 @@ plt.show()
 hf.close()
 hf = h5py.File('TCV65108.h5', 'r')
 print(hf.keys())
-'''
+#'''
 t_CIII = np.array(hf.get('C-III').get('x'))
 cIII = np.array(hf.get('C-III').get('z'))
 plt.plot(t_CIII, cIII)
@@ -38,7 +38,7 @@ plt.ylabel('H-alpha')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
-'''
+
 t_FIR = np.array(hf.get('Line-integrated (FIR)').get('x'))
 FIR = np.array(hf.get('Line-integrated (FIR)').get('z'))
 i0 = np.argmin(np.abs(t_FIR+0.02))
@@ -56,7 +56,7 @@ plt.ylabel('Loop voltage')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
-
+'''
 t_maxThomson = np.array(hf.get('Maximum (Thomson)').get('x'))
 maxThomson = np.array(hf.get('Maximum (Thomson)').get('z'))
 plt.plot(t_maxThomson, maxThomson)
@@ -64,7 +64,7 @@ plt.ylabel('Maximum (Thomson)')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
-
+'''
 t_fluxD = np.array(hf.get('Particle flux (D2)').get('x'))
 fluxD = np.array(hf.get('Particle flux (D2)').get('z'))
 plt.plot(t_fluxD, fluxD)

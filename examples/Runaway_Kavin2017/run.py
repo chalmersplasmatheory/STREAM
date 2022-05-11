@@ -57,9 +57,6 @@ def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0
     Te0 = 5     # electron temperature [eV]
     Ti0 = 1     # ion temperature [eV]
 
-    impurity = False
-
-
     # Initial electric field
     E0 = Ures0/(2 * np.pi * R0)
 
@@ -403,7 +400,7 @@ def oneRun(argv):
         ss1 = generate(n0=1.5e17, EfieldDyon=False, tritium=False)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
-        print('ye')
+
         ss2 = STREAMSettings(ss1)
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(1.3*6 - ss1.timestep.tmax)

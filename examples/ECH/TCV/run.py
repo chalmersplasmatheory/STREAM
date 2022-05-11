@@ -4,7 +4,7 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, interp2d
 import sys
 import h5py
 from scipy.signal import savgol_filter
@@ -77,7 +77,7 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     t_Vp = np.linspace(0, t_Vp_osc[-1]-tstart)
     V_p = V_initfun(t_Vp)
     a = np.sqrt(V_p / (2 * np.pi ** 2 * R0))
-    l_i = 0.5
+    l_i = 0
     #plt.plot(t_Vp, a)
     #plt.show()
     hf.close()
@@ -131,6 +131,9 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     iD = ss.eqsys.n_i.getIndex('D')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1) # ?
 
+    #iN = ss.eqsys.n_i.getIndex('Ne')
+    #ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('Ne', 0.0015)  # ?
+
     ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1, times=t_fluxD) # ?
 
 
@@ -168,6 +171,8 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     """
     Draw a plot with a output from the given STREAMOutput object.
     """
+
+
     t = so.grid.t[:] + toffset
     Ip = so.eqsys.I_p[:, 0]
     ne = so.eqsys.n_cold[:, 0]
@@ -175,11 +180,13 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     Ti = so.eqsys.W_i.getTemperature()['D'][:, 0]
 
     hf = h5py.File('TCV65108.h5', 'r')
-    t_Ip_d = np.array(hf.get('Plasma current').get('x')) + 0.02
+    t_Ip_d = np.array(hf.get('Plasma current').get('x')) + 0.01
     Ip_d = np.array(hf.get('Plasma current').get('z'))
+    t_H = np.array(hf.get('H-alpha').get('x'))+ 0.01
+    Halpha = np.array(hf.get('H-alpha').get('z'))
     hf.close()
     hf = h5py.File('firdens.h5', 'r')
-    t_FIR = np.array(hf.get('FIR').get('x')) + 0.02
+    t_FIR = np.array(hf.get('FIR').get('x')) + 0.01
     FIR = np.array(hf.get('FIR').get('z'))
     hf.close()
 
@@ -187,6 +194,17 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     nD1 = so.eqsys.n_i['D'][1][:]
     totD = nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() + nD1[1:].flatten() * so.other.stream.V_p[:,0].flatten()
     gammaD = (1 - nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() / totD)
+
+    PEC = np.loadtxt('adas_6561-9A.dat', unpack=True)
+    PEC_ne = np.loadtxt('adas_ne.dat', unpack=True) * 1e6
+    PEC_Te = np.loadtxt('adas_Te.dat', unpack=True)
+    PEC_interp = interp2d(PEC_ne, PEC_Te, PEC)
+
+    PEC_data = np.zeros(len(ne))
+    for i in range(len(ne)):
+        PEC_data[i] = PEC_interp(ne[i] , Te[i])
+    Dalpha = ne * nD0.flatten() * PEC_data
+    Dalpha *= np.max(Halpha)  / np.max(Dalpha) / 3
 
     plotInternal(axs[0,0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='STREAM')
     plotInternal(axs[0,0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='STREAM')
@@ -197,6 +215,11 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
     plotInternal(axs[1,1], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='tab:blue', showlabel=showlabel,
                  label=r'$\gamma_{\rm D}$')
+    plotInternal(axs[0, 2], t_H, Halpha, ylabel=r'$D_\alpha$', color='tab:red', showlabel=showlabel,
+                 label='STREAM')
+    plotInternal(axs[0, 2], t, Dalpha, ylabel=r'$D_\alpha$', color='tab:blue', showlabel=showlabel,
+                 label='STREAM')
+
     '''
     plotInternal(axs[1, 1], t[1:], Lf, ylabel=r'$L_f$ (m)', color='tab:blue', showlabel=False, label='STREAM', log=True)
     plotInternal(axs[2, 0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
@@ -259,6 +282,7 @@ def drawplot2(axs, so, toffset=0, showlabel=False, save=False, first=True):
     plotInternal(axs[2, 0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='g', showlabel=False, label='STREAM')
     plotInternal(axs[2, 1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='g', showlabel=False, label='STREAM')
 
+
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
             #axs[i, j].set_xlim([0, 0.3])
@@ -300,7 +324,7 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
 
 
 def makeplots(so1, so2, toffset):
-    fig1, axs1 = plt.subplots(2, 2, figsize=(7, 10))
+    fig1, axs1 = plt.subplots(2, 3, figsize=(12, 8))
 
     drawplot1(axs1, so1, toffset=toffset)
     drawplot1(axs1, so2, toffset=toffset + so1.grid.t[-1], showlabel=True, first=False)
@@ -336,12 +360,12 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.4 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(100000)
+        ss2.timestep.setNt(10000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:
-        so1 = STREAMOutput(f'output1{ext}.h5')
-        so2 = STREAMOutput(f'output2{ext}.h5')
+        so1 = STREAMOutput(f'output1{ext}.h5', loadsettings=False)
+        so2 = STREAMOutput(f'output2{ext}.h5', loadsettings=False)
 
     if settings.plot:
         makeplots(so1, so2, toffset=0)
