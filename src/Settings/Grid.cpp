@@ -17,7 +17,7 @@ using namespace STREAM;
 void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
     s->DefineSetting(MODULENAME "/wall_radius",  "Tokamak wall radius", (real_t)0.5);
     s->DefineSetting(MODULENAME "/R0",  "Tokamak major radius", (real_t)0);
-    
+
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "a");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "B0");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "kappa");
