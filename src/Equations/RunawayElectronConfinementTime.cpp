@@ -14,12 +14,13 @@ using namespace std;
  */
 RunawayElectronConfinementTime::RunawayElectronConfinementTime(
 	FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
-	real_t l_MK2, real_t B_v
+	real_t l_MK2, real_t B_v, real_t uncertaintyFactor
 ) {
     unknowns = u;
     radials  = r;
     this->l_MK2=l_MK2;
-	this->B_v = B_v;
+    this->B_v = B_v;
+    this->uncertaintyFactor = uncertaintyFactor;
 }
 
 /**
@@ -29,8 +30,7 @@ real_t RunawayElectronConfinementTime::EvaluateInverse(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t tau1 = EvaluateRunawayElectronConfinementTime1(ir);
     real_t tau2 = EvaluateRunawayElectronConfinementTime2(ir);
-
-    return exp(-I_p/I_ref)/tau1 + (1-exp(-I_p/I_ref))/tau2;
+    return (exp(-I_p/I_ref)/tau1 + (1-exp(-I_p/I_ref))/tau2)*uncertaintyFactor;
 }
 
 /**
@@ -80,7 +80,7 @@ real_t RunawayElectronConfinementTime::Evaluate_dIp(len_t ir){
     real_t tau2   = EvaluateRunawayElectronConfinementTime2(ir);
     real_t e      = exp(-I_p/I_ref);
 
-    return e * (1/(I_ref*tau2) - 3.0/(2*I_ref*tau1)) - (1-e)/(I_p*tau2);
+    return (e * (1/(I_ref*tau2) - 3.0/(2*I_ref*tau1)) - (1-e)/(I_p*tau2))*uncertaintyFactor;
 }
 
 /**
@@ -96,7 +96,7 @@ real_t RunawayElectronConfinementTime::Evaluate_dIwall(len_t ir){
     real_t Bz    = hypot(B_v, Beddy);
     real_t e     = exp(-I_p/I_ref);
 
-    return e/tau1 * Constants::mu0 * Beddy*Beddy/(I_wall*Bz*Bz);
+    return (e/tau1 * Constants::mu0 * Beddy*Beddy/(I_wall*Bz*Bz))*uncertaintyFactor;
 }
 
 real_t RunawayElectronConfinementTime::Evaluate_dE(len_t ir) {
@@ -107,7 +107,7 @@ real_t RunawayElectronConfinementTime::Evaluate_dE(len_t ir) {
     real_t tau2   = EvaluateRunawayElectronConfinementTime2(ir);
     real_t e      = exp(-I_p/I_ref);
 
-    return -e/(2*E*tau1) - (1-e)/(E*tau2);
+    return (-e/(2*E*tau1) - (1-e)/(E*tau2))*uncertaintyFactor;
 }
 
 void RunawayElectronConfinementTime::Initialize() {

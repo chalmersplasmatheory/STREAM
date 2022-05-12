@@ -25,6 +25,7 @@ class RadialGrid(PrescribedScalarParameter):
         self.R0 = 2.0
         self.Iref = 100.0e3
         self.Bv = 1.0e-3
+        self.uncertaintyFactor = 1.0
 
         self.setElongation(1)
         self.setTriangularity(0)
@@ -46,6 +47,14 @@ class RadialGrid(PrescribedScalarParameter):
         Sets the value of the stray magnetic field.
         """
         self.Bv = float(Bv)
+
+
+    def setRunawayConfinementUncertainty(self, uncertaintyFactor):
+        """
+        Sets the value of the runaway confinement factor
+        """
+        self.uncertaintyFactor = float(uncertaintyFactor)
+
 
 
     def setIref(self, Iref):
@@ -159,6 +168,9 @@ class RadialGrid(PrescribedScalarParameter):
         if 'Bv' in data:
             self.Bv = data['Bv']
 
+        if 'uncertaintyFactor' in data:
+            self.uncertaintyFactor = data['uncertaintyFactor']
+
 
     def todict(self, verify=True):
         """
@@ -185,6 +197,7 @@ class RadialGrid(PrescribedScalarParameter):
                 'x': self.delta
             },
             'Bv': self.Bv,
+            'uncertaintyFactor': self.uncertaintyFactor,
             'R0': self.R0,
             'wall_radius': self.b,
             'wall' : {
@@ -217,6 +230,8 @@ class RadialGrid(PrescribedScalarParameter):
             raise TypeError('The prescribed recycle coefficient 3 must be of type float')
         if type(self.Bv) != float:
             raise TypeError('The prescribed stray magnetic field must be of type float')
+        if type(self.uncertaintyFactor) != float:
+            raise TypeError('The prescribed runaway confinement uncertainty factor must be of type float')
         if type(self.Iref) != float:
             raise TypeError('The prescribed reference plasma current must be of type float')
             

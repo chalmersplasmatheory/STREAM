@@ -57,6 +57,12 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
         (real_t)1e-3
     );
     
+    s->DefineSetting(
+        "radialgrid/uncertaintyFactor",
+        "Runaway confinement uncertainty factor",
+        (real_t)1.0
+    );
+    
     DREAM::SimulationGenerator::DefineOptions_f_ripple(MODULENAME, s);
 }
 
