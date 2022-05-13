@@ -28,11 +28,11 @@ namespace STREAM {
             ElectronCyclotronHeating *Tcold_ECH=nullptr;
         };
     private:
-        ConfinementTime *confinementTime;
-        NeutralInflux *neutralInflux;
-        PlasmaVolume *plasmaVolume;
-        RunawayElectronConfinementTime *reConfinementTime;
-        OpticalThickness *opticalThickness;
+        ConfinementTime *confinementTime=nullptr;
+        NeutralInflux *neutralInflux=nullptr;
+        PlasmaVolume *plasmaVolume=nullptr;
+        RunawayElectronConfinementTime *reConfinementTime=nullptr;
+        OpticalThickness *opticalThickness=nullptr;
 
         std::vector<IonRateEquation*> ionRateEquations;
         struct eqn_terms *stream_terms;

@@ -4,13 +4,15 @@
 
 
 import numpy as np
-from DREAM import DREAMOutput
+from DREAM import DREAMIO, DREAMOutput
 
 from DREAM.Output.OtherIonSpeciesFluidQuantity import OtherIonSpeciesFluidQuantity
 from DREAM.Output.OtherIonSpeciesScalarQuantity import OtherIonSpeciesScalarQuantity
 from . Output.IonHandler import IonHandler
 from . Output.MeanFreePath import MeanFreePath
 from DREAM.Output.ScalarQuantity import ScalarQuantity
+
+from . STREAMSettings import STREAMSettings
 
 
 class STREAMOutput(DREAMOutput):
@@ -30,7 +32,7 @@ class STREAMOutput(DREAMOutput):
         super().__init__(filename=filename, path=path, lazy=lazy, loadsettings=loadsettings)
 
 
-    def load(self, filename, path="", lazy=True, *args, **kwargs):
+    def load(self, filename, path="", lazy=True, loadsettings=True, *args, **kwargs):
         """
         Loads STREAM output from the specified file. If 'path' is
         given, this indicates which group path in the file to load
@@ -40,7 +42,14 @@ class STREAMOutput(DREAMOutput):
         :param str path:     Path to subset of HDF5 file containing STREAM output.
         :param bool lazy:    If ``True``, allows the file to be read lazily (on-demand) by returning h5py DataSet objects instead of the actual data (wrapped in a DREAM.DataObject).
         """
-        super().load(filename=filename, path=path, lazy=lazy, *args, **kwargs)
+        od = super().load(filename=filename, path=path, lazy=lazy, loadsettings=False, *args, **kwargs)
+
+        if 'settings' in od and loadsettings:
+            s = od['settings']
+            if lazy:
+                s = DREAMIO.unlazy(s)
+
+            self.settings = STREAMSettings(s)
 
         self.eqsys.resetUnknown('lambda_i', MeanFreePath)
         self.eqsys.resetUnknown('n_i', IonHandler)

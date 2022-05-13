@@ -16,13 +16,13 @@
 namespace STREAM { 
     class EquationSystem : public DREAM::EquationSystem {
         public: 
-            ConfinementTime *CT;
-            NeutralInflux *NI;
-            PlasmaVolume *PV;
-            EllipticalRadialGridGenerator *r;
+            ConfinementTime *CT=nullptr;
+            NeutralInflux *NI=nullptr;
+            PlasmaVolume *PV=nullptr;
+            EllipticalRadialGridGenerator *r=nullptr;
             std::vector<IonRateEquation*> ire;
-            RunawayElectronConfinementTime *rect;
-            OpticalThickness *OT;
+            RunawayElectronConfinementTime *rect=nullptr;
+            OpticalThickness *OT=nullptr;
             
             EquationSystem(
                 DREAM::FVM::Grid*, DREAM::FVM::Grid*,
