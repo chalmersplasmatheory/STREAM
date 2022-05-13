@@ -23,7 +23,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4, nt=5000, EfieldDYON=True, uncertaintyFactor=1.0):
+def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4, nt=4000, EfieldDYON=True, uncertaintyFactor=1.0):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -117,15 +117,38 @@ def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4,
 
     return ss
 
-def getNrePeak(so, toffset=0, showlabel=True, save=False):
+def getNrePeak(so, so_init, factor, thresh, toffset=0):
+    t1 = so_init.grid.t[:]
+    dt1 = (t1[-1] - t1[0]) / (len(t1) - 1)
+    dreicer1 = so_init.other.fluid.gammaDreicer[:, 0]
+    dreicer_int1 = np.sum(dreicer1 * dt1)
+    t2 = so.grid.t[:] + 1e-4
+    dt2 = (t2[-1] - t2[0]) / (len(t2) - 1)
+    dreicer2 = so.other.fluid.gammaDreicer[:, 0]
+    dreicer_int2 = np.sum(dreicer2 * dt2)
+    loss = 1-so.eqsys.n_re[-1][0]/(dreicer_int1+dreicer_int2)
+    ava1 = so_init.other.fluid.GammaAva[:, 0] * so_init.eqsys.n_re[1:, 0]
+    ava2 = so.other.fluid.GammaAva[:, 0] * so.eqsys.n_re[1:, 0]
+    ava_int = np.sum(ava1*dt1) + np.sum(ava2*dt2)
+    loss_ava = 1 - so.eqsys.n_re[-1][0] / (dreicer_int1 + dreicer_int2 + ava_int)
+
     n_re = so.eqsys.n_re[:].flatten()
     t = so.grid.t[:] + toffset
     iPeaks = find_peaks(n_re)[0]
-    if len(iPeaks)!=1:
-        plt.plot(t,n_re)
-        plt.scatter(t[iPeaks], n_re[iPeaks])
-        plt.show()
-    return n_re[iPeaks[0]]
+
+    iThresh = np.abs(n_re[iPeaks[0]:]-thresh).argmin() + iPeaks[0]
+    if iThresh == len(n_re)-1 or n_re[iThresh+1] > thresh:
+        t[iThresh] = np.inf
+
+    #if len(iPeaks)!=1:
+    #plt.plot(t,n_re)
+    #plt.plot(np.array([t[0], t[-1]]), np.array([thresh, thresh]))
+    #plt.scatter(t[iPeaks], n_re[iPeaks])
+    #if iThresh != -1:
+    #plt.scatter(t[iThresh], n_re[iThresh])
+    #plt.title('Uncertainty factor is ' + str(factor))
+    #plt.show()
+    return n_re[iPeaks[0]], t[iThresh] - t[iPeaks[0]], loss, loss_ava
 
 
 
@@ -340,9 +363,12 @@ def makeplots(so11, so12, save=False):
 
 def saveDataArticle():
     pgp = 2 / 133.32 * 8e-5
-    nPoints = 200
-    uncertaintyFactors = np.logspace(-2, 0, nPoints)
+    nPoints = 100
+    uncertaintyFactors = np.logspace(-3, 0, nPoints)
     nre_peak = np.zeros(nPoints)
+    t_thresh = np.zeros(nPoints)
+    loss = np.zeros(nPoints)
+    loss_ava = np.zeros(nPoints)
     for f_u, i in zip(uncertaintyFactors, range(nPoints)):
         ss21 = generate(prefill=pgp, uncertaintyFactor=f_u)
         ss21.save(f'SweepSettings/settings1_{f_u}.h5')
@@ -350,13 +376,19 @@ def saveDataArticle():
 
         ss22 = STREAMSettings(ss21)
         ss22.fromOutput(f'SweepSettings/output1_{f_u}.h5')
-        ss22.timestep.setTmax(0.08 - ss21.timestep.tmax)
+        ss22.timestep.setTmax(0.15 - ss21.timestep.tmax)
         ss22.timestep.setNt(1000)
         ss22.save(f'SweepSettings/settings2_{f_u}.h5')
         so22 = runiface(ss22, f'SweepSettings/output2_{f_u}.h5', quiet=False)
 
-        nre_peak[i] = getNrePeak(so22)
+        nre_peak[i], t_thresh[i], loss[i], loss_ava[i] = getNrePeak(so22, so21, f_u, 9e13)
     plt.semilogx(uncertaintyFactors, nre_peak)
+    plt.show()
+    plt.semilogx(uncertaintyFactors, t_thresh)
+    plt.show()
+    plt.semilogx(uncertaintyFactors, loss)
+    plt.show()
+    plt.semilogx(uncertaintyFactors, loss_ava)
     plt.show()
     fu_csv = open('Data/uncertaintyfactor.csv', "w")
     np.savetxt(fu_csv, uncertaintyFactors)
@@ -364,6 +396,15 @@ def saveDataArticle():
     nrep_csv = open('Data/peakvalueNre.csv', "w")
     np.savetxt(nrep_csv, nre_peak)
     nrep_csv.close()
+    tt_csv = open('Data/tThreshold.csv', "w")
+    np.savetxt(tt_csv, t_thresh)
+    tt_csv.close()
+    loss_csv = open('Data/RunawayLoss.csv', "w")
+    np.savetxt(loss_csv, loss)
+    loss_csv.close()
+    lossava_csv = open('Data/RunawayLossWithAvalanche.csv', "w")
+    np.savetxt(lossava_csv, loss_ava)
+    lossava_csv.close()
 
 def main(argv):
     FONTSIZE = 16
