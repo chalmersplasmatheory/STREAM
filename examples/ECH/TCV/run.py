@@ -23,7 +23,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
+def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -36,14 +36,16 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     :param tmax:    Simulation time [s]
     :param nt:      Number of time steps
     """
+    fractionC = (Z_eff - 1) / (36 - 6*Z_eff)
+    print(str(fractionC))
     n0 = 5e17  # Initial total deuterium density # ?
     nD = n0 * np.array([[1 - gamma], [gamma]])
-    if fractionNe <= 0: # fractionNe ?
-        nNe = 1e3
+    if fractionC <= 0:
+        nC = 1e3
     else:
-        nNe = fractionNe * n0
+        nC = fractionC * n0
 
-    hf = h5py.File('TCV65108.h5', 'r')
+    hf = h5py.File('TCV65108_old2.h5', 'r')
 
     t_loop = np.array(hf.get('Loop voltage').get('x'))
     V_loop_osc =- np.array(hf.get('Loop voltage').get('z'))
@@ -116,7 +118,7 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
 
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
-    #ss.eqsys.n_i.addIon(name='Ne', Z=10, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nNe, r=np.array([0]), T=Ti0)
+    ss.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nC, r=np.array([0]), T=Ti0)
 
     # Disable runaway
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
@@ -131,8 +133,8 @@ def generate(gamma=2e-3, fractionNe = 0.02, tmax=1e-5, nt=2000, tstart=-0.01, te
     iD = ss.eqsys.n_i.getIndex('D')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1) # ?
 
-    #iN = ss.eqsys.n_i.getIndex('Ne')
-    #ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('Ne', 0.0015)  # ?
+    iC = ss.eqsys.n_i.getIndex('C')
+    ss.eqsys.n_i.ions[iC].setRecyclingCoefficient('C', 1)  # ?
 
     ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1, times=t_fluxD) # ?
 
@@ -184,6 +186,12 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     Ip_d = np.array(hf.get('Plasma current').get('z'))
     t_H = np.array(hf.get('H-alpha').get('x'))+ 0.01
     Halpha = np.array(hf.get('H-alpha').get('z'))
+    t_C = np.array(hf.get('C-III').get('x'))+ 0.01
+    CIII_d = np.array(hf.get('C-III').get('z'))
+    t_Energy = np.array(hf.get('Total energy (DML)').get('x')) + 0.01
+    energy = np.array(hf.get('Total energy (DML)').get('z'))
+    t_rad = np.array(hf.get('Radiated power').get('x')) + 0.01
+    P_rad = np.array(hf.get('Radiated power').get('z')) * 1e3
     hf.close()
     hf = h5py.File('firdens.h5', 'r')
     t_FIR = np.array(hf.get('FIR').get('x')) + 0.01
@@ -195,29 +203,53 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     totD = nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() + nD1[1:].flatten() * so.other.stream.V_p[:,0].flatten()
     gammaD = (1 - nD0[1:].flatten() * so.other.stream.V_n_tot['D'][:].flatten() / totD)
 
-    PEC = np.loadtxt('adas_6561-9A.dat', unpack=True)
-    PEC_ne = np.loadtxt('adas_ne.dat', unpack=True) * 1e6
-    PEC_Te = np.loadtxt('adas_Te.dat', unpack=True)
-    PEC_interp = interp2d(PEC_ne, PEC_Te, PEC)
+    PEC_D = np.loadtxt('adas_H6561-9A.dat', unpack=True)
+    PEC_D_ne = np.loadtxt('adas_Hne.dat', unpack=True) * 1e6
+    PEC_D_Te = np.loadtxt('adas_HTe.dat', unpack=True)
+    PEC_D_interp = interp2d(PEC_D_ne, PEC_D_Te, PEC_D)
 
-    PEC_data = np.zeros(len(ne))
+    PEC_D_data = np.zeros(len(ne))
     for i in range(len(ne)):
-        PEC_data[i] = PEC_interp(ne[i] , Te[i])
-    Dalpha = ne * nD0.flatten() * PEC_data
+        PEC_D_data[i] = PEC_D_interp(ne[i] , Te[i])
+    Dalpha = ne * nD0.flatten() * PEC_D_data
     Dalpha *= np.max(Halpha)  / np.max(Dalpha) / 3
 
-    plotInternal(axs[0,0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='STREAM')
+    PEC_C = np.loadtxt('adas_C4650-1.dat', unpack=True)
+    PEC_C_ne = np.loadtxt('adas_Cne.dat', unpack=True) * 1e6
+    PEC_C_Te = np.loadtxt('adas_CTe.dat', unpack=True)
+    PEC_C_interp = interp2d(PEC_C_ne, PEC_C_Te, PEC_C)
+
+    PEC_C_data = np.zeros(len(ne))
+    for i in range(len(ne)):
+        PEC_C_data[i] = PEC_C_interp(ne[i], Te[i])
+    nC2 = so.eqsys.n_i['C'][4][:]# + so.eqsys.n_i['C'][4][:]
+    CIII = ne * nC2.flatten() * PEC_C_data
+    CIII *= np.max(CIII_d) / np.max(CIII)
+
+    W_cold = so.eqsys.W_cold.integral()[:]
+    P_cold = so.other.fluid.Tcold_radiation.integral()[:]
+
+    plotInternal(axs[0,0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='65108')
     plotInternal(axs[0,0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='STREAM')
     plotInternal(axs[0,1], t_FIR, FIR / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:red', showlabel=False,
-                 label='STREAM')
+                 label='65108')
     plotInternal(axs[0,1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False,
                  label='STREAM')
     plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
-    plotInternal(axs[1,1], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='tab:blue', showlabel=showlabel,
-                 label=r'$\gamma_{\rm D}$')
-    plotInternal(axs[0, 2], t_H, Halpha, ylabel=r'$D_\alpha$', color='tab:red', showlabel=showlabel,
+    #plotInternal(axs[1,1], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='tab:blue', showlabel=showlabel, label=r'$\gamma_{\rm D}$')
+    #plotInternal(axs[0, 2], t_H, Halpha, ylabel=r'$D_\alpha$', color='tab:red', showlabel=showlabel, label='65108')
+    #plotInternal(axs[0, 2], t, Dalpha, ylabel=r'$D_\alpha$', color='tab:blue', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[0, 2], t_C, CIII_d, ylabel=r'$C_{\rm III}$', color='tab:red', showlabel=showlabel,
+                 label='65108')
+    plotInternal(axs[0, 2], t, CIII, ylabel=r'$C_{\rm III}$', color='tab:blue', showlabel=showlabel,
                  label='STREAM')
-    plotInternal(axs[0, 2], t, Dalpha, ylabel=r'$D_\alpha$', color='tab:blue', showlabel=showlabel,
+    plotInternal(axs[1, 2], t_rad, P_rad/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:red', showlabel=showlabel,
+                 label='65108')
+    plotInternal(axs[1, 2], t[1:], P_cold/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:blue', showlabel=showlabel,
+                 label='STREAM')
+    plotInternal(axs[1, 1], t_Energy, energy, ylabel=r'$W_\alpha$', color='tab:red', showlabel=showlabel,
+                 label='65108')
+    plotInternal(axs[1, 1], t, W_cold, ylabel=r'$W_{\rm cold} [J]$', color='tab:blue', showlabel=showlabel,
                  label='STREAM')
 
     '''
