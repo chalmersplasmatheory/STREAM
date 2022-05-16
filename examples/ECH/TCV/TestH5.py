@@ -5,7 +5,8 @@ from scipy.signal import savgol_filter
 from scipy.interpolate import interp1d
 
 
-
+hf = h5py.File('65108.h5', 'r')
+print(hf.keys())
 hf = h5py.File('firdens.h5', 'r')
 print(hf.keys())
 '''
@@ -22,7 +23,7 @@ plt.show()
 hf.close()
 hf = h5py.File('TCV65108.h5', 'r')
 print(hf.keys())
-#'''
+'''
 t_CIII = np.array(hf.get('C-III').get('x'))
 cIII = np.array(hf.get('C-III').get('z'))
 plt.plot(t_CIII, cIII)
@@ -30,7 +31,7 @@ plt.ylabel('C-III')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
-'''
+
 t_H = np.array(hf.get('H-alpha').get('x'))
 Halpha = np.array(hf.get('H-alpha').get('z'))
 plt.plot(t_H, Halpha)
@@ -47,11 +48,13 @@ plt.ylabel('Line-integrated (FIR)')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.1])
 plt.show()
+'''
 
 t_loop = np.array(hf.get('Loop voltage').get('x'))
 V_loop = np.array(hf.get('Loop voltage').get('z'))
 V_loop_s = savgol_filter(V_loop, 105, 3)
 plt.plot(t_loop, -V_loop, t_loop, -V_loop_s)
+plt.xlim([-0.01, 0.39])
 plt.ylabel('Loop voltage')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
@@ -64,7 +67,7 @@ plt.ylabel('Maximum (Thomson)')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
-'''
+
 t_fluxD = np.array(hf.get('Particle flux (D2)').get('x'))
 fluxD = np.array(hf.get('Particle flux (D2)').get('z'))
 plt.plot(t_fluxD, fluxD)

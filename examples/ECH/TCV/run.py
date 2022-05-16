@@ -8,6 +8,7 @@ from scipy.interpolate import interp1d, interp2d
 import sys
 import h5py
 from scipy.signal import savgol_filter
+from scipy.optimize import least_squares
 
 sys.path.append('../../../py')
 
@@ -37,13 +38,13 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     :param nt:      Number of time steps
     """
     fractionC = (Z_eff - 1) / (36 - 6*Z_eff)
-    print(str(fractionC))
     n0 = 5e17  # Initial total deuterium density # ?
     nD = n0 * np.array([[1 - gamma], [gamma]])
     if fractionC <= 0:
         nC = 1e3
     else:
         nC = fractionC * n0
+    nC = 1e3
 
     hf = h5py.File('TCV65108_old2.h5', 'r')
 
@@ -51,7 +52,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     V_loop_osc =- np.array(hf.get('Loop voltage').get('z'))
     it0_loop = int((tstart - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
     t_loop = t_loop[it0_loop:]-tstart
-    V_loop = savgol_filter(V_loop_osc[it0_loop:], 105, 3)
+    V_loop = savgol_filter(V_loop_osc[it0_loop:], 105, 3) * 1.2
 
     t_fluxD = np.array(hf.get('Particle flux (D2)').get('x'))
     fluxD = np.array(hf.get('Particle flux (D2)').get('z'))
@@ -79,10 +80,11 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     t_Vp = np.linspace(0, t_Vp_osc[-1]-tstart)
     V_p = V_initfun(t_Vp)
     a = np.sqrt(V_p / (2 * np.pi ** 2 * R0))
-    l_i = 0
     #plt.plot(t_Vp, a)
     #plt.show()
     hf.close()
+
+    l_i = 0
 
     Te0 = 1  # electron temperature [eV]
     Ti0 = 0.026  # ion temperature [eV]
@@ -134,7 +136,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1) # ?
 
     iC = ss.eqsys.n_i.getIndex('C')
-    ss.eqsys.n_i.ions[iC].setRecyclingCoefficient('C', 1)  # ?
+    ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('C', [0.015, 0.05, 0.015, 0.010], [0, 0.00001, 0.05, 0.4])  # ?
 
     ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1, times=t_fluxD) # ?
 
@@ -145,9 +147,9 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(0.25)
     ss.radialgrid.setVesselVolume(V_vessel)
-    ss.radialgrid.setIref(5e3) # Maximal plasma current 1.2 MA, KSTAR 2 MA so same I_ref? Half? B is half for TCV ??
+    ss.radialgrid.setIref(2*np.pi*0.27*2e-3/scipy.constants.mu_0) # Maximal plasma current 1.2 MA, KSTAR 2 MA so same I_ref? Half? B is half for TCV ??
     ss.radialgrid.setBv(2.0e-3) # ??
-    ss.radialgrid.setConnectionLengthFactor(1.0) # ??
+    ss.radialgrid.setConnectionLengthFactor(3.0) # ??
 
     ss.radialgrid.setECHParameters(P_inj, f_o, f_x, theta, phi, N)
 
@@ -169,6 +171,9 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
 
     return ss
 
+def fun_to_min(c, stream, data):
+    return c * data - stream
+
 def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     """
     Draw a plot with a output from the given STREAMOutput object.
@@ -186,8 +191,13 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     Ip_d = np.array(hf.get('Plasma current').get('z'))
     t_H = np.array(hf.get('H-alpha').get('x'))+ 0.01
     Halpha = np.array(hf.get('H-alpha').get('z'))
+    Halpha_interp = interp1d(t_H, Halpha, 'linear')
+    Halpha_i = Halpha_interp(t)
     t_C = np.array(hf.get('C-III').get('x'))+ 0.01
     CIII_d = np.array(hf.get('C-III').get('z'))
+    CIII_interp = interp1d(t_C, CIII_d, 'linear')
+    CIII_ds = CIII_interp(t)
+
     t_Energy = np.array(hf.get('Total energy (DML)').get('x')) + 0.01
     energy = np.array(hf.get('Total energy (DML)').get('z'))
     t_rad = np.array(hf.get('Radiated power').get('x')) + 0.01
@@ -197,6 +207,13 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     t_FIR = np.array(hf.get('FIR').get('x')) + 0.01
     FIR = np.array(hf.get('FIR').get('z'))
     hf.close()
+    hf = h5py.File('65108.h5', 'r')
+    t_kin = np.array(hf.get('Kinetic energy').get('x')) + 0.01
+    kin = np.array(hf.get('Kinetic energy').get('z'))
+    t_T = np.array(hf.get('Average (Thomson)').get('x')) + 0.01
+    temp = np.array(hf.get('Average (Thomson)').get('z'))
+    hf.close()
+
 
     nD0 = so.eqsys.n_i['D'][0][:]
     nD1 = so.eqsys.n_i['D'][1][:]
@@ -212,7 +229,12 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     for i in range(len(ne)):
         PEC_D_data[i] = PEC_D_interp(ne[i] , Te[i])
     Dalpha = ne * nD0.flatten() * PEC_D_data
-    Dalpha *= np.max(Halpha)  / np.max(Dalpha) / 3
+    Halpha_i /= np.max(Halpha)  / np.max(Dalpha)
+
+    resD = least_squares(fun_to_min, 1, args=(Dalpha, Halpha_i))
+    c_D = resD.x
+
+    Halpha_i *= c_D[0]
 
     PEC_C = np.loadtxt('adas_C4650-1.dat', unpack=True)
     PEC_C_ne = np.loadtxt('adas_Cne.dat', unpack=True) * 1e6
@@ -222,12 +244,27 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     PEC_C_data = np.zeros(len(ne))
     for i in range(len(ne)):
         PEC_C_data[i] = PEC_C_interp(ne[i], Te[i])
-    nC2 = so.eqsys.n_i['C'][4][:]# + so.eqsys.n_i['C'][4][:]
+    nC2 = so.eqsys.n_i['C'][2][:]# + so.eqsys.n_i['C'][4][:]
     CIII = ne * nC2.flatten() * PEC_C_data
-    CIII *= np.max(CIII_d) / np.max(CIII)
+    CIII_ds /= np.max(CIII_ds) / np.max(CIII)
+
+    resC = least_squares(fun_to_min, 1, args=(CIII, CIII_ds))
+    c_C = resC.x
+
+    CIII_ds *= c_C[0]
 
     W_cold = so.eqsys.W_cold.integral()[:]
     P_cold = so.other.fluid.Tcold_radiation.integral()[:]
+
+    Z_eff_num = nD1 * 1
+    Z_eff_denom = nD1 * 1
+    for i in range(1, 7):
+        Z_eff_num += so.eqsys.n_i['C'][i][:] * i ** 2
+        Z_eff_denom += so.eqsys.n_i['C'][i][:] * i
+    Z_eff = Z_eff_num / Z_eff_denom
+
+    eta_x = so.other.stream.eta_x[:]
+    f_absorbedECH = 1 - np.exp(-eta_x / np.cos(10*np.pi/180))
 
     plotInternal(axs[0,0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='65108')
     plotInternal(axs[0,0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='STREAM')
@@ -235,21 +272,25 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
                  label='65108')
     plotInternal(axs[0,1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False,
                  label='STREAM')
+    plotInternal(axs[0,2], t, Z_eff, ylabel=r'$Z_{\rm eff}$', color='tab:blue', showlabel=False, label='STREAM')
+    plotInternal(axs[1,0], t_T, temp, ylabel=r'$T_{\rm e}$ (eV)', color='tab:red', showlabel=False, label='65108')
     plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
     #plotInternal(axs[1,1], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='tab:blue', showlabel=showlabel, label=r'$\gamma_{\rm D}$')
-    #plotInternal(axs[0, 2], t_H, Halpha, ylabel=r'$D_\alpha$', color='tab:red', showlabel=showlabel, label='65108')
-    #plotInternal(axs[0, 2], t, Dalpha, ylabel=r'$D_\alpha$', color='tab:blue', showlabel=showlabel, label='STREAM')
-    plotInternal(axs[0, 2], t_C, CIII_d, ylabel=r'$C_{\rm III}$', color='tab:red', showlabel=showlabel,
+    plotInternal(axs[1, 1], t_kin, kin, ylabel=r'$W_\alpha$', color='tab:red', showlabel=showlabel,
                  label='65108')
-    plotInternal(axs[0, 2], t, CIII, ylabel=r'$C_{\rm III}$', color='tab:blue', showlabel=showlabel,
+    plotInternal(axs[1, 1], t, W_cold, ylabel=r'$W_{\rm cold}$ [J]', color='tab:blue', showlabel=showlabel,
                  label='STREAM')
     plotInternal(axs[1, 2], t_rad, P_rad/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:red', showlabel=showlabel,
                  label='65108')
     plotInternal(axs[1, 2], t[1:], P_cold/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:blue', showlabel=showlabel,
                  label='STREAM')
-    plotInternal(axs[1, 1], t_Energy, energy, ylabel=r'$W_\alpha$', color='tab:red', showlabel=showlabel,
+    plotInternal(axs[2, 0], t, Halpha_i, ylabel=r'$D_\alpha$', color='tab:red', showlabel=showlabel, label='65108')
+    plotInternal(axs[2, 0], t, Dalpha, ylabel=r'$D_\alpha$', color='tab:blue', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[2, 1], t, CIII_ds, ylabel=r'$C_{\rm III}$', color='tab:red', showlabel=showlabel,
                  label='65108')
-    plotInternal(axs[1, 1], t, W_cold, ylabel=r'$W_{\rm cold} [J]$', color='tab:blue', showlabel=showlabel,
+    plotInternal(axs[2, 1], t, CIII, ylabel=r'$C_{\rm III}$', color='tab:blue', showlabel=showlabel,
+                 label='STREAM')
+    plotInternal(axs[2, 2], t[1:], f_absorbedECH, ylabel=r'$f_{\rm ECH, abs}$', color='tab:blue', showlabel=showlabel,
                  label='STREAM')
 
     '''
@@ -356,7 +397,7 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
 
 
 def makeplots(so1, so2, toffset):
-    fig1, axs1 = plt.subplots(2, 3, figsize=(12, 8))
+    fig1, axs1 = plt.subplots(3, 3, figsize=(12, 12))
 
     drawplot1(axs1, so1, toffset=toffset)
     drawplot1(axs1, so2, toffset=toffset + so1.grid.t[-1], showlabel=True, first=False)

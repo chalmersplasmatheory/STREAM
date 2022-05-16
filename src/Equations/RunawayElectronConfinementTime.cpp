@@ -14,13 +14,14 @@ using namespace std;
  */
 RunawayElectronConfinementTime::RunawayElectronConfinementTime(
 	FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
-	real_t l_MK2, real_t B_v, real_t I_ref
+	real_t l_MK2, real_t B_v, real_t I_ref, real_t connectionLengthFactor
 ) {
     unknowns = u;
     radials  = r;
     this->l_MK2=l_MK2;
     this->B_v = B_v;
     this->I_ref = I_ref;
+    this->connectionLengthFactor = connectionLengthFactor;
 }
 
 /**
@@ -48,13 +49,13 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime1(l
     real_t Beddy = Constants::mu0 / (M_PI*l_MK2) * I_wall;
     real_t Bz = hypot(B_v, Beddy);
 
-    real_t Lf  = 3*a/4 * B/Bz * exp(I_p / I_ref);
-	real_t m   = Constants::me;
-	real_t mc  = Constants::me * Constants::c;
-	real_t mc2 = mc * Constants::c;
-	real_t e   = Constants::ec;
+    real_t Lf  = connectionLengthFactor*a/4 * B/Bz * exp(I_p / I_ref);
+    real_t m   = Constants::me;
+    real_t mc  = Constants::me * Constants::c;
+    real_t mc2 = mc * Constants::c;
+    real_t e   = Constants::ec;
 
-	return sqrt((2*m*Lf/(e*E)) * (1 + e*E*Lf/(2*mc2)));
+    return sqrt((2*m*Lf/(e*E)) * (1 + e*E*Lf/(2*mc2)));
 }
 
 /**

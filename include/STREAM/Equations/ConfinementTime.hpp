@@ -39,7 +39,7 @@ namespace STREAM{
 			// the poloidal stray field, that it should rather be 3. To allow us to
 			// easily switch between simulation modes, we put this constant here and
 			// use it in the *.cpp file.
-			real_t connectionLengthFactor = 1.0;
+			real_t connectionLengthFactor;// = 1.0;
                 
                         ConfinementTime(
 							DREAM::FVM::UnknownQuantityHandler *u,
