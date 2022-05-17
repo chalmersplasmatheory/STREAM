@@ -51,8 +51,15 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     t_loop = np.array(hf.get('Loop voltage').get('x'))
     V_loop_osc =- np.array(hf.get('Loop voltage').get('z'))
     it0_loop = int((tstart - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
-    t_loop = t_loop[it0_loop:]-tstart
-    V_loop = savgol_filter(V_loop_osc[it0_loop:], 105, 3) * 1.1
+    itmin_loop = int((0.05 - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
+    itend_loop = int((0.5 - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
+    t_loop = t_loop[it0_loop:itend_loop]-tstart
+    V_loop = np.append(savgol_filter(V_loop_osc[it0_loop:itmin_loop], 205, 3), savgol_filter(V_loop_osc[itmin_loop:itend_loop], 505, 3))#*1.1)
+    #V_loop *= np.linspace(1, 1.2, V_loop.shape[0])
+    #plt.plot(t_loop, V_loop)
+    #plt.xlim([0,0.4])
+    #plt.ylim([-1, 10])
+    #plt.show()
 
     t_fluxD = np.array(hf.get('Particle flux (D2)').get('x'))
     fluxD = np.array(hf.get('Particle flux (D2)').get('z'))
@@ -127,11 +134,11 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
 
     # Recycling coefficients
-    t = np.linspace(tstart, tend)
+    t = np.linspace(0, tend-tstart)
     c1 = 1.022
     c2 = 0.02
     c3 = 0.1
-    Y_DD = c1 - c2 * (1 - np.exp(-(t-tstart) / c3))
+    Y_DD = c1 - c2 * (1 - np.exp(-(t) / c3))
     iD = ss.eqsys.n_i.getIndex('D')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1) # ?
 
@@ -182,9 +189,9 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
 
     t = so.grid.t[:] + toffset
     Ip = so.eqsys.I_p[:, 0]
+    Ire = so.eqsys.j_re.current()[:]
     ne = so.eqsys.n_cold[:, 0]
     Te = so.eqsys.T_cold[:, 0]
-    Ti = so.eqsys.W_i.getTemperature()['D'][:, 0]
 
     hf = h5py.File('TCV65108.h5', 'r')
     t_Ip_d = np.array(hf.get('Plasma current').get('x')) + 0.01
@@ -268,6 +275,8 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
 
     plotInternal(axs[0,0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='65108')
     plotInternal(axs[0,0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[0, 0], t, Ire / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='k', showlabel=showlabel,
+                 label='STREAM')
     plotInternal(axs[0,1], t_FIR, FIR / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:red', showlabel=False,
                  label='65108')
     plotInternal(axs[0,1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False,
@@ -293,16 +302,12 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     plotInternal(axs[2, 2], t[1:], f_absorbedECH, ylabel=r'$f_{\rm ECH, abs}$', color='tab:blue', showlabel=showlabel,
                  label='STREAM')
 
-    '''
-    plotInternal(axs[1, 1], t[1:], Lf, ylabel=r'$L_f$ (m)', color='tab:blue', showlabel=False, label='STREAM', log=True)
-    plotInternal(axs[2, 0], t, Ti, ylabel=r'$T_{\rm i}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
-    plotInternal(axs[2, 1], t[1:], tau, ylabel=r'$\tau_{\rm D}$ (s)', color='tab:blue', showlabel=False, label='STREAM')
-    
+
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
-            #axs[i, j].set_xlim([0, 0.3])
-            #axs[i, j].grid(True)
-    '''
+            axs[i, j].set_xlim([0, 0.11])
+            axs[i, j].grid(True)
+    #'''
     axs[0,0].set_ylim([0, 0.4])
     axs[0,1].set_ylim([0, 4])
     #axs[2, 0].set_ylim([0, 100])
@@ -433,7 +438,7 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.4 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(10000)
+        ss2.timestep.setNt(20000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:

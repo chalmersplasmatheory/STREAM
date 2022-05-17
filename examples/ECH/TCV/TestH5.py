@@ -48,7 +48,7 @@ plt.ylabel('Line-integrated (FIR)')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.1])
 plt.show()
-'''
+
 
 t_loop = np.array(hf.get('Loop voltage').get('x'))
 V_loop = np.array(hf.get('Loop voltage').get('z'))
@@ -57,9 +57,9 @@ plt.plot(t_loop, -V_loop, t_loop, -V_loop_s)
 plt.xlim([-0.01, 0.39])
 plt.ylabel('Loop voltage')
 plt.xlabel('t')
-plt.xlim([-0.02, 0.05])
+plt.ylim([-1, 10])
 plt.show()
-'''
+
 t_maxThomson = np.array(hf.get('Maximum (Thomson)').get('x'))
 maxThomson = np.array(hf.get('Maximum (Thomson)').get('z'))
 plt.plot(t_maxThomson, maxThomson)
@@ -84,7 +84,7 @@ plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
 #'''
-'''
+
 t_Vp = np.array(hf.get('Plasma volume').get('x'))
 V_p_osc = np.array(hf.get('Plasma volume').get('z'))
 V_p = savgol_filter(V_p_osc, 45, 3)
@@ -98,7 +98,7 @@ plt.ylabel('Minor radius')
 plt.xlabel('t')
 #plt.xlim([-0.02, 0.05])
 plt.show()
-
+'''
 t_B = np.array(hf.get('Toroidal magnetic field').get('x'))
 B = np.array(hf.get('Toroidal magnetic field').get('z'))
 plt.plot(t_B, B)
