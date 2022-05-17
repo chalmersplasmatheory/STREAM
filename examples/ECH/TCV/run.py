@@ -52,7 +52,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     V_loop_osc =- np.array(hf.get('Loop voltage').get('z'))
     it0_loop = int((tstart - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
     t_loop = t_loop[it0_loop:]-tstart
-    V_loop = savgol_filter(V_loop_osc[it0_loop:], 105, 3) * 1.2
+    V_loop = savgol_filter(V_loop_osc[it0_loop:], 105, 3) * 1.1
 
     t_fluxD = np.array(hf.get('Particle flux (D2)').get('x'))
     fluxD = np.array(hf.get('Particle flux (D2)').get('z'))
