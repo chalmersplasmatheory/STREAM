@@ -14,6 +14,7 @@ import scipy.constants
 from scipy.interpolate import interp2d
 from scipy.constants import c, e, m_e, mu_0
 import sys
+import matplotlib as mpl
 
 sys.path.append('../../py')
 
@@ -28,6 +29,8 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 import DREAM.Settings.Equations.RunawayElectrons as Runaways
 
+FONTSIZE = 20
+mpl.rcParams.update({'text.usetex': True, 'font.family': 'sans', 'font.size': FONTSIZE})
 
 def generate(prefill=1e-5, gamma=2e-2, fractionO = 0.001, fractionC = 0, Ip=1e4, tmax=1e-4, nt=2000, selfconsistent = False):
     """
@@ -161,8 +164,8 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=True, first=True):
     Ac = 1.25 ** 2 * np.pi
     streaming = Ip/(Ac*e*ne) * np.sqrt(m_e / (e * Te))
 
-    plotInternal(axs[0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=False, label='STREAM')
-    plotInternal(axs[0], t, Ire / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=False, label='STREAM')
+    plotInternal(axs[0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='tab:blue', showlabel=showlabel, label=r'$I_{\rm p}$')
+    plotInternal(axs[0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='k', showlabel=showlabel, label=r'$I_{\rm RE}$')
     plotInternal(axs[1], t, streaming , ylabel=r'$\xi$ ', color='tab:blue', showlabel=False, label='STREAM')
     plotInternal(axs[2], t, Dalpha, ylabel=r'$D_\alpha$ ', color='tab:blue', showlabel=False, label='STREAM')
     plotInternal(axs[3], t, ne/1e18, ylabel=r'$n_{\rm e}$ ($10^{18}$ m$^{-3}$)', color='tab:blue', showlabel=False, label='STREAM')
@@ -203,7 +206,7 @@ def makeplots(so1, so2):
 
     drawplot1(axs1, so1)
     drawplot1(axs1, so2, toffset=so1.grid.t[-1], showlabel=True, first=False)
-
+    axs1[0].legend(frameon=False)
 
     fig1.tight_layout()
     #fig1.savefig('../../runaway_svn/mathias/startup/figs/deVries2020_f0.3.pdf')
