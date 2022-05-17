@@ -47,7 +47,7 @@ real_t RunawayElectronConfinementTime::EvaluateRunawayElectronConfinementTime1(l
     real_t Beddy = Constants::mu0 / (M_PI*l_MK2) * I_wall;
     real_t Bz = hypot(B_v, Beddy);
 
-    real_t Lf  = 3*a/4 * B/Bz * exp(I_p / I_ref);
+    real_t Lf  = 1*a/4 * B/Bz * exp(I_p / I_ref);
 	real_t m   = Constants::me;
 	real_t mc  = Constants::me * Constants::c;
 	real_t mc2 = mc * Constants::c;
