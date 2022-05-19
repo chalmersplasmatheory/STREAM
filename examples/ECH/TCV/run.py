@@ -23,6 +23,8 @@ from STREAM import STREAMOutput, STREAMSettings, runiface
 import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
+def gaussian(x, mu, sig):
+    return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 
 def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, connectionLengthFactor=3.0):
     """
@@ -145,7 +147,12 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     iC = ss.eqsys.n_i.getIndex('C')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('C', [0.015, 0.05, 0.015, 0.010], [0, 0.00001, 0.05, 0.4])  # ?
 
-    ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1, times=t_fluxD) # ?
+    g = gaussian(t_fluxD, 0.18, 0.03)
+    #plt.plot(t_fluxD, g)
+    #plt.xlim([0, 0.41])
+    #plt.show()
+
+    ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1 , times=t_fluxD) # ?
 
 
     # Radial grid

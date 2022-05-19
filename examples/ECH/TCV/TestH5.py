@@ -21,7 +21,7 @@ plt.show()
 
 '''
 hf.close()
-hf = h5py.File('TCV65108.h5', 'r')
+hf = h5py.File('TCV65108_old.h5', 'r')
 print(hf.keys())
 '''
 t_CIII = np.array(hf.get('C-III').get('x'))
@@ -67,15 +67,16 @@ plt.ylabel('Maximum (Thomson)')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
-
+'''
 t_fluxD = np.array(hf.get('Particle flux (D2)').get('x'))
 fluxD = np.array(hf.get('Particle flux (D2)').get('z'))
 plt.plot(t_fluxD, fluxD)
 plt.ylabel('Particle flux (D2)')
 plt.xlabel('t')
-plt.xlim([-0.015, 0.1])
+plt.xlim([-0.01, 0.4])
 plt.show()
 
+'''
 t_Ip = np.array(hf.get('Plasma current').get('x'))
 Ip = np.array(hf.get('Plasma current').get('z'))
 plt.plot(t_Ip, Ip)
@@ -83,7 +84,6 @@ plt.ylabel('Plasma current')
 plt.xlabel('t')
 plt.xlim([-0.02, 0.05])
 plt.show()
-#'''
 
 t_Vp = np.array(hf.get('Plasma volume').get('x'))
 V_p_osc = np.array(hf.get('Plasma volume').get('z'))
@@ -98,7 +98,7 @@ plt.ylabel('Minor radius')
 plt.xlabel('t')
 #plt.xlim([-0.02, 0.05])
 plt.show()
-'''
+
 t_B = np.array(hf.get('Toroidal magnetic field').get('x'))
 B = np.array(hf.get('Toroidal magnetic field').get('z'))
 plt.plot(t_B, B)
