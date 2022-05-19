@@ -24,7 +24,7 @@ import STREAM.Settings.Equations.ElectricField as ElectricField
 import STREAM.Settings.Equations.IonSpecies as Ions
 
 
-def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
+def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, connectionLengthFactor=3.0):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -152,11 +152,11 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4):
     ss.radialgrid.setB0(Btor)
     ss.radialgrid.setMinorRadius(a, t_Vp)
     ss.radialgrid.setMajorRadius(R0)
-    ss.radialgrid.setWallRadius(0.25)
+    ss.radialgrid.setWallRadius(0.4)
     ss.radialgrid.setVesselVolume(V_vessel)
     ss.radialgrid.setIref(2*np.pi*0.27*2e-3/scipy.constants.mu_0) # Maximal plasma current 1.2 MA, KSTAR 2 MA so same I_ref? Half? B is half for TCV ??
     ss.radialgrid.setBv(2.0e-3) # ??
-    ss.radialgrid.setConnectionLengthFactor(3.0) # ??
+    ss.radialgrid.setConnectionLengthFactor(connectionLengthFactor) # ??
 
     ss.radialgrid.setECHParameters(P_inj, f_o, f_x, theta, phi, N)
 
@@ -273,39 +273,39 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     eta_x = so.other.stream.eta_x[:]
     f_absorbedECH = 1 - np.exp(-eta_x / np.cos(10*np.pi/180))
 
-    plotInternal(axs[0,0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='65108')
-    plotInternal(axs[0,0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[0,0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='65108')
+    plotInternal(axs[0,0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='STREAM')
     plotInternal(axs[0, 0], t, Ire / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='k', showlabel=showlabel,
                  label='STREAM')
-    plotInternal(axs[0,1], t_FIR, FIR / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:red', showlabel=False,
+    plotInternal(axs[0,1], t_FIR, FIR / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False,
                  label='65108')
-    plotInternal(axs[0,1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False,
+    plotInternal(axs[0,1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:red', showlabel=False,
                  label='STREAM')
-    plotInternal(axs[0,2], t, Z_eff, ylabel=r'$Z_{\rm eff}$', color='tab:blue', showlabel=False, label='STREAM')
-    plotInternal(axs[1,0], t_T, temp, ylabel=r'$T_{\rm e}$ (eV)', color='tab:red', showlabel=False, label='65108')
-    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='STREAM')
-    #plotInternal(axs[1,1], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='tab:blue', showlabel=showlabel, label=r'$\gamma_{\rm D}$')
-    plotInternal(axs[1, 1], t_kin, kin, ylabel=r'$W_\alpha$', color='tab:red', showlabel=showlabel,
+    plotInternal(axs[0,2], t, Z_eff, ylabel=r'$Z_{\rm eff}$', color='tab:red', showlabel=False, label='STREAM')
+    plotInternal(axs[1,0], t_T, temp, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='65108')
+    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:red', showlabel=False, label='STREAM')
+    #plotInternal(axs[1,1], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='tab:red', showlabel=showlabel, label=r'$\gamma_{\rm D}$')
+    plotInternal(axs[1, 1], t_kin, kin, ylabel=r'$W_\alpha$', color='tab:blue', showlabel=showlabel,
                  label='65108')
-    plotInternal(axs[1, 1], t, W_cold, ylabel=r'$W_{\rm cold}$ [J]', color='tab:blue', showlabel=showlabel,
+    plotInternal(axs[1, 1], t, W_cold, ylabel=r'$W_{\rm cold}$ [J]', color='tab:red', showlabel=showlabel,
                  label='STREAM')
-    plotInternal(axs[1, 2], t_rad, P_rad/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:red', showlabel=showlabel,
+    plotInternal(axs[1, 2], t_rad, P_rad/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:blue', showlabel=showlabel,
                  label='65108')
-    plotInternal(axs[1, 2], t[1:], P_cold/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:blue', showlabel=showlabel,
+    plotInternal(axs[1, 2], t[1:], P_cold/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:red', showlabel=showlabel,
                  label='STREAM')
-    plotInternal(axs[2, 0], t, Halpha_i, ylabel=r'$D_\alpha$', color='tab:red', showlabel=showlabel, label='65108')
-    plotInternal(axs[2, 0], t, Dalpha, ylabel=r'$D_\alpha$', color='tab:blue', showlabel=showlabel, label='STREAM')
-    plotInternal(axs[2, 1], t, CIII_ds, ylabel=r'$C_{\rm III}$', color='tab:red', showlabel=showlabel,
+    plotInternal(axs[2, 0], t, Halpha_i, ylabel=r'$D_\alpha$', color='tab:blue', showlabel=showlabel, label='65108')
+    plotInternal(axs[2, 0], t, Dalpha, ylabel=r'$D_\alpha$', color='tab:red', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[2, 1], t, CIII_ds, ylabel=r'$C_{\rm III}$', color='tab:blue', showlabel=showlabel,
                  label='65108')
-    plotInternal(axs[2, 1], t, CIII, ylabel=r'$C_{\rm III}$', color='tab:blue', showlabel=showlabel,
+    plotInternal(axs[2, 1], t, CIII, ylabel=r'$C_{\rm III}$', color='tab:red', showlabel=showlabel,
                  label='STREAM')
-    plotInternal(axs[2, 2], t[1:], f_absorbedECH, ylabel=r'$f_{\rm ECH, abs}$', color='tab:blue', showlabel=showlabel,
+    plotInternal(axs[2, 2], t[1:], f_absorbedECH, ylabel=r'$f_{\rm ECH, abs}$', color='tab:red', showlabel=showlabel,
                  label='STREAM')
 
 
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
-            axs[i, j].set_xlim([0, 0.11])
+            axs[i, j].set_xlim([0, 0.4])
             axs[i, j].grid(True)
     #'''
     axs[0,0].set_ylim([0, 0.4])
