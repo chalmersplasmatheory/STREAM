@@ -165,7 +165,7 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=True, first=True):
     streaming = Ip/(Ac*e*ne) * np.sqrt(m_e / (e * Te))
 
     plotInternal(axs[0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='tab:blue', showlabel=showlabel, label=r'$I_{\rm p}$')
-    plotInternal(axs[0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='k', showlabel=showlabel, label=r'$I_{\rm RE}$')
+    plotInternal(axs[0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='k', linestyle='dashed', showlabel=showlabel, label=r'$I_{\rm RE}$')
     plotInternal(axs[1], t, streaming , ylabel=r'$\xi$ ', color='tab:blue', showlabel=False, label='STREAM')
     plotInternal(axs[2], t, Dalpha, ylabel=r'$D_\alpha$ ', color='tab:blue', showlabel=False, label='STREAM')
     plotInternal(axs[3], t, ne/1e18, ylabel=r'$n_{\rm e}$ ($10^{18}$ m$^{-3}$)', color='tab:blue', showlabel=False, label='STREAM')
