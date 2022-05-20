@@ -164,6 +164,46 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=True, first=True):
     Ac = 1.25 ** 2 * np.pi
     streaming = Ip/(Ac*e*ne) * np.sqrt(m_e / (e * Te))
 
+    EoverED = so.eqsys.E_field.norm('ED')[1:, 0]
+    ECoverED = so.other.fluid.Eceff[:, 0] / so.other.fluid.EDreic[:, 0]
+    Vloop = so.eqsys.E_field[:]*2*np.pi*2.9
+
+    if save:
+        if first:
+            worab = 'w'
+        else:
+            worab = 'ab'
+        t_csv = open('Data/time_STREAM.csv', worab)
+        np.savetxt(t_csv, t)
+        t_csv.close()
+        Ip_csv = open('Data/PlasmaCurrent_STREAM.csv', worab)
+        np.savetxt(Ip_csv, Ip)
+        Ip_csv.close()
+        ne_csv = open('Data/ElectronDensity_STREAM.csv', worab)
+        np.savetxt(ne_csv, ne)
+        ne_csv.close()
+        Te_csv = open('Data/ElectronTemperature_STREAM.csv', worab)
+        np.savetxt(Te_csv, Te)
+        Te_csv.close()
+        streaming_csv = open('Data/StreamingParameter_STREAM.csv', worab)
+        np.savetxt(streaming_csv, streaming)
+        streaming_csv.close()
+        Dalpha_csv = open('Data/Dalpha_STREAM.csv', worab)
+        np.savetxt(Dalpha_csv, Dalpha)
+        Dalpha_csv.close()
+        Ire_csv = open('Data/RunawayCurrent_STREAM.csv', worab)
+        np.savetxt(Ire_csv, Ire)
+        Ire_csv.close()
+        EoverED_csv = open('Data/ElectricField_STREAM.csv', worab)
+        np.savetxt(EoverED_csv, EoverED)
+        EoverED_csv.close()
+        ECoverED_csv = open('Data/CriticalElectricField_STREAM.csv', worab)
+        np.savetxt(ECoverED_csv, ECoverED)
+        ECoverED_csv.close()
+        Vloop_csv = open('Data/LoopVoltage_STREAM.csv', worab)
+        np.savetxt(Vloop_csv, Vloop)
+        Vloop_csv.close()
+
     plotInternal(axs[0], t, Ip / 1e6, ylabel=r'$I$ (MA)', color='tab:blue', showlabel=showlabel, label=r'$I_{\rm p}$')
     plotInternal(axs[0], t, Ire / 1e6, ylabel=r'$I$ (MA)', color='k', linestyle='dashed', showlabel=showlabel, label=r'$I_{\rm RE}$')
     plotInternal(axs[1], t, streaming , ylabel=r'$\xi$ ', color='tab:blue', showlabel=False, label='STREAM')
