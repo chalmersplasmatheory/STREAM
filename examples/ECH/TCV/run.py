@@ -9,6 +9,10 @@ import sys
 import h5py
 from scipy.signal import savgol_filter
 from scipy.optimize import least_squares
+import matplotlib as mpl
+
+FONTSIZE = 20
+mpl.rcParams.update({'text.usetex': True, 'font.family': 'sans', 'font.size': FONTSIZE})
 
 sys.path.append('../../../py')
 
@@ -56,7 +60,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     itmin_loop = int((0.05 - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
     itend_loop = int((0.5 - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
     t_loop = t_loop[it0_loop:itend_loop]-tstart
-    V_loop = np.append(savgol_filter(V_loop_osc[it0_loop:itmin_loop], 205, 3), savgol_filter(V_loop_osc[itmin_loop:itend_loop], 505, 3))#*1.1)
+    V_loop = np.append(savgol_filter(V_loop_osc[it0_loop:itmin_loop], 205, 3), savgol_filter(V_loop_osc[itmin_loop:itend_loop], 505, 3))#*1.2)
     #V_loop *= np.linspace(1, 1.2, V_loop.shape[0])
     #plt.plot(t_loop, V_loop)
     #plt.xlim([0,0.4])
@@ -93,7 +97,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     #plt.show()
     hf.close()
 
-    l_i = 0
+    l_i = 0.0
 
     Te0 = 1  # electron temperature [eV]
     Ti0 = 0.026  # ion temperature [eV]
@@ -106,7 +110,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     f_o = 0
     f_x = 1.0
     theta = 10 * np.pi / 180
-    phi = 90 * np.pi / 180 #np.pi/2 # ??
+    phi = 50.0 * np.pi / 180 #np.pi/2 # ??
     N = 2
 
     # Impurities ??
@@ -152,7 +156,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     #plt.xlim([0, 0.41])
     #plt.show()
 
-    ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1 , times=t_fluxD) # ?
+    ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1, times=t_fluxD) # ?
 
 
     # Radial grid
@@ -186,7 +190,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     return ss
 
 def fun_to_min(c, stream, data):
-    return c * data - stream
+    return c * stream - data
 
 def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     """
@@ -243,12 +247,12 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     for i in range(len(ne)):
         PEC_D_data[i] = PEC_D_interp(ne[i] , Te[i])
     Dalpha = ne * nD0.flatten() * PEC_D_data
-    Halpha_i /= np.max(Halpha)  / np.max(Dalpha)
+    Dalpha *= np.max(Halpha)  / np.max(Dalpha)
 
     resD = least_squares(fun_to_min, 1, args=(Dalpha, Halpha_i))
     c_D = resD.x
 
-    Halpha_i *= c_D[0]
+    Dalpha *= c_D[0]
 
     PEC_C = np.loadtxt('adas_C4650-1.dat', unpack=True)
     PEC_C_ne = np.loadtxt('adas_Cne.dat', unpack=True) * 1e6
@@ -260,12 +264,12 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
         PEC_C_data[i] = PEC_C_interp(ne[i], Te[i])
     nC2 = so.eqsys.n_i['C'][2][:]# + so.eqsys.n_i['C'][4][:]
     CIII = ne * nC2.flatten() * PEC_C_data
-    CIII_ds /= np.max(CIII_ds) / np.max(CIII)
+    CIII *= np.max(CIII_ds) / np.max(CIII)
 
     resC = least_squares(fun_to_min, 1, args=(CIII, CIII_ds))
     c_C = resC.x
 
-    CIII_ds *= c_C[0]
+    CIII *= c_C[0]
 
     W_cold = so.eqsys.W_cold.integral()[:]
     P_cold = so.other.fluid.Tcold_radiation.integral()[:]
@@ -280,44 +284,40 @@ def drawplot1(axs, so, toffset=0, showlabel=False, save=False, first=True):
     eta_x = so.other.stream.eta_x[:]
     f_absorbedECH = 1 - np.exp(-eta_x / np.cos(10*np.pi/180))
 
-    plotInternal(axs[0,0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='65108')
-    plotInternal(axs[0,0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', showlabel=showlabel, label='STREAM')
-    plotInternal(axs[0, 0], t, Ire / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='k', showlabel=showlabel,
-                 label='STREAM')
-    plotInternal(axs[0,1], t_FIR, FIR / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False,
-                 label='65108')
-    plotInternal(axs[0,1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:red', showlabel=False,
-                 label='STREAM')
-    plotInternal(axs[0,2], t, Z_eff, ylabel=r'$Z_{\rm eff}$', color='tab:red', showlabel=False, label='STREAM')
-    plotInternal(axs[1,0], t_T, temp, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='65108')
-    plotInternal(axs[1,0], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:red', showlabel=False, label='STREAM')
-    #plotInternal(axs[1,1], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='tab:red', showlabel=showlabel, label=r'$\gamma_{\rm D}$')
-    plotInternal(axs[1, 1], t_kin, kin, ylabel=r'$W_\alpha$', color='tab:blue', showlabel=showlabel,
-                 label='65108')
-    plotInternal(axs[1, 1], t, W_cold, ylabel=r'$W_{\rm cold}$ [J]', color='tab:red', showlabel=showlabel,
-                 label='STREAM')
-    plotInternal(axs[1, 2], t_rad, P_rad/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:blue', showlabel=showlabel,
-                 label='65108')
-    plotInternal(axs[1, 2], t[1:], P_cold/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:red', showlabel=showlabel,
-                 label='STREAM')
-    plotInternal(axs[2, 0], t, Halpha_i, ylabel=r'$D_\alpha$', color='tab:blue', showlabel=showlabel, label='65108')
-    plotInternal(axs[2, 0], t, Dalpha, ylabel=r'$D_\alpha$', color='tab:red', showlabel=showlabel, label='STREAM')
-    plotInternal(axs[2, 1], t, CIII_ds, ylabel=r'$C_{\rm III}$', color='tab:blue', showlabel=showlabel,
-                 label='65108')
-    plotInternal(axs[2, 1], t, CIII, ylabel=r'$C_{\rm III}$', color='tab:red', showlabel=showlabel,
-                 label='STREAM')
-    plotInternal(axs[2, 2], t[1:], f_absorbedECH, ylabel=r'$f_{\rm ECH, abs}$', color='tab:red', showlabel=showlabel,
-                 label='STREAM')
+    plotInternal(axs[0, 0], t_Ip_d, Ip_d / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:blue', showlabel=showlabel, label='65108')
+    plotInternal(axs[0, 0], t, Ip / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='tab:red', linestyle='dashed', showlabel=showlabel, label='STREAM')
+    plotInternal(axs[0, 0], t, Ire / 1e6, ylabel=r'$I_{\rm p}$ (MA)', color='k', linestyle='dotted', showlabel=showlabel, label=r'$I_{\rm RE}$ STREAM')
+    plotInternal(axs[0, 1], t_FIR, FIR / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:blue', showlabel=False, label='65108')
+    plotInternal(axs[0, 1], t, ne / 1e19, ylabel=r'$n_{\rm e}$ ($1\cdot 10^{19}$m$^{-3}$)', color='tab:red', linestyle='dashed', showlabel=False, label='STREAM')
+    plotInternal(axs[0, 2], t_T, temp, ylabel=r'$T_{\rm e}$ (eV)', color='tab:blue', showlabel=False, label='65108')
+    plotInternal(axs[0, 2], t, Te, ylabel=r'$T_{\rm e}$ (eV)', color='tab:red', linestyle='dashed', showlabel=False, label='STREAM')
+    #plotInternal(axs[1,1], t[1:], gammaD, ylabel=r'$\gamma_{\rm D}$ (\%)', color='tab:red', linestyle='dashed', showlabel=showlabel, label=r'$\gamma_{\rm D}$')
+    plotInternal(axs[1, 0], t, Halpha_i, ylabel=r'${\rm D}_\alpha$ (a.u.)', color='tab:blue', showlabel=False, label='65108')
+    plotInternal(axs[1, 0], t, Dalpha, ylabel=r'${\rm D}_\alpha$ (a.u.)', color='tab:red', linestyle='dashed', showlabel=False, label='STREAM')
+    plotInternal(axs[1, 1], t, CIII_ds, ylabel=r'${\rm C}_{\rm III}$', color='tab:blue', showlabel=False, label='65108')
+    plotInternal(axs[1, 1], t, CIII, ylabel=r'${\rm C}_{\rm III}$ (a.u.)', color='tab:red', linestyle='dashed', showlabel=False, label='STREAM')
+    plotInternal(axs[1, 2], t_rad, P_rad/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:blue', showlabel=False, label='65108')
+    plotInternal(axs[1, 2], t[1:], P_cold/1e3, ylabel=r'$P_{\rm rad}$ [kW]', color='tab:red', linestyle='dashed', showlabel=False, label='STREAM')
+    plotInternal(axs[2, 0], t_kin, kin, ylabel=r'$W_{\rm cold}$', color='tab:blue', showlabel=False, label='65108')
+    plotInternal(axs[2, 0], t, W_cold, ylabel=r'$W_{\rm cold}$ [J]', color='tab:red', linestyle='dashed', showlabel=False, label='STREAM')
+    plotInternal(axs[2 ,1], t, Z_eff, ylabel=r'$Z_{\rm eff}$', color='tab:red', linestyle='dashed', showlabel=False, label='STREAM')
+    plotInternal(axs[2, 2], t[1:], f_absorbedECH*100, ylabel=r'$f_{\rm ECH, abs}$ (\%)', color='tab:red', linestyle='dashed', showlabel=False, label='STREAM')
 
 
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
             axs[i, j].set_xlim([0, 0.4])
-            axs[i, j].grid(True)
+            axs[i, j].grid(True, color='gainsboro', linewidth=0.5)
     #'''
-    axs[0,0].set_ylim([0, 0.4])
-    axs[0,1].set_ylim([0, 4])
-    #axs[2, 0].set_ylim([0, 100])
+    axs[0, 0].set_ylim([0, 0.4])
+    axs[0, 1].set_ylim([0, 3.5])
+    axs[0, 2].set_ylim([0, 700])
+    axs[1, 0].set_ylim([0, 3.0])
+    axs[1, 1].set_ylim([0, 0.05])
+    axs[1, 2].set_ylim([0, 150])
+    axs[2, 0].set_ylim([0, 6000])
+    axs[2, 1].set_ylim([1, 1.5])
+    axs[2, 2].set_ylim([0, 120])
 
 
 def drawplot2(axs, so, toffset=0, showlabel=False, save=False, first=True):
@@ -409,11 +409,11 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
 
 
 def makeplots(so1, so2, toffset):
-    fig1, axs1 = plt.subplots(3, 3, figsize=(12, 12))
+    fig1, axs1 = plt.subplots(3, 3, figsize=(14, 12))
 
     drawplot1(axs1, so1, toffset=toffset)
     drawplot1(axs1, so2, toffset=toffset + so1.grid.t[-1], showlabel=True, first=False)
-
+    axs1[0,0].legend(frameon=False)
 
     fig1.tight_layout()
     plt.show()
@@ -445,7 +445,7 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.4 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(20000)
+        ss2.timestep.setNt(1000000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:
