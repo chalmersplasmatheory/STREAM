@@ -38,7 +38,15 @@
 
             // d/dlambda_i(Positive charge-exchange term)
             if (this->includeChargeExchange) {
-                ADASRateInterpolator *ccdIon = GetCCD(iIon);
+                //ADASRateInterpolator *ccdIon = GetCCD(iIon);
+                ADASRateInterpolator *ccdIon;// = GetCCD(iIon);
+                if(ions->IsTritium(iIon)){
+    		    ccdIon = adas->GetCCD(1,3);
+	        } else if (ions->IsHydrogen(iIon)) {
+		    ccdIon = adas->GetCCD(1,1);
+        	} else { 
+	            ccdIon = GetCCD(iIon);
+        	}
                 real_t WA = this->unknowns->GetUnknownData(id_Wi)[iIon*Nr+ir];
                 real_t NA = this->unknowns->GetUnknownData(id_Ni)[iIon*Nr+ir];
                 real_t TA;
@@ -55,7 +63,15 @@
                                 continue;
                             len_t Zi = ions->GetZ(iz); 
                             const len_t IonOffset = ions->GetIndex(iz,0); 
-                            ADASRateInterpolator *ccd = GetCCD(iz); 
+                            //ADASRateInterpolator *ccd = GetCCD(iz); //Get cx-coeff. for the other ion
+        	            ADASRateInterpolator *ccd;
+        	            if(ions->IsTritium(iz)){
+			        ccd = adas->GetCCD(1,3);
+		            } else if (ions->IsHydrogen(iz)) {
+			        ccd = adas->GetCCD(1,1);
+		            } else { 
+			        ccd = GetCCD(iz);
+		            }
                             for(len_t Z0i=1; Z0i<Zi+1; Z0i++){ 
                                 real_t ni = ions->GetIonDensity(ir, iz, Z0i);
                                 real_t N_i_temp = N_i[iz*Nr+ir];
