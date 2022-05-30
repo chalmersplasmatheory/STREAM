@@ -192,6 +192,8 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                     continue
 
                 n = data['fueling']['x'][idx,:]
+
+                idx += Z[i]+1
                 if np.all(n==0):
                     continue
 
@@ -200,7 +202,6 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                     'r': data['fueling']['r'],
                     't': data['fueling']['t']
                 }
-                idx += Z[i]+1
 
 
     def todict(self):
@@ -269,8 +270,8 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                     # Only set the neutral state...
                     fueling[idx,:] = self.fueling[ion.name]['n']
 
-                idx += ion.Z+1
 
+                idx += ion.Z+1
             data['fueling'] = {
                 'x': fueling,
                 'r': r,

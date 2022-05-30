@@ -111,9 +111,9 @@ void IonSourceTerm::SetVectorElements(real_t *vec, const real_t*) {
 			else
 				Vfac = 1;
 
-            		const len_t idx = this->ions->GetIndex(ionIndices[i], Z0);
-            		real_t *s = currentData[i];
-			printf("s=%.2e\n",s[Z0]); 
+            const len_t idx = this->ions->GetIndex(ionIndices[i], Z0);
+            real_t *s = currentData[i];
+
 			vec[idx] += Vfac*s[Z0];
         }
     }

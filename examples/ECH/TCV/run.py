@@ -162,8 +162,9 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     #plt.xlim([0, 0.41])
     #plt.show()
     Fuel_Ne = 1e9
-    F_Ne_fun = interp1d(np.array([-10,  0.000999999999999, 0.001, 10]), np.array([Fuel_Ne, Fuel_Ne, 0, 0]))
+    F_Ne_fun = interp1d(np.array([-10,  0.000999999999999, 0.001, 10]), np.array([Fuel_Ne, Fuel_Ne, Fuel_Ne, Fuel_Ne]))
     F_Ne = F_Ne_fun(t_fluxD)
+    plt.plot(np.array([-10,  0.000999999999999, 0.001, 10]), np.array([Fuel_Ne, Fuel_Ne, 0, 0]))
     plt.plot(t_fluxD, F_Ne)
     plt.show()
 

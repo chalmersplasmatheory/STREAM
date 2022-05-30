@@ -38,7 +38,8 @@ class STREAMSettings(DREAMSettings):
             if type(filename) == str:
                 self.load(filename, path=path, lazy=False)
             elif type(filename) == STREAMSettings:
-                self.fromdict(filename.todict())
+                td = filename.todict()
+                self.fromdict(td)
 
                 if chain:
                     self.fromOutput(filename.output.filename)
