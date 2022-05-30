@@ -98,7 +98,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir){
     
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return -4/(connectionLengthFactor*a*B*I_ref) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*(B_v*B_v+Beddy*Beddy)/mi);
+    return -4/(connectionLengthFactor*a*B*I_ref) * exp(-I_p/I_ref) * sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*(B_v*B_v + Beddy*Beddy)/mi);
 }
 
 /**
@@ -140,7 +140,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dTcold(len_t ir){
     
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return 1.0/(8*a*a*connectionLengthFactor*B) + 2*ec/(connectionLengthFactor*a*B) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*mi));
+    return 1.0/(8*a*a*B) + 2*ec/(connectionLengthFactor*a*B) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*mi));
 }
 
 /**
@@ -161,7 +161,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dWi(len_t ir){
     
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return 4/3.0*1/(connectionLengthFactor*a*B)*1/N_i * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*mi));
+    return 4.0/(connectionLengthFactor*a*B)*1.0/3.0*1.0/N_i * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*mi));
 }
 
 /**
@@ -182,7 +182,7 @@ real_t ConfinementTime::EvaluateConfinementTime_dNi(len_t ir){
     
 	real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return -4/3.0*1/(connectionLengthFactor*a*B)*W_i/(N_i*N_i) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*mi));
+    return -4.0/(connectionLengthFactor*a*B)*1.0/3.0*W_i/(N_i*N_i) * exp(-I_p/I_ref) * sqrt((B_v*B_v+Beddy*Beddy)/((ec*T_cold+2.0/3.0*W_i/N_i)*mi));
 }
 
 /**

@@ -51,6 +51,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     else:
         nC = fractionC * n0
     nC = 1e3
+    nNe = 1e3
 
     hf = h5py.File('TCV65108_old2.h5', 'r')
 
@@ -110,7 +111,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     f_o = 0
     f_x = 1.0
     theta = 10 * np.pi / 180
-    phi = 50.0 * np.pi / 180 #np.pi/2 # ??
+    phi = 90.0 * np.pi / 180 #np.pi/2 # ??
     N = 2
 
     # Impurities ??
@@ -134,6 +135,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
     ss.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nC, r=np.array([0]), T=Ti0)
+    ss.eqsys.n_i.addIon(name='Ne', Z=10, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nNe, r=np.array([0]), T=Ti0)
 
     # Disable runaway
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
@@ -147,15 +149,25 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     Y_DD = c1 - c2 * (1 - np.exp(-(t) / c3))
     iD = ss.eqsys.n_i.getIndex('D')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1) # ?
+    iNe = ss.eqsys.n_i.getIndex('Ne')
+    ss.eqsys.n_i.ions[iNe].setRecyclingCoefficient('Ne', 1) # ?
 
     iC = ss.eqsys.n_i.getIndex('C')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('C', [0.015, 0.05, 0.015, 0.010], [0, 0.00001, 0.05, 0.4])  # ?
+    #iNe = ss.eqsys.n_i.getIndex('Ne')
+    #ss.eqsys.n_i.ions[iNe].setRecyclingCoefficient('Ne', 1)  # ?
 
     g = gaussian(t_fluxD, 0.18, 0.03)
     #plt.plot(t_fluxD, g)
     #plt.xlim([0, 0.41])
     #plt.show()
+    Fuel_Ne = 1e9
+    F_Ne_fun = interp1d(np.array([-10,  0.000999999999999, 0.001, 10]), np.array([Fuel_Ne, Fuel_Ne, 0, 0]))
+    F_Ne = F_Ne_fun(t_fluxD)
+    plt.plot(t_fluxD, F_Ne)
+    plt.show()
 
+    ss.eqsys.n_i.setFueling('Ne', F_Ne, times=t_fluxD)
     ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1, times=t_fluxD) # ?
 
 
@@ -182,10 +194,11 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     ss.timestep.setNt(nt)
     ss.timestep.setNumberOfSaveSteps(10000)
 
-    ss.other.include('fluid', 'stream', 'scalar', 'fluid/Tcold_ECH')
+    ss.other.include('fluid', 'stream', 'scalar')#, 'fluid/Tcold_ECH')
 
     #plt.plot(np.zeros(1), np.zeros(1))
     #plt.show()
+    #ss.solver.setVerbose(True)
 
     return ss
 
@@ -445,7 +458,7 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.4 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(1000000)
+        ss2.timestep.setNt(20000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:

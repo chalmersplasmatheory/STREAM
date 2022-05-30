@@ -22,7 +22,7 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
     len_t nZ = ions->GetNZ();
     for (len_t k = 0; k < nZ; k++) {
         len_t Z = ions->GetZ(k);
-        for (len_t l = 0; l <= Z; l++) {
+        for (len_t l = 1; l <= Z; l++) {
             sum_derivs++;
         }
     }

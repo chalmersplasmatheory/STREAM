@@ -70,7 +70,7 @@ plt.show()
 '''
 t_fluxD = np.array(hf.get('Particle flux (D2)').get('x'))
 fluxD = np.array(hf.get('Particle flux (D2)').get('z'))
-plt.plot(t_fluxD, fluxD)
+plt.plot(t_fluxD, fluxD*1.5e-1)
 plt.ylabel('Particle flux (D2)')
 plt.xlabel('t')
 plt.xlim([-0.01, 0.4])

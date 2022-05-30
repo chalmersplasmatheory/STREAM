@@ -157,7 +157,7 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
             k = list(self.fueling.keys())[0]
             if r != self.fueling[k]['r']:
                 raise EquationException("ions: All fueling functions must have the same 'r' grids.")
-            if t != self.fieling[k]['t']:
+            if (t != self.fueling[k]['t']).any():
                 raise EquationException("ions: All fueling functions must have the same 't' grids.")
 
         self.fueling[species] = {
