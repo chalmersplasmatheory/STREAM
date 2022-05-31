@@ -20,6 +20,7 @@ NeutralTransport::NeutralTransport(FVM::Grid *g, IonHandler *ihdl,
     this->id_lambdai = unknowns->GetUnknownID(STREAM::OptionConstants::UQTY_LAMBDA_I);
     
     len_t nZ = ions->GetNZ();
+    sum_derivs = 0;
     for (len_t k = 0; k < nZ; k++) {
         len_t Z = ions->GetZ(k);
         for (len_t l = 1; l <= Z; l++) {
