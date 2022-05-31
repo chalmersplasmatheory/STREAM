@@ -30,7 +30,7 @@ import STREAM.Settings.Equations.IonSpecies as Ions
 def gaussian(x, mu, sig):
     return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 
-def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, connectionLengthFactor=3.0):
+def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, connectionLengthFactor=1.05):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -135,7 +135,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
     ss.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nC, r=np.array([0]), T=Ti0)
-    ss.eqsys.n_i.addIon(name='Ne', Z=10, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nNe, r=np.array([0]), T=Ti0)
+    #ss.eqsys.n_i.addIon(name='Ne', Z=10, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nNe, r=np.array([0]), T=Ti0)
 
     # Disable runaway
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
@@ -149,8 +149,8 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     Y_DD = c1 - c2 * (1 - np.exp(-(t) / c3))
     iD = ss.eqsys.n_i.getIndex('D')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1) # ?
-    iNe = ss.eqsys.n_i.getIndex('Ne')
-    ss.eqsys.n_i.ions[iNe].setRecyclingCoefficient('Ne', 1) # ?
+    #iNe = ss.eqsys.n_i.getIndex('Ne')
+    #ss.eqsys.n_i.ions[iNe].setRecyclingCoefficient('Ne', 1) # ?
 
     iC = ss.eqsys.n_i.getIndex('C')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('C', [0.015, 0.05, 0.015, 0.010], [0, 0.00001, 0.05, 0.4])  # ?
@@ -161,14 +161,14 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     #plt.plot(t_fluxD, g)
     #plt.xlim([0, 0.41])
     #plt.show()
-    Fuel_Ne = 1e9
-    F_Ne_fun = interp1d(np.array([-10,  0.000999999999999, 0.001, 10]), np.array([Fuel_Ne, Fuel_Ne, Fuel_Ne, Fuel_Ne]))
-    F_Ne = F_Ne_fun(t_fluxD)
-    plt.plot(np.array([-10,  0.000999999999999, 0.001, 10]), np.array([Fuel_Ne, Fuel_Ne, 0, 0]))
-    plt.plot(t_fluxD, F_Ne)
-    plt.show()
+    #Fuel_Ne = 1e9
+    #F_Ne_fun = interp1d(np.array([-10,  0.000999999999999, 0.001, 10]), np.array([Fuel_Ne, Fuel_Ne, Fuel_Ne, Fuel_Ne]))
+    #F_Ne = F_Ne_fun(t_fluxD)
+    #plt.plot(np.array([-10,  0.000999999999999, 0.001, 10]), np.array([Fuel_Ne, Fuel_Ne, 0, 0]))
+    #plt.plot(t_fluxD, F_Ne)
+    #plt.show()
 
-    ss.eqsys.n_i.setFueling('Ne', F_Ne, times=t_fluxD)
+    #ss.eqsys.n_i.setFueling('Ne', F_Ne, times=t_fluxD)
     ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1, times=t_fluxD) # ?
 
 
@@ -199,7 +199,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
 
     #plt.plot(np.zeros(1), np.zeros(1))
     #plt.show()
-    #ss.solver.setVerbose(True)
+    ss.solver.setVerbose(True)
 
     return ss
 
