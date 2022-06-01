@@ -53,15 +53,15 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     nC = 1e3
     nNe = 1e3
 
-    hf = h5py.File('TCV65108_old2.h5', 'r')
+    hf = h5py.File('TCV65108_input.h5', 'r')
 
     t_loop = np.array(hf.get('Loop voltage').get('x'))
     V_loop_osc =- np.array(hf.get('Loop voltage').get('z'))
     it0_loop = int((tstart - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
     itmin_loop = int((0.05 - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
     itend_loop = int((0.5 - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1
-    t_loop = t_loop[it0_loop:itend_loop]-tstart
-    V_loop = np.append(savgol_filter(V_loop_osc[it0_loop:itmin_loop], 205, 3), savgol_filter(V_loop_osc[itmin_loop:itend_loop], 505, 3))#*1.2)
+    t_loop = t_loop[it0_loop:]-tstart
+    V_loop = savgol_filter(V_loop_osc[it0_loop:], 205, 3)
     #V_loop *= np.linspace(1, 1.2, V_loop.shape[0])
     #plt.plot(t_loop, V_loop)
     #plt.xlim([0,0.4])
@@ -89,9 +89,9 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
 
     t_Vp_osc = np.array(hf.get('Plasma volume').get('x'))
     V_p_osc = np.array(hf.get('Plasma volume').get('z'))
-    V_p_s = savgol_filter(V_p_osc, 75, 3)
+    V_p_s = savgol_filter(V_p_osc, 65, 3)
     V_initfun = interp1d(np.append(np.array([-0.02-tstart]), t_Vp_osc-tstart), np.append(np.array([V_vessel]), V_p_s), 'cubic')
-    t_Vp = np.linspace(0, t_Vp_osc[-1]-tstart)
+    t_Vp = np.linspace(0, t_Vp_osc[-1]-tstart,200)
     V_p = V_initfun(t_Vp)
     a = np.sqrt(V_p / (2 * np.pi ** 2 * R0))
     #plt.plot(t_Vp, a)
@@ -135,7 +135,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
     ss.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nC, r=np.array([0]), T=Ti0)
-    ss.eqsys.n_i.addIon(name='Ne', Z=10, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nNe, r=np.array([0]), T=Ti0)
+    #ss.eqsys.n_i.addIon(name='Ne', Z=10, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nNe, r=np.array([0]), T=Ti0)
 
     # Disable runaway
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
@@ -152,22 +152,22 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
 
     iC = ss.eqsys.n_i.getIndex('C')
     ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('C', [0.015, 0.05, 0.015, 0.010], [0, 0.00001, 0.05, 0.4])  # ?
-    iNe = ss.eqsys.n_i.getIndex('Ne')
-    ss.eqsys.n_i.ions[iNe].setRecyclingCoefficient('Ne', 1)  # ?
+    #iNe = ss.eqsys.n_i.getIndex('Ne')
+    #ss.eqsys.n_i.ions[iNe].setRecyclingCoefficient('Ne', 1)  # ?
 
-    g = gaussian(t_fluxD, 0.18, 0.03)
+    #g = gaussian(t_fluxD, 0.18, 0.03)
     #plt.plot(t_fluxD, g)
     #plt.xlim([0, 0.41])
     #plt.show()
-    Fuel_Ne = 5e18
-    diff = 1e-6
-    F_Ne_fun = interp1d(np.array([-1,  -tstart-diff, -tstart, 10]), np.array([0, 0, Fuel_Ne, Fuel_Ne]))
-    F_Ne = F_Ne_fun(t_fluxD)
+    #Fuel_Ne = 5e18
+    #diff = 1e-6
+    #F_Ne_fun = interp1d(np.array([-1,  -tstart-diff, -tstart, 10]), np.array([0, 0, Fuel_Ne, Fuel_Ne]))
+    #F_Ne = F_Ne_fun(t_fluxD)
     #plt.plot(np.array([-1,  -tstart-diff, -tstart, 10]), np.array([0, 0, Fuel_Ne, Fuel_Ne]))
     #plt.plot(t_fluxD, F_Ne)
     #plt.show()
 
-    ss.eqsys.n_i.setFueling('Ne', F_Ne, times=t_fluxD)
+    #ss.eqsys.n_i.setFueling('Ne', F_Ne, times=t_fluxD)
     ss.eqsys.n_i.setFueling('D', fluxD*1.5e-1, times=t_fluxD) # ?
 
 
@@ -194,7 +194,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     ss.timestep.setNt(nt)
     ss.timestep.setNumberOfSaveSteps(10000)
 
-    ss.other.include('fluid', 'stream', 'scalar')#, 'fluid/Tcold_ECH')
+    ss.other.include('fluid', 'stream', 'scalar', 'fluid/Tcold_ECH')
 
     #plt.plot(np.zeros(1), np.zeros(1))
     #plt.show()
@@ -459,7 +459,7 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.4 - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(100000)
+        ss2.timestep.setNt(20000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:

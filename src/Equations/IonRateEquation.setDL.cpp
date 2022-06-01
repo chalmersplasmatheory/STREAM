@@ -79,9 +79,9 @@
                             real_t ni = ions->GetIonDensity(ir, iz, Z0i);
                             real_t N_i_temp = N_i[iz*Nr+ir];
                             if (N_i_temp == 0)
-                                Ti = 0;
-                            else
-                                Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
+                                continue;
+                            
+                            Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
                             real_t Rcx = ccd->Eval(Z0i-1, ni, Ti); //Evaluate cx-coeff. for the charge state
 
                             if (Z0 == 0) {
