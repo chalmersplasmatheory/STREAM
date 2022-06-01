@@ -22,18 +22,18 @@
             if(setIonization){
                 // I_i^(j-1) n_cold * n_i^(j-1) * Vhat_i^(j-1)/V_i^(j)
                 if (Z0 == 1){
-                    NI(-1, Ion[Z0-1][ir] * n_cold[ir] * dV_n/V_p);
+                    NI_Z(iIon, -1, Ion[Z0-1][ir] * n_cold[ir] * dV_n/V_p);
                 }
 
                 // -I_i^(j) n_cold * n_i^(j) * Vhat_i^(j)/V_i^(j)
                 if (Z0 == 0){
-                    NI(0, -Ion[Z0][ir] * n_cold[ir] * (dV_n/V_n_tot - V_n/(V_n_tot*V_n_tot)*dV_n_tot)); 
+                    NI_Z(iIon, 0, -Ion[Z0][ir] * n_cold[ir] * (dV_n/V_n_tot - V_n/(V_n_tot*V_n_tot)*dV_n_tot)); 
                 }
             }
             
             // R_i^(j+1) n_cold * n_i^(j+1) * Vhat_i^(j+1)/V_i^(j)
             if (Z0 == 0){
-                NI(+1, -Rec[Z0+1][ir] * n_cold[ir] * V_p/(V_n_tot*V_n_tot)*dV_n_tot);
+                NI_Z(iIon, +1, -Rec[Z0+1][ir] * n_cold[ir] * V_p/(V_n_tot*V_n_tot)*dV_n_tot);
             }
 
             // d/dlambda_i(Positive charge-exchange term)
