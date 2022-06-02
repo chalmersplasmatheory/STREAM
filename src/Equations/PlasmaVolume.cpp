@@ -30,8 +30,9 @@ using namespace DREAM;
             real_t kappa = radials->GetElongation(); 
             real_t delta = radials->GetTriangularity();  
             
-            return  2.0*M_PI*M_PI*R0*kappa*(a*a-(a-lambda_i)*(a-lambda_i)) +
-                    2.0*(8.0-3.0*M_PI*M_PI) *kappa *delta*(a*a*a - (a-lambda_i)*(a-lambda_i)*(a-lambda_i))/3.0;
+            return 2.0 * M_PI*M_PI * R0 * kappa * (a*a - (a-lambda_i)*(a-lambda_i));
+            /*return  2.0*M_PI*M_PI*R0*kappa*(a*a-(a-lambda_i)*(a-lambda_i)) +
+                    2.0*(8.0-3.0*M_PI*M_PI) *kappa *delta*(a*a*a - (a-lambda_i)*(a-lambda_i)*(a-lambda_i))/3.0;*/
         } else {
             return GetPlasmaVolume();
         }
@@ -42,7 +43,7 @@ using namespace DREAM;
         return vessel_vol - GetPlasmaVolume() + GetNeutralVolume(iz);    
     }
     
-    real_t PlasmaVolume::GetNeutralVolume_dT(const len_t iz){
+    /*real_t PlasmaVolume::GetNeutralVolume_dT(const len_t iz){
         real_t a = radials->GetMinorRadius(); 
         real_t lambda_i = unknowns->GetUnknownData(id_lambda_i)[iz];
 
@@ -94,7 +95,7 @@ using namespace DREAM;
         } else {
             return 0;
         }
-    }
+    }*/
 
     real_t PlasmaVolume::GetNeutralVolume_dLambdai(const len_t iz) {
         real_t a = radials->GetMinorRadius();
@@ -106,8 +107,9 @@ using namespace DREAM;
             real_t delta = radials->GetTriangularity(); 
 
             real_t a_l = a-lambda_i;
-
-            return (4.0*M_PI*M_PI*R0*kappa*a_l + 2.0*kappa*delta*(8.0-3.0*M_PI*M_PI)*a_l*a_l);
+	    
+	    return 4.0 * M_PI*M_PI * R0 * kappa * (a-lambda_i);
+            //return (4.0*M_PI*M_PI*R0*kappa*a_l + 2.0*kappa*delta*(8.0-3.0*M_PI*M_PI)*a_l*a_l);
         } else
             return 0;
     }
@@ -116,10 +118,10 @@ using namespace DREAM;
         return GetNeutralVolume_dLambdai(iz);
     }
     
-    real_t PlasmaVolume::GetTotalNeutralVolume_dT(const len_t iz){
+    /*real_t PlasmaVolume::GetTotalNeutralVolume_dT(const len_t iz){
         return GetNeutralVolume_dT(iz);    
     }
     
     real_t PlasmaVolume::GetTotalNeutralVolume_dn(const len_t iz){
         return GetNeutralVolume_dn(iz);    
-    }
+    }*/

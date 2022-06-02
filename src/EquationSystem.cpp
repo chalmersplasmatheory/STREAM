@@ -18,6 +18,8 @@ EllipticalRadialGridGenerator* EquationSystem::GetEllipticalRadialGridGenerator(
     {return this->r;}
 PlasmaVolume* EquationSystem::GetPlasmaVolume()
     {return this->PV;}
+ConnectionLength* EquationSystem::GetConnectionLength()
+    {return this->CL;}
 ConfinementTime* EquationSystem::GetConfinementTime()
     {return this->CT;}
 NeutralInflux *EquationSystem::GetNeutralInflux()
@@ -26,6 +28,11 @@ vector<IonRateEquation*> EquationSystem::GetIonRateEquations()
     { return ire; }
 RunawayElectronConfinementTime *EquationSystem::GetRunawayElectronConfinementTime()
     { return rect; }
+OpticalThickness* EquationSystem::GetOpticalThickness()
+    {return this->OT;}
+    
+void EquationSystem::SetConnectionLength(ConnectionLength *CL)
+    { this->CL = CL; }
     
 void EquationSystem::SetConfinementTime(ConfinementTime *CT)
     { this->CT = CT; }
@@ -50,3 +57,5 @@ void EquationSystem::SetRunawayElectronConfinementTime(RunawayElectronConfinemen
     this->rect = r;
 }
 
+void EquationSystem::SetOpticalThickness(OpticalThickness *OT)
+    { this->OT = OT; }

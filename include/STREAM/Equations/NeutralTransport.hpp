@@ -27,7 +27,7 @@ namespace STREAM {
         real_t dn_cold;
         real_t dlambda_i;
         
-        len_t sum_derivs=0;
+        real_t sum_derivs = 1;
         
         len_t id_Ip, id_Iwall, id_Tcold, id_Wi, id_Ni, id_ncold, id_lambdai;
 		

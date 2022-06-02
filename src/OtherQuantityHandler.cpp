@@ -12,8 +12,9 @@ using namespace STREAM;
  * Constructor. 
  */
 OtherQuantityHandler::OtherQuantityHandler(
-    ConfinementTime *confinementTime, NeutralInflux *neutralInflux,
+    ConnectionLength *connectionLength, ConfinementTime *confinementTime, NeutralInflux *neutralInflux,
     PlasmaVolume *plasmaVolume, RunawayElectronConfinementTime *rect, 
+    OpticalThickness *opticalThickness,
     std::vector<IonRateEquation*> ionRateEquations, struct eqn_terms *stream_terms,
     // Carried over from DREAM...
     DREAM::CollisionQuantityHandler *cqtyHottail, DREAM::CollisionQuantityHandler *cqtyRunaway,
@@ -25,7 +26,7 @@ OtherQuantityHandler::OtherQuantityHandler(
         unknowns, unknown_equations, ions, fluidGrid, hottailGrid, runawayGrid,
         scalarGrid, oqty_terms),
     confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume),
-    reConfinementTime(rect), ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
+    reConfinementTime(rect), opticalThickness(opticalThickness), ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
 
     this->id_ni = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
 
@@ -119,6 +120,14 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             this->stream_terms->Tcold_transport->SetVectorElements(v, Wcold);
         );
     }
+    
+    if (this->stream_terms->Tcold_ECH != nullptr) {
+        DEF_SC("fluid/Tcold_ECH", "Electron Cyclotron Heating (from STREAM::ElectronCyclotronHeating)",
+            real_t *v = qd->StoreEmpty();
+            v[0] = 0;
+            this->stream_terms->Tcold_ECH->SetVectorElements(v, nullptr);
+        );
+    }
 
     if (this->stream_terms->Wi_e_coll != nullptr) {
         DEF_SC_MUL("stream/Wi_e_coll", nIons, "Ion-electron collision heat loss rate",
@@ -172,7 +181,13 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         const len_t nZ = this->ions->GetNZ();
         real_t *v = qd->StoreEmpty();
         for (len_t iz = 0; iz < nZ; iz++)
-            v[iz] = this->neutralInflux->EvaluateNeutralInflux(t, iz);
+            v[iz] = this->neutralInflux->EvaluateNeutralInflux(iz, t);
+    );
+    
+    DEF_FL("stream/Lf", "Effective distance travelled by a particle before colliding with the wall [m]",
+        real_t *v = qd->StoreEmpty();
+        for (len_t ir = 0; ir < nr; ir++)
+            v[ir] = this->connectionLength->EvaluateConnectionLength(ir);
     );
 
     DEF_FL("stream/tau_D", "Deuterium confinement time",
@@ -189,11 +204,6 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         real_t *v = qd->StoreEmpty();
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = 1/this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
-    );
-    DEF_FL("stream/Lf", "Effective distance travelled by a particle before colliding with the wall [m]",
-        real_t *v = qd->StoreEmpty();
-        for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->confinementTime->EvaluateConnectionLength(ir);
     );
 
     DEF_FL("stream/tau_RE", "Runaway electron confinement time [s]",
@@ -215,6 +225,19 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = 1/(1-exp(-I_p/I_ref)) * this->reConfinementTime->EvaluateRunawayElectronConfinementTime2(ir);
     );
+    
+	if (this->opticalThickness) {
+		DEF_FL("stream/eta_o", "Optical thickness for O mode",
+			real_t *v = qd->StoreEmpty();
+			for (len_t ir = 0; ir < nr; ir++)
+				v[ir] = this->opticalThickness->EvaluateOpticalThickness_o(ir);
+		);
+		DEF_FL("stream/eta_x", "Optical thickness for X mode",
+			real_t *v = qd->StoreEmpty();
+			for (len_t ir = 0; ir < nr; ir++)
+				v[ir] = this->opticalThickness->EvaluateOpticalThickness_x(ir);
+		);
+	}
 
     DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals",
         const len_t nZ = this->ions->GetNZ();
@@ -235,10 +258,6 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     DEF_SC("stream/V", "Tokamak vessel volume",
         real_t v = this->plasmaVolume->GetVesselVolume();
         qd->Store(&v);
-    );
-    DEF_SC("stream/Y_D", "Deuterium recycling coefficient",
-        real_t y_d = this->neutralInflux->DeuteriumRecyclingCoefficient(t);
-        qd->Store(&y_d);
     );
 
     // Diagnostics for ion rate equations

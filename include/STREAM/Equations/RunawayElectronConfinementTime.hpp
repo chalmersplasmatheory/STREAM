@@ -24,12 +24,13 @@ namespace STREAM{
 
         public:
             real_t l_MK2;
-            real_t I_ref = 100.e3;
-            real_t B_v   = 1e-3;
+            real_t I_ref;
+            real_t B_v;
+            real_t connectionLengthFactor;
     
             RunawayElectronConfinementTime(
                 DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
-                real_t l_MK2, real_t B_v
+                real_t l_MK2, real_t B_v, real_t I_ref, real_t connectionLengthFactor
             );
             
             real_t EvaluateInverse(len_t ir);

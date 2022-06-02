@@ -113,24 +113,37 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
             self.rNeutralPrescribedAdvection = ion.getRNeutralPrescribedAdvection()
             self.tNeutralPrescribedAdvection = ion.getTNeutralPrescribedAdvection()
 
+    def getIndex(self, species):
+        for iIon in range(len(self.ions)):
+            if self.ions[iIon].getName() == species:
+                return iIon
+        print("WARNING: no species of name '{}'.".format(species))
+        return None
 
-    def setJET_CWrecycling(self, deuterium='D', carbon='C', oxygen='O', tritium='T', iron = 'Fe', beryllium = 'Be'):
+
+    def setJET_CWrecycling(self, deuterium='D', carbon='C', oxygen='O', tritium='T', Nt=100, tMax=20):
         """
         Set recycling coefficients to the values estimated for JET-CW
         (as given in [Kim et al 2012 Nucl. Fusion 52 103016]).
         """
+        t = np.linspace(0, tMax, Nt)
         for ion in self.ions:
             if ion.name == deuterium:
-                ion.setRecyclingCoefficient(carbon, 0.015) #Ändrat från 0.03!!!
-                ion.setRecyclingCoefficient(iron, 0.00001) # Vad ska detta vara?
+                c1 = 1.1
+                c2 = 0.05
+                c3 = 0.1
+                Y = c1 - c2 * (1 - np.exp(-t/c3))
+                ion.setRecyclingCoefficient(deuterium, Y, t)
+                ion.setRecyclingCoefficient(carbon, 0.015)
             elif ion.name == oxygen:
                 ion.setRecyclingCoefficient(carbon, 1.0)
                 ion.setRecyclingCoefficient(oxygen, 1.0)
             elif ion.name == tritium:
-                ion.setRecyclingCoefficient(tritium, 1.0)
-                ion.setRecyclingCoefficient(iron, 0.00001)  # Vad ska detta vara?
-            elif ion.name == iron:
-                ion.setRecyclingCoefficient(iron, 1.0)
+                c1 = 1.1
+                c2 = 0.05
+                c3 = 0.1
+                Y = c1 - c2 * (1 - np.exp(-t / c3))
+                ion.setRecyclingCoefficient(tritium, Y, t)
 
 
     def setFueling(self, species, fueling, times=0):
@@ -144,7 +157,7 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
             k = list(self.fueling.keys())[0]
             if r != self.fueling[k]['r']:
                 raise EquationException("ions: All fueling functions must have the same 'r' grids.")
-            if t != self.fieling[k]['t']:
+            if (t != self.fueling[k]['t']).any():
                 raise EquationException("ions: All fueling functions must have the same 't' grids.")
 
         self.fueling[species] = {
@@ -166,11 +179,11 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
 
         # Load recycling coefficients
         if 'recycling' in data:
-            rec = data['recycling'][:]
+            sputRecCoefficientTable = data['recycling']['x'][:]
+            tSputRec = data['recycling']['t'][:]
             for i in range(len(self.ions)):
                 for j in range(len(self.ions)):
-                    if rec[i,j] != 0.0:
-                        self.ions[i].setRecyclingCoefficient(self.ions[j].name, rec[i,j])
+                    self.ions[i].setRecyclingCoefficient(self.ions[j].name, sputRecCoefficientTable[i,j,:], tSputRec)
 
         if 'fueling' in data:
             idx = 0
@@ -179,6 +192,8 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                     continue
 
                 n = data['fueling']['x'][idx,:]
+
+                idx += Z[i]+1
                 if np.all(n==0):
                     continue
 
@@ -187,7 +202,6 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                     'r': data['fueling']['r'],
                     't': data['fueling']['t']
                 }
-                idx += Z[i]+1
 
 
     def todict(self):
@@ -198,16 +212,42 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
 
         # Construct recycling coefficient table
         nions = len(self.ions)
-        # recycling coefficient table
-        rec = np.zeros((nions, nions))
 
+        # recycling coefficient table and corresponding time array
+        breakflag = False
+        for i in range(nions):
+            for j in range(nions):
+                tSputRec = self.ions[i].getRecyclingCoefficient(self.ions[j].name)[1]
+                NtSputRec = len(tSputRec)
+                if NtSputRec != 1:
+                    breakflag = True
+                    break
+            if breakflag:
+                break
+
+
+        sputRecCoefficientTable = np.zeros((nions, nions, NtSputRec))
         for i in range(nions):
             ion = self.ions[i]
-
             for j in range(nions):
-                rec[i,j] = ion.getRecyclingCoefficient(self.ions[j].name)
+                values, tvalues = ion.getRecyclingCoefficient(self.ions[j].name)
+                if len(values) == 1:
+                    sputRecCoefficientTable[i,j,:] = np.array(values[0]*np.ones(NtSputRec))
+                elif any(tvalues != tSputRec):
+                    raise EquationException(
+                        "Ions: Recycling coefficient for species '{}' due to species '{}' does not have the correct time vector.".format(
+                            self.ions[j], ion))
+                elif len(values) != NtSputRec:
+                    raise EquationException(
+                        "Ions: Recycling coefficient for species '{}' due to species '{}' does not have the correct length.".format(
+                            self.ions[j], ion))
+                else:
+                    sputRecCoefficientTable[i,j,:] = values
 
-        data['recycling'] = rec
+        data['recycling'] = {
+            'x': sputRecCoefficientTable,
+            't': tSputRec
+        }
 
         if len(self.fueling) > 0:
             # Calculate number of charge states
@@ -230,8 +270,8 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                     # Only set the neutral state...
                     fueling[idx,:] = self.fueling[ion.name]['n']
 
-                idx += ion.Z+1
 
+                idx += ion.Z+1
             data['fueling'] = {
                 'x': fueling,
                 'r': r,

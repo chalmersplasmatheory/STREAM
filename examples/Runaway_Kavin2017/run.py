@@ -93,14 +93,23 @@ def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0
         ss.eqsys.n_i.addIon(name='T', Z=1, iontype=Ions.IONS_DYNAMIC, n=nT, r=np.array([0]), T=Ti0)
 
     if impurity:
-        ss.eqsys.n_i.addIon(name='Fe', Z=26, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=0, r=np.array([0]), T=Ti0)
+        ss.eqsys.n_i.addIon(name='Fe', Z=26, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=1e3, r=np.array([0]), T=Ti0)
 
     # Enable runaway
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
     ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
 
-    # Recycling coefficients 
-    ss.eqsys.n_i.setJET_CWrecycling()
+    # Recycling coefficients
+    iD = ss.eqsys.n_i.getIndex('D')
+    ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1)
+    if impurity:
+        ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('Fe', 0.00001)
+    if tritium:
+        iT = ss.eqsys.n_i.getIndex('T')
+        ss.eqsys.n_i.ions[iT].setRecyclingCoefficient('T', 1)
+        if impurity:
+            ss.eqsys.n_i.ions[iT].setRecyclingCoefficient('Fe', 0.00001)
+
 
     # Radial grid
     ss.radialgrid.setB0(Btor)
@@ -108,11 +117,10 @@ def generate(n0=0.01e20/7, Btor = 2.65, gamma=3e-2, Vloop=10.6, Vloop_t=0, Ures0
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(b)
     ss.radialgrid.setVesselVolume(V_vessel)
+    ss.radialgrid.setIref(1e5)
+    ss.radialgrid.setBv(2.0e-3)
+    ss.radialgrid.setConnectionLengthFactor(3.0)
 
-    ss.radialgrid.setRecyclingCoefficient1(1)
-    ss.radialgrid.setRecyclingCoefficient2(0)
-    ss.radialgrid.setRecyclingCoefficient3(1)
-    
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)
     ss.runawaygrid.setEnabled(False)
@@ -306,6 +314,7 @@ def parameterSweepSingle(n0_list=np.array([]), Vloop_list=np.array([]), Btor_lis
         for n0 in n0_list:
             ss1 = generate(n0=n0, EfieldDyon=False, tritium=tritium)
             ss1.save(f'Sweep/settings1_n0_{np.round(n0,-14)}' + addT + '.h5')
+            #ss1.solver.setVerbose(True)
             so1 = runiface(ss1, f'Sweep/output1_n0_{np.round(n0,-14)}' + addT + '.h5', quiet=False)
 
             ss2 = STREAMSettings(ss1)
@@ -388,7 +397,7 @@ def oneRun(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if not settings.skip:
-        ss1 = generate(n0=0.01e20/7, EfieldDyon=False, tritium=False)
+        ss1 = generate(n0=1.5e17, EfieldDyon=False, tritium=False)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
 
@@ -409,12 +418,12 @@ def oneRun(argv):
     return 0
 
 def main(argv):
-    #oneRun(argv=argv)
-    #'''
-    n0_list = np.array([1.25, 1.5, 1.75]) * 1e17
-    Vloop_list = np.array([2, 3])
+    oneRun(argv=argv)
+    '''
+    n0_list = np.array([1.5, 1.75]) * 1e17
+    #Vloop_list = np.array([2, 3])
     #Btor_list = np.array([2.5, 3])
-    parameterSweepSingle(n0_list=n0_list, Vloop_list=Vloop_list)
+    parameterSweepSingle(n0_list=n0_list)#, Vloop_list=Vloop_list)
     #'''
 
     return 0

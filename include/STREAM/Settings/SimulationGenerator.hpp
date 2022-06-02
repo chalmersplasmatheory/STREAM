@@ -104,6 +104,10 @@ namespace STREAM {
         
         static void DefineOptions_n_re(DREAM::Settings*);
         static void ConstructEquation_n_re(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
+        
+        // Data loading routines
+        static void DefineDataT_3D(const std::string&, DREAM::Settings*, const std::string& name="data");
+        static DREAM::FVM::Interpolator1D ***LoadDataT_3D(const std::string&, DREAM::Settings*, const std::string& name="data");
     };
 }
 

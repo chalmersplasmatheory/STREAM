@@ -15,26 +15,23 @@ namespace STREAM{
             ConfinementTime *coefftauinv; 
             PlasmaVolume *PV; 
 
-            real_t c1, c2, c3;
-        
         public:
-            real_t DeuteriumRecyclingCoefficient(real_t t);
+            NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, PlasmaVolume *PV);
             
-            NeutralInflux(DREAM::IonHandler *ihdl, SputteredRecycledCoefficient *SRC, ConfinementTime *coefftauinv, PlasmaVolume *PV,  real_t c1, real_t c2, real_t c3);
-            
-            real_t EvaluateNeutralInflux_dnkj(real_t t, const len_t iIon, const len_t kIon);
+            real_t EvaluateNeutralInflux_dnkj(const len_t iIon, const len_t kIon);
                         
-            real_t EvaluateNeutralInflux(real_t t, const len_t iIon);
+            real_t EvaluateNeutralInflux(const len_t iIon, const real_t t);
 
-            real_t EvaluateNeutralInflux_dIp(real_t t, const len_t iIon);
+            real_t EvaluateNeutralInflux_dIp(const len_t iIon);
 
-            real_t EvaluateNeutralInflux_dIwall(real_t t, const len_t iIon);
+            real_t EvaluateNeutralInflux_dIwall(const len_t iIon);
 
-            real_t EvaluateNeutralInflux_dTcold(real_t t, const len_t iIon);
+            real_t EvaluateNeutralInflux_dTcold(const len_t iIon);
 
-            real_t EvaluateNeutralInflux_dWi(real_t t, const len_t iIon);
+            real_t EvaluateNeutralInflux_dWi(const len_t iIon);
             
-            real_t EvaluateNeutralInflux_dNi(real_t t, const len_t iIon);
+            real_t EvaluateNeutralInflux_dNi(const len_t iIon);
     };
 }
+
 #endif /*_STREAM_EQUATIONS_NEUTRAL_INFLUX_HPP*/

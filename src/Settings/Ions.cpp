@@ -31,15 +31,18 @@ using namespace std;
  * s: Settings object to define options in.
  */
 void SimulationGenerator::DefineOptions_Ions(DREAM::Settings *s) {
-    const len_t ndim[2] = {0};
 
     // Include all settings from DREAM...
     DREAM::SimulationGenerator::DefineOptions_Ions(s);
 
+    /*
+    const len_t ndim[2] = {0};
     s->DefineSetting(
         MODULENAME "/recycling", "Table of sputtering-recycling coefficients",
         2, ndim, (real_t*)nullptr
     );
+    */
+    SimulationGenerator::DefineDataT_3D(MODULENAME, s, "recycling");
 
     DREAM::SimulationGenerator::DefineDataIonRT(MODULENAME, s, "fueling");
 }
@@ -104,25 +107,6 @@ void SimulationGenerator::ConstructEquation_Ions(
                 ionNames[i].c_str(), Z[i]
             );
     }
-    
-    // Sputtering-recycling coefficient table
-    SputteredRecycledCoefficient *src = nullptr;
-    len_t rec_dims[2];
-    const real_t *recycling = s->GetRealArray(MODULENAME "/recycling", 2, rec_dims);
-    if (recycling != nullptr) {
-        real_t **rectab = new real_t*[nZ];
-        rectab[0] = new real_t[nZ*nZ];
-
-        for (len_t i = 0; i < nZ; i++) {
-            if (i > 0)
-                rectab[i] = rectab[i-1] + nZ;
-
-            for (len_t j = 0; j < nZ; j++)
-                rectab[i][j] = recycling[i*nZ + j];
-        }
-
-        src = new SputteredRecycledCoefficient(rectab);
-    }
 
     /////////////////////
     /// LOAD ION DATA ///
@@ -169,9 +153,15 @@ void SimulationGenerator::ConstructEquation_Ions(
     EllipticalRadialGridGenerator *r = eqsys->GetEllipticalRadialGridGenerator(); 
     
     real_t l_MK2 = s->GetReal("radialgrid/wall_radius");
-	real_t B_v = s->GetReal("radialgrid/Bv");
+    real_t B_v = s->GetReal("radialgrid/Bv");
+    real_t I_ref = s->GetReal("radialgrid/Iref");
+    real_t connectionLengthFactor = s->GetReal("radialgrid/connectionLengthFactor");
+    ConnectionLength *CL = new ConnectionLength(
+        eqsys->GetUnknownHandler(), r, l_MK2, B_v, I_ref, connectionLengthFactor
+    );
+    eqsys->SetConnectionLength(CL);
     ConfinementTime *confinementTime = new ConfinementTime(
-        eqsys->GetUnknownHandler(), r, ih, l_MK2, B_v
+        eqsys->GetUnknownHandler(), r, ih, eqsys->GetConnectionLength()
     );
     eqsys->SetConfinementTime(confinementTime);
     
@@ -185,16 +175,20 @@ void SimulationGenerator::ConstructEquation_Ions(
     PlasmaVolume *volumes = new PlasmaVolume(
         fluidGrid, vessel_volume, eqsys->GetUnknownHandler(), r, adas, ih
     );
-    eqsys->SetPlasmaVolume(volumes);
+    eqsys->SetPlasmaVolume(volumes);    
+    
+    // Sputtering-recycling coefficient table
+    SputteredRecycledCoefficient *src = nullptr;
+    DREAM::FVM::Interpolator1D ***coeffTable = LoadDataT_3D(MODULENAME, s, "recycling");
+    if (coeffTable != nullptr) {
+        src = new SputteredRecycledCoefficient(coeffTable, ih);
+    }
     
     // Neutral influx 
     PlasmaVolume *pv = eqsys->GetPlasmaVolume(); 
     ConfinementTime *ct = eqsys->GetConfinementTime();
-
-    real_t c1 = s->GetReal("radialgrid/wall/c1"); 
-    real_t c2 = s->GetReal("radialgrid/wall/c2"); 
-    real_t c3 = s->GetReal("radialgrid/wall/c3"); 
-    NeutralInflux *neutralInflux = new NeutralInflux(ih, src, ct, pv, c1, c2, c3);
+    
+    NeutralInflux *neutralInflux = new NeutralInflux(ih, src, ct, pv);
     eqsys->SetNeutralInflux(neutralInflux);
 
     // Initialize ion equations
