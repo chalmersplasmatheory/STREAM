@@ -9,6 +9,7 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Settings/Ions.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/Process.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/n_re.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Settings/f_hot.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ConfinementTime.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronTransportDiffusion.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronHeatTransport.cpp"

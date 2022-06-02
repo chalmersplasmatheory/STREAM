@@ -21,12 +21,12 @@ using namespace STREAM;
  */
 EquationSystem *SimulationGenerator::ConstructEquationSystem(
     DREAM::Settings *s, DREAM::FVM::Grid *scalarGrid, DREAM::FVM::Grid *fluidGrid,
-    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
-    EllipticalRadialGridGenerator *ergg
+	DREAM::FVM::Grid *hottailGrid, DREAM::ADAS *adas, DREAM::AMJUEL *amjuel,
+	DREAM::NIST *nist, EllipticalRadialGridGenerator *ergg
 ) {
     EquationSystem *eqsys = new EquationSystem(
         scalarGrid, fluidGrid,
-        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr,
+        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, hottailGrid,
         DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr, 
         s, ergg
     );
@@ -135,7 +135,7 @@ void SimulationGenerator::ConstructEquations(
 
     // Hot electron quantities
     if (eqsys->HasHotTailGrid()) {
-        DREAM::SimulationGenerator::ConstructEquation_f_hot(eqsys, s, oqty_terms);
+        ConstructEquation_f_hot(eqsys, s, oqty_terms);
     }
 
     // Runaway electron quantities

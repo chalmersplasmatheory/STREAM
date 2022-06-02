@@ -26,7 +26,7 @@ namespace STREAM {
         // Equation system
         static EquationSystem *ConstructEquationSystem(
             DREAM::Settings*, DREAM::FVM::Grid*, DREAM::FVM::Grid*,
-            DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
+			DREAM::FVM::Grid*, DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
             EllipticalRadialGridGenerator*
         );
         static void ConstructEquations(
@@ -43,6 +43,9 @@ namespace STREAM {
         static void ConstructUnknowns(
             EquationSystem*, DREAM::Settings*
         );
+
+		// Distribution function
+		static void ConstructEquation_f_hot(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
 
         // Electric field and related equations
         static void ConstructEquation_E_field(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
