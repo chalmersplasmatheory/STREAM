@@ -48,6 +48,11 @@ def generate(nD0=5e17, gamma=2e-3, P_inj=665e3, theta=10, phi=90, N=2, f_x=1.0, 
     :param C_Vloop:            Loop voltage factor
     :param C_flux:             Deuterium flux factor
     """
+    if inputdatafilename == '':
+        raise Exception('Filename for TCV data is missing')
+    elif len(inputdatafilename) <= 3 or inputdatafilename[-3:] != '.h5':
+        inputdatafilename += '.h5'
+
     hf = h5py.File(inputdatafilename, 'r')
 
     # Initial total deuterium density
@@ -332,7 +337,20 @@ def plotInternal(ax, x, y, ylabel, xlbl=True, ylim=None, log=False, showlabel=Fa
         ax.set_ylim(ylim)
 
 
-def makeplots(so1, so2, filename='', tstart=0.0, tend=1.0, theta=10):
+def makeplots(so1, so2, filename='', tstart=0.0, tend=1.0, theta=10, savefig=False, pathfig=''):
+    if pathfig != '' and pathfig[-1] != '/':
+        pathfig += '/'
+    if filename == '':
+        raise Exception('Filename for TCV data is missing')
+    elif len(filename) <= 3 or filename[-3:] != '.h5':
+        if savefig:
+            fig1filename = pathfig + filename + '_vs.pdf'
+            fig2filename = pathfig + filename + '_other.pdf'
+        filename += '.h5'
+    elif savefig:
+        fig1filename = pathfig + filename[:-3] + '_vs.pdf'
+        fig2filename = pathfig + filename[:-3] + '_other.pdf'
+
     fig1 = plt.figure(figsize=(14, 12))
     axs1 = [fig1.add_subplot(3, 3, (1, 2)), fig1.add_subplot(3, 3, 3),
             fig1.add_subplot(3, 3, (4, 5)), fig1.add_subplot(3, 3, 6),
@@ -346,11 +364,15 @@ def makeplots(so1, so2, filename='', tstart=0.0, tend=1.0, theta=10):
         axs1[i].set_ylim(bottom=0.0)
     axs1[4].set_ylim(top=2.7)
     fig1.tight_layout()
+    if savefig:
+        fig1.savefig(fig1filename)
 
     fig2, axs2 = plt.subplots(1, 3, figsize=(14, 4))
     drawplotOther(axs2, so1, toffset=0, tstart=tstart, tend=tend, theta=theta)
     drawplotOther(axs2, so2, toffset=so1.grid.t[-1], tstart=tstart, tend=tend, theta=theta)
     fig2.tight_layout()
+    if savefig:
+        fig2.savefig(fig2filename)
     plt.show()
 
 
@@ -374,7 +396,7 @@ def main(argv):
     tstart = -0.01
     tend   = 0.4
     if not settings.skip:
-        ss1 = generate(tstart=-0.01, texpstart=-0.02, inputdatafilename='TCV65108_input.h5', C_Vloop=1.1)
+        ss1 = generate(nD0 = 5e17, tmax = 1e-5, nt = 10000, tstart = -0.01, texpstart = -0.02, inputdatafilename = 'TCV65108_input.h5', C_Vloop = 1.0, C_flux = 1.5e-1)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
 
@@ -382,7 +404,7 @@ def main(argv):
         ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(tend - tstart - ss1.timestep.tmax)
         ss2.timestep.setNumberOfSaveSteps(0)
-        ss2.timestep.setNt(20000)
+        ss2.timestep.setNt(30000)
         ss2.save(f'settings2{ext}.h5')
         so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
     else:
