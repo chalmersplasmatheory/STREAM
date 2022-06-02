@@ -13,7 +13,7 @@ void SimulationGenerator::ConstructEquation_f_hot(
 	EquationSystem *eqsys, DREAM::Settings *s,
 	struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) {
-	ConstructEquation_f_hot(eqsys, s, oqty_terms);
+	DREAM::SimulationGenerator::ConstructEquation_f_hot(eqsys, s, oqty_terms);
 }
 
 
