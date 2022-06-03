@@ -63,7 +63,7 @@ FVM::Interpolator1D ***STREAM::SimulationGenerator::LoadDataT_3D(
                 modname.c_str(), tinterp
             );
     }
-    
+    printf("nx0=%lu\n", nx[0]);
     FVM::Interpolator1D ***interp = new FVM::Interpolator1D**[nx[0]];
     interp[0] = new FVM::Interpolator1D*[nx[0]*nx[1]];
     

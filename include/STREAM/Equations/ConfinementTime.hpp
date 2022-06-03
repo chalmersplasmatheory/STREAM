@@ -50,8 +50,6 @@ namespace STREAM{
                         real_t EvaluateConfinementTime_dWi(len_t ir);
                         
                         real_t EvaluateConfinementTime_dNi(len_t ir);
-                        
-                        void Initialize();
     };
 }
 

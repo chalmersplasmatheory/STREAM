@@ -179,9 +179,10 @@ void SimulationGenerator::ConstructEquations(
     if (ht_mode != DREAM::OptionConstants::EQTERM_HOTTAIL_MODE_DISABLED &&
         ht_dist_mode == DREAM::OptionConstants::UQTY_F_HOT_DIST_MODE_NONREL)
         DREAM::SimulationGenerator::ConstructEquation_tau_coll(eqsys);
-        
-    eqsys->GetConfinementTime()->Initialize();
-    eqsys->GetRunawayElectronConfinementTime()->Initialize();
+      
+    eqsys->GetConnectionLength()->Initialize();  
+    //eqsys->GetConfinementTime()->Initialize();
+    //eqsys->GetRunawayElectronConfinementTime()->Initialize();
     //eqsys->GetOpticalThickness()->Initialize();
 }
 

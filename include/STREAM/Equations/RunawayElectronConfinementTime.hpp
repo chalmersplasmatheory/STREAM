@@ -7,6 +7,7 @@
 #include <gsl/gsl_math.h>
 #include "DREAM/Constants.hpp"
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
+#include "STREAM/Equations/ConnectionLength.hpp"
 
 
 /** 
@@ -20,17 +21,17 @@ namespace STREAM{
             
             EllipticalRadialGridGenerator *radials;
             
-            len_t id_Ip, id_Iwall, id_Efield;
+            ConnectionLength *CL;
+            
+            len_t id_Ip, id_Efield;
+            
+            real_t I_ref;
 
         public:
-            real_t l_MK2;
-            real_t I_ref;
-            real_t B_v;
-            real_t connectionLengthFactor;
     
             RunawayElectronConfinementTime(
                 DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
-                real_t l_MK2, real_t B_v, real_t I_ref, real_t connectionLengthFactor
+                ConnectionLength *CL, real_t I_ref
             );
             
             real_t EvaluateInverse(len_t ir);
@@ -42,8 +43,6 @@ namespace STREAM{
             real_t Evaluate_dE(len_t ir);
 
             real_t GetIref() const { return I_ref; }
-            
-            void Initialize();
     };
 }
 

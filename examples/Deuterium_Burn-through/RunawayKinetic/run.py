@@ -88,13 +88,14 @@ def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4,
     # Enable runaway
     if runaways:
         ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
-        #ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
+        ss.eqsys.n_re.setDreicer(Runaways.DREICER_RATE_NEURAL_NETWORK)
     else:
         ss.eqsys.n_re.setAvalanche(False)
         ss.eqsys.n_re.setDreicer(False)
 
-    # Recycling coefficients (unused)
-    ss.eqsys.n_i.setJET_CWrecycling()
+    # Recycling coefficients
+    iD = ss.eqsys.n_i.getIndex('D')
+    ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1.0)
 
     # Radial grid
     ss.radialgrid.setB0(Btor)
@@ -102,10 +103,6 @@ def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4,
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(l_MK2)
     ss.radialgrid.setVesselVolume(V_vessel)
-
-    ss.radialgrid.setRecyclingCoefficient1(1)
-    ss.radialgrid.setRecyclingCoefficient2(0)
-    ss.radialgrid.setRecyclingCoefficient3(1)
     
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)

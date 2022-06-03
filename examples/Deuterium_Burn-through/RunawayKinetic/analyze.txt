@@ -1,35 +1,60 @@
-==713329== Memcheck, a memory error detector
-==713329== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==713329== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==713329== Command: /home/ekmark/Skrivbord/STREAM/build/iface/streami settings3.h5
-==713329== Parent PID: 564086
-==713329== 
-==713329== Stack overflow in thread #1: can't grow stack to 0x1ffe801000
-==713329== 
-==713329== Process terminating with default action of signal 11 (SIGSEGV): dumping core
-==713329==  Access not within mapped region at address 0x1FFE801FF8
-==713329== Stack overflow in thread #1: can't grow stack to 0x1ffe801000
-==713329==    at 0x14093A: STREAM::SimulationGenerator::ConstructEquation_f_hot(STREAM::EquationSystem*, DREAM::Settings*, DREAM::OtherQuantityHandler::eqn_terms*) (f_hot.cpp:15)
-==713329==  If you believe this happened as a result of a stack
-==713329==  overflow in your program's main thread (unlikely but
-==713329==  possible), you can try to increase the size of the
-==713329==  main thread stack using the --main-stacksize= flag.
-==713329==  The main thread stack size used in this run was 8388608.
-==713329== 
-==713329== HEAP SUMMARY:
-==713329==     in use at exit: 10,203,551 bytes in 64,584 blocks
-==713329==   total heap usage: 119,217 allocs, 54,633 frees, 1,548,232,378 bytes allocated
-==713329== 
-==713329== LEAK SUMMARY:
-==713329==    definitely lost: 2,319 bytes in 11 blocks
-==713329==    indirectly lost: 1,351 bytes in 43 blocks
-==713329==      possibly lost: 1,108 bytes in 24 blocks
-==713329==    still reachable: 10,198,773 bytes in 64,506 blocks
-==713329==                       of which reachable via heuristic:
-==713329==                         length64           : 181,676 bytes in 788 blocks
-==713329==                         newarray           : 4,720 bytes in 292 blocks
-==713329==         suppressed: 0 bytes in 0 blocks
-==713329== Rerun with --leak-check=full to see details of leaked memory
-==713329== 
-==713329== For lists of detected and suppressed errors, rerun with: -s
-==713329== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==753164== Memcheck, a memory error detector
+==753164== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==753164== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==753164== Command: /home/ekmark/Skrivbord/STREAM/build/iface/streami settings1.h5
+==753164== Parent PID: 716585
+==753164== 
+==753164== Invalid read of size 8
+==753164==    at 0x14347B: STREAM::ConnectionLength::EvaluateInverseConnectionLength(unsigned long) (ConnectionLength.cpp:28)
+==753164==    by 0x143614: STREAM::ConnectionLength::EvaluateConnectionLength(unsigned long) (ConnectionLength.cpp:44)
+==753164==    by 0x163DBB: STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}::operator()(double, DREAM::FVM::QuantityData*) const (OtherQuantityHandler.cpp:224)
+==753164==    by 0x16DE75: void std::__invoke_impl<void, STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double, DREAM::FVM::QuantityData*>(std::__invoke_other, STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double&&, DREAM::FVM::QuantityData*&&) (invoke.h:61)
+==753164==    by 0x16BDB2: std::enable_if<is_invocable_r_v<void, STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double, DREAM::FVM::QuantityData*>, void>::type std::__invoke_r<void, STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double, DREAM::FVM::QuantityData*>(STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double&&, DREAM::FVM::QuantityData*&&) (invoke.h:111)
+==753164==    by 0x169ACA: std::_Function_handler<void (double, DREAM::FVM::QuantityData*), STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}>::_M_invoke(std::_Any_data const&, double&&, DREAM::FVM::QuantityData*&&) (std_function.h:291)
+==753164==    by 0x1B1C49: std::function<void (double, DREAM::FVM::QuantityData*)>::operator()(double, DREAM::FVM::QuantityData*) const (std_function.h:560)
+==753164==    by 0x1B150B: DREAM::OtherQuantity::Store(double) (OtherQuantity.hpp:51)
+==753164==    by 0x18772D: DREAM::OtherQuantityHandler::StoreAll(double) (OtherQuantityHandler.cpp:163)
+==753164==    by 0x17579C: DREAM::EquationSystem::Solve() (EquationSystem.cpp:222)
+==753164==    by 0x1B3A83: DREAM::Simulation::Run() (Simulation.cpp:31)
+==753164==    by 0x12ADEC: main (Main.cpp:208)
+==753164==  Address 0x18 is not stack'd, malloc'd or (recently) free'd
+==753164== 
+==753164== 
+==753164== Process terminating with default action of signal 11 (SIGSEGV): dumping core
+==753164==  Access not within mapped region at address 0x18
+==753164==    at 0x14347B: STREAM::ConnectionLength::EvaluateInverseConnectionLength(unsigned long) (ConnectionLength.cpp:28)
+==753164==    by 0x143614: STREAM::ConnectionLength::EvaluateConnectionLength(unsigned long) (ConnectionLength.cpp:44)
+==753164==    by 0x163DBB: STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}::operator()(double, DREAM::FVM::QuantityData*) const (OtherQuantityHandler.cpp:224)
+==753164==    by 0x16DE75: void std::__invoke_impl<void, STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double, DREAM::FVM::QuantityData*>(std::__invoke_other, STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double&&, DREAM::FVM::QuantityData*&&) (invoke.h:61)
+==753164==    by 0x16BDB2: std::enable_if<is_invocable_r_v<void, STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double, DREAM::FVM::QuantityData*>, void>::type std::__invoke_r<void, STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double, DREAM::FVM::QuantityData*>(STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}&, double&&, DREAM::FVM::QuantityData*&&) (invoke.h:111)
+==753164==    by 0x169ACA: std::_Function_handler<void (double, DREAM::FVM::QuantityData*), STREAM::OtherQuantityHandler::DefineQuantitiesSTREAM()::{lambda(double, DREAM::FVM::QuantityData*)#14}>::_M_invoke(std::_Any_data const&, double&&, DREAM::FVM::QuantityData*&&) (std_function.h:291)
+==753164==    by 0x1B1C49: std::function<void (double, DREAM::FVM::QuantityData*)>::operator()(double, DREAM::FVM::QuantityData*) const (std_function.h:560)
+==753164==    by 0x1B150B: DREAM::OtherQuantity::Store(double) (OtherQuantity.hpp:51)
+==753164==    by 0x18772D: DREAM::OtherQuantityHandler::StoreAll(double) (OtherQuantityHandler.cpp:163)
+==753164==    by 0x17579C: DREAM::EquationSystem::Solve() (EquationSystem.cpp:222)
+==753164==    by 0x1B3A83: DREAM::Simulation::Run() (Simulation.cpp:31)
+==753164==    by 0x12ADEC: main (Main.cpp:208)
+==753164==  If you believe this happened as a result of a stack
+==753164==  overflow in your program's main thread (unlikely but
+==753164==  possible), you can try to increase the size of the
+==753164==  main thread stack using the --main-stacksize= flag.
+==753164==  The main thread stack size used in this run was 8388608.
+==753164== 
+==753164== HEAP SUMMARY:
+==753164==     in use at exit: 7,804,971 bytes in 36,341 blocks
+==753164==   total heap usage: 91,278 allocs, 54,937 frees, 1,545,741,040 bytes allocated
+==753164== 
+==753164== LEAK SUMMARY:
+==753164==    definitely lost: 2,443 bytes in 15 blocks
+==753164==    indirectly lost: 1,412 bytes in 44 blocks
+==753164==      possibly lost: 1,108 bytes in 24 blocks
+==753164==    still reachable: 7,800,008 bytes in 36,258 blocks
+==753164==                       of which reachable via heuristic:
+==753164==                         length64           : 162,668 bytes in 707 blocks
+==753164==                         newarray           : 4,096 bytes in 252 blocks
+==753164==                         multipleinheritance: 6,112 bytes in 20 blocks
+==753164==         suppressed: 0 bytes in 0 blocks
+==753164== Rerun with --leak-check=full to see details of leaked memory
+==753164== 
+==753164== For lists of detected and suppressed errors, rerun with: -s
+==753164== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)

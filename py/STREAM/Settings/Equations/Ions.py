@@ -243,7 +243,7 @@ class Ions(DREAMIons.Ions, PrescribedParameter):
                             self.ions[j], ion))
                 else:
                     sputRecCoefficientTable[i,j,:] = values
-
+        
         data['recycling'] = {
             'x': sputRecCoefficientTable,
             't': tSputRec

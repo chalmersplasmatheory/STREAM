@@ -183,12 +183,6 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         for (len_t iz = 0; iz < nZ; iz++)
             v[iz] = this->neutralInflux->EvaluateNeutralInflux(iz, t);
     );
-    
-    DEF_FL("stream/Lf", "Effective distance travelled by a particle before colliding with the wall [m]",
-        real_t *v = qd->StoreEmpty();
-        for (len_t ir = 0; ir < nr; ir++)
-            v[ir] = this->connectionLength->EvaluateConnectionLength(ir);
-    );
 
     DEF_FL("stream/tau_D", "Deuterium confinement time",
         real_t *v = qd->StoreEmpty();
@@ -224,6 +218,14 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         const real_t I_ref = this->reConfinementTime->GetIref();
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = 1/(1-exp(-I_p/I_ref)) * this->reConfinementTime->EvaluateRunawayElectronConfinementTime2(ir);
+    );
+    
+    
+    DEF_FL("stream/Lf", "Effective distance travelled by a particle before colliding with the wall [m]",
+        real_t *v = qd->StoreEmpty();
+        printf("yo\n");
+        for (len_t ir = 0; ir < nr; ir++)
+            v[ir] = this->connectionLength->EvaluateConnectionLength(ir);
     );
     
 	if (this->opticalThickness) {

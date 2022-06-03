@@ -24,6 +24,8 @@ ConnectionLength::ConnectionLength(
  * Evaluates the inverted connection length
  */
 real_t ConnectionLength::EvaluateInverseConnectionLength(len_t ir){ 
+    printf("ye\n");
+    printf("id_Ip=%lu\n", id_Iwall);
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
     
@@ -66,7 +68,6 @@ real_t ConnectionLength::EvaluateInverseConnectionLength_dIwall(len_t ir){
     
     real_t a = radials->GetMinorRadius();
     real_t B = radials->GetMagneticField();
-    real_t ec = DREAM::Constants::ec;
     
     real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 

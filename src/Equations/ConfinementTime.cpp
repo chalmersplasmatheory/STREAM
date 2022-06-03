@@ -21,6 +21,10 @@ ConfinementTime::ConfinementTime(
     this->ions = ions;
     this->CL = CL;
     this->D_index = D_index;
+    
+    id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
+    id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
+    id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
 }
 
 /**
@@ -146,13 +150,4 @@ real_t ConfinementTime::EvaluateConfinementTime_dNi(len_t ir){
     return -Lfinv * 1.0/3.0*W_i/(N_i*N_i) * 1.0 / sqrt((ec*T_cold+2.0/3.0*W_i/N_i)*mi);
 }
 
-/**
- * Get IDs for unknowns (since I_wall is defined late during the construction of
- * the equation system this must be done seperately from other initialization)
- */
-void ConfinementTime::Initialize() {
-    id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
-    id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
-    id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
-}
 
