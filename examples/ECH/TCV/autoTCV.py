@@ -149,6 +149,7 @@ def generate(nD0=5e17, gamma=2e-3, P_inj=665e3, theta=10, phi=90, N=2, f_x=1.0, 
     ss.radialgrid.setWallRadius(0.4)
     ss.radialgrid.setVesselVolume(V_vessel)
     ss.radialgrid.setIref(2*np.pi*0.27*2e-3/scipy.constants.mu_0)
+    print(2*np.pi*0.27*2e-3/scipy.constants.mu_0)
     ss.radialgrid.setBv(2.0e-3)
     ss.radialgrid.setConnectionLengthFactor(C_Lf)
 
