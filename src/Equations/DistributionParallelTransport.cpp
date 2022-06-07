@@ -22,9 +22,12 @@ DistributionParallelTransport::DistributionParallelTransport(
 void DistributionParallelTransport::SetMatrixElements(FVM::Matrix *mat, real_t*) { 
     len_t n2 = grid->GetMomentumGrid(0)->GetNp2();
     len_t n1 = grid->GetMomentumGrid(0)->GetNp1();
-    for(len_t j = 0; j < n2; j++) {
-        for(len_t i = 0; i < n1; i++) {
-            mat->SetElement(i, j, weights[j*n1+i]); 
+    const len_t Nr = this->grid->GetNr();
+    for (len_t ir = 0; ir < Nr; ir++) {
+        for(len_t j = 0; j < n2; j++) {
+            for(len_t i = 0; i < n1; i++) {
+                mat->SetElement(i, j, weights[ir*n2*n1+j*n1+i]); 
+            }
         }
     }
 }
@@ -35,9 +38,12 @@ void DistributionParallelTransport::SetMatrixElements(FVM::Matrix *mat, real_t*)
 void DistributionParallelTransport::SetVectorElements(real_t *vec, const real_t *x) { 
     len_t n2 = grid->GetMomentumGrid(0)->GetNp2();
     len_t n1 = grid->GetMomentumGrid(0)->GetNp1();
-    for(len_t j = 0; j < n2; j++) {
-        for(len_t i = 0; i < n1; i++) {
-            vec[j*n1+i] += weights[j*n1+i] * x[j*n1+i]; 
+    const len_t Nr = this->grid->GetNr();
+    for (len_t ir = 0; ir < Nr; ir++) {
+        for(len_t j = 0; j < n2; j++) {
+            for(len_t i = 0; i < n1; i++) {
+                vec[ir*n2*n1+j*n1+i] += weights[ir*n2*n1+j*n1+i] * x[ir*n2*n1+j*n1+i]; 
+            }
         }
     }
 }
@@ -49,23 +55,27 @@ void DistributionParallelTransport::SetWeights(){
     if (id_Ip == 0) this->Initialize();
     len_t n2 = grid->GetMomentumGrid(0)->GetNp2();
     len_t n1 = grid->GetMomentumGrid(0)->GetNp1();
+    const len_t Nr = this->grid->GetNr();
     real_t xi, p; 
     real_t frac = 0;
-    for(len_t j = 0; j < n2; j++) {
-        for(len_t i = 0; i < n1; i++) {
-            p  = grid->GetMomentumGrid(0)->GetP(i, j);
-            if (p > pcutoff) {
-	        xi = grid->GetMomentumGrid(0)->GetXi0(i, j); 
-	    
-	        real_t vpar = std::abs(p * xi / sqrt(1 + p*p)); 
-	        real_t Lfinv = CL->EvaluateInverseConnectionLength(0); // ?? Should do arbitrary ir?
-	    
-	        weights[j*n1+i] =- vpar * Lfinv; 
-	        
-	        frac += 1.0 / (n2 * n1);
     
-	    } else {
-	        weights[j*n1+i] = 0;
+    for (len_t ir = 0; ir < Nr; ir++) {
+        for(len_t j = 0; j < n2; j++) {
+            for(len_t i = 0; i < n1; i++) {
+                p  = grid->GetMomentumGrid(0)->GetP(i, j);
+                if (p > pcutoff) {
+	            xi = grid->GetMomentumGrid(0)->GetXi0(i, j); 
+	    
+	            real_t vpar = std::abs(p * xi / sqrt(1 + p*p)); 
+                    real_t Lfinv = CL->EvaluateInverseConnectionLength(0); // ?? Should do arbitrary ir?
+	    
+	            weights[ir*n2*n1+j*n1+i] =- vpar * Lfinv; 
+	        
+                    frac += 1.0 / (n2 * n1);
+    
+                } else {
+	            weights[ir*n2*n1+j*n1+i] = 0;
+	        }
 	    }
         }
     }
@@ -80,24 +90,28 @@ void DistributionParallelTransport::SetDiffWeights(len_t derivId, len_t){
     
     len_t n2 = grid->GetMomentumGrid(0)->GetNp2();
     len_t n1 = grid->GetMomentumGrid(0)->GetNp1();
-    real_t xi, p;
-    for(len_t j = 0; j < n2; j++) {
-        for(len_t i = 0; i < n1; i++) {
-            p  = grid->GetMomentumGrid(0)->GetP(i, j);
-            if (p > pcutoff) {
-                xi = grid->GetMomentumGrid(0)->GetXi0(i, j);
+    const len_t Nr = this->grid->GetNr();
+    real_t xi, p; 
+    
+    for (len_t ir = 0; ir < Nr; ir++) {
+        for(len_t j = 0; j < n2; j++) {
+            for(len_t i = 0; i < n1; i++) {
+                p  = grid->GetMomentumGrid(0)->GetP(i, j);
+                if (p > pcutoff) {
+                    xi = grid->GetMomentumGrid(0)->GetXi0(i, j);
             
-                real_t vpar = std::abs(p * xi / sqrt(1 + p*p)); 
-                real_t dLfinv; 
+                    real_t vpar = std::abs(p * xi / sqrt(1 + p*p)); 
+                    real_t dLfinv; 
             
-                if(derivId == id_Ip) {
-                    dLfinv = CL->EvaluateInverseConnectionLength_dIp(0); // ?? Should do arbitrary ir?
-                } else if(derivId == id_Iwall) {
-	            dLfinv = CL->EvaluateInverseConnectionLength_dIwall(0); // ?? Should do arbitrary ir?
-                } 
-                diffWeights[j*n1+i] =- vpar * dLfinv; 
-            } else {
-                diffWeights[j*n1+i] = 0;
+                    if(derivId == id_Ip) {
+                        dLfinv = CL->EvaluateInverseConnectionLength_dIp(0); // ?? Should do arbitrary ir?
+                    } else if(derivId == id_Iwall) {
+	                dLfinv = CL->EvaluateInverseConnectionLength_dIwall(0); // ?? Should do arbitrary ir?
+                    } 
+                    diffWeights[ir*n2*n1+j*n1+i] =- vpar * dLfinv; 
+                } else {
+                   diffWeights[ir*n2*n1+j*n1+i] = 0;
+               }
             }
         }
     }
@@ -110,9 +124,12 @@ void DistributionParallelTransport::SetDiffWeights(len_t derivId, len_t){
 void DistributionParallelTransport::ResetDiffWeights(){
     len_t n2 = grid->GetMomentumGrid(0)->GetNp2();
     len_t n1 = grid->GetMomentumGrid(0)->GetNp1();
-    for(len_t j = 0; j < n2; j++) {
-        for(len_t i = 0; i < n1; i++) {
-            diffWeights[j*n1+i] = 0;
+    const len_t Nr = this->grid->GetNr();
+    for (len_t ir = 0; ir < Nr; ir++) {
+        for(len_t j = 0; j < n2; j++) {
+            for(len_t i = 0; i < n1; i++) {
+                diffWeights[ir*n2*n1+j*n1+i] = 0;
+            }
         }
     }
 }
