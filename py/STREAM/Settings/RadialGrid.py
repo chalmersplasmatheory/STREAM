@@ -29,6 +29,7 @@ class RadialGrid(PrescribedScalarParameter):
         self.theta = np.pi/4
         self.phi = 0.0
         self.N = 1
+        self.p_cutoff = 1
 
         self.setElongation(1)
         self.setTriangularity(0)
@@ -170,6 +171,14 @@ class RadialGrid(PrescribedScalarParameter):
         """
         self.N = int(N)
 
+    def setMomentumCutOff(self, p_cutoff):
+        """
+        Prescribe fundamental harmonic of ECH beam.
+
+        :param theta: fundamental harmonic.
+        """
+        self.p_cutoff = float(p_cutoff)
+
     def setECHParameters(self, P_inj, f_o, f_x, theta, phi, N):
         """
         Prescribe the injected ECH power.
@@ -233,6 +242,9 @@ class RadialGrid(PrescribedScalarParameter):
         if 'N' in data:
             self.N = data['N']
 
+        if 'p_cutoff' in data:
+            self.p_cutoff = data['p_cutoff']
+
 
 
     def todict(self, verify=True):
@@ -272,7 +284,8 @@ class RadialGrid(PrescribedScalarParameter):
             'f_x': self.f_x,
             'theta': self.theta,
             'phi': self.phi,
-            'N': self.N
+            'N': self.N,
+            'p_cutoff': self.p_cutoff
         }
 
         return data
@@ -309,6 +322,8 @@ class RadialGrid(PrescribedScalarParameter):
             raise TypeError('The toroidal angle of ECH-wave injection must be of type float')
         if type(self.N) != int:
             raise TypeError('The fundmental harmonic of ECH beam must be of type int')
+        if type(self.p_cutoff) != float:
+            raise TypeError('The momentum cut off must be of type float')
 
 
         if self.R0 is None or self.R0 <= 0:

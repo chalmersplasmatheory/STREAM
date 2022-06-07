@@ -136,7 +136,7 @@ void SimulationGenerator::ConstructEquations(
 
     // Hot electron quantities
     if (eqsys->HasHotTailGrid()) {
-        ConstructEquation_f_hot(eqsys, s, oqty_terms);
+        ConstructEquation_f_hot(eqsys, s, oqty_terms, stream_terms);
     }
 
     // Runaway electron quantities
@@ -180,7 +180,7 @@ void SimulationGenerator::ConstructEquations(
         ht_dist_mode == DREAM::OptionConstants::UQTY_F_HOT_DIST_MODE_NONREL)
         DREAM::SimulationGenerator::ConstructEquation_tau_coll(eqsys);
       
-    eqsys->GetConnectionLength()->Initialize();  
+    eqsys->GetConnectionLength()->Initialize();
     //eqsys->GetConfinementTime()->Initialize();
     //eqsys->GetRunawayElectronConfinementTime()->Initialize();
     //eqsys->GetOpticalThickness()->Initialize();

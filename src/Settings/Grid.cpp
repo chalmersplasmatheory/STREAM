@@ -83,6 +83,12 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
         (int_t)1
     );
     
+    s->DefineSetting(
+        "radialgrid/p_cutoff",
+        "Cutoff momentum [m_e*c]",
+        (real_t)1
+    );
+    
     DREAM::SimulationGenerator::DefineOptions_f_ripple(MODULENAME, s);
 }
 

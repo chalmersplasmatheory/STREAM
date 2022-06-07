@@ -41,6 +41,7 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Settings/OtherQuantityHandler.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/OpticalThickness.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronCyclotronHeating.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/DistributionParallelTransport.cpp"
 )
 
 set_property(

@@ -103,6 +103,12 @@ def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4,
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(l_MK2)
     ss.radialgrid.setVesselVolume(V_vessel)
+    X = 7.0
+    T_th = 10000
+    mc2 = m_e * c**2 * 6.24150907e18
+    p_th = np.sqrt(2 * T_th / mc2)
+    print(p_th)
+    ss.radialgrid.setMomentumCutOff(X*p_th)
     
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)
@@ -114,7 +120,7 @@ def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4,
     ss.timestep.setTmax(tmax)
     ss.timestep.setNt(nt)
 
-    ss.other.include('fluid', 'stream', 'scalar')
+    ss.other.include('fluid', 'stream', 'scalar', 'hottail/parallel_transport')
 
     return ss
 
@@ -430,7 +436,7 @@ def main(argv):
         ss3 = STREAMSettings(ss2)
         ss3.fromOutput(f'output2{ext}.h5')
         ss3.timestep.setTmax(0.05 - ss1.timestep.tmax - ss2.timestep.tmax)
-        ss3.timestep.setNt(500)
+        ss3.timestep.setNt(10000)
         #'''
         # Hot-tail grid settings
         pMax = 10  # maximum momentum in units of m_e*c
@@ -450,8 +456,11 @@ def main(argv):
         # ss3.eqsys.f_hot.setBoundaryCondition(DistFunc.BC_PHI_CONST) # extrapolate flux to boundary
         ss3.eqsys.f_hot.setBoundaryCondition(DistFunc.BC_F_0)  # F=0 outside the boundary
         ss3.eqsys.f_hot.setSynchrotronMode(DistFunc.SYNCHROTRON_MODE_NEGLECT)
-        ss3.eqsys.f_hot.setAdvectionInterpolationMethod(DistFunc.AD_INTERP_SMART)
+        #ss3.eqsys.f_hot.setAdvectionInterpolationMethod(DistFunc.AD_INTERP_SMART)
         ss3.eqsys.f_hot.setParticleSource(particleSource=FHot.PARTICLE_SOURCE_IMPLICIT, shape=FHot.PARTICLE_SOURCE_SHAPE_DELTA)
+        ss3.solver.tolerance.set('n_hot', abstol=1e7)
+        ss3.solver.tolerance.set('j_hot', abstol=1e-3)
+        ss3.solver.tolerance.set('E_field', reltol=1e-5)
         #'''
         ss3.save(f'settings3{ext}.h5')
         so3 = runiface(ss3, f'output3{ext}.h5', quiet=False)

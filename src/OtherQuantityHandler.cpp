@@ -25,7 +25,7 @@ OtherQuantityHandler::OtherQuantityHandler(
 ) : DREAM::OtherQuantityHandler(cqtyHottail, cqtyRunaway, postProcessor, REFluid,
         unknowns, unknown_equations, ions, fluidGrid, hottailGrid, runawayGrid,
         scalarGrid, oqty_terms),
-    confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume),
+    connectionLength(connectionLength), confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume),
     reConfinementTime(rect), opticalThickness(opticalThickness), ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
 
     this->id_ni = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_ION_SPECIES);
@@ -45,11 +45,11 @@ OtherQuantityHandler::~OtherQuantityHandler() {
 void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     // XXX here we assume that all momentum grids are the same
     const len_t nr = this->fluidGrid->GetNr();
-    /*const len_t nr_ht = (this->hottailGrid==nullptr ? 0 : this->hottailGrid->GetNr());
+    const len_t nr_ht = (this->hottailGrid==nullptr ? 0 : this->hottailGrid->GetNr());
     const len_t n1_ht = (this->hottailGrid==nullptr ? 0 : this->hottailGrid->GetMomentumGrid(0)->GetNp1());
     const len_t n2_ht = (this->hottailGrid==nullptr ? 0 : this->hottailGrid->GetMomentumGrid(0)->GetNp2());
 
-    const len_t nr_re = (this->runawayGrid==nullptr ? 0 : this->runawayGrid->GetNr());
+    /*const len_t nr_re = (this->runawayGrid==nullptr ? 0 : this->runawayGrid->GetNr());
     const len_t n1_re = (this->runawayGrid==nullptr ? 0 : this->runawayGrid->GetMomentumGrid(0)->GetNp1());
     const len_t n2_re = (this->runawayGrid==nullptr ? 0 : this->runawayGrid->GetMomentumGrid(0)->GetNp2());*/
 
@@ -223,7 +223,6 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     
     DEF_FL("stream/Lf", "Effective distance travelled by a particle before colliding with the wall [m]",
         real_t *v = qd->StoreEmpty();
-        printf("yo\n");
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = this->connectionLength->EvaluateConnectionLength(ir);
     );
@@ -260,6 +259,15 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     DEF_SC("stream/V", "Tokamak vessel volume",
         real_t v = this->plasmaVolume->GetVesselVolume();
         qd->Store(&v);
+    );
+    
+    
+    DEF_HT("hottail/parallel_transport", "Parallel transport",
+        real_t *v = qd->StoreEmpty();
+
+        DistributionParallelTransport *DPT = stream_terms->DPT;
+        real_t *f = this->unknowns->GetUnknownData(id_f_hot);
+        DPT->SetVectorElements(v, f);
     );
 
     // Diagnostics for ion rate equations

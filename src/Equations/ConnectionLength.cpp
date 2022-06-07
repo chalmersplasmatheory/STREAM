@@ -23,9 +23,7 @@ ConnectionLength::ConnectionLength(
 /**
  * Evaluates the inverted connection length
  */
-real_t ConnectionLength::EvaluateInverseConnectionLength(len_t ir){ 
-    printf("ye\n");
-    printf("id_Ip=%lu\n", id_Iwall);
+real_t ConnectionLength::EvaluateInverseConnectionLength(len_t ir){
     real_t I_p    = unknowns->GetUnknownData(id_Ip)[ir];
     real_t I_wall = unknowns->GetUnknownData(id_Iwall)[ir];
     
@@ -71,7 +69,7 @@ real_t ConnectionLength::EvaluateInverseConnectionLength_dIwall(len_t ir){
     
     real_t Beddy = Constants::mu0*I_wall / (2*M_PI*l_MK2);
 
-    return 4.0 * Constants::mu0*Constants::mu0*I_wall / (4*M_PI*M_PI*l_MK2*l_MK2) / (connectionLengthFactor*a*B*sqrt(B_v*B_v + Beddy*Beddy)) * exp(-I_p/I_ref);
+    return Constants::mu0*Constants::mu0*I_wall / (M_PI*M_PI*l_MK2*l_MK2) / (connectionLengthFactor*a*B*sqrt(B_v*B_v + Beddy*Beddy)) * exp(-I_p/I_ref);
 }
 
 /**
