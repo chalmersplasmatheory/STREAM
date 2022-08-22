@@ -12,4 +12,4 @@ DYON_tests/Read_mat.py
 *.toc
 *.bcf
 *Data
-examples/ECH/TCV/debug/*
+examples/ECH/tcvstream/*
