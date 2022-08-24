@@ -57,7 +57,7 @@ DREAM::Simulation *SimulationGenerator::ProcessSettings(DREAM::Settings *s) {
 
     // Construct equation system
     EquationSystem *eqsys = ConstructEquationSystem(
-        s, scalarGrid, fluidGrid, hottailGrid, adas, amjuel, nist, ergg
+        s, scalarGrid, fluidGrid, hottailGrid, runawayGrid, adas, amjuel, nist, ergg
     );
 
     // Construct simulation object

@@ -7,14 +7,16 @@
 #include "STREAM/Equations/PlasmaVolume.hpp"
 #include "DREAM/Constants.hpp"
 #include "STREAM/Equations/ConnectionLength.hpp"
+#include "STREAM/Equations/RunawayElectronConfinementTime.hpp"
 
 namespace STREAM {
     class DistributionParallelTransport : public DREAM::FVM::DiagonalComplexTerm {
         private:
             ConnectionLength *CL;
+            RunawayElectronConfinementTime *REC;
             EllipticalRadialGridGenerator *radials;
             
-            len_t id_Ip=0, id_Iwall=0;
+            len_t id_Ip=0, id_Iwall=0, id_Efield=0; 
             
             real_t pcutoff;
                         
@@ -31,7 +33,7 @@ namespace STREAM {
         public:
             DistributionParallelTransport(
                 DREAM::FVM::Grid*, DREAM::FVM::UnknownQuantityHandler*,
-                ConnectionLength *CL, DREAM::FVM::Grid *operandGrid, real_t
+                ConnectionLength *CL, RunawayElectronConfinementTime *REC, DREAM::FVM::Grid *operandGrid, real_t
             );
 
             virtual len_t GetNumberOfNonZerosPerRow() const override { return 1; } 

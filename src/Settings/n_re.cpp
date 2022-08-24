@@ -23,14 +23,6 @@ void SimulationGenerator::ConstructEquation_n_re(
     
     len_t id_n_re = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_N_RE);
     
-    real_t I_ref = s->GetReal("radialgrid/Iref");
-    RunawayElectronConfinementTime *rect = 
-        new RunawayElectronConfinementTime(
-            eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator(),
-            eqsys->GetConnectionLength(), I_ref
-        );
-    eqsys->SetRunawayElectronConfinementTime(rect);
-    
     DREAM::FVM::Operator *Op_nRE = eqsys->GetEquation(id_n_re)->GetOperatorUnsafe(id_n_re);
     Op_nRE->AddTerm(new RunawayElectronTransport(
         eqsys->GetFluidGrid(), eqsys->GetEllipticalRadialGridGenerator(),

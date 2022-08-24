@@ -29,7 +29,7 @@ class RadialGrid(PrescribedScalarParameter):
         self.theta = np.pi/4
         self.phi = 0.0
         self.N = 1
-        self.p_cutoff = 1
+        self.p_cutoff = 0.0
 
         self.setElongation(1)
         self.setTriangularity(0)
@@ -177,6 +177,7 @@ class RadialGrid(PrescribedScalarParameter):
 
         :param theta: fundamental harmonic.
         """
+
         self.p_cutoff = float(p_cutoff)
 
     def setECHParameters(self, P_inj, f_o, f_x, theta, phi, N):
