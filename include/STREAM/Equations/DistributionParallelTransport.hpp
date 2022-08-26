@@ -33,7 +33,7 @@ namespace STREAM {
         public:
             DistributionParallelTransport(
                 DREAM::FVM::Grid*, DREAM::FVM::UnknownQuantityHandler*,
-                ConnectionLength *CL, RunawayElectronConfinementTime *REC, DREAM::FVM::Grid *operandGrid, real_t
+                ConnectionLength *CL, DREAM::FVM::Grid *operandGrid, real_t
             );
 
             virtual len_t GetNumberOfNonZerosPerRow() const override { return 1; } 

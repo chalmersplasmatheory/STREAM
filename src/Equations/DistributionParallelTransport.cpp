@@ -10,8 +10,8 @@ using namespace DREAM;
  */
 DistributionParallelTransport::DistributionParallelTransport(
     FVM::Grid *g, FVM::UnknownQuantityHandler *u,
-    ConnectionLength *CL, RunawayElectronConfinementTime *REC, FVM::Grid *operandGrid, real_t pcutoff
-    ) : DiagonalComplexTerm(g, u, operandGrid), CL(CL), REC(REC), pcutoff(pcutoff) {
+    ConnectionLength *CL, FVM::Grid *operandGrid, real_t pcutoff
+    ) : DiagonalComplexTerm(g, u, operandGrid), CL(CL), pcutoff(pcutoff) {
     
     this->DiagonalTerm::SetName("DistributionParallelTransport");
 }
@@ -68,8 +68,7 @@ void DistributionParallelTransport::SetWeights(){
 	    
 	            real_t vpar = std::abs(p * xi / sqrt(1 + p*p)); 
                     real_t Lfinv = CL->EvaluateInverseConnectionLength(0); // ?? Should do arbitrary ir?
-                    real_t tauinv = REC->EvaluateInverse(0); // ?? Should do arbitrary ir?
-	            weights[ir*n2*n1+j*n1+i] =- vpar * tauinv / c; 
+	            weights[ir*n2*n1+j*n1+i] =- vpar * Lfinv / 120; 
                 } else {
 	            weights[ir*n2*n1+j*n1+i] = 0;
 	        }
@@ -88,7 +87,6 @@ void DistributionParallelTransport::SetDiffWeights(len_t derivId, len_t){
     len_t n1 = grid->GetMomentumGrid(0)->GetNp1();
     const len_t Nr = this->grid->GetNr();
     real_t xi, p; 
-    real_t c = 299792458.0;
     
     for (len_t ir = 0; ir < Nr; ir++) {
         for(len_t j = 0; j < n2; j++) {
@@ -98,18 +96,14 @@ void DistributionParallelTransport::SetDiffWeights(len_t derivId, len_t){
                     xi = grid->GetMomentumGrid(0)->GetXi0(i, j);
             
                     real_t vpar = std::abs(p * xi / sqrt(1 + p*p)); 
-                    real_t dLfinv, dtauinv; 
+                    real_t dLfinv; 
             
                     if(derivId == id_Ip) {
                         dLfinv = CL->EvaluateInverseConnectionLength_dIp(0); // ?? Should do arbitrary ir?
-                        dtauinv = REC->Evaluate_dIp(0); // ?? Should do arbitrary ir?
                     } else if(derivId == id_Iwall) {
 	                dLfinv = CL->EvaluateInverseConnectionLength_dIwall(0); // ?? Should do arbitrary ir?
-	                dtauinv = REC->Evaluate_dIp(0); // ?? Should do arbitrary ir?
-                    } else if(derivId = id_Efield) {
-                        dtauinv = REC->Evaluate_dE(0);
-                    }
-                    diffWeights[ir*n2*n1+j*n1+i] =- vpar * dtauinv / c; 
+                    } 
+                    diffWeights[ir*n2*n1+j*n1+i] =- vpar * dLfinv / 120; 
                 } else {
                    diffWeights[ir*n2*n1+j*n1+i] = 0;
                }

@@ -422,20 +422,20 @@ def main(argv):
     ext = '' if not settings.extension else '_' + settings.extension
 
     if settings.skip is None or (len(settings.skip) > 0 and 2 not in settings.skip):
-        pgp = 2 / 133.32 * 1e-4
+        pgp = 2 / 133.32 * 5e-4
         ss1 = generate(prefill=pgp, runaways=True)
-        ss1.save(f'settings1{ext}_d.h5')
-        so1 = runiface(ss1, f'output1{ext}_d.h5', quiet=False)
+        ss1.save(f'settings1{ext}.h5')
+        so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
 
         ss2 = STREAMSettings(ss1)
-        ss2.fromOutput(f'output1{ext}_d.h5')
+        ss2.fromOutput(f'output1{ext}.h5')
         ss2.timestep.setTmax(0.004 - ss1.timestep.tmax)
         ss2.timestep.setNt(400)
-        ss2.save(f'settings2{ext}_d.h5')
-        so2 = runiface(ss2, f'output2{ext}_d.h5', quiet=False)
+        ss2.save(f'settings2{ext}.h5')
+        so2 = runiface(ss2, f'output2{ext}.h5', quiet=False)
         #'''
         ss3 = STREAMSettings(ss2)
-        ss3.fromOutput(f'output2{ext}_d.h5')
+        ss3.fromOutput(f'output2{ext}.h5')
         ss3.timestep.setTmax(0.05*2 - ss1.timestep.tmax - ss2.timestep.tmax)
         ss3.timestep.setNt(10000*2)
         #'''
@@ -465,8 +465,8 @@ def main(argv):
         ss3.solver.tolerance.set('n_re', abstol=1e7)
         ss3.solver.tolerance.set('j_re', abstol=1e-3)
         #'''
-        ss3.save(f'settings3{ext}_d.h5')
-        so3 = runiface(ss3, f'output3{ext}_d.h5', quiet=False)
+        ss3.save(f'settings3{ext}.h5')
+        so3 = runiface(ss3, f'output3{ext}.h5', quiet=False)
         #'''
 
     else:

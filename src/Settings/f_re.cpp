@@ -24,7 +24,7 @@ void SimulationGenerator::ConstructEquation_f_re(
         real_t p_cutoff   = s->GetReal("radialgrid/p_cutoff");
 	DistributionParallelTransport *DPT = new DistributionParallelTransport(eqsys->GetHotTailGrid(), 
 	                                           eqsys->GetUnknownHandler(), eqsys->GetConnectionLength(), 
-	                                           eqsys->GetRunawayElectronConfinementTime(), eqsys->GetHotTailGrid(), p_cutoff);
+	                                           eqsys->GetHotTailGrid(), p_cutoff);
    	//eqn->AddTerm(DPT);
    	//stream_terms->DPT=DPT;
 }
