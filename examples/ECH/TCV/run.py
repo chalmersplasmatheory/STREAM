@@ -30,7 +30,7 @@ import STREAM.Settings.Equations.IonSpecies as Ions
 def gaussian(x, mu, sig):
     return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 
-def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, connectionLengthFactor=3.0):
+def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, connectionLengthFactor=1.0):
     """
     Generate a STREAMSettings object for a simulation with the specified
     parameters.
@@ -87,16 +87,33 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     Btor = 1.45   # Toroidal magnetic field [T]
     V_vessel = 4.632  # Vacuum vessel volume
 
-    t_Vp_osc = np.array(hf.get('Plasma volume').get('x'))
-    V_p_osc = np.array(hf.get('Plasma volume').get('z'))
+    with h5py.File('LIUQE65108.mat', 'r') as liuqef:
+        t_Vp_osc = liuqef['t'][:][:,0]
+        V_p_osc = liuqef['Vp'][:][:,0]
+
     V_p_s = savgol_filter(V_p_osc, 65, 3)
-    V_initfun = interp1d(np.append(np.array([-0.02-tstart]), t_Vp_osc-tstart), np.append(np.array([V_vessel]), V_p_s), 'cubic')
-    t_Vp = np.linspace(0, t_Vp_osc[-1]-tstart,200)
+    #V_initfun = interp1d(np.append(np.array([-0.02-tstart]), t_Vp_osc-tstart), np.append(np.array([V_vessel]), V_p_s), 'cubic')
+    V_p_s[np.argmin(t_Vp_osc)] = V_vessel
+    t_Vp_osc[np.argmin(t_Vp_osc)] = 0
+    V_initfun = interp1d(t_Vp_osc, V_p_s)
+    t_Vp = np.linspace(0, np.amax(t_Vp_osc)+tstart,200)
     V_p = V_initfun(t_Vp)
     a = np.sqrt(V_p / (2 * np.pi ** 2 * R0))
     #plt.plot(t_Vp, a)
     #plt.show()
+    t_Vp_osc_alt = hf['Plasma volume']['x'][:]
+    V_p_osc_alt = hf['Plasma volume']['z'][:]
+
     hf.close()
+
+    V_p_s_alt = savgol_filter(V_p_osc_alt, 65, 3)
+    V_initfun_alt = interp1d(np.append(np.array([-0.02-tstart]), t_Vp_osc_alt-tstart), np.append(np.array([V_vessel]), V_p_s_alt), 'cubic')
+    t_Vp_alt = np.linspace(0, np.amax(t_Vp_osc_alt)+tstart, 200)
+
+    print(np.amin(V_initfun(t_Vp)))
+    plt.plot(t_Vp, V_initfun(t_Vp))
+    plt.plot(t_Vp_alt, V_initfun_alt(t_Vp_alt))
+    plt.show()
 
     l_i = 0.0
 
@@ -135,7 +152,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     # Ions
     ss.eqsys.n_i.addIon(name='D', Z=1, iontype=Ions.IONS_DYNAMIC, n=nD, r=np.array([0]), T=Ti0)
     ss.eqsys.n_i.addIon(name='C', Z=6, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nC, r=np.array([0]), T=Ti0)
-    #ss.eqsys.n_i.addIon(name='Ne', Z=10, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nNe, r=np.array([0]), T=Ti0)
+    ss.eqsys.n_i.addIon(name='Ne', Z=10, iontype=Ions.IONS_DYNAMIC_NEUTRAL, n=nNe, r=np.array([0]), T=Ti0)
 
     # Disable runaway
     ss.eqsys.n_re.setAvalanche(Runaways.AVALANCHE_MODE_FLUID_HESSLOW)
@@ -190,6 +207,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     # Numerical settings
     ss.solver.setType(Solver.NONLINEAR)
     ss.solver.preconditioner.setEnabled(False)
+    ss.solver.tolerance.set(reltol=1e-5)
     ss.timestep.setTmax(tmax)
     ss.timestep.setNt(nt)
     ss.timestep.setNumberOfSaveSteps(10000)
@@ -200,6 +218,7 @@ def generate(gamma=2e-3, Z_eff = 3, tmax=1e-5, nt=2000, tstart=-0.01, tend=0.4, 
     #plt.show()
     #ss.solver.setVerbose(True)
     #ss.solver.setDebug(savejacobian=True, savenumericaljacobian=True, timestep=2, iteration=5)
+    ss.solver.setDebug(savesystem=True, timestep=2, iteration=0)
 
     return ss
 
