@@ -87,6 +87,8 @@ def generate(nD0=5e17, gamma=2e-3, P_inj=665e3, theta=10, phi=90, N=2, f_x=1.0, 
     it0_loop   = int((tstart - t_loop[0]) / (t_loop[-1] - t_loop[0]) * t_loop.shape[0])-1  # Index of tstart in TCV time data for loop voltage
     t_loop     = t_loop[it0_loop:]-tstart                                                  # Shifted loop voltage time vector [s]
     V_loop     = savgol_filter(V_loop_osc[it0_loop:], 157, 3)*C_Vloop                      # Smoothed loop voltage [V]
+    plt.plot(t_loop, V_loop)
+    plt.show()
 
     # Initial electric field (derived from TCV data)
     t_Ip = np.array(hf.get('Plasma current').get('x'))                           # TCV time data for plasma current [s]
