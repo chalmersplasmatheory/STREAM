@@ -283,7 +283,7 @@ def main(argv):
 
     if not settings.skip:
         prefill = 2 * 0.8e-3 / 133.32   # Pa -> Torr
-        ss1 = generate(prefill=prefill, nt=40000)
+        ss1 = generate(prefill=prefill, nt=10000)
         ss1.save(f'settings1{ext}.h5')
         so1 = runiface(ss1, f'output1{ext}.h5', quiet=False)
 

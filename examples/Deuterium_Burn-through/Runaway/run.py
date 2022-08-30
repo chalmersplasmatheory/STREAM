@@ -249,6 +249,9 @@ def drawplot4(axs, so, toffset=0, showlabel=True, save=False, fileaddon='', firs
         ECoverED_csv = open('Data/CriticalElectricField_' + fileaddon + '.csv', worab)
         np.savetxt(ECoverED_csv, ECoverED)
         ECoverED_csv.close()
+        ne_csv = open('Data/ElectronDensity_' + fileaddon + '.csv', worab)
+        np.savetxt(ne_csv, ne)
+        ne_csv.close()
 
         gammaTot_csv = open('Data/TotalRunawayRate_' + fileaddon + '.csv', worab)
         np.savetxt(gammaTot_csv, gammaTot)

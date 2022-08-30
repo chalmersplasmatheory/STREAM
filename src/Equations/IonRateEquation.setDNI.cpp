@@ -44,8 +44,7 @@
                         continue;
                     len_t Zi = ions->GetZ(iz); //Get Z for other ion
                     const len_t IonOffset = ions->GetIndex(iz,0); //Get index of neutral state of other ion
-                    const real_t V_n_iz = this->volumes->GetNeutralVolume(iz);
-                    
+
                     //ADASRateInterpolator *ccd = GetCCD(iz); //Get cx-coeff. for the other ion
                     ADASRateInterpolator *ccd;
                     if(ions->IsTritium(iz)){
@@ -63,6 +62,8 @@
                         Ti = 2.0/3.0*W_i[iz*Nr+ir]/(ec*N_i_temp);
                         real_t Rcx = ccd->Eval(Z0i-1, ni, Ti); //Evaluate cx-coeff. for the charge state
                         real_t PartialnRcx = ccd->Eval_deriv_n(Z0i-1, ni, Ti);
+                        
+                        const real_t V_n_iz = this->volumes->GetNeutralVolume(iz);
 
                         if (Z0 == 0) {
                             // Apply to neutral deuterium (Z0=0)
