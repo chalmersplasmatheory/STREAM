@@ -88,9 +88,10 @@
                                 // Apply to neutral deuterium (Z0=0)
                                 NI_Z(iIon, 0, -Rcx * (dV_n/V_n_tot - V_n * dV_n_tot/(V_n_tot*V_n_tot)) * nions[(IonOffset+Z0i)*Nr+ir]); 
                                 // D-T term (absent in DYON)
-                                if (Zi == 1)
-                                    NI_Z(iz, 1, +Rcx_ion * dV_n_iz/V_n_tot * nions[(IonOffset+0)*Nr+ir]);
+                                if (Zi == 1){ // if (Zi != 0)?
+                                    NI_Z(iz, 1, +Rcx_ion * dV_n_iz/V_n_tot * nions[(IonOffset+0)*Nr+ir]); // ???? 
                                     NI_Z(iIon, 1, +Rcx_ion * (- V_n_iz * dV_n_tot/(V_n_tot*V_n_tot)) * nions[(IonOffset+0)*Nr+ir]);
+                                }
                             } else if (Z0 == 1) {
                                 // Apply to neutral deuterium (Z0-1 = 0)
                                 NI_Z(iIon, -1, Rcx * dV_n/V_p * nions[(IonOffset+Z0i)*Nr+ir]); //First argument in NI 0 because we want the neutral density for D/T (and we have Z0=1 here)
