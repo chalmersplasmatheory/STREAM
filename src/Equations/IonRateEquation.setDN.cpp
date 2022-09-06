@@ -22,7 +22,7 @@
             // d/dn_cold[-I_i^(j) n_cold * n_i^(j) * Vhat_i^(j)/V_i^(j)]
             if (Z0 == 0){
                 NI(0, -Ion[Z0][ir] * V_n/V_n_tot - PartialNIon[Z0][ir] * n_cold[ir] * V_n /V_n_tot);
-            }else{
+            }else if (Z0 < Z){
                 NI(0, -Ion[Z0][ir] - PartialNIon[Z0][ir] * n_cold[ir] );
             }
         }
