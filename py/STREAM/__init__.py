@@ -6,8 +6,8 @@ except ModuleNotFoundError:
     import sys
     import pathlib
     cwd = pathlib.Path(__file__).resolve()
-    p = (cwd.parent / 'extern' / 'DREAM' / 'py').resolve()
-    sys.path.append(p)
+    p = (cwd.parent / '..' / '..' / 'extern' / 'DREAM' / 'py').resolve()
+    sys.path.append(str(p))
 
 from . STREAMException import STREAMException
 from . STREAMSettings import STREAMSettings
