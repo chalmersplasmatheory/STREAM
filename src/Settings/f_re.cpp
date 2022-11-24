@@ -25,8 +25,8 @@ void SimulationGenerator::ConstructEquation_f_re(
 	DistributionParallelTransport *DPT = new DistributionParallelTransport(eqsys->GetHotTailGrid(), 
 	                                           eqsys->GetUnknownHandler(), eqsys->GetConnectionLength(), 
 	                                           eqsys->GetHotTailGrid(), p_cutoff);
-   	//eqn->AddTerm(DPT);
-   	//stream_terms->DPT=DPT;
+   	eqn->AddTerm(DPT);
+   	stream_terms->DPT=DPT;
 }
 
 

@@ -20,7 +20,7 @@ void SimulationGenerator::ConstructEquation_f_hot(
 	
 	DREAM::FVM::Operator *eqn = eqsys->GetEquation(id_f)->GetOperatorUnsafe(id_f);
 	
-        real_t p_cutoff   = s->GetReal("radialgrid/p_cutoff");
+    real_t p_cutoff   = s->GetReal("radialgrid/p_cutoff");
 	DistributionParallelTransport *DPT = new DistributionParallelTransport(eqsys->GetHotTailGrid(), 
 	                                           eqsys->GetUnknownHandler(), eqsys->GetConnectionLength(), 
 	                                           eqsys->GetHotTailGrid(), p_cutoff);

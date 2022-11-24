@@ -121,7 +121,7 @@ def generate(prefill=1e-6, gamma=2e-3, Vloop=12, Vloop_t=0, I0=2.4e3, tmax=1e-4,
     ss.timestep.setTmax(tmax)
     ss.timestep.setNt(nt)
 
-    ss.other.include('fluid', 'stream', 'scalar', 'hottail/parallel_transport')
+    ss.other.include('fluid', 'stream', 'scalar')#, 'hottail/parallel_transport')
 
     return ss
 
@@ -440,9 +440,9 @@ def main(argv):
         ss3.timestep.setNt(10000*2)
         #'''
         # Hot-tail grid settings
-        pMax = 10  # maximum momentum in units of m_e*c
-        Np = 300  # number of momentum grid points
-        Nxi = 20  # number of pitch grid points
+        pMax = 1  # maximum momentum in units of m_e*c
+        Np = 100  # number of momentum grid points
+        Nxi = 40  # number of pitch grid points
         ss3.hottailgrid.setNxi(Nxi)
         ss3.hottailgrid.setNp(Np)
         ss3.hottailgrid.setPmax(pMax)
@@ -454,16 +454,18 @@ def main(argv):
         ss3.eqsys.f_hot.setInitialProfiles(n0=so2.eqsys.n_cold[-1,0], T0=so2.eqsys.T_cold[-1,0])
 
         # Set boundary condition type at pMax
-        # ss3.eqsys.f_hot.setBoundaryCondition(DistFunc.BC_PHI_CONST) # extrapolate flux to boundary
+        #ss3.eqsys.f_hot.setBoundaryCondition(DistFunc.BC_PHI_CONST) # extrapolate flux to boundary
         ss3.eqsys.f_hot.setBoundaryCondition(DistFunc.BC_F_0)  # F=0 outside the boundary
         ss3.eqsys.f_hot.setSynchrotronMode(DistFunc.SYNCHROTRON_MODE_NEGLECT)
-        ss3.eqsys.f_hot.setAdvectionInterpolationMethod(DistFunc.AD_INTERP_TCDF, DistFunc.AD_INTERP_JACOBIAN_UPWIND)
+        ss3.eqsys.f_hot.setAdvectionInterpolationMethod(DistFunc.AD_INTERP_TCDF)#, DistFunc.AD_INTERP_JACOBIAN_UPWIND)
         ss3.eqsys.f_hot.setParticleSource(particleSource=FHot.PARTICLE_SOURCE_IMPLICIT, shape=FHot.PARTICLE_SOURCE_SHAPE_DELTA)
+        #ss3.solver.tolerance.set(reltol=1e-5)
         ss3.solver.tolerance.set('n_hot', abstol=1e7)
         ss3.solver.tolerance.set('j_hot', abstol=1e-3)
         ss3.solver.tolerance.set('E_field', reltol=1e-5)
         ss3.solver.tolerance.set('n_re', abstol=1e7)
         ss3.solver.tolerance.set('j_re', abstol=1e-3)
+        ss3.solver.setDebug(savesystem=True, timestep=1, iteration=0)
         #'''
         ss3.save(f'settings3{ext}.h5')
         so3 = runiface(ss3, f'output3{ext}.h5', quiet=False)

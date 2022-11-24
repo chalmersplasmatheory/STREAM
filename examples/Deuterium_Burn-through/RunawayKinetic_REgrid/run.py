@@ -437,7 +437,7 @@ def main(argv):
         ss3 = STREAMSettings(ss2)
         ss3.fromOutput(f'output2{ext}_grid.h5')
         ss3.timestep.setTmax(0.05 - ss1.timestep.tmax - ss2.timestep.tmax)
-        ss3.timestep.setNt(10000*50)
+        ss3.timestep.setNt(10000)
         #'''
         # Hot-tail grid settings
         pMax = 0.1  # maximum momentum in units of m_e*c
@@ -448,13 +448,16 @@ def main(argv):
         ss3.hottailgrid.setPmax(pMax)
         ss3.hottailgrid.setEnabled(True)
 
-        pMax = 10  # maximum momentum in units of m_e*c
+        pMax = 1  # maximum momentum in units of m_e*c
+        Np = 270
         ss3.runawaygrid.setNxi(Nxi)
         ss3.runawaygrid.setNp(Np)
         ss3.runawaygrid.setPmax(pMax)
         ss3.runawaygrid.setEnabled(True)
 
         ss3.solver.setVerbose(True)
+        ss3.solver.setDebug(savejacobian=True, saveresidual=True, timestep=1, iteration=1)
+        ss3.solver.setLinearSolver(Solver.LINEAR_SOLVER_MKL)
 
         # Set initial hot electron Maxwellian
         ss3.eqsys.f_hot.setInitialProfiles(n0=so2.eqsys.n_cold[-1,0], T0=so2.eqsys.T_cold[-1,0])

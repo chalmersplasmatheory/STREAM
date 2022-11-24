@@ -261,14 +261,14 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         qd->Store(&v);
     );
     
-    
-    DEF_HT("hottail/parallel_transport", "Parallel transport",
-        real_t *v = qd->StoreEmpty();
+    if (this->stream_terms->DPT != nullptr)
+		DEF_HT("hottail/parallel_transport", "Parallel transport",
+			real_t *v = qd->StoreEmpty();
 
-        DistributionParallelTransport *DPT = stream_terms->DPT;
-        real_t *f = this->unknowns->GetUnknownData(id_f_hot);
-        DPT->SetVectorElements(v, f);
-    );
+			DistributionParallelTransport *DPT = stream_terms->DPT;
+			real_t *f = this->unknowns->GetUnknownData(id_f_hot);
+			DPT->SetVectorElements(v, f);
+		);
 
     // Diagnostics for ion rate equations
     DEF_FL_MUL("stream/ionrateequation_posIonization", nChargeStates, "Positive ionization term in ion rate equation",

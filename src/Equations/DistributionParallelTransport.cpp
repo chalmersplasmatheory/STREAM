@@ -57,7 +57,6 @@ void DistributionParallelTransport::SetWeights(){
     len_t n1 = grid->GetMomentumGrid(0)->GetNp1();
     const len_t Nr = this->grid->GetNr();
     real_t xi, p; 
-    real_t c = 299792458.0;
     
     for (len_t ir = 0; ir < Nr; ir++) {
         for(len_t j = 0; j < n2; j++) {
@@ -66,7 +65,7 @@ void DistributionParallelTransport::SetWeights(){
                 if (p > pcutoff) {
 	            xi = grid->GetMomentumGrid(0)->GetXi0(i, j); 
 	    
-	            real_t vpar = std::abs(p * xi / sqrt(1 + p*p)); 
+	            real_t vpar = DREAM::Constants::c*std::abs(p * xi / sqrt(1 + p*p)); 
                     real_t Lfinv = CL->EvaluateInverseConnectionLength(0); // ?? Should do arbitrary ir?
 	            weights[ir*n2*n1+j*n1+i] =- vpar * Lfinv / 120; 
                 } else {
@@ -87,6 +86,9 @@ void DistributionParallelTransport::SetDiffWeights(len_t derivId, len_t){
     len_t n1 = grid->GetMomentumGrid(0)->GetNp1();
     const len_t Nr = this->grid->GetNr();
     real_t xi, p; 
+
+    if (derivId != id_Ip && derivId != id_Iwall)
+    	return;
     
     for (len_t ir = 0; ir < Nr; ir++) {
         for(len_t j = 0; j < n2; j++) {
@@ -95,7 +97,7 @@ void DistributionParallelTransport::SetDiffWeights(len_t derivId, len_t){
                 if (p > pcutoff) {
                     xi = grid->GetMomentumGrid(0)->GetXi0(i, j);
             
-                    real_t vpar = std::abs(p * xi / sqrt(1 + p*p)); 
+                    real_t vpar = DREAM::Constants::c * std::abs(p * xi / sqrt(1 + p*p)); 
                     real_t dLfinv; 
             
                     if(derivId == id_Ip) {
