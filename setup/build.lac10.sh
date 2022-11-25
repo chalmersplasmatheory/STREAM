@@ -23,7 +23,7 @@ function is_python_installed {
 }
 function install_python {
 	echo "Installing required Python packages"
-	pip install --user h5py, matplotlib, numpy, packaging, scipy
+	pip install --user h5py matplotlib numpy packaging scipy
 }
 
 function install_dream {
