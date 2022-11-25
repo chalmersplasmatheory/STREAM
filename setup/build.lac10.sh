@@ -12,7 +12,7 @@ function install_petsc {
 	cd "$PETSC_DIR"
 
 	# Configure with Intel MKL?
-	./configure --with-debugging=0 --COPTFLAGS=-O2 --CXXOPTFLAGS=-O2 --FOPTFLAGS=-O2 --with-blas-lib=/usr/lib64/libblas.so.3.8.0 --with-lapack-dir=/usr/lib64/liblapack.so.3.8.0 --with-mpi=0 &&
+	./configure --with-debugging=0 --COPTFLAGS=-O2 --CXXOPTFLAGS=-O2 --FOPTFLAGS=-O2 --with-blas-lib=/usr/lib64/libblas.so.3.8.0 --with-lapack-lib=/usr/lib64/liblapack.so.3.8.0 --with-mpi=0 &&
 	make PETSC_DIR=$PETSC_DIR PETSC_ARCH=$PETSC_ARCH all
 }
 
