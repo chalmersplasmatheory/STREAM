@@ -270,12 +270,18 @@ bool IonRateEquation::SetCSJacobianBlock(
 
         contributes = true;
         #include "IonRateEquation.setDWI.cpp"        
-    }else if (derivId == id_lambda_i) {
+    } else if (derivId == id_lambda_i) {
         #undef NI
         #define NI(J,V) NI_Z(iIon,(J),(V))
 
         contributes = true;
         #include "IonRateEquation.setDL.cpp"
+    } else if(derivId == id_Ni){
+        #undef NI
+        #define NI(J,V) NI_Z(iIon,(J),(V))
+
+        contributes = true;
+        #include "IonRateEquation.setDTINI.cpp"        
     } else if (derivId == uqtyId) {     // Cross-terms from n_i
         #undef NI
         #define NI(J,V) NI_Z(iIon,(J),(V))
@@ -283,6 +289,7 @@ bool IonRateEquation::SetCSJacobianBlock(
         contributes = true;
         #include "IonRateEquation.setDNI.cpp"
     }
+    
     #undef NI_Z
     #undef NI
 

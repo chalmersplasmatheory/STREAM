@@ -8,6 +8,7 @@
 #include "STREAM/Settings/OptionConstants.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
 #include "STREAM/Equations/NeutralInflux.hpp"
+#include "STREAM/Equations/OpticalThickness.hpp"
 
 using namespace STREAM;
 
@@ -21,13 +22,13 @@ using namespace STREAM;
  */
 EquationSystem *SimulationGenerator::ConstructEquationSystem(
     DREAM::Settings *s, DREAM::FVM::Grid *scalarGrid, DREAM::FVM::Grid *fluidGrid,
-    DREAM::ADAS *adas, DREAM::AMJUEL *amjuel, DREAM::NIST *nist,
-    EllipticalRadialGridGenerator *ergg
+	DREAM::FVM::Grid *hottailGrid, DREAM::FVM::Grid *runawayGrid, DREAM::ADAS *adas, DREAM::AMJUEL *amjuel,
+	DREAM::NIST *nist, EllipticalRadialGridGenerator *ergg
 ) {
     EquationSystem *eqsys = new EquationSystem(
         scalarGrid, fluidGrid,
-        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr,
-        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, nullptr, 
+        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, hottailGrid,
+        DREAM::OptionConstants::MOMENTUMGRID_TYPE_PXI, runawayGrid, 
         s, ergg
     );
     eqsys->SetEllipticalRadialGridGenerator(ergg);
@@ -132,15 +133,23 @@ void SimulationGenerator::ConstructEquations(
         fluidGrid, unknowns, pThreshold, pMode
     );
     eqsys->SetPostProcessor(postProcessor); 
-
+    
+    real_t I_ref = s->GetReal("radialgrid/Iref");
+    RunawayElectronConfinementTime *rect = 
+        new RunawayElectronConfinementTime(
+            eqsys->GetUnknownHandler(), eqsys->GetEllipticalRadialGridGenerator(),
+            eqsys->GetConnectionLength(), I_ref
+        );
+    eqsys->SetRunawayElectronConfinementTime(rect);
+    
     // Hot electron quantities
     if (eqsys->HasHotTailGrid()) {
-        DREAM::SimulationGenerator::ConstructEquation_f_hot(eqsys, s, oqty_terms);
+        ConstructEquation_f_hot(eqsys, s, oqty_terms, stream_terms);
     }
 
     // Runaway electron quantities
     if (eqsys->HasRunawayGrid()) {
-        DREAM::SimulationGenerator::ConstructEquation_f_re(eqsys, s, oqty_terms, nullptr);
+        ConstructEquation_f_re(eqsys, s, oqty_terms, stream_terms);
     }
 
     // Standard equations
@@ -178,9 +187,8 @@ void SimulationGenerator::ConstructEquations(
     if (ht_mode != DREAM::OptionConstants::EQTERM_HOTTAIL_MODE_DISABLED &&
         ht_dist_mode == DREAM::OptionConstants::UQTY_F_HOT_DIST_MODE_NONREL)
         DREAM::SimulationGenerator::ConstructEquation_tau_coll(eqsys);
-        
-    eqsys->GetConfinementTime()->Initialize();
-    eqsys->GetRunawayElectronConfinementTime()->Initialize();
+      
+    eqsys->GetConnectionLength()->Initialize();
 }
 
 /**

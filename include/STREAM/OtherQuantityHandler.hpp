@@ -4,6 +4,7 @@
 #include <vector>
 #include "DREAM/Equations/Fluid/MaxwellianCollisionalEnergyTransferTerm.hpp"
 #include "DREAM/OtherQuantityHandler.hpp"
+#include "STREAM/Equations/ConnectionLength.hpp"
 #include "STREAM/Equations/ConfinementTime.hpp"
 #include "STREAM/Equations/ChargeExchangeTerm.hpp"
 #include "STREAM/Equations/ElectronHeatTransport.hpp"
@@ -13,6 +14,9 @@
 #include "STREAM/Equations/IonTransport.hpp"
 #include "STREAM/Equations/IonHeatTransport.hpp"
 #include "STREAM/Equations/RunawayElectronConfinementTime.hpp"
+#include "STREAM/Equations/OpticalThickness.hpp"
+#include "STREAM/Equations/ElectronCyclotronHeating.hpp"
+#include "STREAM/Equations/DistributionParallelTransport.hpp"
 
 namespace STREAM {
     class OtherQuantityHandler : public DREAM::OtherQuantityHandler {
@@ -23,12 +27,16 @@ namespace STREAM {
             DREAM::MaxwellianCollisionalEnergyTransferTerm **Wi_e_coll=nullptr;
             IonHeatTransport **Wi_iontransport=nullptr;
             ElectronHeatTransport *Tcold_transport=nullptr;
+            ElectronCyclotronHeating *Tcold_ECH=nullptr;
+            DistributionParallelTransport *DPT=nullptr;
         };
     private:
-        ConfinementTime *confinementTime;
-        NeutralInflux *neutralInflux;
-        PlasmaVolume *plasmaVolume;
-        RunawayElectronConfinementTime *reConfinementTime;
+        ConnectionLength *connectionLength=nullptr;
+        ConfinementTime *confinementTime=nullptr;
+        NeutralInflux *neutralInflux=nullptr;
+        PlasmaVolume *plasmaVolume=nullptr;
+        RunawayElectronConfinementTime *reConfinementTime=nullptr;
+        OpticalThickness *opticalThickness=nullptr;
 
         std::vector<IonRateEquation*> ionRateEquations;
         struct eqn_terms *stream_terms;
@@ -37,8 +45,8 @@ namespace STREAM {
 
     public:
         OtherQuantityHandler(
-            ConfinementTime*, NeutralInflux*, PlasmaVolume*,
-            RunawayElectronConfinementTime*,
+            ConnectionLength *, ConfinementTime*, NeutralInflux*, 
+            PlasmaVolume*, RunawayElectronConfinementTime*, OpticalThickness*,
             std::vector<IonRateEquation*>, struct eqn_terms*,
             DREAM::CollisionQuantityHandler*, DREAM::CollisionQuantityHandler*,
             DREAM::PostProcessor*, DREAM::RunawayFluid*, DREAM::FVM::UnknownQuantityHandler*,

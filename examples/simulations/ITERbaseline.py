@@ -80,6 +80,11 @@ def generate_baseline(prefill=1e-6, tritium=True, Vloop0=12, runaways=True, Ip0=
         ss.eqsys.n_i.addIon(name='T', Z=1, iontype=Ions.IONS_DYNAMIC, n=nT, r=np.array([0]), T=Ti0)
 
     # Recycling coefficients
+    iD = ss.eqsys.n_i.getIndex('D')
+    ss.eqsys.n_i.ions[iD].setRecyclingCoefficient('D', 1)
+    if tritium:
+        iT = ss.eqsys.n_i.getIndex('T')
+        ss.eqsys.n_i.ions[iT].setRecyclingCoefficient('T', 1)
 
     # Enable runaway?
     if runaways:
@@ -96,10 +101,6 @@ def generate_baseline(prefill=1e-6, tritium=True, Vloop0=12, runaways=True, Ip0=
     ss.radialgrid.setMajorRadius(R0)
     ss.radialgrid.setWallRadius(b)
     ss.radialgrid.setVesselVolume(V_vessel)
-
-    ss.radialgrid.setRecyclingCoefficient1(1)
-    ss.radialgrid.setRecyclingCoefficient2(0)
-    ss.radialgrid.setRecyclingCoefficient3(1)
 
     # Disable kinetic grids
     ss.hottailgrid.setEnabled(False)

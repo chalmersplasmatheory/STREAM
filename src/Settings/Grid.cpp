@@ -17,28 +17,12 @@ using namespace STREAM;
 void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
     s->DefineSetting(MODULENAME "/wall_radius",  "Tokamak wall radius", (real_t)0.5);
     s->DefineSetting(MODULENAME "/R0",  "Tokamak major radius", (real_t)0);
-    
+
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "a");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "B0");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "kappa");
     DREAM::SimulationGenerator::DefineDataT(MODULENAME, s, "delta");
-    
-    s->DefineSetting(
-        "radialgrid/wall/c1",
-        "Coefficients for deuterium recycling",
-        (real_t)1.1
-    );
-    s->DefineSetting(
-        "radialgrid/wall/c2",
-        "Coefficients for deuterium recycling",
-        (real_t)0.09
-    );
-    s->DefineSetting(
-        "radialgrid/wall/c3",
-        "Coefficients for deuterium recycling",
-        (real_t)0.1
-    );
-    
+        
     s->DefineSetting(
         "radialgrid/wall/vessel_volume", 
         "The vacuum vessel volume",
@@ -47,7 +31,7 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
 
     s->DefineSetting(
         "radialgrid/Iref",
-        "Reference plasma current at which flux surfaces form [A]",
+        "Reference current at which flux surfaces form [A]",
         (real_t)100e3
     );
 
@@ -55,6 +39,54 @@ void SimulationGenerator::DefineOptions_Grid(DREAM::Settings *s) {
         "radialgrid/Bv",
         "Stray vertical magnetic field [T]",
         (real_t)1e-3
+    );
+    
+    s->DefineSetting(
+        "radialgrid/connectionLengthFactor",
+        "Connection length factor", 
+        (real_t)3.0
+    );
+    
+    s->DefineSetting(
+        "radialgrid/P_inj",
+        "Injected ECH power [W]",
+        (real_t)0.0
+    );
+    
+    s->DefineSetting(
+        "radialgrid/f_o",
+        "Fraction of O mode",
+        (real_t)0.5
+    );
+    
+    s->DefineSetting(
+        "radialgrid/f_x",
+        "Fraction of X mode",
+        (real_t)0.5
+    );
+    
+    s->DefineSetting(
+        "radialgrid/theta",
+        "Poloidal angle between EC-beam path and vertical z-axis [rad]",
+        (real_t)M_PI/4.0
+    );
+    
+    s->DefineSetting(
+        "radialgrid/phi",
+        "Toroidal angle between magnetic field and ECH wave injection [rad]",
+        (real_t)0.0
+    );
+    
+    s->DefineSetting(
+        "radialgrid/N",
+        "Fundamental harmonic",
+        (int_t)1
+    );
+    
+    s->DefineSetting(
+        "radialgrid/p_cutoff",
+        "Cutoff momentum [m_e*c]",
+        (real_t)1
     );
     
     DREAM::SimulationGenerator::DefineOptions_f_ripple(MODULENAME, s);

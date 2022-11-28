@@ -9,7 +9,11 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Settings/Ions.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/Process.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/n_re.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Settings/f_hot.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Settings/f_re.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Settings/LoadPrescribedData.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ConfinementTime.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/ConnectionLength.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronTransportDiffusion.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronHeatTransport.cpp"
     "${PROJECT_SOURCE_DIR}/src/Equations/ElectronHeatTransportDiffusion.cpp"
@@ -36,6 +40,9 @@ set(stream
     "${PROJECT_SOURCE_DIR}/src/Equations/ChargeExchangeTerm.cpp"
     "${PROJECT_SOURCE_DIR}/src/OtherQuantityHandler.cpp"
     "${PROJECT_SOURCE_DIR}/src/Settings/OtherQuantityHandler.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/OpticalThickness.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/ElectronCyclotronHeating.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Equations/DistributionParallelTransport.cpp"
 )
 
 set_property(

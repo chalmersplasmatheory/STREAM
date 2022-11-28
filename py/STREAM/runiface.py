@@ -70,7 +70,7 @@ def runiface(settings, outfile=None, quiet=False):
         if p.returncode != 0:
             errorOnExit = 1
         else:
-            obj = STREAMOutput(outfile)
+            obj = STREAMOutput(outfile, loadsettings=False)
 
             if deleteOutput:
                 os.remove(outfile)

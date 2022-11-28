@@ -22,7 +22,7 @@ def create_argparser():
 
     parser.add_argument('output', help="STREAM output file to load", type=str, nargs='?')
 
-    parser.set_defaults(lazy=True, output='output.h5', settings=False)
+    parser.set_defaults(lazy=True, output='output.h5', settings=True)
 
     return parser.parse_args()
 

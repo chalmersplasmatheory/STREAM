@@ -1,3 +1,4 @@
+import numpy as np
 
 import DREAM.Settings.Equations.IonSpecies as DREAMIonSpecies
 
@@ -33,13 +34,13 @@ class IonSpecies(DREAMIonSpecies.IonSpecies):
 
     def getRecyclingCoefficient(self, species):
         """
-        Retrieves the recycling coefficient value for the
-        named ion species.
+        Retrieves the recycling coefficient value-vector and time vector for
+        the named ion species.
         """
         if species in self.recycling:
-            return self.recycling[species]
+            return self.recycling[species][0], self.recycling[species][1]
         else:
-            return 0.0
+            return np.zeros(1), np.zeros(1)
 
 
     def pressureToDensity(p, T=300/11604.51812):
@@ -65,17 +66,23 @@ class IonSpecies(DREAMIonSpecies.IonSpecies):
         return 133.32 * p / (scipy.constants.k * eV2J * T)
 
 
-    def setRecyclingCoefficient(self, species, value):
+    def setRecyclingCoefficient(self, species, values, tvalues=[0.0]):
         """
         Sets the recycling coefficient :math:`Y_i^j`, where :math:`i` denotes
         this ion species and :math:`j` the species of the interacting ion.
 
         :param str species: Name of interacting ion species.
-        :param float value: Recycling coefficient value.
+        :param float values: Vector of recycling coefficient values through time.
+        :param float tvalues: Corresponding time vector.
         """
         if species in self.recycling:
             print("WARNING: Updating recycling coefficient for species '{}' and '{}'.".format(self.name, species))
 
-        self.recycling[species] = value
+        if isinstance(values, float) or isinstance(values, int):
+            values = [float(values)]
+        if isinstance(tvalues, float) or isinstance(tvalues, int):
+            tvalues = [float(tvalues)]
+
+        self.recycling[species] = [np.array(values), np.array(tvalues)]
 
 

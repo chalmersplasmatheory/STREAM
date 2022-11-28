@@ -26,7 +26,7 @@ namespace STREAM {
         // Equation system
         static EquationSystem *ConstructEquationSystem(
             DREAM::Settings*, DREAM::FVM::Grid*, DREAM::FVM::Grid*,
-            DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
+			DREAM::FVM::Grid*, DREAM::FVM::Grid*, DREAM::ADAS*, DREAM::AMJUEL*, DREAM::NIST*,
             EllipticalRadialGridGenerator*
         );
         static void ConstructEquations(
@@ -44,6 +44,10 @@ namespace STREAM {
             EquationSystem*, DREAM::Settings*
         );
 
+	// Distribution function
+	static void ConstructEquation_f_hot(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*, struct STREAM::OtherQuantityHandler::eqn_terms*);
+	static void ConstructEquation_f_re(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*, struct STREAM::OtherQuantityHandler::eqn_terms*);
+	
         // Electric field and related equations
         static void ConstructEquation_E_field(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
         static void ConstructEquation_E_field_selfconsistent(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
@@ -101,6 +105,10 @@ namespace STREAM {
         
         static void DefineOptions_n_re(DREAM::Settings*);
         static void ConstructEquation_n_re(EquationSystem*, DREAM::Settings*, struct DREAM::OtherQuantityHandler::eqn_terms*);
+        
+        // Data loading routines
+        static void DefineDataT_3D(const std::string&, DREAM::Settings*, const std::string& name="data");
+        static DREAM::FVM::Interpolator1D ***LoadDataT_3D(const std::string&, DREAM::Settings*, const std::string& name="data");
     };
 }
 
