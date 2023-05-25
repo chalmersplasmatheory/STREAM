@@ -240,6 +240,14 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
 		);
 	}
 
+	DEF_SC("stream/a", "Plasma minor radius",
+		real_t a = this->fluidGrid->GetRadialGrid()->GetDr(0);
+		qd->Store(&a);
+	);
+	DEF_SC("stream/A", "Plasma poloidal cross-section",
+		real_t A = this->plasmaVolume->GetPlasmaCrossSection();
+		qd->Store(&A);
+	);
     DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals",
         const len_t nZ = this->ions->GetNZ();
         real_t *v = qd->StoreEmpty();

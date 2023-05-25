@@ -243,11 +243,28 @@ void SimulationGenerator::ConstructEquation_T_i(
         );
 
     // Initialize heat from ion densities and input ion temperatures
-    real_t *Ti_init = DREAM::SimulationGenerator::LoadDataIonR("eqsys/n_i", eqsys->GetFluidGrid()->GetRadialGrid(), s, eqsys->GetIonHandler()->GetNZ(), "initialTi");
+    /*real_t *Ti_init = DREAM::SimulationGenerator::LoadDataIonR("eqsys/n_i", eqsys->GetFluidGrid()->GetRadialGrid(), s, eqsys->GetIonHandler()->GetNZ(), "initialTi");
     const real_t *Ni_init = eqsys->GetUnknownHandler()->GetUnknownInitialData(eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS));
     for(len_t it=0; it<eqsys->GetIonHandler()->GetNZ()*eqsys->GetFluidGrid()->GetNr(); it++)
         Ti_init[it] *= 1.5*DREAM::Constants::ec*Ni_init[it];
-    eqsys->SetInitialValue(eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER), Ti_init);    
+    eqsys->SetInitialValue(eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER), Ti_init);*/
+
+	real_t *Ti_init = DREAM::SimulationGenerator::LoadDataIonR("eqsys/n_i", eqsys->GetFluidGrid()->GetRadialGrid(), s, eqsys->GetIonHandler()->GetNZ(), "initialTi");
+	len_t id_Ni = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS);
+
+	std::function<void(DREAM::FVM::UnknownQuantityHandler*, real_t*)> initfunc_Ti =
+		[Ti_init,id_Ni,eqsys](DREAM::FVM::UnknownQuantityHandler *u, real_t *Ti) {
+		const real_t *Ni_init = u->GetUnknownInitialData(id_Ni);
+		for(len_t it=0; it<eqsys->GetIonHandler()->GetNZ()*eqsys->GetFluidGrid()->GetNr(); it++)
+			Ti[it] = Ti_init[it] * 1.5*DREAM::Constants::ec*Ni_init[it];
+	};
+	len_t id_Wi = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
+	eqsys->initializer->AddRule(
+		id_Wi,
+		DREAM::EqsysInitializer::INITRULE_EVAL_FUNCTION,
+		initfunc_Ti,
+		id_Ni
+	);
 }
 
 void SimulationGenerator::ConstructEquation_T_i_selfconsistent(
