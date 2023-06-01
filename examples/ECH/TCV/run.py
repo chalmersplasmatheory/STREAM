@@ -17,7 +17,7 @@ mpl.rcParams.update({'text.usetex': True, 'font.family': 'sans', 'font.size': FO
 sys.path.append('../../../py')
 
 # from run import makeplots
-import PlasmaParameters as Formulas
+from DREAM import Formulas
 import DREAM.Settings.Equations.ColdElectronTemperature as Tcold
 import DREAM.Settings.Solver as Solver
 import DREAM.Settings.Equations.RunawayElectrons as Runaways

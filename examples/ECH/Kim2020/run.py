@@ -10,7 +10,7 @@ import sys
 sys.path.append('../../../py')
 
 # from run import makeplots
-import PlasmaParameters as Formulas
+from DREAM import Formulas
 import DREAM.Settings.Equations.ColdElectronTemperature as Tcold
 import DREAM.Settings.Solver as Solver
 

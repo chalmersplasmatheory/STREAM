@@ -206,45 +206,41 @@ class RadialGrid(PrescribedScalarParameter):
         self.B0, self.tB0 = data['B0']['x'], data['B0']['t']
         self.kappa, self.tkappa = data['kappa']['x'], data['kappa']['t']
         self.delta, self.tdelta = data['delta']['x'], data['delta']['t']
-        self.vessel_volume = data['wall']['vessel_volume']
-        self.R0 = data['R0']
+        self.vessel_volume = float(data['wall']['vessel_volume'])
+        self.R0 = float(data['R0'])
 
         if 'wall_radius' in data:
-            self.b = data['wall_radius']
-            if type(self.b) == np.ndarray:
-                self.b = float(self.b[0])
-            else:
-                self.b = float(self.b)
+            self.b = float(data['wall_radius'])
 
         if 'Bv' in data:
-            self.Bv = data['Bv']
+            self.Bv = float(data['Bv'])
 
         if 'connectionLengthFactor' in data:
-            self.connectionLengthFactor = data['connectionLengthFactor']
+            self.connectionLengthFactor = float(data['connectionLengthFactor'])
 
         if 'Iref' in data:
-            self.Iref = data['Iref']
+            self.Iref = float(data['Iref'])
 
         if 'P_inj' in data:
-            self.P_inj = data['P_inj']
+            self.P_inj = float(data['P_inj'])
 
         if 'f_o' in data:
-            self.f_o = data['f_o']
+            self.f_o = float(data['f_o'])
 
         if 'f_x' in data:
-            self.f_x = data['f_x']
+            self.f_x = float(data['f_x'])
 
         if 'theta' in data:
-            self.theta = data['theta']
+            self.theta = float(data['theta'])
 
         if 'phi' in data:
-            self.phi = data['phi']
+            self.phi = float(data['phi'])
 
         if 'N' in data:
-            self.N = data['N']
+            self.N = int(data['N'])
 
         if 'p_cutoff' in data:
-            self.p_cutoff = data['p_cutoff']
+            self.p_cutoff = float(data['p_cutoff'])
 
 
 

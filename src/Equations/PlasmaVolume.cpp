@@ -16,6 +16,10 @@ using namespace DREAM;
         id_n_cold = u->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD); 
     }
     
+	real_t PlasmaVolume::GetPlasmaCrossSection() const {
+		return grid->GetVpVol(0) * radials->GetMinorRadius() / (2*M_PI);
+	}
+
     real_t PlasmaVolume::GetPlasmaVolume() const{
         return grid->GetVpVol(0) * radials->GetMinorRadius() * radials->GetMajorRadius(); 
     }

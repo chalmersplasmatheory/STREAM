@@ -240,23 +240,31 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
 		);
 	}
 
-    DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals",
+	DEF_SC("stream/a", "Plasma minor radius [m]",
+		real_t a = this->fluidGrid->GetRadialGrid()->GetDr(0);
+		qd->Store(&a);
+	);
+	DEF_SC("stream/A", "Plasma poloidal cross-section [m^2]",
+		real_t A = this->plasmaVolume->GetPlasmaCrossSection();
+		qd->Store(&A);
+	);
+    DEF_SC_MUL("stream/V_n", nIons, "Plasma volume occupied by neutrals [m^3]",
         const len_t nZ = this->ions->GetNZ();
         real_t *v = qd->StoreEmpty();
         for (len_t i = 0; i < nZ; i++)
             v[i] = this->plasmaVolume->GetNeutralVolume(i);
     );
-    DEF_SC_MUL("stream/V_n_tot", nIons, "Total volume occupied by neutrals (including outside plasma)",
+    DEF_SC_MUL("stream/V_n_tot", nIons, "Total volume occupied by neutrals (including outside plasma) [m^3]",
         const len_t nZ = this->ions->GetNZ();
         real_t *v = qd->StoreEmpty();
         for (len_t i = 0; i < nZ; i++)
             v[i] = this->plasmaVolume->GetTotalNeutralVolume(i);
     );
-    DEF_SC("stream/V_p", "Plasma volume", 
+    DEF_SC("stream/V_p", "Plasma volume [m^3]", 
         real_t v = this->plasmaVolume->GetPlasmaVolume();
         qd->Store(&v);
     );
-    DEF_SC("stream/V", "Tokamak vessel volume",
+    DEF_SC("stream/V", "Tokamak vessel volume [m^3]",
         real_t v = this->plasmaVolume->GetVesselVolume();
         qd->Store(&v);
     );

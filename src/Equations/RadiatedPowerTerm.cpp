@@ -63,7 +63,7 @@ using namespace STREAM;
             for (len_t iz = 0; iz<ions->GetNZ(); iz++){
                 real_t dVdlambda = volumes->GetNeutralVolume_dLambdai(iz);
 
-                if (weights[iz] != 0)
+                if (jacWeights[iz] != 0)
                     jac->SetElement(iz, 0, jacWeights[iz] * dVdlambda / this->Volfac[iz]);
             }
         }
