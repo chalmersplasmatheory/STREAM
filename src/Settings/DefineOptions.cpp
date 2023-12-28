@@ -20,7 +20,8 @@ void SimulationGenerator::DefineOptions(DREAM::Settings *s) {
     DefineOptions_Grid(s);
     DefineOptions_T_cold(s);
     DefineOptions_Ions(s);
-
+    DefineOptions_ConfinementTime(s);
+    
     // Same as for DREAM
     DREAM::SimulationGenerator::DefineOptions_ADAS(s);
     DREAM::SimulationGenerator::DefineOptions_CollisionQuantityHandler(s);

@@ -17,11 +17,11 @@ ElectronHeatTransportDiffusion::ElectronHeatTransportDiffusion(
     SetName("ElectronHeatTransportDiffusion"); 
 
     this->unknowns  = unknowns;
-    this->id_ncold = unknowns->GetUnknownID(OptionConstants::UQTY_N_COLD);
-    this->id_Ip    = unknowns->GetUnknownID(OptionConstants::UQTY_I_P);
-    this->id_Tcold = unknowns->GetUnknownID(OptionConstants::UQTY_T_COLD);
-    this->id_Wi    = unknowns->GetUnknownID(OptionConstants::UQTY_WI_ENER);
-    this->id_Ni    = unknowns->GetUnknownID(OptionConstants::UQTY_NI_DENS);
+    this->id_ncold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD);
+    this->id_Ip    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_P);
+    this->id_Tcold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
+    this->id_Wi    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
+    this->id_Ni    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_NI_DENS);
     
     this->radials = radials;
     
@@ -84,7 +84,7 @@ void ElectronHeatTransportDiffusion::Rebuild(
     const real_t, const real_t, FVM::UnknownQuantityHandler *unknowns 
 ) {
     if(this->id_Iwall == 0){
-        this->id_Iwall = unknowns->GetUnknownID(OptionConstants::UQTY_I_WALL);
+        this->id_Iwall = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_I_WALL);
         AddUnknownForJacobian(unknowns, this->id_Iwall);
     }
     real_t a = radials->GetMinorRadius();

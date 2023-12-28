@@ -8,6 +8,7 @@ from DREAM import DREAMIO, DREAMSettings
 
 from .Settings.EquationSystem import EquationSystem
 from .Settings.RadialGrid import RadialGrid
+from .Settings.OtherQuantities import OtherQuantities
 
 
 class STREAMSettings(DREAMSettings):
@@ -33,6 +34,8 @@ class STREAMSettings(DREAMSettings):
         # Should be defined last as it may need access to the
         # obejcts created above...
         self.addSetting('eqsys', EquationSystem(settings=self))
+
+        self.addSetting('other', OtherQuantities())
 
         if filename is not None:
             if type(filename) == str:
