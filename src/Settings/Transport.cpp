@@ -25,7 +25,6 @@ void SimulationGenerator::DefineOptions_Transport(
 void SimulationGenerator::DefineOptions_ConfinementTime( DREAM::Settings* s)
 {
 	s->DefineSetting("eqsys/tau_perp/tau_perp", "Type of perpendicular confinement time to use", (int_t)OptionConstants::CONF_TIME_BOHM);
-    s->DefineSetting("eqsys/tau_perp/maxPerpLaw", "To take the maximum between two perpendicular confinement time", (int_t)0);
 }
 
 /**

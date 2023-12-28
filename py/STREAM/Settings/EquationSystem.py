@@ -2,7 +2,7 @@
 from DREAM.Settings.EquationSystem import EquationSystem as DREAMEqSys
 from STREAM.Settings.Equations.ElectricField import ElectricField
 from STREAM.Settings.Equations.Ions import Ions
-from STREAM.Settings.Equations.ConfinementTime import ConfinementTime
+from STREAM.Settings.ConfinementTime import ConfinementTime
 
 
 class EquationSystem(DREAMEqSys):
@@ -17,4 +17,6 @@ class EquationSystem(DREAMEqSys):
         # Overwrite with STREAM-modified unknowns
         self.addUnknown('n_i', Ions(settings=settings))
         self.addUnknown('E_field', ElectricField(settings=settings))
-        self.addUnknown('tau_perp', ConfinementTime(settings=settings))
+        self.addUnknown('tau_perp', ConfinementTime(settings=settings)) #modified
+
+

@@ -14,9 +14,10 @@ enum eqterm_E_field_eqn {
 };
 
 
-enum Conf_Time_type {
+enum Conf_Time_type
+{
 	CONF_TIME_BOHM      = 1,
-	CONF_TIME_RLW       = 2,
+	CONF_TIME_INTOR     = 2,
 	CONF_TIME_ITER89    = 3,
 	CONF_TIME_ITER97    = 4,
 	CONF_TIME_IPB98     = 5,
@@ -27,11 +28,5 @@ enum Conf_Time_type {
 	CONF_TIME_KAYE_BIG  = 10,
 	CONF_TIME_CY        = 11,
 	CONF_TIME_OS_OL     = 12,
-	CONF_TIME_RL_OL     = 13,
-	CONF_TIME_INTOR     = 14,
-};
-
-enum Max_Perp_Law_type {
-				MAX_PERP_LAW_DISABLED = 0,
-				MAX_PERP_LAW_ENABLED = 1,
+	CONF_TIME_RL_OL     = 13
 };
