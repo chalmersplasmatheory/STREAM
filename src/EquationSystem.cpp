@@ -12,7 +12,7 @@ EquationSystem::EquationSystem(
     enum DREAM::OptionConstants::momentumgrid_type re_type, DREAM::FVM::Grid *runawayGrid,
     DREAM::Settings *s, EllipticalRadialGridGenerator *r
 ) : DREAM::EquationSystem(emptygrid, rgrid, ht_type, hottailGrid, re_type, runawayGrid, s), r(r)
-    {}
+    {/*s->DisplaySettings();*/}
     
 EllipticalRadialGridGenerator* EquationSystem::GetEllipticalRadialGridGenerator()
     {return this->r;}

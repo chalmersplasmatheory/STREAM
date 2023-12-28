@@ -22,6 +22,11 @@ void SimulationGenerator::DefineOptions_Transport(
     s->DefineSetting(mod + "/" + subname + "/type", "Type of transport model to use.", (int_t)OptionConstants::EQTERM_TRANSPORT_NONE);
 }
 
+void SimulationGenerator::DefineOptions_ConfinementTime( DREAM::Settings* s)
+{
+	s->DefineSetting("eqsys/tau_perp/tau_perp", "Type of perpendicular confinement time to use", (int_t)OptionConstants::CONF_TIME_BOHM);
+}
+
 /**
  * Construct transport terms.
  *
