@@ -10,23 +10,12 @@
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
 #include "STREAM/Equations/ConnectionLength.hpp"
 #include <array>
+#include <functional>
 #include "STREAM/Equations/Coefficients.hpp"
-//#include "STREAM/Settings/OptionConstants.hpp"
-//#include "STREAM/EquationSystem.hpp" // MINE
-//#include "STREAM/Equations/PlasmaVolume.hpp"
-//#include "DREAM/EquationSystem.hpp"
-
-/** 
- * Implementation of the particle confinement time
- */
-/*namespace DREAM{
-	class EquationSystem;
-}*/
-//enum STREAM::OptionConstants::Conft_Time_type;
 
 namespace STREAM{
 		class EquationSystem;
-		//class OptionConstants::Conf
+		
         class ConfinementTime {
 
                 protected:
@@ -65,6 +54,8 @@ namespace STREAM{
 						real_t Goldstone_scaling(PowerList const&, len_t ir, real_t const& ConvUnit = 1e-19);
 						
 						const PowerList GetCoeff();
+						const PowerList GetCoeff(OptionConstants::Conf_Time_type _type);
+
                         
                 public:
                         ConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
