@@ -18,4 +18,8 @@ tcvstream
 tcvstream/
 tcvstream/*
 src/Equations/save/*
+src/Equations/save
+src/Equations/save/
+.metadata/*
+.metadata*
 src/Equations/ConfTimeSave.cpp
