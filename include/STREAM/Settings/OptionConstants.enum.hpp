@@ -28,5 +28,6 @@ enum Conf_Time_type
 	CONF_TIME_KAYE_BIG  = 10,
 	CONF_TIME_CY        = 11,
 	CONF_TIME_OS_OL     = 12,
-	CONF_TIME_RL_OL     = 13
+	CONF_TIME_RL_OL     = 13,
+	CONF_TIME_MIXTE     = 14
 };

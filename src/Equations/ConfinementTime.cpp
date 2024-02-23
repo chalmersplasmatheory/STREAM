@@ -3,12 +3,11 @@
 #include "DREAM/Settings/OptionConstants.hpp"
 #include "FVM/UnknownQuantityHandler.hpp"
 #include "STREAM/Grid/EllipticalRadialGridGenerator.hpp"
-//#include "STREAM/Equations/PlasmaVolume.hpp"
 #include "DREAM/Equations/RunawayFluid.hpp"
 #include "STREAM/EquationSystem.hpp"
-//#include "STREAM/Settings/SimulationGenerator.hpp"
 #include <cmath>
-//#include "STREAM/Equations/Coefficients.hpp"
+#include <algorithm>
+#include <functional>
 
 using namespace STREAM;
 using namespace DREAM;
@@ -18,9 +17,10 @@ using namespace std;
 /**
  * Constructor
  */
+
 ConfinementTime::ConfinementTime(
 	FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
-	IonHandler *ions, ConnectionLength* CL, STREAM::EquationSystem *eqsys,  len_t D_index) //PlasmaVolume *V,
+	IonHandler *ions, ConnectionLength* CL, STREAM::EquationSystem *eqsys,  len_t D_index)
 {
     unknowns = u;
     radials  = r;
@@ -29,7 +29,6 @@ ConfinementTime::ConfinementTime(
     this->eqsys = eqsys;
     this->D_index = D_index;
     
-    //STREAM::SimulationGenerator::DefineOptions_ConfinementTime(eqsys->GetSettings());
     
     id_Tcold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_T_COLD);
     id_Wi    = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_WI_ENER);
@@ -38,7 +37,7 @@ ConfinementTime::ConfinementTime(
     id_Ncold = unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_N_COLD);
     id_Efield= unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_E_FIELD);
     
-    type = (enum STREAM::OptionConstants::Conf_Time_type)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/tau_perp");
+    type = (enum STREAM::OptionConstants::Conf_Time_type)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/tau_perp"); //Setting the type of confinement time
 }
 
 /**
@@ -70,7 +69,13 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
  * Evaluates the perpendicular confinement time.
  */
 
-const PowerList ConfinementTime::GetCoeff()
+//Possible improvement using a lambda function
+const PowerList ConfinementTime::GetCoeff(STREAM::OptionConstants::Conf_Time_type _type) //Return a power list containing the Coeffcient for each law
+{
+	return COEFFICIENTS::LawCoefficients.at(_type);
+}
+
+const PowerList ConfinementTime::GetCoeff() //Return a power list containing the Coeffcient for each law
 {
 	return COEFFICIENTS::LawCoefficients.at(type);
 }
@@ -85,7 +90,7 @@ real_t ConfinementTime::GetOhmicPower(len_t ir)
 	return E_field * E_field * sigma * V / R0;
 }
 
-real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real_t const& ConvUnit)
+real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real_t const& ConvUnit) //
 {
 	real_t a = radials->GetMinorRadius();
 	real_t B0 = radials->GetMagneticField();
@@ -110,7 +115,7 @@ real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real
 	return prod;
 }
 
-real_t ConfinementTime::Bohm_ConfinementTime(len_t ir)
+real_t ConfinementTime::Bohm_ConfinementTime(len_t ir) // Bohm confinement time
 {
 	real_t a      = radials->GetMinorRadius();
 	real_t B      = radials->GetMagneticField();
@@ -118,17 +123,17 @@ real_t ConfinementTime::Bohm_ConfinementTime(len_t ir)
 	return T_cold / (8*a*a*B);
 }
 
-real_t ConfinementTime::INTOR_ConfinementTime(len_t ir)
+real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) // INTOR scaling law
 {
 	real_t q = eqsys->GetSettings()->GetReal("timestep/safetyfactor");
 	real_t tau_0 = sqrt(q);
-	real_t C0 = 5e-19;
+	real_t C0 = 5e-21;
 	real_t ne = unknowns->GetUnknownData(id_Ncold)[ir];
 	real_t a = radials->GetMinorRadius();
 	return 1.0 / (C0 * tau_0 * ne * a * a);
 }
 
-real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir)
+real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) //ITER89 OL
 {		
 	real_t P = GetOhmicPower(ir) * ConversionFactor;
 	real_t WOH = Goldstone_scaling(GetCoeff(), ir, 1e-20);
@@ -187,6 +192,8 @@ real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir)
 			return OS_OL_ConfinementTime(ir);
 		case STREAM::OptionConstants::CONF_TIME_RL_OL :
 			return RL_OL_ConfinementTime(ir);
+		case STREAM::OptionConstants::CONF_TIME_MIXTE :
+			return std::max(Bohm_ConfinementTime(ir), 1.0 / Goldstone_scaling(GetCoeff(STREAM::OptionConstants::Conf_Time_type::CONF_TIME_ITER97), ir, Conv_n20));
 		default :
 			throw DREAM::SettingsException("Unrecognized equation type for '%s' : %d", "tau_perp", type);
 	}
