@@ -24,6 +24,7 @@ ConfinementTime::ConfinementTime(
 {
     unknowns = u;
     radials  = r;
+    
     this->ions = ions;
     this->CL = CL;
     this->eqsys = eqsys;
@@ -38,20 +39,43 @@ ConfinementTime::ConfinementTime(
     id_Efield= unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_E_FIELD);
     
     type = (enum STREAM::OptionConstants::Conf_Time_type)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/tau_perp"); //Setting the type of confinement time
+	mixte = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixte");
+    smoothless = (STREAM::OptionConstants::Conf_Time_smoothless)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/smoothless");
+	smoothlessFunction = setSmoothless();
+	
+}
+
+
+std::function<real_t(real_t, real_t)> ConfinementTime::setSmoothless() 
+{
+	switch(smoothless)
+	{
+		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_INVERSE_SUM :
+			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return x + y; });
+		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_EXP_SUM :
+			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return log(exp(1.0 / x) + exp(1.0 / y)); });
+		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_LOG_SUM :
+			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return exp(log(1.0 / x) + log(1.0 / y)); });
+		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_SUM :
+			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return 1.0 / (1.0 / x + 1.0 / y); });
+		default :
+			throw DREAM::SettingsException("Unrecognized equation type for '%s' : %d", "tau_perp smoothless", smoothless); 
+	}	
 }
 
 /**
  * Evaluates the inverted confinement time
  */
-real_t ConfinementTime::EvaluateConfinementTime(len_t ir){ 
-    return EvaluatePerpendicularConfinementTime(ir)
-        + EvaluateParallelConfinementTime(ir);
+real_t ConfinementTime::EvaluateConfinementTime(len_t ir)
+{ 
+    return smoothlessFunction(EvaluatePerpendicularConfinementTime(ir), EvaluateParallelConfinementTime(ir));
 }
 
 /**
  * Evaluates the parallel confinement time.
  */
-real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
+real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) 
+{
     len_t nr = radials->GetNr();
     real_t T_cold    = unknowns->GetUnknownData(id_Tcold)[ir];
     real_t W_i    = unknowns->GetUnknownData(id_Wi)[D_index*nr+ir];
@@ -70,17 +94,17 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
  */
 
 //Possible improvement using a lambda function
-const PowerList ConfinementTime::GetCoeff(STREAM::OptionConstants::Conf_Time_type _type) //Return a power list containing the Coeffcient for each law
+const PowerList ConfinementTime::GetCoeff(STREAM::OptionConstants::Conf_Time_type _type) const //Return a power list containing the Coeffcient for each law
 {
 	return COEFFICIENTS::LawCoefficients.at(_type);
 }
 
-const PowerList ConfinementTime::GetCoeff() //Return a power list containing the Coeffcient for each law
+const PowerList ConfinementTime::GetCoeff() const //Return a power list containing the Coeffcient for each law
 {
 	return COEFFICIENTS::LawCoefficients.at(type);
 }
 
-real_t ConfinementTime::GetOhmicPower(len_t ir)
+real_t ConfinementTime::GetOhmicPower(len_t ir) const
 {
 	real_t V = eqsys->GetPlasmaVolume()->GetPlasmaVolume();
 	real_t E_field = unknowns->GetUnknownData(id_Efield)[ir];	
@@ -90,7 +114,7 @@ real_t ConfinementTime::GetOhmicPower(len_t ir)
 	return E_field * E_field * sigma * V / R0;
 }
 
-real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real_t const& ConvUnit) //
+real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real_t const& ConvUnit) const //
 {
 	real_t a = radials->GetMinorRadius();
 	real_t B0 = radials->GetMagneticField();
@@ -115,7 +139,7 @@ real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real
 	return prod;
 }
 
-real_t ConfinementTime::Bohm_ConfinementTime(len_t ir) // Bohm confinement time
+real_t ConfinementTime::Bohm_ConfinementTime(len_t ir) const // Bohm confinement time
 {
 	real_t a      = radials->GetMinorRadius();
 	real_t B      = radials->GetMagneticField();
@@ -123,7 +147,7 @@ real_t ConfinementTime::Bohm_ConfinementTime(len_t ir) // Bohm confinement time
 	return T_cold / (8*a*a*B);
 }
 
-real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) // INTOR scaling law
+real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) const // INTOR scaling law
 {
 	real_t q = eqsys->GetSettings()->GetReal("timestep/safetyfactor");
 	real_t tau_0 = sqrt(q);
@@ -133,7 +157,7 @@ real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) // INTOR scaling law
 	return 1.0 / (C0 * tau_0 * ne * a * a);
 }
 
-real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) //ITER89 OL
+real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) const //ITER89 OL
 {		
 	real_t P = GetOhmicPower(ir) * ConversionFactor;
 	real_t WOH = Goldstone_scaling(GetCoeff(), ir, 1e-20);
@@ -142,7 +166,7 @@ real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) //ITER89 OL
 	return 1.0 / (WOH / P + tau_inc);
 }
 
-real_t ConfinementTime::OS_OL_ConfinementTime(len_t ir)
+real_t ConfinementTime::OS_OL_ConfinementTime(len_t ir) const
 {	
 	real_t Zeff = ions->GetZeff(ir);
 	
@@ -156,7 +180,7 @@ real_t ConfinementTime::OS_OL_ConfinementTime(len_t ir)
 	return 1.0 / (WOH / P + tau_inc);
 }
 
-real_t ConfinementTime::RL_OL_ConfinementTime(len_t ir)
+real_t ConfinementTime::RL_OL_ConfinementTime(len_t ir) const
 {
 	real_t Zeff = ions->GetZeff(ir);
 	
@@ -168,34 +192,47 @@ real_t ConfinementTime::RL_OL_ConfinementTime(len_t ir)
 	return 1.0 / (WOH / P + tau_inc);
 }
 
-real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) 
+const real_t ConfinementTime::EvaluatePerpendicularConfinementTimeType(len_t ir) const
 {
 	switch(type) 
+		{
+			case STREAM::OptionConstants::CONF_TIME_BOHM :
+				return Bohm_ConfinementTime(ir);
+			case STREAM::OptionConstants::CONF_TIME_INTOR :
+				return INTOR_ConfinementTime(ir);
+			case STREAM::OptionConstants::CONF_TIME_ITER89 :
+			case STREAM::OptionConstants::CONF_TIME_IPB98 :
+			case STREAM::OptionConstants::CONF_TIME_GOLDSTONE :
+			case STREAM::OptionConstants::CONF_TIME_KAYE_BIG :
+			case STREAM::OptionConstants::CONF_TIME_CY :
+				return 1.0 / Goldstone_scaling(GetCoeff(), ir, Conv_n20);
+			case STREAM::OptionConstants::CONF_TIME_ITER97 :
+			case STREAM::OptionConstants::CONF_TIME_EIV1 :
+			case STREAM::OptionConstants::CONF_TIME_EIV2 :
+				return 1.0 / Goldstone_scaling(GetCoeff(), ir);
+			case STREAM::OptionConstants::CONF_TIME_ITER89_OL :
+				return ITER89_OL_ConfinementTime(ir);
+			case STREAM::OptionConstants::CONF_TIME_OS_OL :
+				return OS_OL_ConfinementTime(ir);
+			case STREAM::OptionConstants::CONF_TIME_RL_OL :
+				return RL_OL_ConfinementTime(ir);
+			//case STREAM::OptionConstants::CONF_TIME_MIXTE :
+				//return std::min(Bohm_ConfinementTime(ir), 1.0 / Goldstone_scaling(GetCoeff(STREAM::OptionConstants::Conf_Time_type::CONF_TIME_ITER97), ir));
+			default :
+				throw DREAM::SettingsException("Unrecognized equation type for '%s' : %d", "tau_perp", type);
+		}
+}
+
+
+real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) 
+{
+	if (mixte)
 	{
-		case STREAM::OptionConstants::CONF_TIME_BOHM :
-			return Bohm_ConfinementTime(ir);
-		case STREAM::OptionConstants::CONF_TIME_INTOR :
-			return INTOR_ConfinementTime(ir);
-		case STREAM::OptionConstants::CONF_TIME_ITER89 :
-		case STREAM::OptionConstants::CONF_TIME_IPB98 :
-		case STREAM::OptionConstants::CONF_TIME_GOLDSTONE :
-		case STREAM::OptionConstants::CONF_TIME_KAYE_BIG :
-		case STREAM::OptionConstants::CONF_TIME_CY :
-			return 1.0 / Goldstone_scaling(GetCoeff(), ir, Conv_n20);
-		case STREAM::OptionConstants::CONF_TIME_ITER97 :
-		case STREAM::OptionConstants::CONF_TIME_EIV1 :
-		case STREAM::OptionConstants::CONF_TIME_EIV2 :
-			return 1.0 / Goldstone_scaling(GetCoeff(), ir);
-		case STREAM::OptionConstants::CONF_TIME_ITER89_OL :
-			return ITER89_OL_ConfinementTime(ir);
-		case STREAM::OptionConstants::CONF_TIME_OS_OL :
-			return OS_OL_ConfinementTime(ir);
-		case STREAM::OptionConstants::CONF_TIME_RL_OL :
-			return RL_OL_ConfinementTime(ir);
-		case STREAM::OptionConstants::CONF_TIME_MIXTE :
-			return std::max(Bohm_ConfinementTime(ir), 1.0 / Goldstone_scaling(GetCoeff(STREAM::OptionConstants::Conf_Time_type::CONF_TIME_ITER97), ir, Conv_n20));
-		default :
-			throw DREAM::SettingsException("Unrecognized equation type for '%s' : %d", "tau_perp", type);
+		return std::min(Bohm_ConfinementTime(ir), EvaluatePerpendicularConfinementTimeType(ir));
+	}
+	else
+	{
+		return EvaluatePerpendicularConfinementTimeType(ir);
 	}
 }
 

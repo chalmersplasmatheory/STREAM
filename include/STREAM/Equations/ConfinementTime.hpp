@@ -34,28 +34,36 @@ namespace STREAM{
                         static constexpr real_t nullset = 0.0;
                         static constexpr real_t Conv_n20 = 1e-20;
                         
+                        bool mixte;
+                        
+                        std::function<real_t(real_t,real_t)> smoothlessFunction;
+                        
                         // BEGINNING OF MY LINES
                         EquationSystem *eqsys;
                         
                         OptionConstants::Conf_Time_type type;
+                        OptionConstants::Conf_Time_smoothless smoothless;
                         
-                        real_t GetOhmicPower(len_t ir);
+                        real_t GetOhmicPower(len_t ir) const;
                         
-                        real_t Bohm_ConfinementTime(len_t ir);
+                        real_t Bohm_ConfinementTime(len_t ir) const;
                                                 
-						real_t INTOR_ConfinementTime(len_t ir);
+						real_t INTOR_ConfinementTime(len_t ir) const;
 						
-						real_t ITER89_OL_ConfinementTime(len_t ir);
+						real_t ITER89_OL_ConfinementTime(len_t ir) const;
 						
-						real_t OS_OL_ConfinementTime(len_t ir);
+						real_t OS_OL_ConfinementTime(len_t ir) const;
 						
-						real_t RL_OL_ConfinementTime(len_t ir);
+						real_t RL_OL_ConfinementTime(len_t ir) const;
 						
-						real_t Goldstone_scaling(PowerList const&, len_t ir, real_t const& ConvUnit = 1e-19);
+						real_t Goldstone_scaling(PowerList const&, len_t ir, real_t const& ConvUnit = 1e-19) const;
 						
-						const PowerList GetCoeff();
-						const PowerList GetCoeff(OptionConstants::Conf_Time_type _type);
+						const PowerList GetCoeff() const;
+						const PowerList GetCoeff(OptionConstants::Conf_Time_type _type) const;
+						
+						const real_t EvaluatePerpendicularConfinementTimeType(len_t ir) const;
 
+                        std::function<real_t(real_t, real_t)> setSmoothless();
                         
                 public:
                         ConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
