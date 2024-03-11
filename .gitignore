@@ -22,4 +22,8 @@ src/Equations/save
 src/Equations/save/
 .metadata/*
 .metadata*
+.metadata/
 src/Equations/ConfTimeSave.cpp
+.vscode*
+.vscode/
+.vscode/*

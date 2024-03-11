@@ -28,6 +28,15 @@ enum Conf_Time_type
 	CONF_TIME_KAYE_BIG  = 10,
 	CONF_TIME_CY        = 11,
 	CONF_TIME_OS_OL     = 12,
-	CONF_TIME_RL_OL     = 13,
-	CONF_TIME_MIXTE     = 14
+	CONF_TIME_RL_OL     = 13//,
+	//CONF_TIME_MIXTE     = 14
+};
+
+
+enum Conf_Time_smoothless
+{
+	CONF_TIME_INVERSE_SUM = 1,
+	CONF_TIME_EXP_SUM = 2,
+	CONF_TIME_LOG_SUM = 3,
+	CONF_TIME_SUM = 4
 };
