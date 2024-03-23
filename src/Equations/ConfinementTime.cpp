@@ -46,7 +46,7 @@ ConfinementTime::ConfinementTime(
 }
 
 
-std::function<real_t(real_t, real_t)> ConfinementTime::setSmoothless() 
+std::function<real_t(real_t, real_t)> ConfinementTime::setSmoothless() // Work in progress (case 2 to 4 does not work)
 {
 	switch(smoothless)
 	{
@@ -94,16 +94,18 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir)
  */
 
 //Possible improvement using a lambda function
-const PowerList ConfinementTime::GetCoeff(STREAM::OptionConstants::Conf_Time_type _type) const //Return a power list containing the Coeffcient for each law
+//Return a power list containing the coeffcients for each law stored in a map in a .hpp file
+const PowerList ConfinementTime::GetCoeff(STREAM::OptionConstants::Conf_Time_type _type) const 
 {
 	return COEFFICIENTS::LawCoefficients.at(_type);
 }
 
-const PowerList ConfinementTime::GetCoeff() const //Return a power list containing the Coeffcient for each law
+const PowerList ConfinementTime::GetCoeff() const //Return a power list containing the coeffcients for each law stored in a map in a .hpp file
 {
 	return COEFFICIENTS::LawCoefficients.at(type);
 }
 
+//Computation od the ohmic power
 real_t ConfinementTime::GetOhmicPower(len_t ir) const
 {
 	real_t V = eqsys->GetPlasmaVolume()->GetPlasmaVolume();
@@ -111,9 +113,10 @@ real_t ConfinementTime::GetOhmicPower(len_t ir) const
 	real_t sigma = eqsys->GetREFluid()->GetElectricConductivity(ir);
 	real_t R0 = radials->GetMajorRadius();
 	
-	return E_field * E_field * sigma * V / R0;
+	return E_field * E_field * sigma * V / R0; // Need to normalize by R0 
 }
 
+//Goldstone power scaling law
 real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real_t const& ConvUnit) const //
 {
 	real_t a = radials->GetMinorRadius();
@@ -121,9 +124,9 @@ real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real
 	real_t R0 = radials->GetMajorRadius();
 	real_t kappa = radials->GetElongation();
 	
-	real_t Ip = ConversionFactor * unknowns->GetUnknownData(id_Ip)[ir];
+	real_t Ip = ConversionFactor * unknowns->GetUnknownData(id_Ip)[ir]; // To convert into mega
 		
-	real_t ne = ConvUnit * unknowns->GetUnknownData(id_Ncold)[ir]; 
+	real_t ne = ConvUnit * unknowns->GetUnknownData(id_Ncold)[ir];  // to have the correct units 10^-19 or 10^-20 depending of the case
 	
 	real_t Pm = GetOhmicPower(ir) * ConversionFactor;
 	
@@ -139,7 +142,8 @@ real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real
 	return prod;
 }
 
-real_t ConfinementTime::Bohm_ConfinementTime(len_t ir) const // Bohm confinement time
+// Bohm confinement time
+real_t ConfinementTime::Bohm_ConfinementTime(len_t ir) const 
 {
 	real_t a      = radials->GetMinorRadius();
 	real_t B      = radials->GetMagneticField();
@@ -147,7 +151,8 @@ real_t ConfinementTime::Bohm_ConfinementTime(len_t ir) const // Bohm confinement
 	return T_cold / (8*a*a*B);
 }
 
-real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) const // INTOR scaling law
+// INTOR scaling law
+real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) const 
 {
 	real_t q = eqsys->GetSettings()->GetReal("timestep/safetyfactor");
 	real_t tau_0 = sqrt(q);
@@ -157,7 +162,8 @@ real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) const // INTOR scaling l
 	return 1.0 / (C0 * tau_0 * ne * a * a);
 }
 
-real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) const //ITER89 OL
+//ITER89 Offset linear
+real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) const 
 {		
 	real_t P = GetOhmicPower(ir) * ConversionFactor;
 	real_t WOH = Goldstone_scaling(GetCoeff(), ir, 1e-20);
@@ -166,6 +172,7 @@ real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) const //ITER89 OL
 	return 1.0 / (WOH / P + tau_inc);
 }
 
+// Odajima-Shimomura scaling law (offset linear) P.N. Yushmanov et al. “Scalings for tokamak energy confinement”. In: Nuclear Fusion 30.10 (Oct. 1990)
 real_t ConfinementTime::OS_OL_ConfinementTime(len_t ir) const
 {	
 	real_t Zeff = ions->GetZeff(ir);
@@ -180,6 +187,7 @@ real_t ConfinementTime::OS_OL_ConfinementTime(len_t ir) const
 	return 1.0 / (WOH / P + tau_inc);
 }
 
+// Rebut-Lallia scaling law (offset linear) P.N. Yushmanov et al. “Scalings for tokamak energy confinement”. In: Nuclear Fusion 30.10 (Oct. 1990)
 real_t ConfinementTime::RL_OL_ConfinementTime(len_t ir) const
 {
 	real_t Zeff = ions->GetZeff(ir);
@@ -216,8 +224,6 @@ const real_t ConfinementTime::EvaluatePerpendicularConfinementTimeType(len_t ir)
 				return OS_OL_ConfinementTime(ir);
 			case STREAM::OptionConstants::CONF_TIME_RL_OL :
 				return RL_OL_ConfinementTime(ir);
-			//case STREAM::OptionConstants::CONF_TIME_MIXTE :
-				//return std::min(Bohm_ConfinementTime(ir), 1.0 / Goldstone_scaling(GetCoeff(STREAM::OptionConstants::Conf_Time_type::CONF_TIME_ITER97), ir));
 			default :
 				throw DREAM::SettingsException("Unrecognized equation type for '%s' : %d", "tau_perp", type);
 		}
@@ -226,6 +232,7 @@ const real_t ConfinementTime::EvaluatePerpendicularConfinementTimeType(len_t ir)
 
 real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) 
 {
+	//When using different confinement time, it can be useful to mix them in order for the plasma to ignite
 	if (mixte)
 	{
 		return std::min(Bohm_ConfinementTime(ir), EvaluatePerpendicularConfinementTimeType(ir));
