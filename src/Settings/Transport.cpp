@@ -22,6 +22,13 @@ void SimulationGenerator::DefineOptions_Transport(
     s->DefineSetting(mod + "/" + subname + "/type", "Type of transport model to use.", (int_t)OptionConstants::EQTERM_TRANSPORT_NONE);
 }
 
+void SimulationGenerator::DefineOptions_ConfinementTime( DREAM::Settings* s)
+{
+	s->DefineSetting("eqsys/tau_perp/tau_perp", "Type of perpendicular confinement time to use", (int_t)OptionConstants::CONF_TIME_BOHM);
+    s->DefineSetting("eqsys/tau_perp/mixte", "If we use a mixte combination of perpendicular confinement time", (int_t)0);
+    s->DefineSetting("eqsys/tau_perp/smoothless", "Which realtion of smooth transistion do we use", (int_t)OptionConstants::CONF_TIME_INVERSE_SUM);
+}
+
 /**
  * Construct transport terms.
  *

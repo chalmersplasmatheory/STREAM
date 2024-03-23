@@ -18,6 +18,7 @@ namespace STREAM {
 
         // Define options
         static void DefineOptions_ElectricField(DREAM::Settings*);
+        static void DefineOptions_ConfinementTime(DREAM::Settings*);
         static void DefineOptions_Grid(DREAM::Settings*);
         static void DefineOptions_T_cold(DREAM::Settings*);
         static void DefineOptions_Ions(DREAM::Settings*);
