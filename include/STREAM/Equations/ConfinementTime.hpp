@@ -38,15 +38,14 @@ namespace STREAM{
                         
                         std::function<real_t(real_t,real_t)> smoothlessFunction;
                         
-                        // BEGINNING OF MY LINES
                         EquationSystem *eqsys;
                         
                         OptionConstants::Conf_Time_type type;
                         OptionConstants::Conf_Time_smoothless smoothless;
                         
-                        real_t GetOhmicPower(len_t ir) const;
+                        real_t GetOhmicPower(len_t ir) const; // Computes the ohmic power
                         
-                        real_t Bohm_ConfinementTime(len_t ir) const;
+                        real_t Bohm_ConfinementTime(len_t ir) const; // Computes the confinement time from Bohm
                                                 
 						real_t INTOR_ConfinementTime(len_t ir) const;
 						
