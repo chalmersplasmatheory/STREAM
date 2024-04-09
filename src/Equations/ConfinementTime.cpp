@@ -39,7 +39,7 @@ ConfinementTime::ConfinementTime(
     id_Efield= unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_E_FIELD);
     
     type = (enum STREAM::OptionConstants::Conf_Time_type)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/tau_perp"); //Setting the type of confinement time
-	mixte = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixte");
+	mixedConfLaw = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixte");
     smoothless = (STREAM::OptionConstants::Conf_Time_smoothless)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/smoothless");
 	smoothlessFunction = setSmoothless();
 	
@@ -53,9 +53,9 @@ std::function<real_t(real_t, real_t)> ConfinementTime::setSmoothless() // Work i
 		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_INVERSE_SUM :
 			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return x + y; });
 		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_EXP_SUM :
-			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return log(exp(1.0 / x) + exp(1.0 / y)); });
-		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_LOG_SUM :
-			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return exp(log(1.0 / x) + log(1.0 / y)); });
+			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return -1.0 / log((exp(-1.0 / x) + exp(-1.0 / y)) / 2.0); });
+		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_TANH_SUM :
+			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return 1.0 / std::atanh((std::tanh(1.0 / x) + std::tanh(1.0 / y)) / 2.0); });
 		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_SUM :
 			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return 1.0 / (1.0 / x + 1.0 / y); });
 		default :
@@ -233,7 +233,7 @@ const real_t ConfinementTime::EvaluatePerpendicularConfinementTimeType(len_t ir)
 real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) 
 {
 	//When using different confinement time, it can be useful to mix them in order for the plasma to ignite
-	if (mixte)
+	if (mixedConfLaw)
 	{
 		return std::min(Bohm_ConfinementTime(ir), EvaluatePerpendicularConfinementTimeType(ir));
 	}

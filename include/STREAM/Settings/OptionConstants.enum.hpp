@@ -36,6 +36,6 @@ enum Conf_Time_smoothless // Work in progress
 {
 	CONF_TIME_INVERSE_SUM = 1,
 	CONF_TIME_EXP_SUM = 2,
-	CONF_TIME_LOG_SUM = 3,
+	CONF_TIME_TANH_SUM = 3,
 	CONF_TIME_SUM = 4
 };
