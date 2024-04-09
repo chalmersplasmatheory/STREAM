@@ -34,7 +34,7 @@ namespace STREAM{
                         static constexpr real_t nullset = 0.0;
                         static constexpr real_t Conv_n20 = 1e-20;
                         
-                        bool mixte;
+                        bool mixedConfLaw;
                         
                         std::function<real_t(real_t,real_t)> smoothlessFunction;
                         
