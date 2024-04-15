@@ -19,6 +19,6 @@ class EquationSystem(DREAMEqSys):
         # Overwrite with STREAM-modified unknowns
         self.addUnknown('n_i', Ions(settings=settings))
         self.addUnknown('E_field', ElectricField(settings=settings))
-        self.addUnknown('tau_perp', ConfinementTime(settings=settings)) #modified
+        self.addUnknown('tau_perp', ConfinementTime(settings=settings))
 
 
