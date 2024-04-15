@@ -32,7 +32,7 @@ enum Conf_Time_type
 };
 
 
-enum Conf_Time_smoothless // Work in progress
+enum Conf_Time_smoothless // Different ways to sum the perpendicular and parallel confinement time
 {
 	CONF_TIME_INVERSE_SUM = 1,
 	CONF_TIME_EXP_SUM = 2,
