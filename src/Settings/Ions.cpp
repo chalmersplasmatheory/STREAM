@@ -174,7 +174,7 @@ void SimulationGenerator::ConstructEquation_Ions(
 	eqsys->SetPlasmaVolume(volumes); 
        
     ConfinementTime *confinementTime = new ConfinementTime(
-        eqsys->GetUnknownHandler(), r, ih, eqsys->GetConnectionLength(), eqsys // Modified, volumes
+        eqsys->GetUnknownHandler(), r, ih, eqsys->GetConnectionLength(), eqsys
     );
     eqsys->SetConfinementTime(confinementTime);
     

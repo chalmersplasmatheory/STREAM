@@ -200,7 +200,6 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
             v[ir] = 1/this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
     );
     
-    // MODIFICATION
     DEF_FL("stream/elongation", "Elongation kappa", 
 		real_t *v = qd->StoreEmpty();
     	for(len_t ir = 0; ir <nr; ir++)

@@ -39,14 +39,14 @@ ConfinementTime::ConfinementTime(
     id_Efield= unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_E_FIELD);
     
     type = (enum STREAM::OptionConstants::Conf_Time_type)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/tau_perp"); //Setting the type of confinement time
-	mixedConfLaw = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixte");
+	mixedConfLaw = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixed");
     smoothless = (STREAM::OptionConstants::Conf_Time_smoothless)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/smoothless");
 	smoothlessFunction = setSmoothless();
 	
 }
 
 
-std::function<real_t(real_t, real_t)> ConfinementTime::setSmoothless() // Work in progress (case 2 to 4 does not work)
+std::function<real_t(real_t, real_t)> ConfinementTime::setSmoothless() // Different ways to add parallel and perpendicular confinement times
 {
 	switch(smoothless)
 	{
@@ -113,7 +113,7 @@ real_t ConfinementTime::GetOhmicPower(len_t ir) const
 	real_t sigma = eqsys->GetREFluid()->GetElectricConductivity(ir);
 	real_t R0 = radials->GetMajorRadius();
 	
-	return E_field * E_field * sigma * V / R0; // Need to normalize by R0 
+	return E_field * E_field * sigma * V / R0; // need to normalize volume by R0 to be physically a volume (m^3) 
 }
 
 //Goldstone power scaling law
@@ -151,7 +151,10 @@ real_t ConfinementTime::Bohm_ConfinementTime(len_t ir) const
 	return T_cold / (8*a*a*B);
 }
 
-// INTOR scaling law
+// INTOR scaling law Robert J Goldston. “Energy confinement scaling in Tokamaks: some implications of recent
+//experiments with Ohmic and strong auxiliary heating”. In: Plasma Physics and Controlled
+//Fusion 26.1A (Jan. 1984), p. 88. doi: 10 . 1088 / 0741 - 3335 / 26 / 1A / 308. url:
+//https://dx.doi.org/10.1088/0741-3335/26/1A/308.
 real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) const 
 {
 	real_t q = eqsys->GetSettings()->GetReal("timestep/safetyfactor");
@@ -162,7 +165,7 @@ real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) const
 	return 1.0 / (C0 * tau_0 * ne * a * a);
 }
 
-//ITER89 Offset linear
+//ITER89 Offset linear P.N. Yushmanov et al. “Scalings for tokamak energy confinement”. In: Nuclear Fusion 30.10 (Oct. 1990)
 real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) const 
 {		
 	real_t P = GetOhmicPower(ir) * ConversionFactor;
