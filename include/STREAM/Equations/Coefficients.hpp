@@ -16,6 +16,7 @@ namespace COEFFICIENTS
 	const std::map<const enum STREAM::OptionConstants::Conf_Time_type, const PowerList> LawCoefficients = 
 	{
 			// {CONF_TIME_LAW, {C, alpha_B0, alpha_Ip, alpha_ne, alpha_a, alpha_R0, alpha_kappa, alpha_A, alpha_Pm}}
+			{STREAM::OptionConstants::CONF_TIME_RLW, {0.026, 0.5, 0.5, 0.75, 11.0/6.0, 11.0/12.0, 11.0/12.0, nullset,-1.0}},
 			{STREAM::OptionConstants::CONF_TIME_ITER89, {0.048, 0.2, 0.85, 0.1, 0.3, 1.2, 0.5, 0.5, -0.5}},
 			{STREAM::OptionConstants::CONF_TIME_ITER97, {0.0264, 0.03, 0.96, 0.4, -0.06, 1.89, 0.64, nullset, -0.73}},
 			{STREAM::OptionConstants::CONF_TIME_IPB98, {0.145, 0.15, 0.93, 0.41,0.58, 1.39, 0.78, 0.19, -0.69}},

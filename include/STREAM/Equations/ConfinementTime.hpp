@@ -38,12 +38,9 @@ namespace STREAM
                 
                 bool mixedConfLaw;
                 
-                std::function<real_t(real_t,real_t)> smoothlessFunction;
-                
                 EquationSystem *eqsys;
                 
                 OptionConstants::Conf_Time_type type;
-                OptionConstants::Conf_Time_smoothless smoothless;
                 
                 real_t GetOhmicPower(len_t ir) const; // Computes the ohmic power
                 
@@ -56,6 +53,8 @@ namespace STREAM
                 real_t OS_OL_ConfinementTime(len_t ir) const; // Computes Odajima-Shimomura offset linear scaling law
                 
                 real_t RL_OL_ConfinementTime(len_t ir) const; // Computes Rebut-Lallia offset linear scaling law
+
+                real_t RLW_ConfinementTime(len_t ir) const; // Computes Rebut-Lallia-Watkins scaling law
                 
                 real_t Goldstone_scaling(PowerList const&, len_t ir, real_t const& ConvUnit = 1e-19) const;
                 
@@ -63,8 +62,6 @@ namespace STREAM
                 const PowerList GetCoeff(OptionConstants::Conf_Time_type _type) const;
                 
                 const real_t EvaluatePerpendicularConfinementTimeType(len_t ir) const;
-
-                std::function<real_t(real_t, real_t)> setSmoothless();
                 
         public:
                 ConfinementTime(DREAM::FVM::UnknownQuantityHandler *u, EllipticalRadialGridGenerator *r,
