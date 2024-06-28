@@ -16,8 +16,9 @@ enum eqterm_E_field_eqn {
 
 enum Conf_Time_type
 {
+	CONF_TIME_INTOR     = -1,
 	CONF_TIME_BOHM      = 1,
-	CONF_TIME_INTOR     = 2,
+	CONF_TIME_RLW       = 2,
 	CONF_TIME_ITER89    = 3,
 	CONF_TIME_ITER97    = 4,
 	CONF_TIME_IPB98     = 5,
@@ -29,13 +30,4 @@ enum Conf_Time_type
 	CONF_TIME_CY        = 11,
 	CONF_TIME_OS_OL     = 12,
 	CONF_TIME_RL_OL     = 13
-};
-
-
-enum Conf_Time_smoothless // Different ways to sum the perpendicular and parallel confinement time
-{
-	CONF_TIME_INVERSE_SUM = 1,
-	CONF_TIME_EXP_SUM = 2,
-	CONF_TIME_TANH_SUM = 3,
-	CONF_TIME_SUM = 4
 };

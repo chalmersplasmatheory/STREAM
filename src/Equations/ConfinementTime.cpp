@@ -39,28 +39,7 @@ ConfinementTime::ConfinementTime(
     id_Efield= unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_E_FIELD);
     
     type = (enum STREAM::OptionConstants::Conf_Time_type)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/tau_perp"); //Setting the type of confinement time
-	mixedConfLaw = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixed");
-    smoothless = (STREAM::OptionConstants::Conf_Time_smoothless)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/smoothless");
-	smoothlessFunction = setSmoothless();
-	
-}
-
-
-std::function<real_t(real_t, real_t)> ConfinementTime::setSmoothless() // Different ways to add parallel and perpendicular confinement times
-{
-	switch(smoothless)
-	{
-		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_INVERSE_SUM :
-			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return x + y; });
-		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_EXP_SUM :
-			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return -1.0 / log((exp(-1.0 / x) + exp(-1.0 / y)) / 2.0); });
-		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_TANH_SUM :
-			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return 1.0 / std::atanh((std::tanh(1.0 / x) + std::tanh(1.0 / y)) / 2.0); });
-		case STREAM::OptionConstants::Conf_Time_smoothless::CONF_TIME_SUM :
-			return std::function<real_t(real_t, real_t)>([] (real_t x, real_t y) { return 1.0 / (1.0 / x + 1.0 / y); });
-		default :
-			throw DREAM::SettingsException("Unrecognized equation type for '%s' : %d", "tau_perp smoothless", smoothless); 
-	}	
+	mixedConfLaw = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixed");	
 }
 
 /**
@@ -68,7 +47,7 @@ std::function<real_t(real_t, real_t)> ConfinementTime::setSmoothless() // Differ
  */
 real_t ConfinementTime::EvaluateConfinementTime(len_t ir)
 { 
-    return smoothlessFunction(EvaluatePerpendicularConfinementTime(ir), EvaluateParallelConfinementTime(ir));
+    return EvaluatePerpendicularConfinementTime(ir) + EvaluateParallelConfinementTime(ir);
 }
 
 /**
@@ -165,6 +144,21 @@ real_t ConfinementTime::INTOR_ConfinementTime(len_t ir) const
 	return 1.0 / (C0 * tau_0 * ne * a * a);
 }
 
+//Rebut-Lallia-Watkins confinement scaling law  from P. H. Rebut, P. P. Lallia, and M. L. Watkins. The Critical Temperature Gradient Model
+//of Plasma Transport: Applications to JET and Future Tokamaks. Vienna, Austria: In-
+//ternational Atomic Energy Agency (IAEA), 1989. isbn: 92-0-130189-8. url: http://inis.iaea.org/search/search.aspx?orig_q=RN:21008742.
+real_t ConfinementTime::RLW_ConfinementTime(len_t ir) const
+{
+	real_t temp = Goldstone_scaling(GetCoeff(), ir);
+	real_t Zeff = ions->GetZeff(ir);
+	real_t a = radials->GetMinorRadius();
+	real_t R0 = radials->GetMajorRadius();
+	real_t kappa = radials->GetElongation();
+	real_t Ip = ConversionFactor * unknowns->GetUnknownData(id_Ip)[ir]; // To convert into mega
+	
+	return 1.0 / (temp * pow(Zeff, 0.25) + 0.012 * Ip *pow(R0, 0.5)* a * pow(kappa, 0.5) * pow(Zeff, -0.5));
+}
+
 //ITER89 Offset linear P.N. Yushmanov et al. “Scalings for tokamak energy confinement”. In: Nuclear Fusion 30.10 (Oct. 1990)
 real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) const 
 {		
@@ -211,6 +205,8 @@ const real_t ConfinementTime::EvaluatePerpendicularConfinementTimeType(len_t ir)
 				return Bohm_ConfinementTime(ir);
 			case STREAM::OptionConstants::CONF_TIME_INTOR :
 				return INTOR_ConfinementTime(ir);
+			case STREAM::OptionConstants::CONF_TIME_RLW :
+				return RLW_ConfinementTime(ir);
 			case STREAM::OptionConstants::CONF_TIME_ITER89 :
 			case STREAM::OptionConstants::CONF_TIME_IPB98 :
 			case STREAM::OptionConstants::CONF_TIME_GOLDSTONE :
