@@ -18,5 +18,3 @@ class EquationSystem(DREAMEqSys):
         self.addUnknown('n_i', Ions(settings=settings))
         self.addUnknown('E_field', ElectricField(settings=settings))
         self.addUnknown('tau_perp', ConfinementTime(settings=settings))
-
-
