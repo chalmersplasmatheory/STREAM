@@ -39,8 +39,7 @@ ConfinementTime::ConfinementTime(
     id_Efield= unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_E_FIELD);
     
     type = (enum STREAM::OptionConstants::Conf_Time_type)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/tau_perp"); //Setting the type of confinement time
-	mixedConfLaw = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixed");	
-}
+	mixedConfLaw = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixed"); // If a combination of confinement law is activated
 
 /**
  * Evaluates the inverted confinement time
@@ -72,7 +71,6 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir)
  * Evaluates the perpendicular confinement time.
  */
 
-//Possible improvement using a lambda function
 //Return a power list containing the coeffcients for each law stored in a map in a .hpp file
 const PowerList ConfinementTime::GetCoeff(STREAM::OptionConstants::Conf_Time_type _type) const 
 {
@@ -84,7 +82,7 @@ const PowerList ConfinementTime::GetCoeff() const //Return a power list containi
 	return COEFFICIENTS::LawCoefficients.at(type);
 }
 
-//Computation od the ohmic power
+//Computation of the ohmic power
 real_t ConfinementTime::GetOhmicPower(len_t ir) const
 {
 	real_t V = eqsys->GetPlasmaVolume()->GetPlasmaVolume();
@@ -105,11 +103,11 @@ real_t ConfinementTime::Goldstone_scaling(PowerList const& coeff, len_t ir, real
 	
 	real_t Ip = ConversionFactor * unknowns->GetUnknownData(id_Ip)[ir]; // To convert into mega
 		
-	real_t ne = ConvUnit * unknowns->GetUnknownData(id_Ncold)[ir];  // to have the correct units 10^-19 or 10^-20 depending of the case
+	real_t ne = ConvUnit * unknowns->GetUnknownData(id_Ncold)[ir];  // To have the correct units 10^-19 or 10^-20 depending of the case
 	
 	real_t Pm = GetOhmicPower(ir) * ConversionFactor;
 	
-	real_t A = 2.0141017926; // ATOMIC MASS OF DEUTERIUM ----> Possible Improvement using IonHandler
+	real_t A = 2.0141017926; // ATOMIC MASS OF DEUTERIUM
 	
 	real_t prod = coeff[0]; // The first element is the constant
 	
@@ -200,38 +198,38 @@ real_t ConfinementTime::RL_OL_ConfinementTime(len_t ir) const
 const real_t ConfinementTime::EvaluatePerpendicularConfinementTimeType(len_t ir) const
 {
 	switch(type) 
-		{
-			case STREAM::OptionConstants::CONF_TIME_BOHM :
-				return Bohm_ConfinementTime(ir);
-			case STREAM::OptionConstants::CONF_TIME_INTOR :
-				return INTOR_ConfinementTime(ir);
-			case STREAM::OptionConstants::CONF_TIME_RLW :
-				return RLW_ConfinementTime(ir);
-			case STREAM::OptionConstants::CONF_TIME_ITER89 :
-			case STREAM::OptionConstants::CONF_TIME_IPB98 :
-			case STREAM::OptionConstants::CONF_TIME_GOLDSTONE :
-			case STREAM::OptionConstants::CONF_TIME_KAYE_BIG :
-			case STREAM::OptionConstants::CONF_TIME_CY :
-				return 1.0 / Goldstone_scaling(GetCoeff(), ir, Conv_n20);
-			case STREAM::OptionConstants::CONF_TIME_ITER97 :
-			case STREAM::OptionConstants::CONF_TIME_EIV1 :
-			case STREAM::OptionConstants::CONF_TIME_EIV2 :
-				return 1.0 / Goldstone_scaling(GetCoeff(), ir);
-			case STREAM::OptionConstants::CONF_TIME_ITER89_OL :
-				return ITER89_OL_ConfinementTime(ir);
-			case STREAM::OptionConstants::CONF_TIME_OS_OL :
-				return OS_OL_ConfinementTime(ir);
-			case STREAM::OptionConstants::CONF_TIME_RL_OL :
-				return RL_OL_ConfinementTime(ir);
-			default :
-				throw DREAM::SettingsException("Unrecognized equation type for '%s' : %d", "tau_perp", type);
-		}
+	{
+		case STREAM::OptionConstants::CONF_TIME_BOHM :
+			return Bohm_ConfinementTime(ir);
+		case STREAM::OptionConstants::CONF_TIME_INTOR :
+			return INTOR_ConfinementTime(ir);
+		case STREAM::OptionConstants::CONF_TIME_RLW :
+			return RLW_ConfinementTime(ir);
+		case STREAM::OptionConstants::CONF_TIME_ITER89 :
+		case STREAM::OptionConstants::CONF_TIME_IPB98 :
+		case STREAM::OptionConstants::CONF_TIME_GOLDSTONE :
+		case STREAM::OptionConstants::CONF_TIME_KAYE_BIG :
+		case STREAM::OptionConstants::CONF_TIME_CY :
+			return 1.0 / Goldstone_scaling(GetCoeff(), ir, Conv_n20);
+		case STREAM::OptionConstants::CONF_TIME_ITER97 :
+		case STREAM::OptionConstants::CONF_TIME_EIV1 :
+		case STREAM::OptionConstants::CONF_TIME_EIV2 :
+			return 1.0 / Goldstone_scaling(GetCoeff(), ir);
+		case STREAM::OptionConstants::CONF_TIME_ITER89_OL :
+			return ITER89_OL_ConfinementTime(ir);
+		case STREAM::OptionConstants::CONF_TIME_OS_OL :
+			return OS_OL_ConfinementTime(ir);
+		case STREAM::OptionConstants::CONF_TIME_RL_OL :
+			return RL_OL_ConfinementTime(ir);
+		default :
+			throw DREAM::SettingsException("Unrecognized equation type for '%s' : %d", "tau_perp", type);
+	}
 }
 
 
 real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) 
 {
-	//When using different confinement time, it can be useful to mix them in order for the plasma to ignite
+	//When using different confinement time, it can be useful to mix them in order for the plasma for the plasma to continue the 'burn-through' or to complete the current ramp up to reach the 'flat-top'.
 	if (mixedConfLaw)
 	{
 		return std::min(Bohm_ConfinementTime(ir), EvaluatePerpendicularConfinementTimeType(ir));
