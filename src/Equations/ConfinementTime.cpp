@@ -39,8 +39,8 @@ ConfinementTime::ConfinementTime(
     id_Efield= unknowns->GetUnknownID(DREAM::OptionConstants::UQTY_E_FIELD);
     
     type = (enum STREAM::OptionConstants::Conf_Time_type)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/tau_perp"); //Setting the type of confinement time
-	mixedConfLaw = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/mixed"); // If a combination of confinement law is activated
-
+	maxPerpLaw = (bool)eqsys->GetSettings()->GetInteger("eqsys/tau_perp/maxPerpLaw"); // If a combination of confinement law is activated
+}
 /**
  * Evaluates the inverted confinement time
  */
@@ -229,8 +229,8 @@ const real_t ConfinementTime::EvaluatePerpendicularConfinementTimeType(len_t ir)
 
 real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) 
 {
-	//When using different confinement time, it can be useful to mix them in order for the plasma for the plasma to continue the 'burn-through' or to complete the current ramp up to reach the 'flat-top'.
-	if (mixedConfLaw)
+	//When using different confinement time, it can be useful to take the maximum between them in order for the plasma for the plasma to continue the 'burn-through' or to complete the current ramp up to reach the 'flat-top'.
+	if (maxPerpLaw)
 	{
 		return std::min(Bohm_ConfinementTime(ir), EvaluatePerpendicularConfinementTimeType(ir));
 	}
