@@ -5,27 +5,27 @@ from DREAM.Settings.Equations.PrescribedScalarParameter import PrescribedScalarP
 from DREAM.Settings.Equations.UnknownQuantity import UnknownQuantity
 
 DEFAULT_TYPE = 1 #Bohm confinement time
-DEFAULT_MIXED = 0 #Mixed confinement time is disabled
+DEFAULT_MAXPERPLAW = 0 #Mixed confinement time is disabled
 
 
 class ConfinementTime(UnknownQuantity):
-    def __init__(self, settings, ttype=DEFAULT_TYPE, mmixed=DEFAULT_MIXED):
+    def __init__(self, settings, ttype=DEFAULT_TYPE, mmaxPerpLaw=DEFAULT_MAXPERPLAW):
         super().__init__(settings=settings)
         self.type = ttype
-        self.mixed = mmixed
+        self.maxPerpLaw = mmaxPerpLaw
 
     def setType(self, ttype):
         self.type = ttype
 
-    def setMixed(self, mmixed):
-        self.mixed = mmixed
+    def setMaxPerpLaw(self, mmaxPerpLaw):
+        self.maxPerpLaw = mmaxPerpLaw
 
     def todict(self):
-        return dict(tau_perp=self.type, mixed=self.mixed)
+        return dict(tau_perp=self.type, maxPerpLaw=self.maxPerpLaw)
 
     def fromdict(self, data):
         self.type = data['tau_perp']
-        self.mixed = data['mixed']
+        self.maxPerpLaw = data['maxPerpLaw']
 
     def verifySettings(self):
         if self.type < 1:
