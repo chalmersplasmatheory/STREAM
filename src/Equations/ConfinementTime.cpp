@@ -229,9 +229,12 @@ const real_t ConfinementTime::EvaluatePerpendicularConfinementTimeType(len_t ir)
 
 real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) 
 {
-	//When using different confinement time, it can be useful to take the maximum between them in order for the plasma for the plasma to continue the 'burn-through' or to complete the current ramp up to reach the 'flat-top'.
+	//When using different confinement time, it can be useful to take the maximum between the current scaling law and the Bohm one 
+	//in order for the plasma to continue the 'burn-through' or to complete the current ramp up to reach the 'flat-top'. This maximum works well during the early phases
+	//where the parallel confinement time dominates
 	if (maxPerpLaw)
 	{
+		// Here the minimum is taken as we work with the inverse of the perpendicular confinement time
 		return std::min(Bohm_ConfinementTime(ir), EvaluatePerpendicularConfinementTimeType(ir));
 	}
 	else
