@@ -67,6 +67,8 @@ namespace STREAM
             
             real_t KappaOut();
             
+            real_t ConfTimeTypeOut();
+            
             real_t EvaluateConfinementTime(len_t ir);
 
             real_t EvaluateParallelConfinementTime(len_t ir);

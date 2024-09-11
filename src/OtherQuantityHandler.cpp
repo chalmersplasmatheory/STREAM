@@ -202,8 +202,14 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
     
     DEF_FL("stream/elongation", "Elongation kappa", 
 		real_t *v = qd->StoreEmpty();
-    	for(len_t ir = 0; ir <nr; ir++)
+    	for (len_t ir = 0; ir <nr; ir++)
     		v[ir] = this->confinementTime->KappaOut();
+	);
+    
+    DEF_FL("stream/conftime_type", "type of perpendicular deuterium confinement time",
+    	real_t *v = qd->StoreEmpty();
+    	for (len_t ir = 0; ir < nr; ir++)
+    		v[ir] = this->confinementTime->ConfTimeTypeOut();
 	);
 
     DEF_FL("stream/tau_RE", "Runaway electron confinement time [s]",
