@@ -259,37 +259,14 @@ real_t ConfinementTime::KappaOut()
 	return radials->GetElongation();
 }
 
-
-real_t ConfinementTime::KappaOut() {
-	/**
-	* Returns the plasma elongation.
-	*
-	* Returns: Plasma elongation (kappa).
-	*/
-	return radials->GetElongation();
+real_t ConfinementTime::ConfTimeTypeOut()
+{
+	return type;
 }
 
-
-real_t ConfinementTime::ConfTimeTypeOut() {
-	/**
-	* Returns the current confinement type being used.
-	*
-	* Returns: Current confinement type.
-	*/
-	return currentTypeUsed;
-}
-
-
-real_t ConfinementTime::MaxPerpLawOut() {
-	/**
-	* Returns whether the maximum perpendicular confinement law is being used.
-	*
-	* Returns: Boolean indicating if the maximum perpendicular confinement law is used.
-	*/
-	return maxPerpLawUsed;
-}
-
-
+/**
+ * Evaluates the derivative of the inverted confinement time with respect to the plasma current
+ */
 real_t ConfinementTime::EvaluateConfinementTime_dIp(len_t ir){
 	/**
 	* Evaluates the derivative of the inverted confinement time with respect to the plasma current
