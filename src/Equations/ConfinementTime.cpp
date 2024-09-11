@@ -248,6 +248,11 @@ real_t ConfinementTime::KappaOut()
 	return radials->GetElongation();
 }
 
+real_t ConfinementTime::ConfTimeTypeOut()
+{
+	return type;
+}
+
 /**
  * Evaluates the derivative of the inverted confinement time with respect to the plasma current
  */
