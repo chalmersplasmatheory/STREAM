@@ -39,6 +39,8 @@ namespace STREAM
             EquationSystem *eqsys;
 
             OptionConstants::Conf_Time_type type;
+            
+            OptionConstants::Conf_Time_type currentTypeUsed;
 
             real_t GetOhmicPower(len_t ir) const; // Computes the ohmic power
 
@@ -68,6 +70,8 @@ namespace STREAM
             real_t KappaOut();
             
             real_t ConfTimeTypeOut();
+            
+            real_t MaxPerpLawOut();
             
             real_t EvaluateConfinementTime(len_t ir);
 
