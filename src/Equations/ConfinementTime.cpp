@@ -250,7 +250,7 @@ real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir)
         // Select confinement type based on which is smaller
         if (bohmTime < perpTime) 
         {
-            currentTypeUsed = 1;
+            currentTypeUsed = STREAM::OptionConstants::CONF_TIME_BOHM;
         } 
         else 
         {
@@ -265,13 +265,6 @@ real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir)
         return perpTime;
     }
 }
-
-Key optimizations:
-
-    Precomputing values: The calls to Bohm_ConfinementTime(ir) and EvaluatePerpendicularConfinementTimeType(ir) are only performed once.
-    Cleaner branching: The currentTypeUsed logic is simplified and the branching for the maxPerpLaw condition is more straightforward.
-
-This version should be more efficient and easier to maintain while retaining the same logic.
 
 real_t ConfinementTime::KappaOut()
 {
