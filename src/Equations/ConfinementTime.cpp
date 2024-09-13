@@ -226,22 +226,41 @@ const real_t ConfinementTime::EvaluatePerpendicularConfinementTimeType(len_t ir)
 	}
 }
 
-
 real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir) 
 {
 	//When using different confinement time, it can be useful to take the maximum between the current scaling law and the Bohm one 
 	//in order for the plasma to continue the 'burn-through' or to complete the current ramp up to reach the 'flat-top'. This maximum works well during the early phases
 	//where the parallel confinement time dominates
-	if (maxPerpLaw)
-	{
-		// Here the minimum is taken as we work with the inverse of the perpendicular confinement time
-		return std::min(Bohm_ConfinementTime(ir), EvaluatePerpendicularConfinementTimeType(ir));
-	}
-	else
-	{
-		return EvaluatePerpendicularConfinementTimeType(ir);
-	}
+    real_t bohmTime = Bohm_ConfinementTime(ir);
+    real_t perpTime = EvaluatePerpendicularConfinementTimeType(ir);
+
+    if (maxPerpLaw)
+    {
+        // Select confinement type based on which is smaller
+        if (bohmTime < perpTime) 
+        {
+            currentTypeUsed = 1;
+        } 
+        else 
+        {
+            currentTypeUsed = type;
+        }
+        // Here the minimum is taken as we work with the inverse of the perpendicular confinement time
+        return std::min(bohmTime, perpTime);
+    }
+    else
+    {
+        currentTypeUsed = type;
+        return perpTime;
+    }
 }
+
+Key optimizations:
+
+    Precomputing values: The calls to Bohm_ConfinementTime(ir) and EvaluatePerpendicularConfinementTimeType(ir) are only performed once.
+    Cleaner branching: The currentTypeUsed logic is simplified and the branching for the maxPerpLaw condition is more straightforward.
+
+This version should be more efficient and easier to maintain while retaining the same logic.
 
 real_t ConfinementTime::KappaOut()
 {
@@ -250,7 +269,12 @@ real_t ConfinementTime::KappaOut()
 
 real_t ConfinementTime::ConfTimeTypeOut()
 {
-	return type;
+	return currentTypeUsed;
+}
+
+real_t ConfinementTime::MaxPerpLawOut()
+{
+	return maxPerpLaw;
 }
 
 /**
