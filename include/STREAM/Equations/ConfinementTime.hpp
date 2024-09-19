@@ -35,6 +35,8 @@ namespace STREAM
             static constexpr real_t Conv_n20 = 1e-20;
 
             bool maxPerpLaw;
+            
+            bool maxPerpLawUsed;
 
             EquationSystem *eqsys;
 
