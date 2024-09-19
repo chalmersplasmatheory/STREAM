@@ -240,10 +240,12 @@ real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir)
         if (bohmTime < perpTime) 
         {
             currentTypeUsed = STREAM::OptionConstants::CONF_TIME_BOHM;
+            maxPerpLawUsed = true;
         } 
         else 
         {
             currentTypeUsed = type;
+            maxPerpLawUsed = false;
         }
         // Here the minimum is taken as we work with the inverse of the perpendicular confinement time
         return std::min(bohmTime, perpTime);
@@ -251,6 +253,7 @@ real_t ConfinementTime::EvaluatePerpendicularConfinementTime(len_t ir)
     else
     {
         currentTypeUsed = type;
+        maxPerpLawUsed = false;
         return perpTime;
     }
 }
@@ -267,7 +270,7 @@ real_t ConfinementTime::ConfTimeTypeOut()
 
 real_t ConfinementTime::MaxPerpLawOut()
 {
-	return maxPerpLaw;
+	return maxPerpLawUsed;
 }
 
 /**
