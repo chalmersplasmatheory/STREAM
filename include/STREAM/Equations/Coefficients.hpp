@@ -7,11 +7,11 @@
 #include "STREAM/Settings/OptionConstants.hpp"
 
 
-typedef std::array<const double,9> PowerList;
+typedef std::array<const real_t,9> PowerList;
 
-namespace COEFFICIENTS
+namespace STREAM
 {	
-	constexpr double nullset = 0.0;
+	constexpr real_t nullset = 0.0;
 	
 	const std::map<const enum STREAM::OptionConstants::Conf_Time_type, const PowerList> LawCoefficients = 
 	{

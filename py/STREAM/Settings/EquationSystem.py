@@ -2,7 +2,7 @@
 from DREAM.Settings.EquationSystem import EquationSystem as DREAMEqSys
 from STREAM.Settings.Equations.ElectricField import ElectricField
 from STREAM.Settings.Equations.Ions import Ions
-from STREAM.Settings.ConfinementTime import ConfinementTime
+from STREAM.Settings.Equations.ConfinementTime import ConfinementTime
 
 
 class EquationSystem(DREAMEqSys):
