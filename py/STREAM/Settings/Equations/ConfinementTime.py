@@ -4,16 +4,11 @@ from DREAM.Settings.Equations.PrescribedInitialParameter import PrescribedInitia
 from DREAM.Settings.Equations.PrescribedScalarParameter import PrescribedScalarParameter
 from DREAM.Settings.Equations.UnknownQuantity import UnknownQuantity
 
-DEFAULT_TYPE = 1            # Bohm confinement time
-DEFAULT_MAXPERPLAW = 0      # Mixed confinement time is disabled
+DEFAULT_TYPE = 1 #Bohm confinement time
+DEFAULT_MAXPERPLAW = 0 #Mixed confinement time is disabled
 
 
 class ConfinementTime(UnknownQuantity):
-    """ ConfinementTime allows to set both the type of confinement law used and 
-    whether the maximum between Bohm and the chosen confinement law is used.
-
-    See https://spcwiki.epfl.ch/wiki/STREAM/Confinement_time_options for more information
-    """ 
     def __init__(self, settings, ttype=DEFAULT_TYPE, mmaxPerpLaw=DEFAULT_MAXPERPLAW):
         super().__init__(settings=settings)
         self.type = ttype
