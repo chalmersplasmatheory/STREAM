@@ -9,9 +9,8 @@ from DREAM import DREAMIO, DREAMSettings
 from .Settings.EquationSystem import EquationSystem
 from .Settings.RadialGrid import RadialGrid
 
-
 class STREAMSettings(DREAMSettings):
-    
+
 
     def __init__(self, filename=None, path="", chain=True, keepignore=False):
         """
@@ -29,7 +28,7 @@ class STREAMSettings(DREAMSettings):
 
         # TODO replace 'EquationSystem'
         self.addSetting('radialgrid', RadialGrid())
-        
+
         # Should be defined last as it may need access to the
         # obejcts created above...
         self.addSetting('eqsys', EquationSystem(settings=self))
