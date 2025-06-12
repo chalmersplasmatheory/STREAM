@@ -9,7 +9,6 @@ from DREAM import DREAMIO, DREAMSettings
 from .Settings.EquationSystem import EquationSystem
 from .Settings.RadialGrid import RadialGrid
 
-
 class STREAMSettings(DREAMSettings):
     
 

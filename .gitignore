@@ -1,4 +1,4 @@
-build
+build/
 *.swp
 *.swo
 __pycache__
@@ -13,3 +13,7 @@ DYON_tests/Read_mat.py
 *.bcf
 *Data
 examples/ECH/TCV/debug/*
+src/.metadata/*
+tcvstream/
+.metadata/*
+.vscode/

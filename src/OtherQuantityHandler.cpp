@@ -199,6 +199,24 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = 1/this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
     );
+    
+    DEF_FL("stream/elongation", "Elongation kappa", 
+		real_t *v = qd->StoreEmpty();
+    	for (len_t ir = 0; ir <nr; ir++)
+    		v[ir] = this->confinementTime->KappaOut();
+	);
+    
+    DEF_FL("stream/conftime_type", "type of perpendicular deuterium confinement time",
+    	real_t *v = qd->StoreEmpty();
+    	for (len_t ir = 0; ir < nr; ir++)
+    		v[ir] = this->confinementTime->ConfTimeTypeOut();
+	);
+    
+    DEF_FL("stream/maxPerpLaw", "Boolean value to enable taking the maximum between Bohm and a given confinement law",
+		real_t *v = qd->StoreEmpty();
+    	for (len_t ir = 0;  ir < nr; ir++)
+    		v[ir] = this->confinementTime->MaxPerpLawOut();
+	);
 
     DEF_FL("stream/tau_RE", "Runaway electron confinement time [s]",
         real_t *v = qd->StoreEmpty();
