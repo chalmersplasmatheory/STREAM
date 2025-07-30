@@ -98,7 +98,7 @@ void DistributionParallelTransport::SetDiffWeights(len_t derivId, len_t){
                     xi = grid->GetMomentumGrid(0)->GetXi0(i, j);
             
                     real_t vpar = DREAM::Constants::c * std::abs(p * xi / sqrt(1 + p*p)); 
-                    real_t dLfinv; 
+                    real_t dLfinv = 0; 
             
                     if(derivId == id_Ip) {
                         dLfinv = CL->EvaluateInverseConnectionLength_dIp(0); // ?? Should do arbitrary ir?

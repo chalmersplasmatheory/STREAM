@@ -32,7 +32,7 @@ using namespace DREAM;
         if (lambda_i <= a){
             real_t R0 = radials->GetMajorRadius();
             real_t kappa = radials->GetElongation(); 
-            real_t delta = radials->GetTriangularity();  
+            //real_t delta = radials->GetTriangularity();  
             
             return 2.0 * M_PI*M_PI * R0 * kappa * (a*a - (a-lambda_i)*(a-lambda_i));
             /*return  2.0*M_PI*M_PI*R0*kappa*(a*a-(a-lambda_i)*(a-lambda_i)) +
@@ -108,9 +108,8 @@ using namespace DREAM;
         if (lambda_i <= a){
             real_t R0 = radials->GetMajorRadius();
             real_t kappa = radials->GetElongation(); 
-            real_t delta = radials->GetTriangularity(); 
-
-            real_t a_l = a-lambda_i;
+            //real_t delta = radials->GetTriangularity(); 
+            //real_t a_l = a-lambda_i;
 	    
 	    return 4.0 * M_PI*M_PI * R0 * kappa * (a-lambda_i);
             //return (4.0*M_PI*M_PI*R0*kappa*a_l + 2.0*kappa*delta*(8.0-3.0*M_PI*M_PI)*a_l*a_l);
