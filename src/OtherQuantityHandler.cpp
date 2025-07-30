@@ -23,7 +23,7 @@ OtherQuantityHandler::OtherQuantityHandler(
     DREAM::FVM::Grid *fluidGrid, DREAM::FVM::Grid *hottailGrid, DREAM::FVM::Grid *runawayGrid,
     DREAM::FVM::Grid *scalarGrid, struct DREAM::OtherQuantityHandler::eqn_terms *oqty_terms
 ) : DREAM::OtherQuantityHandler(cqtyHottail, cqtyRunaway, postProcessor, REFluid,
-        unknowns, unknown_equations, ions, fluidGrid, hottailGrid, runawayGrid,
+        unknowns, unknown_equations, ions, nullptr, fluidGrid, hottailGrid, runawayGrid,
         scalarGrid, oqty_terms),
     connectionLength(connectionLength), confinementTime(confinementTime), neutralInflux(neutralInflux), plasmaVolume(plasmaVolume),
     reConfinementTime(rect), opticalThickness(opticalThickness), ionRateEquations(ionRateEquations), stream_terms(stream_terms) {
