@@ -39,7 +39,7 @@ EquationSystem *SimulationGenerator::ConstructEquationSystem(
         new OtherQuantityHandler::eqn_terms;
 
     // Timing information
-    eqsys->SetTiming(s->GetBool("/output/timingstdout"), s->GetBool("/output/timingfile"));
+    eqsys->SetTiming(s->GetBool("output/timingstdout"), s->GetBool("output/timingfile"));
 
     // Initialize from previous simulation output?
     const real_t t0 = DREAM::SimulationGenerator::ConstructInitializer(eqsys, s);
