@@ -15,6 +15,10 @@ using namespace STREAM;
 
         this->Volfac = new real_t[ionHandler->GetNzs()];
         this->jacWeights = new real_t[GetNumberOfWeightsElements()];
+        for (len_t iz=0; iz<GetNumberOfWeightsElements();iz++){
+            this->Volfac[iz]=0;
+            this->jacWeights[iz]=0;
+        }
     }
     RadiatedPowerTerm::~RadiatedPowerTerm() {
         delete [] this->jacWeights;
