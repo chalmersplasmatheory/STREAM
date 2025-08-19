@@ -62,13 +62,18 @@ using namespace STREAM;
         bool contrib = false;
         if (derivId == id_lambda_i) {
             // Rebuild weights 
-            this->SetWeights(false, jacWeights);
-            
+            real_t* ionScaleFactor = new real_t[ions->GetNzs()];
+            for (len_t iz=0; iz<GetNumberOfWeightsElements();iz++){
+                ionScaleFactor[iz]=0;
+            }
             for (len_t iz = 0; iz<ions->GetNZ(); iz++){
-                real_t dVdlambda = volumes->GetNeutralVolume_dLambdai(iz);
-
-                if (jacWeights[iz] != 0)
-                    jac->SetElement(iz, 0, jacWeights[iz] * dVdlambda / this->Volfac[iz]);
+                if (this->Volfac[iz] != 0) {
+                    real_t dVdlambda = volumes->GetNeutralVolume_dLambdai(iz);
+                    ionScaleFactor[iz] = dVdlambda / this->Volfac[iz];
+                    this->SetWeights(ionScaleFactor, jacWeights);
+                    jac->SetElement(iz, 0, jacWeights[iz]);
+                    ionScaleFactor[iz] = 0;
+                }
             }
         }
         contrib |= this->DREAM::RadiatedPowerTerm::SetJacobianBlock(uqtyId, derivId, jac, x);
