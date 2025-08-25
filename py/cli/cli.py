@@ -8,6 +8,7 @@ import sys
 
 path = str((pathlib.Path(__file__).parent / '..').resolve().absolute())
 sys.path.append(path)
+sys.path.append(path + '/../extern/DREAM/py')
 
 from DREAM import *
 from STREAM import STREAMOutput
