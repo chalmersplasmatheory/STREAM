@@ -82,8 +82,10 @@ class ElectricField(DREAMEfield):
         self.type = data['type']
 
         if self.type == TYPE_CIRCUIT:
-            self.efield = data['init']['x']
-            self.radius = data['init']['r']
+
+            if 'init' in data:
+                self.efield = data['init']['x']
+                self.radius = data['init']['r']
 
             self.circuit_Lp = data['circuit']['Lp']
             self.circuit_Lwall = data['circuit']['Lwall']
