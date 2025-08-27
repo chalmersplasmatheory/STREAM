@@ -9,6 +9,7 @@ import sys
 path = str((pathlib.Path(__file__).parent / '..').resolve().absolute())
 sys.path.append(path)
 
+from STREAM import *
 from DREAM import *
 from STREAM import STREAMOutput
 

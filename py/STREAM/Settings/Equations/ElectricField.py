@@ -82,8 +82,10 @@ class ElectricField(DREAMEfield):
         self.type = data['type']
 
         if self.type == TYPE_CIRCUIT:
-            self.efield = data['init']['x']
-            self.radius = data['init']['r']
+
+            if 'init' in data:
+                self.efield = data['init']['x']
+                self.radius = data['init']['r']
 
             self.circuit_Lp = data['circuit']['Lp']
             self.circuit_Lwall = data['circuit']['Lwall']
@@ -107,13 +109,15 @@ class ElectricField(DREAMEfield):
         ElectricField object.
         """
         if self.type == TYPE_CIRCUIT:
-            data = {
-                'type': self.type,
-                'init': {
+            data = { 'type': self.type }
+
+            if self.efield is not None:
+                data['init'] = {
                     'x': self.efield,
-                    'r': self.radius
-                },
-                'circuit': {
+                    'r': self.radius,
+                }            
+
+            data['circuit'] = {
                     'Lp': self.circuit_Lp,
                     'Lwall': self.circuit_Lwall,
                     'M': self.circuit_M,
@@ -124,7 +128,6 @@ class ElectricField(DREAMEfield):
                         't': self.circuit_Vloop_t
                     }
                 }
-            }
 
             return data
         else:
@@ -146,7 +149,8 @@ class ElectricField(DREAMEfield):
                 raise Exception("E_field: Parameter 'Rwall' must be given a value > 0.")
 
             PrescribedScalarParameter._verifySettingsPrescribedScalarData(self, name='Vloop', data=self.circuit_Vloop, times=self.circuit_Vloop_t)
-            self._verifySettingsPrescribedInitialData()
+            if self.efield is not None:
+                self._verifySettingsPrescribedInitialData()
         else:
             super().verifySettings()
 
