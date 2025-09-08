@@ -2,6 +2,7 @@
  * Construction of the DYON circuit equations.
  */
 
+#include <string>
 #include "DREAM/Equations/Scalar/WallCurrentTerms.hpp"
 #include "FVM/Equation/IdentityTerm.hpp"
 #include "FVM/Equation/PrescribedParameter.hpp"
@@ -193,6 +194,7 @@ void SimulationGenerator::ConstructEquation_E_field_circuit(
     );
     
     const len_t id_E_field = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_E_FIELD);
+	const len_t id_j_tot   = eqsys->GetUnknownID(DREAM:: OptionConstants::UQTY_J_TOT);
     const len_t id_V_loop  = eqsys->GetUnknownID(OptionConstants::UQTY_VLOOP);
     const len_t id_I_p     = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_I_P);
     const len_t id_I_w     = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_I_WALL);
@@ -271,12 +273,54 @@ void SimulationGenerator::ConstructEquation_E_field_circuit(
     eqsys->SetOperator(id_I_w, id_I_w, Op_Iw_Iw);
     eqsys->SetOperator(id_I_w, id_I_p, Op_Iw_Ip);
 
-    // Set initial values
-    real_t *Efield_init = DREAM::SimulationGenerator::LoadDataR(
-        MODULENAME, fluidGrid->GetRadialGrid(), s, "init"
-    );
-    eqsys->SetInitialValue(id_E_field, Efield_init);
-    delete [] Efield_init;
+    // Specify initialization...
+	if (DREAM::SimulationGenerator::HasInitialEfield(eqsys, s)) {
+		/**
+		 * Load initial electric field profile.
+		 * If the input profile is not explicitly set, then 'SetInitialValue()' is
+		 * called with a null-pointer which results in E=0 at t=0
+		 */
+        real_t *Efield_init = DREAM::SimulationGenerator::LoadDataR(
+            MODULENAME, fluidGrid->GetRadialGrid(), s, "init"
+        );
+        eqsys->SetInitialValue(id_E_field, Efield_init);
+        delete [] Efield_init;
+    } else if (DREAM::SimulationGenerator::HasInitialJtot(eqsys, s)) {
+        DREAM::RunawayFluid *REFluid = eqsys->GetREFluid();
+
+        std::function<void(DREAM::FVM::UnknownQuantityHandler*, real_t*)> initfunc_EfieldFromJtot =
+			[id_j_tot,REFluid,fluidGrid](DREAM::FVM::UnknownQuantityHandler *u, real_t *Efield_init) {
+
+			const real_t *j_tot = u->GetUnknownData(id_j_tot);
+			const len_t nr = fluidGrid->GetNCells();
+			for (len_t ir = 0; ir < nr; ir++) {
+				real_t s = REFluid->GetElectricConductivity(ir);
+				real_t B = sqrt(fluidGrid->GetRadialGrid()->GetFSA_B2(ir));
+
+				Efield_init[ir] = j_tot[ir]*B / s;
+			}
+        };
+
+        // Initialize electric field to dummy value to allow RunawayFluid
+		// to be initialized first...
+		eqsys->SetInitialValue(id_E_field, nullptr);
+
+		eqsys->initializer->AddRule(
+			id_E_field,
+			DREAM::EqsysInitializer::INITRULE_EVAL_FUNCTION,
+			initfunc_EfieldFromJtot,
+			// Dependencies..
+			id_j_tot,
+			DREAM::EqsysInitializer::RUNAWAY_FLUID
+		);
+    } else {
+		const std::string& fromfile = s->GetString("init/fromfile", false);
+
+		if (fromfile == "")
+			throw DREAM::SettingsException(
+				"E_field: Self-consistent electric field evolution requested, but neither initial E or j_tot profiles have been specified."
+			);
+	}
 
     // I_w(t=0) = 0
     const real_t Iwall0 = s->GetReal(MODULENAME "/circuit/Iwall0");
