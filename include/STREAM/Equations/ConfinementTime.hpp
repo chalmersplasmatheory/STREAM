@@ -33,7 +33,6 @@ namespace STREAM
             // This variable represent the conversion factor between 1 and Mega
             static constexpr real_t ConversionFactor = 1e-6;
             
-            static constexpr real_t nullset = 0.0;
             static constexpr real_t Conv_n20 = 1e-20;
 
             bool maxPerpLaw;

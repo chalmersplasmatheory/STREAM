@@ -195,7 +195,7 @@ real_t ConfinementTime::RLW_ConfinementTime(len_t ir) const {
 real_t ConfinementTime::ITER89_OL_ConfinementTime(len_t ir) const {		
 	real_t P = GetOhmicPower(ir) * ConversionFactor;
 	real_t WOH = Goldstone_scaling(GetCoeff(), ir, 1e-20);
-	real_t tau_inc = Goldstone_scaling({0.04, nullset, 0.5, nullset, 0.8, 0.3, 0.6, 0.5, nullset}, ir, Conv_n20);
+	real_t tau_inc = Goldstone_scaling({0.04, 0.0, 0.5, 0.0, 0.8, 0.3, 0.6, 0.5, 0.0}, ir, Conv_n20);
 	
 	return 1.0 / (WOH / P + tau_inc);
 }
@@ -217,7 +217,7 @@ real_t ConfinementTime::OS_OL_ConfinementTime(len_t ir) const {
 	real_t fZ = pow(Zeff, 0.4) * pow((15.0 - Zeff) / 20.0, 0.6);
 	real_t P = GetOhmicPower(ir) * ConversionFactor;
 	real_t WOH = fZ * gq * Goldstone_scaling(GetCoeff(), ir, 1e-20);
-	real_t tau_inc = Goldstone_scaling({0.085, nullset, nullset, nullset, 2.0, nullset, 1.0, 0.5, nullset}, ir, Conv_n20);
+	real_t tau_inc = Goldstone_scaling({0.085, 0.0, 0.0, 0.0, 2.0, 0.0, 1.0, 0.5, 0.0}, ir, Conv_n20);
 
 	return 1.0 / (WOH / P + tau_inc);
 }
@@ -234,7 +234,7 @@ real_t ConfinementTime::RL_OL_ConfinementTime(len_t ir) const {
 	real_t fZ = sqrt(sqrt(Zeff));
 	real_t P = GetOhmicPower(ir) * ConversionFactor;
 	real_t WOH = fZ * Goldstone_scaling(GetCoeff(), ir, 1e-20);
-	real_t tau_inc = pow(Zeff, -0.5) * Goldstone_scaling({0.014, nullset, 1.0, nullset, 1.0, 0.5, 0.5, 0.5, nullset}, ir, Conv_n20);
+	real_t tau_inc = pow(Zeff, -0.5) * Goldstone_scaling({0.014, 0.0, 1.0, 0.0, 1.0, 0.5, 0.5, 0.5, 0.0}, ir, Conv_n20);
 
 	return 1.0 / (WOH / P + tau_inc);
 }
