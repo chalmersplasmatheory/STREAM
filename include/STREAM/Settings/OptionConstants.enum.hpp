@@ -14,8 +14,7 @@ enum eqterm_E_field_eqn {
 };
 
 
-enum Conf_Time_type
-{
+enum Conf_Time_type {
 	CONF_TIME_INTOR     = -1,
 	CONF_TIME_BOHM      = 1,
 	CONF_TIME_RLW       = 2,
