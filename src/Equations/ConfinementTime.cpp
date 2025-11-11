@@ -15,7 +15,7 @@ using namespace std;
 
  
 /**
- * This function calculates both perpendicular and parallel confinement times and adds their inverse
+ * This class calculates both perpendicular and parallel confinement times and adds their inverse
  * to return a final confinement time. See individual methods for details.
  */
 
@@ -62,9 +62,6 @@ real_t ConfinementTime::EvaluateParallelConfinementTime(len_t ir) {
     return Lfinv * sqrt((ec*T_cold+2.0/3.0*W_i/N_i)/mi);
 }
 
-/**
- * Evaluates the perpendicular confinement time.
- */
 
 const PowerList ConfinementTime::GetCoeff(STREAM::OptionConstants::Conf_Time_type _type) const {
 	/**
