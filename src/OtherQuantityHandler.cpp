@@ -199,6 +199,11 @@ void OtherQuantityHandler::DefineQuantitiesSTREAM() {
         for (len_t ir = 0; ir < nr; ir++)
             v[ir] = 1/this->confinementTime->EvaluatePerpendicularConfinementTime(ir);
     );
+    
+    DEF_SC("stream/elongation", "Elongation kappa",
+        real_t *v = qd->StoreEmpty();
+        v[0] = this->confinementTime->KappaOut();
+    );
 
     DEF_FL("stream/tau_RE", "Runaway electron confinement time [s]",
         real_t *v = qd->StoreEmpty();

@@ -160,22 +160,25 @@ void SimulationGenerator::ConstructEquation_Ions(
         eqsys->GetUnknownHandler(), r, l_MK2, B_v, I_ref, connectionLengthFactor
     );
     eqsys->SetConnectionLength(CL);
+    
+    //Plasma Volume
+	real_t vessel_volume = s->GetReal("radialgrid/wall/vessel_volume");
+	if (vessel_volume == 0){
+	   throw DREAM::SettingsException(
+		   "Vessel volume is unspecified"
+	   );
+	}
+	PlasmaVolume *volumes = new PlasmaVolume(
+	   fluidGrid, vessel_volume, eqsys->GetUnknownHandler(), r, adas, ih
+	);
+	eqsys->SetPlasmaVolume(volumes); 
+       
     ConfinementTime *confinementTime = new ConfinementTime(
-        eqsys->GetUnknownHandler(), r, ih, eqsys->GetConnectionLength()
+        eqsys->GetUnknownHandler(), r, ih, eqsys->GetConnectionLength(), eqsys
     );
     eqsys->SetConfinementTime(confinementTime);
     
-    //Plasma Volume
-    real_t vessel_volume = s->GetReal("radialgrid/wall/vessel_volume");
-    if (vessel_volume == 0){
-        throw DREAM::SettingsException(
-            "Vessel volume is unspecified"
-        );
-    }
-    PlasmaVolume *volumes = new PlasmaVolume(
-        fluidGrid, vessel_volume, eqsys->GetUnknownHandler(), r, adas, ih
-    );
-    eqsys->SetPlasmaVolume(volumes);    
+      
     
     // Sputtering-recycling coefficient table
     SputteredRecycledCoefficient *src = nullptr;
