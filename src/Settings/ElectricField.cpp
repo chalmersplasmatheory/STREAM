@@ -9,6 +9,7 @@
 #include "FVM/Equation/TransientTerm.hpp"
 #include "DREAM/Settings/Settings.hpp"
 #include "FVM/Equation/DiagonalLinearTerm.hpp"
+#include "STREAM/Equations/TimeDependentTransientTerm.hpp"
 #include "STREAM/Settings/OptionConstants.hpp"
 #include "STREAM/Settings/SimulationGenerator.hpp"
 
@@ -45,13 +46,14 @@ void SimulationGenerator::DefineOptions_ElectricField(DREAM::Settings *s) {
     DREAM::SimulationGenerator::DefineOptions_ElectricField(s);
 
     // Circuit equation options
-    s->DefineSetting(MODULENAME "/circuit/Lp", "Plasma self-inductance", (real_t)0);
     s->DefineSetting(MODULENAME "/circuit/Lwall", "Wall self-inductance", (real_t)0);
     s->DefineSetting(MODULENAME "/circuit/M", "Plasma-wall mutual inductance", (real_t)0);
     s->DefineSetting(MODULENAME "/circuit/Rwall", "Wall resistance", (real_t)0);
     s->DefineSetting(MODULENAME "/circuit/Iwall0", "Wall current at t=0", (real_t)0);
 
     DREAM::SimulationGenerator::DefineDataT(MODULENAME "/circuit", s, "Vloop");
+    //s->DefineSetting(MODULENAME "/circuit/Lp", "Plasma self-inductance", (real_t)0);
+	DREAM::SimulationGenerator::DefineDataT(MODULENAME "/circuit", s, "Lp");
 }
 
 void SimulationGenerator::ConstructEquation_E_field(
@@ -200,19 +202,21 @@ void SimulationGenerator::ConstructEquation_E_field_circuit(
     const len_t id_I_w     = eqsys->GetUnknownID(DREAM::OptionConstants::UQTY_I_WALL);
 
     // Get circuit parameters
-    const real_t Lp    = s->GetReal(MODULENAME "/circuit/Lp");
+	DREAM::FVM::Interpolator1D *Lp =
+		DREAM::SimulationGenerator::LoadDataT(MODULENAME "/circuit", s, "Lp");
+    //const real_t Lp    = s->GetReal(MODULENAME "/circuit/Lp");
     const real_t Lwall = s->GetReal(MODULENAME "/circuit/Lwall");
     const real_t M     = s->GetReal(MODULENAME "/circuit/M");
     const real_t Rwall = s->GetReal(MODULENAME "/circuit/Rwall");
 
     const real_t R0    = eqsys->GetEllipticalRadialGridGenerator()->GetMajorRadius();
 
-    if (Lp <= 0)
+    /*if (Lp <= 0)
         throw DREAM::SettingsException(
             "%s: parameter '" MODULENAME "/circuit/Lp' has an invalid value. Must be > 0.",
             DREAM::OptionConstants::UQTY_E_FIELD
         );
-    else if (Lwall <= 0)
+    else */if (Lwall <= 0)
         throw DREAM::SettingsException(
             "%s: parameter '" MODULENAME "/circuit/Lwall' has an invalid value. Must be > 0.",
             DREAM::OptionConstants::UQTY_E_FIELD
@@ -249,7 +253,7 @@ void SimulationGenerator::ConstructEquation_E_field_circuit(
 
     Op_E_Efield->AddTerm(new VloopTerm(fluidGrid));
     Op_E_Vloop->AddTerm(new DREAM::FVM::IdentityTerm(fluidGrid, -1/R0));
-    Op_E_Ip->AddTerm(new DREAM::FVM::TransientTerm(fluidGrid, id_I_p, Lp/R0));
+    Op_E_Ip->AddTerm(new TimeDependentTransientTerm(fluidGrid, id_I_p, Lp, 1/R0));
     Op_E_Iw->AddTerm(new DREAM::FVM::TransientTerm(fluidGrid, id_I_w, M/R0));
 
     eqsys->SetOperator(id_E_field, id_E_field, Op_E_Efield, "Vloop = 2*pi*R*E + Lp*dIp/dt + M*dIw/dt");

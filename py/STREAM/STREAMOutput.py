@@ -56,8 +56,9 @@ class STREAMOutput(DREAMOutput):
         self.eqsys.resetUnknown('Vloop', ScalarQuantity)
 
         if self.other is not None and 'stream' in self.other:
-            self.other.stream.resetQuantity('V_n', OtherIonSpeciesScalarQuantity)
-            self.other.stream.resetQuantity('V_n_tot', OtherIonSpeciesScalarQuantity)
-            self.other.stream.resetQuantity('neutralinflux', OtherIonSpeciesScalarQuantity)
+            pass
+            #self.other.stream.resetQuantity('V_n', OtherIonSpeciesScalarQuantity)
+            #self.other.stream.resetQuantity('V_n_tot', OtherIonSpeciesScalarQuantity)
+            #self.other.stream.resetQuantity('neutralinflux', OtherIonSpeciesScalarQuantity)
             #self.other.stream.resetQuantity('iontransport', OtherIonSpeciesScalarQuantity)
         

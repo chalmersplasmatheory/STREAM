@@ -20,11 +20,13 @@ class ElectricField(DREAMEfield):
         
         self.setType(ttype)
 
-        self.circuit_Lp = 0
         self.circuit_Lwall = 0
         self.circuit_M = 0
         self.circuit_Rwall = 0
         self.circuit_Iwall0 = 0
+
+        self.circuit_Lp = None
+        self.circuit_Lp_t = None
 
         self.circuit_Vloop = None
         self.circuit_Vloop_t = None
@@ -37,22 +39,23 @@ class ElectricField(DREAMEfield):
             super().setType(ttype)
 
 
-    def setInductances(self, Lp, Lwall, M, Rwall):
+    def setInductances(self, Lp, Lwall, M, Rwall, Lp_t=0):
         """
         Set the self and mutual inductances of the plasma and wall, as well
         as the resistance of the wall. Used only for the electric field type
         ``TYPE_CIRCUIT``.
         """
-        if Lp <= 0:
-            raise Exception("Invalid value assigned to 'Lp'.")
-        elif Lwall <= 0:
+        _data, _time = self._setScalarData(data=Lp, times=Lp_t)
+        self.circuit_Lp = _data
+        self.circuit_Lp_t = _time
+
+        if Lwall <= 0:
             raise Exception("Invalid value assigned to 'Lwall'.")
         elif M <= 0:
             raise Exception("Invalid value assigned to 'M'.")
         elif Rwall <= 0:
             raise Exception("Invalid value assigned to 'Rwall'.")
 
-        self.circuit_Lp = Lp
         self.circuit_Lwall = Lwall
         self.circuit_M = M
         self.circuit_Rwall = Rwall
@@ -87,7 +90,8 @@ class ElectricField(DREAMEfield):
                 self.efield = data['init']['x']
                 self.radius = data['init']['r']
 
-            self.circuit_Lp = data['circuit']['Lp']
+            self.circuit_Lp = data['circuit']['Lp']['x']
+            self.circuit_Lp_t = data['circuit']['Lp']['t']
             self.circuit_Lwall = data['circuit']['Lwall']
             self.circuit_M = data['circuit']['M']
             self.circuit_Rwall = data['circuit']['Rwall']
@@ -118,7 +122,10 @@ class ElectricField(DREAMEfield):
                 }            
 
             data['circuit'] = {
-                    'Lp': self.circuit_Lp,
+                    'Lp': {
+                        'x': self.circuit_Lp,
+                        't': self.circuit_Lp_t
+                    },
                     'Lwall': self.circuit_Lwall,
                     'M': self.circuit_M,
                     'Rwall': self.circuit_Rwall,
@@ -139,9 +146,7 @@ class ElectricField(DREAMEfield):
         Verify that the settings of this unknown are correctly set.
         """
         if self.type == TYPE_CIRCUIT:
-            if self.circuit_Lp <= 0:
-                raise Exception("E_field: Parameter 'Lp' must be given a value > 0.")
-            elif self.circuit_Lwall <= 0:
+            if self.circuit_Lwall <= 0:
                 raise Exception("E_field: Parameter 'Lwall' must be given a value > 0.")
             elif self.circuit_M <= 0:
                 raise Exception("E_field: Parameter 'M' must be given a value > 0.")
